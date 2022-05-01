@@ -1,0 +1,13 @@
+[gd_scene load_steps=4 format=3 uid="uid://smyq0lsgeetn"]
+
+[ext_resource type="Texture2D" uid="uid://b88k2vlnaw1il" path="res://systems/ran/epsilon 3/EPSILON3_col_auto_x2_auto_x2.jpg" id="1_isnrk"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_aeegh"]
+albedo_texture = ExtResource( "1_isnrk" )
+
+[sub_resource type="SphereMesh" id="SphereMesh_oicp3"]
+material = SubResource( "StandardMaterial3D_aeegh" )
+
+[node name="epsilon iii" type="MeshInstance3D"]
+transform = Transform3D(100, 0, 0, 0, 100, 0, 0, 0, 100, 0, 0, 0)
+mesh = SubResource( "SphereMesh_oicp3" )

@@ -1,0 +1,14 @@
+[gd_resource type="Theme" load_steps=4 format=3 uid="uid://cwu8jc67h0tot"]
+
+[ext_resource type="FontData" uid="uid://brybugfe64cb1" path="res://ui/fonts/b5statio.TTF" id="1_dlqif"]
+
+[sub_resource type="Font" id="Font_pe86c"]
+data/0 = ExtResource( "1_dlqif" )
+
+[sub_resource type="Font" id="Font_cg5cl"]
+data/0 = ExtResource( "1_dlqif" )
+
+[resource]
+Button/font_sizes/font_size = 64
+Button/fonts/font = SubResource( "Font_pe86c" )
+Label/fonts/font = SubResource( "Font_cg5cl" )

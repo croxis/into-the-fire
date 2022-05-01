@@ -1,0 +1,156 @@
+[gd_scene load_steps=3 format=3 uid="uid://d31wy0m5b7d3b"]
+
+[ext_resource type="Theme" uid="uid://cwu8jc67h0tot" path="res://ui/menu_theme.tres" id="1_dnqi6"]
+[ext_resource type="Script" path="res://ui/main_menu/main_menu.gd" id="1_xocpo"]
+
+[node name="MainMenu" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( "1_xocpo" )
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -416.0
+offset_right = 486.0
+grow_vertical = 0
+
+[node name="VBoxContainerMain" type="VBoxContainer" parent="HBoxContainer"]
+offset_right = 486.0
+offset_bottom = 416.0
+
+[node name="ButtonNewGame" type="Button" parent="HBoxContainer/VBoxContainerMain"]
+offset_right = 486.0
+offset_bottom = 80.0
+theme = ExtResource( "1_dnqi6" )
+theme_override_font_sizes/font_size = 64
+disabled = true
+text = "New Game"
+alignment = 0
+
+[node name="ButtonJoinGame" type="Button" parent="HBoxContainer/VBoxContainerMain"]
+offset_top = 84.0
+offset_right = 486.0
+offset_bottom = 164.0
+theme = ExtResource( "1_dnqi6" )
+theme_override_font_sizes/font_size = 64
+text = "Join Game"
+alignment = 0
+
+[node name="ButtonLoadGame" type="Button" parent="HBoxContainer/VBoxContainerMain"]
+offset_top = 168.0
+offset_right = 486.0
+offset_bottom = 248.0
+theme = ExtResource( "1_dnqi6" )
+theme_override_font_sizes/font_size = 64
+disabled = true
+text = "Load Game"
+alignment = 0
+
+[node name="ButtonOptions" type="Button" parent="HBoxContainer/VBoxContainerMain"]
+offset_top = 252.0
+offset_right = 486.0
+offset_bottom = 332.0
+theme = ExtResource( "1_dnqi6" )
+theme_override_font_sizes/font_size = 64
+disabled = true
+text = "Options"
+alignment = 0
+
+[node name="ButtonExitMenu" type="Button" parent="HBoxContainer/VBoxContainerMain"]
+visible = false
+offset_top = 336.0
+offset_right = 606.0
+offset_bottom = 416.0
+theme = ExtResource( "1_dnqi6" )
+theme_override_font_sizes/font_size = 64
+text = "Exit to Title Screen"
+alignment = 0
+
+[node name="ButtonExitDesktop" type="Button" parent="HBoxContainer/VBoxContainerMain"]
+offset_top = 336.0
+offset_right = 486.0
+offset_bottom = 416.0
+theme = ExtResource( "1_dnqi6" )
+theme_override_font_sizes/font_size = 64
+text = "Exit to Desktop"
+alignment = 0
+
+[node name="VBoxContainerOption" type="VBoxContainer" parent="HBoxContainer"]
+offset_left = 490.0
+offset_right = 490.0
+offset_bottom = 416.0
+
+[node name="VBoxContainerJoin" type="VBoxContainer" parent="HBoxContainer/VBoxContainerOption"]
+visible = false
+offset_right = 498.0
+offset_bottom = 299.0
+
+[node name="GridContainer" type="GridContainer" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin"]
+offset_right = 498.0
+offset_bottom = 233.0
+columns = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer"]
+offset_top = 9.0
+offset_right = 194.0
+offset_bottom = 66.0
+theme = ExtResource( "1_dnqi6" )
+theme_override_font_sizes/font_size = 48
+text = "IP"
+
+[node name="LineEditIP" type="LineEdit" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer"]
+offset_left = 198.0
+offset_right = 498.0
+offset_bottom = 75.0
+theme = ExtResource( "1_dnqi6" )
+theme_override_font_sizes/font_size = 48
+text = "127.0.0.1"
+placeholder_text = "127.0.0.1"
+
+[node name="Label2" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer"]
+offset_top = 88.0
+offset_right = 194.0
+offset_bottom = 145.0
+theme = ExtResource( "1_dnqi6" )
+theme_override_font_sizes/font_size = 48
+text = "Port"
+
+[node name="LineEditPort" type="LineEdit" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer"]
+offset_left = 198.0
+offset_top = 79.0
+offset_right = 498.0
+offset_bottom = 154.0
+theme = ExtResource( "1_dnqi6" )
+theme_override_font_sizes/font_size = 48
+text = "2258"
+placeholder_text = "2258"
+
+[node name="Label3" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer"]
+offset_top = 167.0
+offset_right = 194.0
+offset_bottom = 224.0
+theme = ExtResource( "1_dnqi6" )
+theme_override_font_sizes/font_size = 48
+text = "Callsign"
+
+[node name="LineEditCallsign" type="LineEdit" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer"]
+offset_left = 198.0
+offset_top = 158.0
+offset_right = 498.0
+offset_bottom = 233.0
+theme = ExtResource( "1_dnqi6" )
+theme_override_font_sizes/font_size = 48
+placeholder_text = "Dolphin"
+
+[node name="ButtonJoinServer" type="Button" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin"]
+offset_top = 237.0
+offset_right = 498.0
+offset_bottom = 299.0
+theme = ExtResource( "1_dnqi6" )
+theme_override_font_sizes/font_size = 48
+text = "Join Server"
+
+[connection signal="pressed" from="HBoxContainer/VBoxContainerMain/ButtonJoinGame" to="." method="_on_button_join_game_pressed"]
+[connection signal="pressed" from="HBoxContainer/VBoxContainerMain/ButtonExitDesktop" to="." method="_on_button_exit_desktop_pressed"]
+[connection signal="pressed" from="HBoxContainer/VBoxContainerOption/VBoxContainerJoin/ButtonJoinServer" to="." method="_on_button_join_server_pressed"]

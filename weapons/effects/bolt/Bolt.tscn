@@ -1,0 +1,51 @@
+[gd_scene load_steps=6 format=3 uid="uid://yw5s3jdg5lfg"]
+
+[ext_resource type="Script" path="res://weapons/effects/bolt/Bolt.gd" id="1_nrree"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_essqy"]
+shading_mode = 0
+albedo_color = Color(0, 0.980392, 1, 1)
+disable_receive_shadows = true
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_d7k2v"]
+material = SubResource( "StandardMaterial3D_essqy" )
+radius = 0.1
+height = 0.4
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_il74u"]
+radius = 0.111983
+height = 0.403912
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_xbynn"]
+properties/0/path = NodePath(":sync_orientation")
+properties/0/spawn = true
+properties/0/sync = true
+properties/1/path = NodePath(":sync_speed")
+properties/1/spawn = true
+properties/1/sync = true
+properties/2/path = NodePath(":sync_position")
+properties/2/spawn = true
+properties/2/sync = true
+properties/3/path = NodePath(":sync_timer")
+properties/3/spawn = true
+properties/3/sync = true
+
+[node name="Bolt" type="Area3D"]
+script = ExtResource( "1_nrree" )
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
+mesh = SubResource( "CapsuleMesh_d7k2v" )
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+light_color = Color(0.0156863, 0.960784, 1, 1)
+shadow_enabled = true
+distance_fade_enabled = true
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
+shape = SubResource( "CapsuleShape3D_il74u" )
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+root_path = NodePath("..")
+resource = SubResource( "SceneReplicationConfig_xbynn" )

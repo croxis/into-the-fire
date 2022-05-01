@@ -1,0 +1,38 @@
+[gd_scene load_steps=3 format=3 uid="uid://bxf8p4mhhuvra"]
+
+[ext_resource type="Script" path="res://ui/spawn_picker/spawn_picker.gd" id="1_3e3fn"]
+[ext_resource type="Theme" uid="uid://cwu8jc67h0tot" path="res://ui/menu_theme.tres" id="1_dyxtv"]
+
+[node name="SpawnPicker" type="VBoxContainer"]
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource( "1_3e3fn" )
+
+[node name="Label" type="Label" parent="."]
+offset_right = 459.0
+offset_bottom = 84.0
+theme = ExtResource( "1_dyxtv" )
+theme_override_font_sizes/font_size = 72
+text = "SPAWN SCREEN"
+horizontal_alignment = 1
+
+[node name="Tree" type="Tree" parent="."]
+minimum_size = Vector2(0, 600)
+offset_top = 88.0
+offset_right = 459.0
+offset_bottom = 688.0
+allow_reselect = true
+allow_rmb_select = true
+hide_root = true
+
+[node name="SpawnButton" type="Button" parent="."]
+offset_top = 692.0
+offset_right = 459.0
+offset_bottom = 781.0
+theme = ExtResource( "1_dyxtv" )
+theme_override_font_sizes/font_size = 72
+disabled = true
+text = "SPAWN!"
+
+[connection signal="item_selected" from="Tree" to="." method="_on_tree_item_selected"]
+[connection signal="pressed" from="SpawnButton" to="." method="_on_spawn_button_pressed"]
