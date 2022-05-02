@@ -78,16 +78,15 @@ alignment = 0
 
 [node name="VBoxContainerOption" type="VBoxContainer" parent="HBoxContainer"]
 offset_left = 490.0
-offset_right = 490.0
+offset_right = 966.0
 offset_bottom = 416.0
 
 [node name="VBoxContainerJoin" type="VBoxContainer" parent="HBoxContainer/VBoxContainerOption"]
-visible = false
-offset_right = 498.0
+offset_right = 476.0
 offset_bottom = 299.0
 
 [node name="GridContainer" type="GridContainer" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin"]
-offset_right = 498.0
+offset_right = 476.0
 offset_bottom = 233.0
 columns = 2
 
@@ -101,12 +100,13 @@ text = "IP"
 
 [node name="LineEditIP" type="LineEdit" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer"]
 offset_left = 198.0
-offset_right = 498.0
+offset_right = 476.0
 offset_bottom = 75.0
 theme = ExtResource( "1_dnqi6" )
 theme_override_font_sizes/font_size = 48
-text = "127.0.0.1"
-placeholder_text = "127.0.0.1"
+text = "croxis.net"
+placeholder_text = "croxis.net"
+expand_to_text_length = true
 
 [node name="Label2" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer"]
 offset_top = 88.0
@@ -119,7 +119,7 @@ text = "Port"
 [node name="LineEditPort" type="LineEdit" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer"]
 offset_left = 198.0
 offset_top = 79.0
-offset_right = 498.0
+offset_right = 476.0
 offset_bottom = 154.0
 theme = ExtResource( "1_dnqi6" )
 theme_override_font_sizes/font_size = 48
@@ -137,7 +137,7 @@ text = "Callsign"
 [node name="LineEditCallsign" type="LineEdit" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer"]
 offset_left = 198.0
 offset_top = 158.0
-offset_right = 498.0
+offset_right = 476.0
 offset_bottom = 233.0
 theme = ExtResource( "1_dnqi6" )
 theme_override_font_sizes/font_size = 48
@@ -145,7 +145,7 @@ placeholder_text = "Dolphin"
 
 [node name="ButtonJoinServer" type="Button" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin"]
 offset_top = 237.0
-offset_right = 498.0
+offset_right = 476.0
 offset_bottom = 299.0
 theme = ExtResource( "1_dnqi6" )
 theme_override_font_sizes/font_size = 48

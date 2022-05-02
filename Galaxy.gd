@@ -63,7 +63,7 @@ func request_spawn(system_name, spawner_name):
 	var ship := PlayerScene.instantiate()
 	ship._player_pilot_id = peer_id
 	print("Ship is ", ship)
-	system.get_node("ships").add_child(ship)
+	system.get_node("ships").add_child(ship, true)
 	ship.global_transform.origin = spawn_position
 	
 
