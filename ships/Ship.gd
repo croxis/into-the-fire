@@ -52,7 +52,7 @@ func _ready():
 	# If in editor simply disable processing as it's not needed here
 	if (Engine.is_editor_hint()):
 		set_physics_process(false)
-	
+	print("Creating ship with id: ", _player_pilot_id, " for multiplayer id ", multiplayer.get_unique_id())
 	if (multiplayer.get_unique_id() == _player_pilot_id):
 		# Set the camera
 		#camera.set_znear(0.3)  # This should be set per ship
