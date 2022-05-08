@@ -55,6 +55,7 @@ func update():
 	if (Input.is_action_pressed("counter_clockwise_full")):
 		rotation_throttle.z = -1
 	if (Input.is_action_pressed("debug_all_stop")):
+		print("Debug all stop")
 		throttle = Vector3(0, 0, 0)
 		rotation_throttle = Vector3(0, 0, 0)
 		debug_all_stop = true

@@ -104,8 +104,6 @@ offset_right = 476.0
 offset_bottom = 75.0
 theme = ExtResource( "1_dnqi6" )
 theme_override_font_sizes/font_size = 48
-text = "croxis.net"
-placeholder_text = "croxis.net"
 expand_to_text_length = true
 
 [node name="Label2" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer"]

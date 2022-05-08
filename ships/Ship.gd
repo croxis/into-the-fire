@@ -52,13 +52,14 @@ func _ready():
 	# If in editor simply disable processing as it's not needed here
 	if (Engine.is_editor_hint()):
 		set_physics_process(false)
-	print("Creating ship with id: ", _player_pilot_id, " for multiplayer id ", multiplayer.get_unique_id())
+	print("Creating ship with id: ", _player_pilot_id, ". My ID: ", multiplayer.get_unique_id())
 	if (multiplayer.get_unique_id() == _player_pilot_id):
 		# Set the camera
 		#camera.set_znear(0.3)  # This should be set per ship
 		camera.far = 30000
 		# Ensure it is the active one
 		camera.current = true
+		print("Setting camera")
 	$Inputs/InputsSync.set_multiplayer_authority(_player_pilot_id)
 	can_sleep = false
 	print("Ship created: ", _player_pilot_id)
