@@ -1,14 +1,9 @@
-[gd_resource type="Theme" load_steps=4 format=3 uid="uid://cwu8jc67h0tot"]
+[gd_resource type="Theme" load_steps=2 format=3 uid="uid://iewuun72p7uj"]
 
-[ext_resource type="FontData" uid="uid://brybugfe64cb1" path="res://ui/fonts/b5statio.TTF" id="1_dlqif"]
-
-[sub_resource type="Font" id="Font_pe86c"]
-data/0 = ExtResource( "1_dlqif" )
-
-[sub_resource type="Font" id="Font_cg5cl"]
-data/0 = ExtResource( "1_dlqif" )
+[ext_resource type="FontFile" uid="uid://brybugfe64cb1" path="res://ui/fonts/b5station.ttf" id="1_0235c"]
 
 [resource]
+default_font = ExtResource("1_0235c")
 Button/font_sizes/font_size = 64
-Button/fonts/font = SubResource( "Font_pe86c" )
-Label/fonts/font = SubResource( "Font_cg5cl" )
+Button/fonts/font = ExtResource("1_0235c")
+Label/fonts/font = ExtResource("1_0235c")

@@ -1,20 +1,11 @@
-[gd_scene load_steps=11 format=3 uid="uid://fog63swldmub"]
+[gd_scene load_steps=10 format=3 uid="uid://fog63swldmub"]
 
 [ext_resource type="Script" path="res://title_screen.gd" id="1_v3ado"]
-[ext_resource type="Texture2D" uid="uid://roinmacqp2u" path="res://systems/ran/panorama_image.png" id="1_ye6kh"]
 [ext_resource type="PackedScene" uid="uid://b46swjkskju5j" path="res://ships/earth alliance/babylon 5/babylon_5_scale.tscn" id="2_a5wwe"]
+[ext_resource type="Environment" uid="uid://d084u3xtn7nyp" path="res://title_screen_env.tres" id="2_xlnt3"]
 [ext_resource type="PackedScene" uid="uid://smyq0lsgeetn" path="res://systems/ran/epsilon 3/epsilon3.tscn" id="3_si7s7"]
 [ext_resource type="AudioStream" uid="uid://mn5widkbv53p" path="res://music/Season-3-Edited-Titles.ogg" id="4_jke73"]
-
-[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_wpuql"]
-panorama = ExtResource( "1_ye6kh" )
-
-[sub_resource type="Sky" id="Sky_8jusf"]
-sky_material = SubResource( "PanoramaSkyMaterial_wpuql" )
-
-[sub_resource type="Environment" id="Environment_fpais"]
-background_mode = 2
-sky = SubResource( "Sky_8jusf" )
+[ext_resource type="Script" path="res://addons/star_field/star_field_manager.gd" id="6_bsqdu"]
 
 [sub_resource type="Animation" id="Animation_kiqxv"]
 resource_name = "Camera"
@@ -76,7 +67,7 @@ tracks/5/path = NodePath("Camera3D:position:x")
 tracks/5/interp = 1
 tracks/5/loop_wrap = true
 tracks/5/keys = {
-"points": PackedFloat32Array(-3969.1, -0.25, 0, 0.25, 0, 1, -4168.43, -0.25, 0, 0.25, 0, 1, 4511.91, -0.247244, 5.46978, 0.295345, -6.53394, 1, 3774.47, -0.25, 0, 0.25, 0, 1),
+"points": PackedFloat32Array(-3985.33, -0.25, 0, 0.25, 0, 1, -4168.43, -0.25, 0, 0.25, 0, 1, 4511.91, -0.247244, 5.46978, 0.295345, -6.53394, 1, 3774.47, -0.25, 0, 0.25, 0, 1),
 "times": PackedFloat32Array(0, 8, 39.9, 45)
 }
 tracks/6/type = "audio"
@@ -89,7 +80,7 @@ tracks/6/keys = {
 "clips": [{
 "end_offset": 0.0,
 "start_offset": 0.0,
-"stream": ExtResource( "4_jke73" )
+"stream": ExtResource("4_jke73")
 }],
 "times": PackedFloat32Array(0)
 }
@@ -169,16 +160,22 @@ tracks/6/keys = {
 "values": [false]
 }
 
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_epepl"]
+_data = {
+"Camera": SubResource("Animation_kiqxv"),
+"RESET": SubResource("Animation_q455p")
+}
+
 [node name="title screen" type="Node3D"]
-script = ExtResource( "1_v3ado" )
+script = ExtResource("1_v3ado")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource( "Environment_fpais" )
+environment = ExtResource("2_xlnt3")
 
-[node name="babylon_5_scale" parent="." instance=ExtResource( "2_a5wwe" )]
+[node name="babylon_5_scale" parent="." instance=ExtResource("2_a5wwe")]
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(-3.69549e-06, 0, -1, 0, 1, 0, 1, 0, -3.69549e-06, -3969.1, 0, 0)
+transform = Transform3D(-3.61999e-06, 0, -1, 0, 1, 0, 1, 0, -3.61999e-06, -3969.1, 0, 0)
 current = true
 far = 10000.0
 
@@ -193,12 +190,23 @@ transform = Transform3D(-0.791042, 0, -0.611762, 0.383873, 0.778627, -0.496369, 
 light_color = Color(0.360784, 0.223529, 1, 1)
 light_energy = 0.31
 
-[node name="epsilon iii" parent="." instance=ExtResource( "3_si7s7" )]
+[node name="epsilon iii" parent="." instance=ExtResource("3_si7s7")]
 transform = Transform3D(-590.721, 0, -4964.98, 0, 5000, 0, 4964.98, 0, -590.721, -0.03125, 1380.32, -9628.14)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 autoplay = "Camera"
-anims/Camera = SubResource( "Animation_kiqxv" )
-anims/RESET = SubResource( "Animation_q455p" )
+libraries = {
+"": SubResource("AnimationLibrary_epepl")
+}
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+
+[node name="StarField" type="Node3D" parent="."]
+script = ExtResource("6_bsqdu")
+star_labels_visible = false
+celestial_coords = Vector3(3985.52, 2.254, -0.528)
+camera_path = NodePath("../Camera3D")
+
+[node name="DirectionalLight3D2" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.997803, 0, 0.0662565, -0.025043, 0.925818, 0.37714, -0.0613414, -0.37797, 0.923783, 0, 0, 2856.64)
+sky_mode = 1

@@ -1,16 +1,13 @@
-[gd_scene load_steps=10 format=3 uid="uid://c4wlmqxolhksu"]
+[gd_scene load_steps=7 format=3 uid="uid://c4wlmqxolhksu"]
 
 [ext_resource type="Environment" uid="uid://d1el1icbym1qc" path="res://systems/test_system/test_system_environment.tres" id="1_6nsu0"]
 [ext_resource type="Script" path="res://systems/test_system/test_system.gd" id="1_ri66r"]
 [ext_resource type="PackedScene" uid="uid://b46swjkskju5j" path="res://ships/earth alliance/babylon 5/babylon_5_scale.tscn" id="2_c8e4s"]
-[ext_resource type="PackedScene" uid="uid://yw5s3jdg5lfg" path="res://weapons/effects/bolt/Bolt.tscn" id="3_ejkui"]
 [ext_resource type="Script" path="res://systems/BoltSpawner.gd" id="4_q7c0s"]
-[ext_resource type="PackedScene" uid="uid://bje1osdhtpqsy" path="res://ships/earth alliance/aurora_starfury/auora_starfury.tscn" id="5_1wiyl"]
 [ext_resource type="Script" path="res://systems/test_system/ShipSpawner.gd" id="5_yofjn"]
-[ext_resource type="PackedScene" uid="uid://bhhs2v02syo8j" path="res://ships/Ship.tscn" id="6_njv1w"]
 
 [sub_resource type="World3D" id="World3D_c5rpp"]
-environment = ExtResource( "1_6nsu0" )
+environment = ExtResource("1_6nsu0")
 
 [node name="test_system" type="SubViewportContainer"]
 visible = false
@@ -18,11 +15,11 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource( "1_ri66r" )
+script = ExtResource("1_ri66r")
 
 [node name="SubViewport" type="SubViewport" parent="."]
 own_world_3d = true
-world_3d = SubResource( "World3D_c5rpp" )
+world_3d = SubResource("World3D_c5rpp")
 handle_input_locally = false
 msaa = 1
 screen_space_aa = 1
@@ -32,7 +29,7 @@ size = Vector2i(1920, 1080)
 render_target_update_mode = 0
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="SubViewport"]
-environment = ExtResource( "1_6nsu0" )
+environment = ExtResource("1_6nsu0")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="SubViewport"]
 transform = Transform3D(0.892358, 0, 0.451329, 0, 1, 0, -0.451329, 0, 0.892358, 0, 0, 0)
@@ -46,16 +43,14 @@ light_color = Color(0.360784, 0.223529, 1, 1)
 light_energy = 0.31
 
 [node name="BoltSpawner" type="MultiplayerSpawner" parent="SubViewport"]
-replication = [ExtResource( "3_ejkui" )]
 spawn_path = NodePath("../Bolts")
 auto_spawn = true
-script = ExtResource( "4_q7c0s" )
+script = ExtResource("4_q7c0s")
 
 [node name="ShipSpawner" type="MultiplayerSpawner" parent="SubViewport"]
-replication = [ExtResource( "6_njv1w" ), ExtResource( "5_1wiyl" )]
 spawn_path = NodePath("../ships")
 auto_spawn = true
-script = ExtResource( "5_yofjn" )
+script = ExtResource("5_yofjn")
 
 [node name="Bolts" type="Node3D" parent="SubViewport"]
 
@@ -63,5 +58,5 @@ script = ExtResource( "5_yofjn" )
 
 [node name="stations" type="Node3D" parent="SubViewport"]
 
-[node name="Babylon 5" parent="SubViewport/stations" instance=ExtResource( "2_c8e4s" )]
+[node name="Babylon 5" parent="SubViewport/stations" instance=ExtResource("2_c8e4s")]
 transform = Transform3D(0.911561, 0, -0.411164, 0, 1, 0, 0.411164, 0, 0.911561, 0, 0, 0)

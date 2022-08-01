@@ -25,7 +25,7 @@ func _ready():
 		_dedicated_server = true
 	else:
 		#Set window size here
-		get_tree().get_root().size = DisplayServer.window_get_real_size()
+		#get_tree().get_root().size = DisplayServer.window_get_real_size()
 		$loading.load_scene("res://title_screen.tscn")
 
 

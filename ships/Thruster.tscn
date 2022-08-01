@@ -1,0 +1,30 @@
+[gd_scene load_steps=5 format=3 uid="uid://cgta0f0f7w0cv"]
+
+[ext_resource type="Shader" uid="uid://dpbbvpgga6sqv" path="res://ships/Thruster.tres" id="1_nyuyh"]
+
+[sub_resource type="ParticlesMaterial" id="ParticlesMaterial_bwjk3"]
+lifetime_randomness = 0.11
+emission_shape = 6
+emission_ring_axis = Vector3(0, 0, 1)
+emission_ring_height = 1.0
+emission_ring_radius = 1.0
+emission_ring_inner_radius = 0.0
+spread = 7.36
+gravity = Vector3(0, 0, 0)
+initial_velocity_min = 9.09
+initial_velocity_max = 20.0
+color = Color(0.109804, 0.886275, 1, 1)
+hue_variation_min = 0.05
+hue_variation_max = 0.2
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_7kghp"]
+shader = ExtResource("1_nyuyh")
+
+[sub_resource type="SphereMesh" id="SphereMesh_m6fqg"]
+material = SubResource("ShaderMaterial_7kghp")
+
+[node name="Node3D" type="Node3D"]
+
+[node name="GPUParticles3D" type="GPUParticles3D" parent="."]
+process_material = SubResource("ParticlesMaterial_bwjk3")
+draw_pass_1 = SubResource("SphereMesh_m6fqg")

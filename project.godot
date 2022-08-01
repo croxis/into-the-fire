@@ -29,139 +29,25 @@ _global_script_classes=[{
 "language": &"GDScript",
 "path": "res://ui/debug/fps_label.gd"
 }, {
-"base": "MovementProvider",
-"class": &"Function_ClimbMovement",
-"language": &"GDScript",
-"path": "res://addons/godot-xr-tools/functions/Function_Climb_movement.gd"
-}, {
-"base": "MovementProvider",
-"class": &"Function_DirectMovement",
-"language": &"GDScript",
-"path": "res://addons/godot-xr-tools/functions/Function_Direct_movement.gd"
-}, {
-"base": "MovementProvider",
-"class": &"Function_Glide",
-"language": &"GDScript",
-"path": "res://addons/godot-xr-tools/functions/Function_Glide_movement.gd"
-}, {
-"base": "MovementProvider",
-"class": &"Function_Jump",
-"language": &"GDScript",
-"path": "res://addons/godot-xr-tools/functions/Function_Jump_movement.gd"
-}, {
-"base": "MovementProvider",
-"class": &"Function_JumpDetect",
-"language": &"GDScript",
-"path": "res://addons/godot-xr-tools/functions/Function_JumpDetect_movement.gd"
-}, {
-"base": "Area3D",
-"class": &"Function_Pickup",
-"language": &"GDScript",
-"path": "res://addons/godot-xr-tools/functions/Function_Pickup.gd"
-}, {
-"base": "MovementProvider",
-"class": &"Function_WindMovement",
-"language": &"GDScript",
-"path": "res://addons/godot-xr-tools/functions/Function_Wind_movement.gd"
-}, {
-"base": "Node",
-"class": &"GroundPhysics",
-"language": &"GDScript",
-"path": "res://addons/godot-xr-tools/overrides/GroundPhysics.gd"
-}, {
-"base": "Resource",
-"class": &"GroundPhysicsSettings",
-"language": &"GDScript",
-"path": "res://addons/godot-xr-tools/overrides/GroundPhysicsSettings.gd"
-}, {
-"base": "Node",
-"class": &"MovementProvider",
-"language": &"GDScript",
-"path": "res://addons/godot-xr-tools/functions/MovementProvider.gd"
-}, {
-"base": "Node3D",
-"class": &"Object_climbable",
-"language": &"GDScript",
-"path": "res://addons/godot-xr-tools/objects/Object_climbable.gd"
-}, {
-"base": "Node",
-"class": &"PlayerBody",
-"language": &"GDScript",
-"path": "res://addons/godot-xr-tools/assets/PlayerBody.gd"
-}, {
 "base": "RigidDynamicBody3D",
 "class": &"Ship",
 "language": &"GDScript",
 "path": "res://ships/Ship.gd"
-}, {
-"base": "RefCounted",
-"class": &"VelocityAverager",
-"language": &"GDScript",
-"path": "res://addons/godot-xr-tools/misc/Velocity_Averager.gd"
-}, {
-"base": "RefCounted",
-"class": &"VelocityAveragerLinear",
-"language": &"GDScript",
-"path": "res://addons/godot-xr-tools/misc/Velocity_Averager_Linear.gd"
-}, {
-"base": "Area3D",
-"class": &"WindArea",
-"language": &"GDScript",
-"path": "res://addons/godot-xr-tools/objects/Wind_area.gd"
-}, {
-"base": "RefCounted",
-"class": &"XRHelpers",
-"language": &"GDScript",
-"path": "res://addons/godot-xr-tools/misc/XR_Helpers.gd"
-}, {
-"base": "Area3D",
-"class": &"XRToolsInteractableArea",
-"language": &"GDScript",
-"path": "res://addons/godot-xr-tools/objects/Interactable_area.gd"
-}, {
-"base": "Node3D",
-"class": &"XRToolsInteractableBody",
-"language": &"GDScript",
-"path": "res://addons/godot-xr-tools/objects/Interactable_body.gd"
-}, {
-"base": "RigidDynamicBody3D",
-"class": &"XRToolsPickable",
-"language": &"GDScript",
-"path": "res://addons/godot-xr-tools/objects/Object_pickable.gd"
 }]
 _global_script_class_icons={
 "Bolt": "",
 "DebugContainer": "",
 "DebugWidget": "",
 "FpsLabel": "",
-"Function_ClimbMovement": "",
-"Function_DirectMovement": "",
-"Function_Glide": "",
-"Function_Jump": "",
-"Function_JumpDetect": "",
-"Function_Pickup": "",
-"Function_WindMovement": "",
-"GroundPhysics": "",
-"GroundPhysicsSettings": "",
-"MovementProvider": "",
-"Object_climbable": "",
-"PlayerBody": "",
-"Ship": "",
-"VelocityAverager": "",
-"VelocityAveragerLinear": "",
-"WindArea": "",
-"XRHelpers": "",
-"XRToolsInteractableArea": "",
-"XRToolsInteractableBody": "",
-"XRToolsPickable": ""
+"Ship": ""
 }
 
 [application]
 
 config/name="ITF"
 run/main_scene="res://entry.tscn"
-config/icon="res://icon.png"
 config/features=PackedStringArray("4.0", "Vulkan Clustered")
+config/icon="res://icon.png"
 
 [autoload]
 
@@ -172,6 +58,16 @@ Debug="*res://ui/debug/debug_layer.tscn"
 window/size/viewport_width=1920
 window/size/viewport_height=1080
 window/vsync/vsync_mode=0
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+
+[editor]
+
+movie_writer/movie_file="/home/croxis/Videos/itf.avi"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/star_field/plugin.cfg", "res://addons/monitor_overlay/plugin.cfg", "res://addons/Todo_Manager/plugin.cfg")
 
 [input]
 
@@ -310,11 +206,11 @@ fire_secondary={
 [rendering]
 
 driver/threads/thread_model=2
-shadows/directional_shadow/soft_shadow_quality=3
-shadows/shadows/soft_shadow_quality=3
 textures/default_filters/use_nearest_mipmap_filter=true
 scaling_3d/mode=1
 anti_aliasing/quality/msaa=1
 anti_aliasing/quality/screen_space_aa=1
 textures/canvas_textures/default_texture_filter=2
+shadows/directional_shadow/soft_shadow_quality=3
+shadows/shadows/soft_shadow_quality=3
 xr/enabled=true

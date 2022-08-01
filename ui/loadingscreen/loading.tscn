@@ -1,7 +1,7 @@
 [gd_scene load_steps=8 format=3 uid="uid://deqh6h2wkuvel"]
 
 [ext_resource type="Script" path="res://ui/loadingscreen/loading.gd" id="1_sn5rh"]
-[ext_resource type="Theme" uid="uid://cwu8jc67h0tot" path="res://ui/menu_theme.tres" id="2_ce0tu"]
+[ext_resource type="Theme" uid="uid://iewuun72p7uj" path="res://ui/menu_theme.tres" id="2_ce0tu"]
 [ext_resource type="Script" path="res://ui/debug/DebugContainer.gd" id="3_13r42"]
 [ext_resource type="PackedScene" uid="uid://dgsj2su1f5ppc" path="res://ui/debug/widgets/TextList/DebugTextList.tscn" id="4_mfwyk"]
 
@@ -34,14 +34,14 @@ tracks/0/keys = {
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_sdfms"]
 _data = {
-"RESET": SubResource( "Animation_kdnid" ),
-"Yellow Jump": SubResource( "Animation_5cda2" )
+"RESET": SubResource("Animation_kdnid"),
+"Yellow Jump": SubResource("Animation_5cda2")
 }
 
 [node name="loading" type="Control"]
-anchor_right = 1.875
-anchor_bottom = 1.8
-script = ExtResource( "1_sn5rh" )
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_sn5rh")
 
 [node name="ColorRect" type="ColorRect" parent="."]
 anchor_right = 1.0
@@ -71,7 +71,7 @@ alignment = 1
 [node name="Label" type="Label" parent="CenterContainer/VBoxContainer"]
 offset_right = 676.0
 offset_bottom = 137.0
-theme = ExtResource( "2_ce0tu" )
+theme = ExtResource("2_ce0tu")
 theme_override_font_sizes/font_size = 120
 text = "Loading........."
 horizontal_alignment = 1
@@ -108,14 +108,14 @@ step = 1.0
 offset_top = 725.0
 offset_right = 676.0
 offset_bottom = 755.0
-theme = ExtResource( "2_ce0tu" )
+theme = ExtResource("2_ce0tu")
 theme_override_font_sizes/font_size = 24
 text = "Smart loading messages will go here"
 horizontal_alignment = 1
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
-"": SubResource( "AnimationLibrary_sdfms" )
+"": SubResource("AnimationLibrary_sdfms")
 }
 
 [node name="LoaderDebugContainer" type="MarginContainer" parent="."]
@@ -123,8 +123,8 @@ offset_left = 1800.0
 offset_top = 972.0
 offset_right = 1800.0
 offset_bottom = 972.0
-script = ExtResource( "3_13r42" )
+script = ExtResource("3_13r42")
 
-[node name="TextListLoad" parent="LoaderDebugContainer" instance=ExtResource( "4_mfwyk" )]
+[node name="TextListLoad" parent="LoaderDebugContainer" instance=ExtResource("4_mfwyk")]
 offset_right = 0.0
 offset_bottom = 0.0

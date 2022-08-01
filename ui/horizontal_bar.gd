@@ -2,13 +2,13 @@ extends Control
 
 # https://www.reddit.com/r/godot/comments/kdimah/ui_create_altimeter_right_bar_and_airspeed/
 
-onready var font:Font = Control.new().get_font('font')
+@onready var font:Font = Control.new().get_font('font')
 var current_velocity:int = 0 setget setCurrentVelocity
 var displayAbove = 300
 var displayBelow = 300
 var displayStepText  = 100
 var displayStepSmallLines = 20
-export var display_color: Color = Color.green
+@export var display_color: Color = Color.green
 #onready var font:DynamicFont = DynamicFont.new()
 
 func _ready():

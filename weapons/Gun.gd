@@ -22,7 +22,7 @@ func _physics_process(dt: float) -> void:
 		cooldown_timer = 0.0
 
 
-func fire(damage):
+func fire(damage_mod):
 	if can_fire():
 		$AudioStreamPlayer3D.play()
 	if ((multiplayer.multiplayer_peer == null or is_multiplayer_authority()) and can_fire()):

@@ -3,11 +3,11 @@
 [ext_resource type="Texture2D" uid="uid://roinmacqp2u" path="res://systems/ran/panorama_image.png" id="1_e15t8"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_n75gh"]
-panorama = ExtResource( "1_e15t8" )
+panorama = ExtResource("1_e15t8")
 
 [sub_resource type="Sky" id="Sky_u8ha7"]
-sky_material = SubResource( "PanoramaSkyMaterial_n75gh" )
+sky_material = SubResource("PanoramaSkyMaterial_n75gh")
 
 [resource]
 background_mode = 2
-sky = SubResource( "Sky_u8ha7" )
+sky = SubResource("Sky_u8ha7")

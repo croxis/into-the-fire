@@ -1,0 +1,36 @@
+[gd_scene load_steps=6 format=3 uid="uid://hq8prd5a88yn"]
+
+[ext_resource type="Script" path="res://addons/star_field/star_field_manager.gd" id="1"]
+[ext_resource type="Script" path="res://addons/star_field/FPSDebug.gd" id="2"]
+[ext_resource type="Script" path="res://addons/star_field/Example.gd" id="3"]
+[ext_resource type="Script" path="res://addons/star_field/debug_print.gd" id="4_d0uvj"]
+
+[sub_resource type="Environment" id="Environment_u7wy5"]
+background_mode = 1
+
+[node name="Example" type="Node3D"]
+script = ExtResource("3")
+
+[node name="Camera" type="Camera3D" parent="."]
+far = 8196.0
+
+[node name="StarField" type="Node3D" parent="."]
+script = ExtResource("1")
+mag_ref = 3.5
+celestial_coords = Vector3(0, 0, 0)
+camera_path = NodePath("../Camera")
+
+[node name="Control" type="Control" parent="."]
+
+[node name="FPSDebug" type="Label" parent="Control"]
+script = ExtResource("2")
+
+[node name="Control" type="Control" parent="Control"]
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("4_d0uvj")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_u7wy5")
+
+[connection signal="star_debug" from="StarField" to="." method="_on_star_field_star_debug"]

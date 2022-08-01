@@ -10,7 +10,7 @@ func _ready():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
-	get_hinge_angle()
+	#get_hinge_angle()
 	time += delta
 	if time > 5.0 and x:
 		self.set_node_b("")
