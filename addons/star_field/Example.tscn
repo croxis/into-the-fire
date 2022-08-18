@@ -16,7 +16,8 @@ far = 8196.0
 
 [node name="StarField" type="Node3D" parent="."]
 script = ExtResource("1")
-mag_ref = 3.5
+mag_ref = 4.0
+mag_limit = 8.0
 celestial_coords = Vector3(0, 0, 0)
 camera_path = NodePath("../Camera")
 

@@ -1,5 +1,5 @@
 shader_type spatial;
-render_mode blend_mix,depth_draw_opaque,cull_back,diffuse_burley,specular_schlick_ggx,unshaded;
+render_mode blend_mix,depth_draw_always,cull_back,diffuse_burley,specular_disabled,unshaded,shadows_disabled;
 uniform vec4 albedo : source_color;
 uniform sampler2D texture_albedo : source_color;
 uniform float specular;
@@ -21,6 +21,12 @@ const float e = 2.7182818284590452353602;
 float log10( in float n ) {
     return log2(n) / log2(10.0);
 }
+
+float circle(vec2 position, float radius, float feather)
+{
+	return smoothstep(radius, radius + feather, dot(position, position) * 4.0);
+}
+
 
 void vertex() {
 	UV=UV*uv1_scale.xy+uv1_offset.xy;
@@ -60,21 +66,19 @@ void fragment() {
     if (apparent_magnitude > mag_limit) {
         discard;
     }
-
-	vec4 albedo_tex = texture(texture_albedo, POINT_COORD);
-	albedo_tex *= COLOR;
-    //COLOR.rgb = vec3( circle( UV, 0.2, 0.005));
+	ALBEDO = COLOR.rgb;
+	
     float dist = length(POINT_COORD - vec2(0.5, 0.5)); 
     if (dist > 0.5f){
 		discard;
-	} else if (dist > 0.5f){
+	} else if (dist > 0.3f){
         ALPHA = -10.0 * dist + 5.0;
     } else {
-        ALPHA = 1.0;
+        //ALPHA = 0.1;
     }
-	ALBEDO = albedo_tex.rgb * intensity;
+	
 	METALLIC = metallic;
 	ROUGHNESS = roughness;
 	SPECULAR = specular;
-    DEPTH = 0.999;
+    DEPTH = 0.99999;
 }

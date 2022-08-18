@@ -1,6 +1,6 @@
 [gd_resource type="Environment" load_steps=4 format=3 uid="uid://d1el1icbym1qc"]
 
-[ext_resource type="Texture2D" uid="uid://roinmacqp2u" path="res://systems/ran/panorama_image.png" id="1_e15t8"]
+[ext_resource type="Texture2D" path="res://systems/ran/panorama_image.png" id="1_e15t8"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_n75gh"]
 panorama = ExtResource("1_e15t8")
@@ -9,5 +9,8 @@ panorama = ExtResource("1_e15t8")
 sky_material = SubResource("PanoramaSkyMaterial_n75gh")
 
 [resource]
-background_mode = 2
+background_mode = 1
 sky = SubResource("Sky_u8ha7")
+ambient_light_source = 1
+reflected_light_source = 1
+auto_exposure_enabled = true

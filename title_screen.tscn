@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://fog63swldmub"]
+[gd_scene load_steps=13 format=3 uid="uid://fog63swldmub"]
 
 [ext_resource type="Script" path="res://title_screen.gd" id="1_v3ado"]
 [ext_resource type="PackedScene" uid="uid://b46swjkskju5j" path="res://ships/earth alliance/babylon 5/babylon_5_scale.tscn" id="2_a5wwe"]
@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://smyq0lsgeetn" path="res://systems/ran/epsilon 3/epsilon3.tscn" id="3_si7s7"]
 [ext_resource type="AudioStream" uid="uid://mn5widkbv53p" path="res://music/Season-3-Edited-Titles.ogg" id="4_jke73"]
 [ext_resource type="Script" path="res://addons/star_field/star_field_manager.gd" id="6_bsqdu"]
+[ext_resource type="Texture2D" uid="uid://b8mr0hea1ghdh" path="res://systems/ran/epsilon_nebulae_texture_by_amras_arfeiniel.png" id="7_26dio"]
 
 [sub_resource type="Animation" id="Animation_kiqxv"]
 resource_name = "Camera"
@@ -166,6 +167,22 @@ _data = {
 "RESET": SubResource("Animation_q455p")
 }
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8r0lf"]
+transparency = 1
+shading_mode = 0
+albedo_texture = ExtResource("7_26dio")
+heightmap_scale = 0.0
+uv1_scale = Vector3(1, 2, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_qcncl"]
+flip_faces = true
+top_radius = 10000.0
+bottom_radius = 10000.0
+height = 10000.0
+rings = 2
+cap_top = false
+cap_bottom = false
+
 [node name="title screen" type="Node3D"]
 script = ExtResource("1_v3ado")
 
@@ -177,7 +194,8 @@ environment = ExtResource("2_xlnt3")
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(-3.61999e-06, 0, -1, 0, 1, 0, 1, 0, -3.61999e-06, -3969.1, 0, 0)
 current = true
-far = 10000.0
+near = 0.1
+far = 20000.0
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.892358, 0, 0.451329, 0, 1, 0, -0.451329, 0, 0.892358, 0, 0, 0)
@@ -200,13 +218,21 @@ libraries = {
 }
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("4_jke73")
 
 [node name="StarField" type="Node3D" parent="."]
 script = ExtResource("6_bsqdu")
+mag_ref = 7.0
+mag_limit = 7.0
 star_labels_visible = false
-celestial_coords = Vector3(3985.52, 2.254, -0.528)
+celestial_coords = Vector3(1.899, 2.541, -0.529)
 camera_path = NodePath("../Camera3D")
 
 [node name="DirectionalLight3D2" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.997803, 0, 0.0662565, -0.025043, 0.925818, 0.37714, -0.0613414, -0.37797, 0.923783, 0, 0, 2856.64)
 sky_mode = 1
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.983132, 0.182794, -0.0061107, 0.182771, -0.983147, -0.00420464, -0.0067763, 0.00301686, -0.999972, 0, 0, 0)
+material_override = SubResource("StandardMaterial3D_8r0lf")
+mesh = SubResource("CylinderMesh_qcncl")

@@ -24,7 +24,6 @@ handle_input_locally = false
 msaa = 1
 screen_space_aa = 1
 audio_listener_enable_3d = true
-shadow_atlas_size = 4096
 size = Vector2i(1920, 1080)
 render_target_update_mode = 0
 
@@ -44,12 +43,10 @@ light_energy = 0.31
 
 [node name="BoltSpawner" type="MultiplayerSpawner" parent="SubViewport"]
 spawn_path = NodePath("../Bolts")
-auto_spawn = true
 script = ExtResource("4_q7c0s")
 
 [node name="ShipSpawner" type="MultiplayerSpawner" parent="SubViewport"]
 spawn_path = NodePath("../ships")
-auto_spawn = true
 script = ExtResource("5_yofjn")
 
 [node name="Bolts" type="Node3D" parent="SubViewport"]

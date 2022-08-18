@@ -11,6 +11,8 @@ var proper_to_index := {}
 func _ready():
 	var start = Time.get_ticks_msec()
 	var stars = parse("res://addons/star_field/databases/hygdata_v3_reduced.csv")
+	emit_signal("star_db_debug", "CSV parsed in " + str(Time.get_ticks_msec() - start) + " ms")
+	start = Time.get_ticks_msec()
 	for i in stars.size():
 		if str(i) in stars:
 			data.append(stars[str(i)])
@@ -18,7 +20,7 @@ func _ready():
 				hip_to_index[stars[str(i)]['hip']] = stars[str(i)]['id'].to_int()
 			if stars[str(i)]['proper']:
 				proper_to_index[stars[str(i)]['proper']] = stars[str(i)]['id'].to_int()
-	emit_signal("star_db_debug", "Database loaded in " + str(Time.get_ticks_msec() - start) + " ms")
+	emit_signal("star_db_debug", "Database built in " + str(Time.get_ticks_msec() - start) + " ms")
 
 
 func get_star_hip(hip: String):

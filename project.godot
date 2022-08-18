@@ -200,8 +200,8 @@ fire_secondary={
 
 [physics]
 
-3d/run_on_separate_thread=true
 3d/default_gravity=0.0
+3d/default_gravity_vector=Vector3(0, 0, 0)
 
 [rendering]
 

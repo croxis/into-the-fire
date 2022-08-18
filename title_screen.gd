@@ -10,7 +10,3 @@ func _ready():
 	print(ran_position)
 	$StarField.celestial_coords = ran_position
 	print($StarField.celestial_coords)
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass

@@ -13,7 +13,7 @@ const PARSEC_IN_AU := 206265
 const PARSEC_IN_LY := 3.262
 
 
-@export var mag_ref : float = 3.0:
+@export var mag_ref : float:
 	get:
 		return mag_ref
 	set(mag):
@@ -22,7 +22,7 @@ const PARSEC_IN_LY := 3.262
 		if is_inside_tree():
 			star_render.mag_ref = mag
 
-@export var mag_limit : float = 6.0:
+@export var mag_limit : float:
 	get:
 		return mag_limit
 	set(new_limit):
@@ -41,13 +41,7 @@ const PARSEC_IN_LY := 3.262
 		star_render.star_labels_visible = visible
 
 
-@export var celestial_coords: Vector3:
-	get:
-		return celestial_coords
-	set(coords):
-		# Position is in parsecs
-		celestial_coords = coords
-		star_render.position = -coords
+@export var celestial_coords: Vector3
 
 @export var camera_path : NodePath:
 	get:
@@ -94,7 +88,7 @@ func get_star_proper(name: String):
 
 func _process(delta):
 	if camera:
-		star_render.position = camera.position
+		star_render.position = camera.position - celestial_coords
 
 
 func debug(msg):
