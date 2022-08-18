@@ -1,6 +1,8 @@
 extends Node
 
 var _dedicated_server := false
+var _vr := false
+var interface : XRInterface
 
 func _input(event):
 	if event.is_action_pressed("ui_cancel"):
@@ -24,6 +26,14 @@ func _ready():
 		$network.player_name = "Server"
 		_dedicated_server = true
 	else:
+		if "vr" in arguments:
+			interface = XRServer.find_interface("OpenXR")
+			if interface and interface.is_initialized():
+				print("OpenXR initialised successfully")
+				_vr = true
+				get_viewport().use_xr = true
+			else:
+				print("OpenXR not initialised, please check if your headset is connected")
 		#Set window size here
 		#get_tree().get_root().size = DisplayServer.window_get_real_size()
 		$loading.load_scene("res://title_screen.tscn")

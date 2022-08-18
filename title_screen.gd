@@ -7,6 +7,6 @@ func _ready():
 	var ran = $StarField.get_star_proper("Ran")
 	var ran_position = Vector3(ran['x'].to_float(), ran['y'].to_float(), ran['z'].to_float())
 	ran_position.z += $StarField.AU_IN_PARSEC * 1.058  # Distance of epsilon 3 to RAN
-	print(ran_position)
 	$StarField.celestial_coords = ran_position
-	print($StarField.celestial_coords)
+	$StarField.mag_ref = 7.0
+	$StarField.mag_limit = 7.0

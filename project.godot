@@ -213,4 +213,4 @@ anti_aliasing/quality/screen_space_aa=1
 textures/canvas_textures/default_texture_filter=2
 shadows/directional_shadow/soft_shadow_quality=3
 shadows/shadows/soft_shadow_quality=3
-xr/enabled=true
+xr/enabled=false

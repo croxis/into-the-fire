@@ -44,12 +44,12 @@ tracks/2/keys = {
 tracks/3/type = "bezier"
 tracks/3/imported = false
 tracks/3/enabled = true
-tracks/3/path = NodePath("Camera3D:position:z")
+tracks/3/path = NodePath("Camera3D:position:x")
 tracks/3/interp = 1
 tracks/3/loop_wrap = true
 tracks/3/keys = {
-"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0, 1, 0, -0.249736, -1.69766, 0.0735531, 0.5, 1, 351.5, -0.14447, -24.9728, 0.173553, 30, 1, 670.18, -0.25, 0, 0.25, 0, 1, 507.559, -0.23789, 11.3565, 0.273553, -13.059, 1, -524.5, -0.228073, 8.11169, 0.243057, -8.6446, 1, -556.09, -0.25, 0, 0.25, 0, 1, 0, -0.25, 0, 0.25, 0, 1, 0, -0.25, 0, 0.25, 0, 1),
-"times": PackedFloat32Array(0, 8, 8.4, 11, 13, 22, 30, 40, 45)
+"points": PackedFloat32Array(-3985.33, -0.25, 0, 0.25, 0, 1, -4168.43, -0.25, 0, 0.25, 0, 1, 4511.91, -0.247244, 5.46978, 0.295345, -6.53394, 1, 3774.47, -0.25, 0, 0.25, 0, 1),
+"times": PackedFloat32Array(0, 8, 39.9, 45)
 }
 tracks/4/type = "bezier"
 tracks/4/imported = false
@@ -64,16 +64,16 @@ tracks/4/keys = {
 tracks/5/type = "bezier"
 tracks/5/imported = false
 tracks/5/enabled = true
-tracks/5/path = NodePath("Camera3D:position:x")
+tracks/5/path = NodePath("Camera3D:position:z")
 tracks/5/interp = 1
 tracks/5/loop_wrap = true
 tracks/5/keys = {
-"points": PackedFloat32Array(-3985.33, -0.25, 0, 0.25, 0, 1, -4168.43, -0.25, 0, 0.25, 0, 1, 4511.91, -0.247244, 5.46978, 0.295345, -6.53394, 1, 3774.47, -0.25, 0, 0.25, 0, 1),
-"times": PackedFloat32Array(0, 8, 39.9, 45)
+"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0, 1, 0, -0.249736, -1.69766, 0.0735531, 0.5, 1, 351.5, -0.14447, -24.9728, 0.173553, 30, 1, 670.18, -0.25, 0, 0.25, 0, 1, 507.559, -0.23789, 11.3565, 0.273553, -13.059, 1, -524.5, -0.228073, 8.11169, 0.243057, -8.6446, 1, -556.09, -0.25, 0, 0.25, 0, 1, 0, -0.25, 0, 0.25, 0, 1, 0, -0.25, 0, 0.25, 0, 1),
+"times": PackedFloat32Array(0, 8, 8.4, 11, 13, 22, 30, 40, 45)
 }
 tracks/6/type = "audio"
 tracks/6/imported = false
-tracks/6/enabled = true
+tracks/6/enabled = false
 tracks/6/path = NodePath("AudioStreamPlayer")
 tracks/6/interp = 1
 tracks/6/loop_wrap = true
@@ -83,6 +83,36 @@ tracks/6/keys = {
 "start_offset": 0.0,
 "stream": ExtResource("4_jke73")
 }],
+"times": PackedFloat32Array(0)
+}
+tracks/7/type = "bezier"
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/path = NodePath("XROrigin3D:position:x")
+tracks/7/interp = 1
+tracks/7/loop_wrap = true
+tracks/7/keys = {
+"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0, 1),
+"times": PackedFloat32Array(0)
+}
+tracks/8/type = "bezier"
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/path = NodePath("XROrigin3D:position:y")
+tracks/8/interp = 1
+tracks/8/loop_wrap = true
+tracks/8/keys = {
+"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0, 1),
+"times": PackedFloat32Array(0)
+}
+tracks/9/type = "bezier"
+tracks/9/imported = false
+tracks/9/enabled = true
+tracks/9/path = NodePath("XROrigin3D:position:z")
+tracks/9/interp = 1
+tracks/9/loop_wrap = true
+tracks/9/keys = {
+"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0, 1),
 "times": PackedFloat32Array(0)
 }
 
@@ -95,8 +125,8 @@ tracks/0/path = NodePath("Camera3D:rotation:z")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0, 1),
-"times": PackedFloat32Array(0)
+"points": PackedFloat32Array(),
+"times": PackedFloat32Array()
 }
 tracks/1/type = "bezier"
 tracks/1/imported = false
@@ -105,8 +135,8 @@ tracks/1/path = NodePath("Camera3D:rotation:y")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
-"points": PackedFloat32Array(-1.5708, -0.25, 0, 0.25, 0, 1),
-"times": PackedFloat32Array(0)
+"points": PackedFloat32Array(),
+"times": PackedFloat32Array()
 }
 tracks/2/type = "bezier"
 tracks/2/imported = false
@@ -115,8 +145,8 @@ tracks/2/path = NodePath("Camera3D:rotation:x")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = {
-"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0, 1),
-"times": PackedFloat32Array(0)
+"points": PackedFloat32Array(),
+"times": PackedFloat32Array()
 }
 tracks/3/type = "bezier"
 tracks/3/imported = false
@@ -125,8 +155,8 @@ tracks/3/path = NodePath("Camera3D:position:z")
 tracks/3/interp = 1
 tracks/3/loop_wrap = true
 tracks/3/keys = {
-"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0, 1),
-"times": PackedFloat32Array(0)
+"points": PackedFloat32Array(),
+"times": PackedFloat32Array()
 }
 tracks/4/type = "bezier"
 tracks/4/imported = false
@@ -135,8 +165,8 @@ tracks/4/path = NodePath("Camera3D:position:y")
 tracks/4/interp = 1
 tracks/4/loop_wrap = true
 tracks/4/keys = {
-"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0, 1),
-"times": PackedFloat32Array(0)
+"points": PackedFloat32Array(),
+"times": PackedFloat32Array()
 }
 tracks/5/type = "bezier"
 tracks/5/imported = false
@@ -145,8 +175,8 @@ tracks/5/path = NodePath("Camera3D:position:x")
 tracks/5/interp = 1
 tracks/5/loop_wrap = true
 tracks/5/keys = {
-"points": PackedFloat32Array(-3969.1, -0.25, 0, 0.25, 0, 1),
-"times": PackedFloat32Array(0)
+"points": PackedFloat32Array(),
+"times": PackedFloat32Array()
 }
 tracks/6/type = "value"
 tracks/6/imported = false
@@ -192,7 +222,7 @@ environment = ExtResource("2_xlnt3")
 [node name="babylon_5_scale" parent="." instance=ExtResource("2_a5wwe")]
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(-3.61999e-06, 0, -1, 0, 1, 0, 1, 0, -3.61999e-06, -3969.1, 0, 0)
+transform = Transform3D(-3.61999e-06, 0, -1, 0, 1, 0, 1, 0, -3.61999e-06, -3985.33, 0, 0)
 current = true
 near = 0.1
 far = 20000.0
@@ -236,3 +266,16 @@ sky_mode = 1
 transform = Transform3D(0.983132, 0.182794, -0.0061107, 0.182771, -0.983147, -0.00420464, -0.0067763, 0.00301686, -0.999972, 0, 0, 0)
 material_override = SubResource("StandardMaterial3D_8r0lf")
 mesh = SubResource("CylinderMesh_qcncl")
+
+[node name="XROrigin3D" type="XROrigin3D" parent="."]
+
+[node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, 0)
+
+[node name="LeftHand" type="XRController3D" parent="XROrigin3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 1, -0.5)
+tracker = &"left_hand"
+
+[node name="RightHand" type="XRController3D" parent="XROrigin3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 1, 0.5)
+tracker = &"right_hand"
