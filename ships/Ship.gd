@@ -1,5 +1,5 @@
 @tool
-extends RigidDynamicBody3D
+extends RigidBody3D
 class_name Ship
 
 
@@ -7,7 +7,7 @@ class_name Ship
 var _player_pilot_id: int = 0
 
 @onready var inputs = $Inputs
-@export_node_path(Camera3D) var camera_path: NodePath
+@export_node_path("Camera3D") var camera_path: NodePath
 @onready var camera: Camera3D = get_node_or_null(camera_path)
 
 @export var ship_class := ""

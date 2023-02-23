@@ -1,68 +1,15 @@
-[gd_scene load_steps=7 format=3 uid="uid://r1x0fqeuxk04"]
+[gd_scene load_steps=3 format=3 uid="uid://r1x0fqeuxk04"]
 
-[sub_resource type="ParticlesMaterial" id="ParticlesMaterial_bwjk3"]
-lifetime_randomness = 0.11
-emission_shape = 6
-emission_ring_axis = Vector3(0, 0, 1)
-emission_ring_height = 0.5
-emission_ring_radius = 0.5
-emission_ring_inner_radius = 0.1
-spread = 0.0
-gravity = Vector3(0, 0, 0)
-initial_velocity_min = 9.09
-initial_velocity_max = 10.0
-color = Color(0.109804, 0.886275, 1, 1)
-hue_variation_min = 0.05
-hue_variation_max = 0.2
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_224kn"]
-shading_mode = 0
-disable_ambient_light = true
-vertex_color_use_as_albedo = true
-albedo_color = Color(0.117647, 0.835294, 1, 1)
-disable_receive_shadows = true
-
-[sub_resource type="SphereMesh" id="SphereMesh_nkwtf"]
-material = SubResource("StandardMaterial3D_224kn")
-radius = 0.01
-height = 0.02
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_pesel"]
-height = 0.5
+[ext_resource type="PackedScene" uid="uid://b2sfwpev7j0fm" path="res://sfx/engine_plume.tscn" id="1_mm0qw"]
 
 [sub_resource type="Environment" id="Environment_rc3og"]
+glow_enabled = true
 volumetric_fog_enabled = true
 volumetric_fog_density = 0.0
 
-[sub_resource type="FogMaterial" id="FogMaterial_10fyv"]
-density = 4.0
-albedo = Color(0.0941176, 0.835294, 1, 1)
-emission = Color(0.109804, 0.537255, 0.580392, 1)
-edge_fade = 0.492458
-
 [node name="Node3D" type="Node3D"]
-
-[node name="GPUParticles3D" type="GPUParticles3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.396907, 0, 0)
-emitting = false
-amount = 200
-lifetime = 0.1
-visibility_aabb = AABB(-0.700526, -0.744962, -0.887854, 1.40105, 1.48992, 1.77571)
-trail_length_secs = 1.0
-process_material = SubResource("ParticlesMaterial_bwjk3")
-draw_passes = 2
-draw_pass_1 = SubResource("SphereMesh_nkwtf")
-draw_pass_2 = null
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0)
-mesh = SubResource("CylinderMesh_pesel")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_rc3og")
 
-[node name="FogVolume" type="FogVolume" parent="WorldEnvironment"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.310356, 0, 0)
-extents = Vector3(1, 0.5, 0.5)
-shape = 2
-material = SubResource("FogMaterial_10fyv")
+[node name="engine_plume2" parent="." instance=ExtResource("1_mm0qw")]

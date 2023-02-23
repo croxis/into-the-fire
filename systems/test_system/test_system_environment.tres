@@ -13,4 +13,3 @@ background_mode = 1
 sky = SubResource("Sky_u8ha7")
 ambient_light_source = 1
 reflected_light_source = 1
-auto_exposure_enabled = true

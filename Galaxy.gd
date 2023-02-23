@@ -31,10 +31,10 @@ func get_spawn_points(team) -> Dictionary:
 
 func player_enter_system(system_name) -> void:
 	#TODO: This needs to be client only
-	print("Sizing: ", DisplayServer.window_get_real_size())
+	print("Sizing: ", DisplayServer.window_get_size())
 	var system: SubViewportContainer = get_node("Systems/" + system_name)
 	#system.size = DisplayServer.window_get_real_size()
-	system.get_node("SubViewport").size = DisplayServer.window_get_real_size()
+	system.get_node("SubViewport").size = DisplayServer.window_get_size()
 	system.visible = true
 
 
@@ -42,7 +42,7 @@ func _on_network_connection_succeeded():
 	$spawn_picker.show_spawn(get_spawn_points(""))
 
 
-@rpc(any_peer)
+@rpc("any_peer")
 func request_spawn(system_name, spawner_name):
 	var peer_id := multiplayer.get_remote_sender_id()
 	print("request_s[awm RPC called by: ", peer_id)

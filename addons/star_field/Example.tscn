@@ -18,15 +18,18 @@ far = 8196.0
 script = ExtResource("1")
 mag_ref = 4.0
 mag_limit = 8.0
-celestial_coords = Vector3(0, 0, 0)
 camera_path = NodePath("../Camera")
 
 [node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
 
 [node name="FPSDebug" type="Label" parent="Control"]
+layout_mode = 0
 script = ExtResource("2")
 
 [node name="Control" type="Control" parent="Control"]
+anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("4_d0uvj")

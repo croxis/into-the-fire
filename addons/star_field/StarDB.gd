@@ -41,8 +41,8 @@ func parse(
 	id_column: String = "id",
 	delimiter: String = ","
 ) -> Dictionary:
-	var file: File = File.new()
-	file.open(file_path, File.READ)
+	var file = FileAccess.open(file_path, FileAccess.READ)
+	#var content = file.get_as_text()
 
 	var dict_data: Dictionary = {}
 
@@ -81,6 +81,6 @@ func parse(
 				if column_headers[column_index] == id_column:
 					dict_data[entry[id_column]] = entry
 
-	file.close()
+	file = null
 
 	return dict_data
