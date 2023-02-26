@@ -1,16 +1,20 @@
-[gd_scene load_steps=7 format=3 uid="uid://c4wlmqxolhksu"]
+[gd_scene load_steps=10 format=3 uid="uid://c4wlmqxolhksu"]
 
 [ext_resource type="Environment" uid="uid://d1el1icbym1qc" path="res://systems/test_system/test_system_environment.tres" id="1_6nsu0"]
 [ext_resource type="Script" path="res://systems/test_system/test_system.gd" id="1_ri66r"]
-[ext_resource type="PackedScene" uid="uid://b46swjkskju5j" path="res://ships/earth alliance/babylon 5/babylon_5_scale.tscn" id="2_c8e4s"]
 [ext_resource type="Script" path="res://systems/BoltSpawner.gd" id="4_q7c0s"]
+[ext_resource type="PackedScene" uid="uid://b46swjkskju5j" path="res://ships/earth alliance/babylon 5/babylon_5_scale.tscn" id="5_vfe8m"]
 [ext_resource type="Script" path="res://systems/test_system/ShipSpawner.gd" id="5_yofjn"]
+[ext_resource type="Script" path="res://addons/star_field/star_field_manager.gd" id="6_6s37n"]
+[ext_resource type="PackedScene" uid="uid://kay1bansjucq" path="res://addons/star_field/StarDB.tscn" id="7_jwf0i"]
+[ext_resource type="PackedScene" uid="uid://boog6nwte8hjq" path="res://addons/star_field/StarRender.tscn" id="8_cs51u"]
 
 [sub_resource type="World3D" id="World3D_c5rpp"]
 environment = ExtResource("1_6nsu0")
 
 [node name="test_system" type="SubViewportContainer"]
 visible = false
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
@@ -21,7 +25,6 @@ script = ExtResource("1_ri66r")
 own_world_3d = true
 world_3d = SubResource("World3D_c5rpp")
 handle_input_locally = false
-msaa = 1
 screen_space_aa = 1
 audio_listener_enable_3d = true
 size = Vector2i(1920, 1080)
@@ -55,5 +58,19 @@ script = ExtResource("5_yofjn")
 
 [node name="stations" type="Node3D" parent="SubViewport"]
 
-[node name="Babylon 5" parent="SubViewport/stations" instance=ExtResource("2_c8e4s")]
+[node name="Babylon 5" parent="SubViewport/stations" instance=ExtResource("5_vfe8m")]
 transform = Transform3D(0.911561, 0, -0.411164, 0, 1, 0, 0.411164, 0, 0.911561, 0, 0, 0)
+
+[node name="StarField" type="Node3D" parent="SubViewport"]
+script = ExtResource("6_6s37n")
+mag_ref = 7.0
+mag_limit = 7.0
+star_labels_visible = false
+celestial_coords = Vector3(1.899, 2.541, -0.529)
+
+[node name="StarDB" parent="SubViewport/StarField" instance=ExtResource("7_jwf0i")]
+
+[node name="StarRender" parent="SubViewport/StarField" instance=ExtResource("8_cs51u")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5315.98, -2.541, 1163.07)
+mag_limit = 7.0
+star_labels_visible = false

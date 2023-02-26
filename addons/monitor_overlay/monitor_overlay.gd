@@ -3,140 +3,159 @@ extends VBoxContainer
 
 const DebugGraph := preload("./monitor_overlay_debug_graph.gd")
 
-# Graph options
-var background_color := Color(0.0, 0.0, 0.0, 0.5)
-var plot_graphs := true
-var graph_color := Color.ORANGE
-var normalize_units := true
-var history := 100
-var graph_height := 50
-
 # Monitors
-var fps := true
-var process := false
-var physics_process := false
-var static_memory := false
-var max_static_memory := false
-var max_message_buffer := false
-var objects := false
-var resources := false
-var nodes := false
-var orphan_nodes := false
-var objects_drawn := false
-var primitives_drawn := false
-var total_draw_calls := false
-var video_memory := false
-var texture_memory := false
-var buffer_memory := false
-var active_objects_2d := false
-var collision_pairs_2d := false
-var islands_2d := false
-var active_objects_3d := false
-var collision_pairs_3d := false
-var islands_3d := false
-var audio_output_latency := false
+@export_group("Active Monitors")
+@export_subgroup("Time")
+@export var fps := true:
+	set(value):
+		fps = value
+		rebuild_ui()
+@export var process := false:
+	set(value):
+		process = value
+		rebuild_ui()
+@export var physics_process := false:
+	set(value):
+		physics_process = value
+		rebuild_ui()
+@export_subgroup("Memory")
+@export var static_memory := false:
+	set(value):
+		static_memory = value
+		rebuild_ui()
+@export var max_static_memory := false:
+	set(value):
+		max_static_memory = value
+		rebuild_ui()
+@export var max_message_buffer := false:
+	set(value):
+		max_message_buffer = value
+		rebuild_ui()
+@export_subgroup("Objects")
+@export var objects := false:
+	set(value):
+		objects = value
+		rebuild_ui()
+@export var resources := false:
+	set(value):
+		resources = value
+		rebuild_ui()
+@export var nodes := false:
+	set(value):
+		nodes = value
+		rebuild_ui()
+@export var orphan_nodes := false:
+	set(value):
+		orphan_nodes = value
+		rebuild_ui()
+@export_subgroup("Raster")
+@export var objects_drawn := false:
+	set(value):
+		objects_drawn = value
+		rebuild_ui()
+@export var primitives_drawn := false:
+	set(value):
+		primitives_drawn = value
+		rebuild_ui()
+@export var total_draw_calls := false:
+	set(value):
+		total_draw_calls = value
+		rebuild_ui()
+@export_subgroup("Video")
+@export var video_memory := false:
+	set(value):
+		video_memory = value
+		rebuild_ui()
+@export var texture_memory := false:
+	set(value):
+		texture_memory = value
+		rebuild_ui()
+@export var buffer_memory := false:
+	set(value):
+		buffer_memory = value
+		rebuild_ui()
+@export_subgroup("Physics 2D")
+@export var active_objects_2d := false:
+	set(value):
+		active_objects_2d = value
+		rebuild_ui()
+@export var collision_pairs_2d := false:
+	set(value):
+		collision_pairs_2d = value
+		rebuild_ui()
+@export var islands_2d := false:
+	set(value):
+		islands_2d = value
+		rebuild_ui()
+@export_subgroup("Physics 3D")
+@export var active_objects_3d := false:
+	set(value):
+		active_objects_3d = value
+		rebuild_ui()
+@export var collision_pairs_3d := false:
+	set(value):
+		collision_pairs_3d = value
+		rebuild_ui()
+@export var islands_3d := false:
+	set(value):
+		islands_3d = value
+		rebuild_ui()
+@export_subgroup("Audio")
+@export var audio_output_latency := false:
+	set(value):
+		audio_output_latency = value
+		rebuild_ui()
 
-var _property_list := []
+# Graph options
+@export_group("Options")
+## Sampling rate in samples per second
+@export_range(0.0, 1000.0) var sampling_rate := 60.0:
+	set(value):
+		sampling_rate = value
+		# if sampling rate is 0, _t_limit is infinity
+		_t_limit = 1 / sampling_rate
+@export var normalize_units := true:
+	set(value):
+		normalize_units = value
+		rebuild_ui()
+@export var plot_graphs := true:
+	set(value):
+		plot_graphs = value
+		rebuild_ui()
+@export var history := 100:
+	set(value):
+		history = value
+		rebuild_ui()
+@export var background_color := Color(0.0, 0.0, 0.0, 0.5):
+	set(value):
+		background_color = value
+		rebuild_ui()
+@export var graph_color := Color.ORANGE:
+	set(value):
+		graph_color = value
+		rebuild_ui()
+@export var graph_height := 50:
+	set(value):
+		graph_height = value
+		rebuild_ui()
+@export var graph_thickness := 1.0:
+	set(value):
+		graph_thickness = value
+		rebuild_ui()
+@export var graph_antialiased := false:
+	set(value):
+		graph_antialiased = value
+		rebuild_ui()
+
 var _graphs := []
+var _t := 0.0
+var _t_limit := 0.0
 
 
 func _ready():
-	_init_property_list()
 	if custom_minimum_size.x == 0:
 		custom_minimum_size.x = 300
 	rebuild_ui()
-
-
-func _get_property_list() -> Array:
-	return _property_list
-
-
-# We manualy define exposed properties here instead of using the @export
-# annotation so we can define categories, groups and subgroups.
-func _init_property_list() -> void:
-	_property_list.clear()
-
-	_add_script_category("MonitorOverlay")
-
-	_add_script_group("Active monitors")
-	_add_script_subgroup("Time")
-	_add_script_property("fps", TYPE_BOOL, true)
-	_add_script_property("process", TYPE_BOOL, true)
-	_add_script_property("physics_process", TYPE_BOOL, false)
-
-	_add_script_subgroup("Memory")
-	_add_script_property("static_memory", TYPE_BOOL, false)
-	_add_script_property("max_static_memory", TYPE_BOOL, false)
-	_add_script_property("max_message_buffer", TYPE_BOOL, false)
-
-	_add_script_subgroup("Object")
-	_add_script_property("objects", TYPE_BOOL, false)
-	_add_script_property("resources", TYPE_BOOL, false)
-	_add_script_property("nodes", TYPE_BOOL, false)
-	_add_script_property("orphan_nodes", TYPE_BOOL, false)
-
-	_add_script_subgroup("Raster")
-	_add_script_property("objects_drawn", TYPE_BOOL, false)
-	_add_script_property("primitives_drawn", TYPE_BOOL, false)
-	_add_script_property("total_draw_calls", TYPE_BOOL, false)
-
-	_add_script_subgroup("Video")
-	_add_script_property("video_memory", TYPE_BOOL, false)
-	_add_script_property("texture_memory", TYPE_BOOL, false)
-	_add_script_property("buffer_memory", TYPE_BOOL, false)
-
-	_add_script_subgroup("Physics 2D")
-	_add_script_property("active_objects_2d", TYPE_BOOL, false)
-	_add_script_property("collision_pairs_2d", TYPE_BOOL, false)
-	_add_script_property("islands_2d", TYPE_BOOL, false)
-
-	_add_script_subgroup("Physics 3D")
-	_add_script_property("active_objects_3d", TYPE_BOOL, false)
-	_add_script_property("collision_pairs_3d", TYPE_BOOL, false)
-	_add_script_property("islands_3d", TYPE_BOOL, false)
-
-	_add_script_subgroup("Audio")
-	_add_script_property("audio_output_latency", TYPE_BOOL, false)
-
-	_add_script_group("Options")
-	_add_script_property("normalize_units", TYPE_BOOL, true)
-	_add_script_property("plot_graphs", TYPE_BOOL, true)
-	_add_script_property("history", TYPE_INT, 100)
-	_add_script_property("background_color", TYPE_COLOR, Color(0.0, 0.0, 0.0, 0.5))
-	_add_script_property("graph_color", TYPE_COLOR, Color.ORANGE)
-	_add_script_property("graph_height", TYPE_INT, 50)
-
-
-func _add_script_category(category_name: String) -> void:
-	_property_list.push_back({
-		name = category_name,
-		type = TYPE_NIL,
-		usage = PROPERTY_USAGE_CATEGORY | PROPERTY_USAGE_SCRIPT_VARIABLE,
-	})
-
-
-func _add_script_group(group_name: String) -> void:
-	_property_list.push_back({
-		name = group_name,
-		type = TYPE_NIL,
-		usage = PROPERTY_USAGE_GROUP | PROPERTY_USAGE_SCRIPT_VARIABLE,
-	})
-
-
-func _add_script_subgroup(subgroup_name: String) -> void:
-	_property_list.push_back({
-		name = subgroup_name,
-		type = TYPE_NIL,
-		usage = PROPERTY_USAGE_SUBGROUP | PROPERTY_USAGE_SCRIPT_VARIABLE,
-	})
-
-
-func _add_script_property(property_name: String, type: int, value) -> void:
-	_property_list.push_back({
-		name = property_name,
-		type = type,
-		value = value
-	})
 
 
 func clear() -> void:
@@ -217,9 +236,12 @@ func rebuild_ui() -> void:
 		_create_graph_for(Performance.AUDIO_OUTPUT_LATENCY, "Audio Latency", "s")
 
 
-func _process(_delta: float) -> void:
-	for item in _graphs:
-		item.update()
+func _process(delta: float) -> void:
+	_t += delta
+	if _t >= _t_limit:
+		_t = 0
+		for item in _graphs:
+			item.queue_redraw()
 
 
 func _create_graph_for(monitor: int, monitor_name: String, unit: String = "") -> void:
@@ -234,6 +256,8 @@ func _create_graph_for(monitor: int, monitor_name: String, unit: String = "") ->
 	graph.plot_graph = plot_graphs
 	graph.unit = unit
 	graph.normalize_units = normalize_units
-
+	graph.thickness = graph_thickness
+	graph.antialiased = graph_antialiased
+	
 	add_child(graph)
 	_graphs.push_back(graph)

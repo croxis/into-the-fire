@@ -23,6 +23,7 @@ func get_spawn_points(team) -> Dictionary:
 			if station.has_spawn_points:
 				if system not in spawn_points:
 					spawn_points[system] = []
+				print_debug("Appending spawn_points: ", system, station)
 				spawn_points[system].append(station)
 	# TODO: Add hyperspace here
 	# TODO: Add random generated deep space systems here
@@ -31,7 +32,7 @@ func get_spawn_points(team) -> Dictionary:
 
 func player_enter_system(system_name) -> void:
 	#TODO: This needs to be client only
-	print("Sizing: ", DisplayServer.window_get_size())
+	print_debug("Sizing: ", DisplayServer.window_get_size())
 	var system: SubViewportContainer = get_node("Systems/" + system_name)
 	#system.size = DisplayServer.window_get_real_size()
 	system.get_node("SubViewport").size = DisplayServer.window_get_size()
@@ -45,24 +46,28 @@ func _on_network_connection_succeeded():
 @rpc("any_peer")
 func request_spawn(system_name, spawner_name):
 	var peer_id := multiplayer.get_remote_sender_id()
-	print("request_s[awm RPC called by: ", peer_id)
+	print_debug("request_spawm RPC called by: ", peer_id)
 	if is_multiplayer_authority():
-		print("I am the authority")
+		print_debug("I am the authority")
 	var top_system := $Systems.get_node(system_name)
 	var system := top_system.get_node("SubViewport")
 	var spawner: Node3D
+	print_debug("System: ", system, " ", spawner_name)
 	if system.get_node("stations").has_node(spawner_name):
 		spawner = system.get_node("stations").get_node(spawner_name)
+		print_debug("Station Spawner: ", spawner)
 	elif system.get_node("ships").has_node(spawner_name):
 		spawner = system.get_node("ships").get_node(spawner_name)
+		print_debug("Ship Spawner: ", spawner)
 	else:
 		print("Critical error! ", system_name, " ", spawner_name, " does not exist")
 		return
 	var spawn_point = spawner.find_free_spawner()
+	print_debug("Spawn_point: ", spawn_point)
 	var spawn_position = spawn_point.global_transform.origin
 	var ship := PlayerScene.instantiate()
 	ship._player_pilot_id = peer_id
-	print("Ship is ", ship)
+	print_debug("Ship is ", ship)
 	system.get_node("ships").add_child(ship, true)
 	ship.global_transform.origin = spawn_position
 	

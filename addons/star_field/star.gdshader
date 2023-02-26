@@ -80,5 +80,5 @@ void fragment() {
 	METALLIC = metallic;
 	ROUGHNESS = roughness;
 	SPECULAR = specular;
-    DEPTH = 0.9999;
+    DEPTH = 0.999999;
 }

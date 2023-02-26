@@ -10,6 +10,8 @@ var graph_color: Color
 var normalize_units := true
 var plot_graph := true
 var unit: String
+var thickness: float
+var antialiased: bool
 
 var _history := []
 var _last_value: float
@@ -18,8 +20,8 @@ var _last_value: float
 func _draw() -> void:
 	_update_history()
 	_draw_background_panel()
-	_draw_text()
 	_draw_graph()
+	_draw_text()
 
 
 func _draw_background_panel() -> void:
@@ -46,10 +48,8 @@ func _draw_graph() -> void:
 	var min_value = _history[0]
 	var max_value = _history[0]
 	for value in _history:
-		if value < min_value:
-			min_value = value
-		if value > max_value:
-			max_value = value
+		min_value = min(value, min_value)
+		max_value = max(value, max_value)
 
 	if min_value == max_value:
 		min_value -= 1
@@ -61,17 +61,17 @@ func _draw_graph() -> void:
 	var height := size.y
 	var margin = height / 10.0
 	var origin := get_canvas_transform().origin
-	var previous_point = Vector2.ZERO
-	var next_point = Vector2.ZERO
-
+	var points = PackedVector2Array()
+	
 	for value in _history:
-		value = range_lerp(value, min_value, max_value, margin, height - margin)
-		next_point = Vector2(x, height - value) + origin
+		value = remap(value, min_value, max_value, margin, height - margin)
 		if x > 0:
-			draw_line(previous_point, next_point, graph_color)
-
-		previous_point = next_point
+			points.push_back(Vector2(x, height - value) + origin)
+		
 		x += offset
+	
+	if points.size() > 1:
+		draw_polyline(points, graph_color, thickness, antialiased)
 
 
 func _update_history():

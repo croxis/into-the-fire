@@ -1,64 +1,39 @@
-[gd_scene load_steps=6 format=3 uid="uid://bhhs2v02syo8j"]
+[gd_scene load_steps=5 format=3 uid="uid://bhhs2v02syo8j"]
 
 [ext_resource type="Script" path="res://ships/Ship.gd" id="1_lh74f"]
 [ext_resource type="Script" path="res://ships/Inputs.gd" id="2_im5dg"]
 [ext_resource type="Script" path="res://weapons/Guns.gd" id="3_fckih"]
 
-[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_tlay0"]
-properties/0/path = NodePath(":sync_position")
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_2c0xb"]
+properties/0/path = NodePath(".:linear_velocity")
 properties/0/spawn = true
 properties/0/sync = true
-properties/1/path = NodePath(":sync_orientation")
+properties/1/path = NodePath(".:angular_velocity")
 properties/1/spawn = true
 properties/1/sync = true
-properties/2/path = NodePath(":sync_angular_velocity")
+properties/2/path = NodePath(".:position")
 properties/2/spawn = true
 properties/2/sync = true
-properties/3/path = NodePath(":sync_linear_velocity")
+properties/3/path = NodePath(".:rotation")
 properties/3/spawn = true
 properties/3/sync = true
-properties/4/path = NodePath(":sync_health")
-properties/4/spawn = true
-properties/4/sync = true
-properties/5/path = NodePath(":_player_pilot_id")
-properties/5/spawn = true
-properties/5/sync = true
-
-[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_v56ga"]
-properties/0/path = NodePath(":throttle")
-properties/0/spawn = true
-properties/0/sync = true
-properties/1/path = NodePath(":rotation_throttle")
-properties/1/spawn = true
-properties/1/sync = true
-properties/2/path = NodePath(":fire_secondary")
-properties/2/spawn = false
-properties/2/sync = true
-properties/3/path = NodePath(":fire_primary")
-properties/3/spawn = false
-properties/3/sync = true
-properties/4/path = NodePath(":debug_all_stop")
+properties/4/path = NodePath(".:health")
 properties/4/spawn = true
 properties/4/sync = true
 
-[node name="Ship" type="RigidDynamicBody3D"]
+[node name="Ship" type="RigidBody3D"]
 continuous_cd = true
 can_sleep = false
-script = ExtResource( "1_lh74f" )
-camera_path = NodePath("")
-max_thrust = [3800000, 1900000, 950000, 950000, 950000, 950000]
+script = ExtResource("1_lh74f")
 sync_health = 0
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
-root_path = NodePath("..")
-resource = SubResource( "SceneReplicationConfig_tlay0" )
+replication_config = SubResource("SceneReplicationConfig_2c0xb")
 
 [node name="Inputs" type="Node" parent="."]
-script = ExtResource( "2_im5dg" )
+script = ExtResource("2_im5dg")
 
 [node name="InputsSync" type="MultiplayerSynchronizer" parent="Inputs"]
-root_path = NodePath("..")
-resource = SubResource( "SceneReplicationConfig_v56ga" )
 
 [node name="Guns" type="Node3D" parent="."]
-script = ExtResource( "3_fckih" )
+script = ExtResource("3_fckih")

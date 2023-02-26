@@ -171,7 +171,6 @@ fire_secondary={
 
 [rendering]
 
-driver/threads/thread_model=2
 textures/default_filters/use_nearest_mipmap_filter=true
 scaling_3d/mode=1
 anti_aliasing/quality/screen_space_aa=1

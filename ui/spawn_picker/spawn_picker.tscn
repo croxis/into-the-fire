@@ -4,30 +4,30 @@
 [ext_resource type="Theme" uid="uid://iewuun72p7uj" path="res://ui/menu_theme.tres" id="1_dyxtv"]
 
 [node name="SpawnPicker" type="VBoxContainer"]
-offset_right = 40.0
-offset_bottom = 40.0
+offset_right = 459.0
+offset_bottom = 215.0
+size_flags_vertical = 3
 script = ExtResource("1_3e3fn")
 
 [node name="Label" type="Label" parent="."]
-offset_right = 459.0
-offset_bottom = 84.0
+layout_mode = 2
 theme = ExtResource("1_dyxtv")
 theme_override_font_sizes/font_size = 72
 text = "SPAWN SCREEN"
 horizontal_alignment = 1
 
 [node name="Tree" type="Tree" parent="."]
-offset_top = 88.0
-offset_right = 459.0
-offset_bottom = 88.0
+clip_contents = false
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+column_titles_visible = true
 allow_reselect = true
 allow_rmb_select = true
 hide_root = true
+scroll_horizontal_enabled = false
 
 [node name="SpawnButton" type="Button" parent="."]
-offset_top = 92.0
-offset_right = 459.0
-offset_bottom = 181.0
+layout_mode = 2
 theme = ExtResource("1_dyxtv")
 theme_override_font_sizes/font_size = 72
 disabled = true

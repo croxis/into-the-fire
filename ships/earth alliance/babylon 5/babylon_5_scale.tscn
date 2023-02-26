@@ -16,33 +16,39 @@ radius = 0.0280877
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_a5uws"]
 
-[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_r17qu"]
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_bues7"]
+properties/0/path = NodePath(".:rpm")
+properties/0/spawn = true
+properties/0/sync = true
+properties/1/path = NodePath(".:rotation")
+properties/1/spawn = true
+properties/1/sync = true
 
-[node name="babylon_5_scale" instance=ExtResource( "1_osxqi" )]
-script = ExtResource( "2_qfki3" )
+[node name="babylon_5_scale" instance=ExtResource("1_osxqi")]
+script = ExtResource("2_qfki3")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Reactor_Section" index="0"]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Reactor_Section/StaticBody3D" index="0"]
-shape = ExtResource( "2_0vhrt" )
+shape = ExtResource("2_0vhrt")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Base_Assembly" index="0"]
 
 [node name="@@269596" type="CollisionShape3D" parent="Base_Assembly/StaticBody3D" index="0"]
-shape = ExtResource( "3_j8ab8" )
+shape = ExtResource("3_j8ab8")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Solar_Panel_Array" index="0"]
 
 [node name="@@271514" type="CollisionShape3D" parent="Solar_Panel_Array/StaticBody3D" index="0"]
-shape = ExtResource( "4_4utfw" )
+shape = ExtResource("4_4utfw")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Upper_Frame" index="0"]
 
 [node name="Upper_frame_collision" type="CollisionShape3D" parent="Upper_Frame/StaticBody3D" index="0"]
-shape = ExtResource( "5_w6e8i" )
+shape = ExtResource("5_w6e8i")
 
 [node name="rotation" parent="." index="4"]
-script = ExtResource( "2_1swvk" )
+script = ExtResource("2_1swvk")
 
 [node name="Spawner" type="StaticBody3D" parent="rotation/Cobra_Bays" index="0"]
 
@@ -56,7 +62,7 @@ collision_layer = 8388608
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="rotation/Cobra_Bays/Spawner/Bay1/1/Area3D" index="0"]
 transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0.352424, 0, 0)
-shape = SubResource( "CylinderShape3D_u5rss" )
+shape = SubResource("CylinderShape3D_u5rss")
 
 [node name="2" type="Node3D" parent="rotation/Cobra_Bays/Spawner/Bay1" index="1"]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -1.08998, 0, -1.165)
@@ -66,7 +72,7 @@ collision_layer = 8388608
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="rotation/Cobra_Bays/Spawner/Bay1/2/Area3D" index="0"]
 transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0.352424, 0, 0)
-shape = SubResource( "CylinderShape3D_u5rss" )
+shape = SubResource("CylinderShape3D_u5rss")
 
 [node name="3" type="Node3D" parent="rotation/Cobra_Bays/Spawner/Bay1" index="2"]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -1.14813, 0, -1.165)
@@ -76,7 +82,7 @@ collision_layer = 8388608
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="rotation/Cobra_Bays/Spawner/Bay1/3/Area3D" index="0"]
 transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0.352424, 0, 0)
-shape = SubResource( "CylinderShape3D_u5rss" )
+shape = SubResource("CylinderShape3D_u5rss")
 
 [node name="4" type="Node3D" parent="rotation/Cobra_Bays/Spawner/Bay1" index="3"]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -1.20776, 0, -1.165)
@@ -86,7 +92,7 @@ collision_layer = 8388608
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="rotation/Cobra_Bays/Spawner/Bay1/4/Area3D" index="0"]
 transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0.352424, 0, 0)
-shape = SubResource( "CylinderShape3D_u5rss" )
+shape = SubResource("CylinderShape3D_u5rss")
 
 [node name="5" type="Node3D" parent="rotation/Cobra_Bays/Spawner/Bay1" index="4"]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -1.26619, 0, -1.165)
@@ -96,7 +102,7 @@ collision_layer = 8388608
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="rotation/Cobra_Bays/Spawner/Bay1/5/Area3D" index="0"]
 transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0.352424, 0, 0)
-shape = SubResource( "CylinderShape3D_u5rss" )
+shape = SubResource("CylinderShape3D_u5rss")
 
 [node name="6" type="Node3D" parent="rotation/Cobra_Bays/Spawner/Bay1" index="5"]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -1.32622, 0, -1.165)
@@ -106,7 +112,7 @@ collision_layer = 8388608
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="rotation/Cobra_Bays/Spawner/Bay1/6/Area3D" index="0"]
 transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0.352424, 0, 0)
-shape = SubResource( "CylinderShape3D_u5rss" )
+shape = SubResource("CylinderShape3D_u5rss")
 
 [node name="7" type="Node3D" parent="rotation/Cobra_Bays/Spawner/Bay1" index="6"]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -1.38584, 0, -1.165)
@@ -116,7 +122,7 @@ collision_layer = 8388608
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="rotation/Cobra_Bays/Spawner/Bay1/7/Area3D" index="0"]
 transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0.352424, 0, 0)
-shape = SubResource( "CylinderShape3D_u5rss" )
+shape = SubResource("CylinderShape3D_u5rss")
 
 [node name="Bay2" type="Node3D" parent="rotation/Cobra_Bays/Spawner" index="1"]
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0)
@@ -129,7 +135,7 @@ collision_layer = 8388608
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="rotation/Cobra_Bays/Spawner/Bay2/1/Area3D" index="0"]
 transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0.352424, 0, 0)
-shape = SubResource( "CylinderShape3D_u5rss" )
+shape = SubResource("CylinderShape3D_u5rss")
 
 [node name="2" type="Node3D" parent="rotation/Cobra_Bays/Spawner/Bay2" index="1"]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -1.08998, 0, -1.165)
@@ -139,7 +145,7 @@ collision_layer = 8388608
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="rotation/Cobra_Bays/Spawner/Bay2/2/Area3D" index="0"]
 transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0.352424, 0, 0)
-shape = SubResource( "CylinderShape3D_u5rss" )
+shape = SubResource("CylinderShape3D_u5rss")
 
 [node name="3" type="Node3D" parent="rotation/Cobra_Bays/Spawner/Bay2" index="2"]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -1.14813, 0, -1.165)
@@ -149,7 +155,7 @@ collision_layer = 8388608
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="rotation/Cobra_Bays/Spawner/Bay2/3/Area3D" index="0"]
 transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0.352424, 0, 0)
-shape = SubResource( "CylinderShape3D_u5rss" )
+shape = SubResource("CylinderShape3D_u5rss")
 
 [node name="4" type="Node3D" parent="rotation/Cobra_Bays/Spawner/Bay2" index="3"]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -1.20776, 0, -1.165)
@@ -159,7 +165,7 @@ collision_layer = 8388608
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="rotation/Cobra_Bays/Spawner/Bay2/4/Area3D" index="0"]
 transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0.352424, 0, 0)
-shape = SubResource( "CylinderShape3D_u5rss" )
+shape = SubResource("CylinderShape3D_u5rss")
 
 [node name="5" type="Node3D" parent="rotation/Cobra_Bays/Spawner/Bay2" index="4"]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -1.26619, 0, -1.165)
@@ -169,7 +175,7 @@ collision_layer = 8388608
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="rotation/Cobra_Bays/Spawner/Bay2/5/Area3D" index="0"]
 transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0.352424, 0, 0)
-shape = SubResource( "CylinderShape3D_u5rss" )
+shape = SubResource("CylinderShape3D_u5rss")
 
 [node name="6" type="Node3D" parent="rotation/Cobra_Bays/Spawner/Bay2" index="5"]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -1.32622, 0, -1.165)
@@ -179,7 +185,7 @@ collision_layer = 8388608
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="rotation/Cobra_Bays/Spawner/Bay2/6/Area3D" index="0"]
 transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0.352424, 0, 0)
-shape = SubResource( "CylinderShape3D_u5rss" )
+shape = SubResource("CylinderShape3D_u5rss")
 
 [node name="7" type="Node3D" parent="rotation/Cobra_Bays/Spawner/Bay2" index="6"]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -1.38584, 0, -1.165)
@@ -189,7 +195,7 @@ collision_layer = 8388608
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="rotation/Cobra_Bays/Spawner/Bay2/7/Area3D" index="0"]
 transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0.352424, 0, 0)
-shape = SubResource( "CylinderShape3D_u5rss" )
+shape = SubResource("CylinderShape3D_u5rss")
 
 [node name="Bay3" type="Node3D" parent="rotation/Cobra_Bays/Spawner" index="2"]
 transform = Transform3D(1, 0, 0, 0, -1, 8.74228e-08, 0, -8.74228e-08, -1, 0, 0, 0)
@@ -202,7 +208,7 @@ collision_layer = 8388608
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="rotation/Cobra_Bays/Spawner/Bay3/1/Area3D" index="0"]
 transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0.352424, 0, 0)
-shape = SubResource( "CylinderShape3D_u5rss" )
+shape = SubResource("CylinderShape3D_u5rss")
 
 [node name="2" type="Node3D" parent="rotation/Cobra_Bays/Spawner/Bay3" index="1"]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -1.08998, 0, -1.165)
@@ -212,7 +218,7 @@ collision_layer = 8388608
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="rotation/Cobra_Bays/Spawner/Bay3/2/Area3D" index="0"]
 transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0.352424, 0, 0)
-shape = SubResource( "CylinderShape3D_u5rss" )
+shape = SubResource("CylinderShape3D_u5rss")
 
 [node name="3" type="Node3D" parent="rotation/Cobra_Bays/Spawner/Bay3" index="2"]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -1.14813, 0, -1.165)
@@ -222,7 +228,7 @@ collision_layer = 8388608
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="rotation/Cobra_Bays/Spawner/Bay3/3/Area3D" index="0"]
 transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0.352424, 0, 0)
-shape = SubResource( "CylinderShape3D_u5rss" )
+shape = SubResource("CylinderShape3D_u5rss")
 
 [node name="4" type="Node3D" parent="rotation/Cobra_Bays/Spawner/Bay3" index="3"]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -1.20776, 0, -1.165)
@@ -232,7 +238,7 @@ collision_layer = 8388608
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="rotation/Cobra_Bays/Spawner/Bay3/4/Area3D" index="0"]
 transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0.352424, 0, 0)
-shape = SubResource( "CylinderShape3D_u5rss" )
+shape = SubResource("CylinderShape3D_u5rss")
 
 [node name="5" type="Node3D" parent="rotation/Cobra_Bays/Spawner/Bay3" index="4"]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -1.26619, 0, -1.165)
@@ -242,7 +248,7 @@ collision_layer = 8388608
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="rotation/Cobra_Bays/Spawner/Bay3/5/Area3D" index="0"]
 transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0.352424, 0, 0)
-shape = SubResource( "CylinderShape3D_u5rss" )
+shape = SubResource("CylinderShape3D_u5rss")
 
 [node name="6" type="Node3D" parent="rotation/Cobra_Bays/Spawner/Bay3" index="5"]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -1.32622, 0, -1.165)
@@ -252,7 +258,7 @@ collision_layer = 8388608
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="rotation/Cobra_Bays/Spawner/Bay3/6/Area3D" index="0"]
 transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0.352424, 0, 0)
-shape = SubResource( "CylinderShape3D_u5rss" )
+shape = SubResource("CylinderShape3D_u5rss")
 
 [node name="7" type="Node3D" parent="rotation/Cobra_Bays/Spawner/Bay3" index="6"]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -1.38584, 0, -1.165)
@@ -262,7 +268,7 @@ collision_layer = 8388608
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="rotation/Cobra_Bays/Spawner/Bay3/7/Area3D" index="0"]
 transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0.352424, 0, 0)
-shape = SubResource( "CylinderShape3D_u5rss" )
+shape = SubResource("CylinderShape3D_u5rss")
 
 [node name="Bay4" type="Node3D" parent="rotation/Cobra_Bays/Spawner" index="3"]
 transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0, 0)
@@ -275,7 +281,7 @@ collision_layer = 8388608
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="rotation/Cobra_Bays/Spawner/Bay4/1/Area3D" index="0"]
 transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0.352424, 0, 0)
-shape = SubResource( "CylinderShape3D_u5rss" )
+shape = SubResource("CylinderShape3D_u5rss")
 
 [node name="2" type="Node3D" parent="rotation/Cobra_Bays/Spawner/Bay4" index="1"]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -1.08998, 0, -1.165)
@@ -285,7 +291,7 @@ collision_layer = 8388608
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="rotation/Cobra_Bays/Spawner/Bay4/2/Area3D" index="0"]
 transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0.352424, 0, 0)
-shape = SubResource( "CylinderShape3D_u5rss" )
+shape = SubResource("CylinderShape3D_u5rss")
 
 [node name="3" type="Node3D" parent="rotation/Cobra_Bays/Spawner/Bay4" index="2"]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -1.14813, 0, -1.165)
@@ -295,7 +301,7 @@ collision_layer = 8388608
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="rotation/Cobra_Bays/Spawner/Bay4/3/Area3D" index="0"]
 transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0.352424, 0, 0)
-shape = SubResource( "CylinderShape3D_u5rss" )
+shape = SubResource("CylinderShape3D_u5rss")
 
 [node name="4" type="Node3D" parent="rotation/Cobra_Bays/Spawner/Bay4" index="3"]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -1.20776, 0, -1.165)
@@ -305,7 +311,7 @@ collision_layer = 8388608
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="rotation/Cobra_Bays/Spawner/Bay4/4/Area3D" index="0"]
 transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0.352424, 0, 0)
-shape = SubResource( "CylinderShape3D_u5rss" )
+shape = SubResource("CylinderShape3D_u5rss")
 
 [node name="5" type="Node3D" parent="rotation/Cobra_Bays/Spawner/Bay4" index="4"]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -1.26619, 0, -1.165)
@@ -315,7 +321,7 @@ collision_layer = 8388608
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="rotation/Cobra_Bays/Spawner/Bay4/5/Area3D" index="0"]
 transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0.352424, 0, 0)
-shape = SubResource( "CylinderShape3D_u5rss" )
+shape = SubResource("CylinderShape3D_u5rss")
 
 [node name="6" type="Node3D" parent="rotation/Cobra_Bays/Spawner/Bay4" index="5"]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -1.32622, 0, -1.165)
@@ -325,7 +331,7 @@ collision_layer = 8388609
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="rotation/Cobra_Bays/Spawner/Bay4/6/Area3D" index="0"]
 transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0.352424, 0, 0)
-shape = SubResource( "CylinderShape3D_u5rss" )
+shape = SubResource("CylinderShape3D_u5rss")
 
 [node name="7" type="Node3D" parent="rotation/Cobra_Bays/Spawner/Bay4" index="6"]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -1.38584, 0, -1.165)
@@ -335,10 +341,10 @@ collision_layer = 8388608
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="rotation/Cobra_Bays/Spawner/Bay4/7/Area3D" index="0"]
 transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0.352424, 0, 0)
-shape = SubResource( "CylinderShape3D_u5rss" )
+shape = SubResource("CylinderShape3D_u5rss")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="rotation/Cobra_Bays/Spawner" index="4"]
-shape = SubResource( "BoxShape3D_a5uws" )
+shape = SubResource("BoxShape3D_a5uws")
 
 [node name="Node3D" type="Node3D" parent="rotation/Main_Cylinder" index="0"]
 
@@ -385,17 +391,16 @@ spot_range = 202.0
 [node name="StaticBody3D" type="StaticBody3D" parent="rotation/Main_Cylinder" index="1"]
 
 [node name="@@272572" type="CollisionShape3D" parent="rotation/Main_Cylinder/StaticBody3D" index="0"]
-shape = ExtResource( "7_t4phd" )
+shape = ExtResource("7_t4phd")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="rotation/Neck_Section" index="0"]
 
 [node name="@@273041" type="CollisionShape3D" parent="rotation/Neck_Section/StaticBody3D" index="0"]
-shape = ExtResource( "8_4xixx" )
+shape = ExtResource("8_4xixx")
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="rotation" index="3"]
-root_path = NodePath("..")
 replication_interval = 1.0
-resource = SubResource( "SceneReplicationConfig_r17qu" )
+replication_config = SubResource("SceneReplicationConfig_bues7")
 
 [node name="CnC" type="Node3D" parent="rotation" index="4"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3916.83, -35.6664, -35.5712)

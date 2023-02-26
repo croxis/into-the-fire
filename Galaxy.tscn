@@ -15,5 +15,7 @@ script = ExtResource("1_3em77")
 
 [node name="spawn_picker" parent="." instance=ExtResource("3_87ncl")]
 visible = false
+offset_bottom = 996.0
+size_flags_vertical = 1
 
 [connection signal="request_spawn" from="spawn_picker" to="." method="_on_spawn_picker_request_spawn"]

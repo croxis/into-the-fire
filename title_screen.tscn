@@ -238,7 +238,7 @@ environment = ExtResource("2_xlnt3")
 [node name="babylon_5_scale" parent="." instance=ExtResource("2_a5wwe")]
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(-3.61999e-06, 0, -1, 0, 1, 0, 1, 0, -3.61999e-06, -3985.33, 0, 0)
+transform = Transform3D(0.364068, 0, 0.931373, 0, 1, 0, -0.931373, 0, 0.364068, 5317.88, 0, 1162.54)
 current = true
 near = 0.1
 far = 20000.0

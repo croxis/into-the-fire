@@ -10,3 +10,5 @@ func _ready():
 	$StarField.celestial_coords = ran_position
 	$StarField.mag_ref = 7.0
 	$StarField.mag_limit = 7.0
+	
+	

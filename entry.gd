@@ -20,10 +20,9 @@ func _ready():
 	print("Arguments: ", arguments)
 	if ("server" in arguments || OS.has_feature("dedicated_server")):
 		if "port" in arguments:
-			$network.host_server(arguments["port"])
+			$network.host_server("Server", arguments["port"])
 		else:
-			$network.host_server()
-		$network.player_name = "Server"
+			$network.host_server("Server")
 		_dedicated_server = true
 	else:
 		if "vr" in arguments:
