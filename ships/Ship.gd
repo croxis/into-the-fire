@@ -1,12 +1,17 @@
-@tool
+#@tool
 extends RigidBody3D
 class_name Ship
 
 
 # Cache the pilot ID in here
-var _player_pilot_id: int = 0
+#@export var _player_pilot_id:= 1 :
+@export var _player_pilot_id: int:
+	set(id):
+		_player_pilot_id = id
+		# Give authority over the player input to the appropriate peer.
+		$InputsSync.set_multiplayer_authority(id)
 
-@onready var inputs = $Inputs
+@onready var inputs = $InputsSync
 @export_node_path("Camera3D") var camera_path: NodePath
 @onready var camera: Camera3D = get_node_or_null(camera_path)
 
@@ -52,17 +57,20 @@ func _ready():
 	# If in editor simply disable processing as it's not needed here
 	if (Engine.is_editor_hint()):
 		set_physics_process(false)
-	print("Creating ship with id: ", _player_pilot_id, ". My ID: ", multiplayer.get_unique_id())
+	print_debug("Creating ship with id: ", _player_pilot_id, ". My ID: ", multiplayer.get_unique_id())
 	if (multiplayer.get_unique_id() == _player_pilot_id):
 		# Set the camera
 		#camera.set_znear(0.3)  # This should be set per ship
 		camera.far = 30000
 		# Ensure it is the active one
 		camera.current = true
-		print("Setting camera")
-	$Inputs/InputsSync.set_multiplayer_authority(_player_pilot_id)
+		print_debug("Setting camera")
+	$InputsSync.set_multiplayer_authority(_player_pilot_id)
 	can_sleep = false
-	print("Ship created: ", _player_pilot_id)
+	print_debug("Ship created: ", _player_pilot_id)
+	# Only process on server.
+	# While in the blog tutorial, I suspect this wouldn't work well for our more dynamic game.
+	#set_physics_process(multiplayer.is_server())
 
 
 func _integrate_forces(state: PhysicsDirectBodyState3D):
@@ -150,7 +158,7 @@ func _physics_process(dt: float) -> void:
 
 
 func bullet_hit(damage, bullet_global_trans):
-	print("Hit")
+	print_debug("Hit")
 	var BASE_BULLET_BOOST = 1
 	var direction_vect = bullet_global_trans.basis.z.normalized() * BASE_BULLET_BOOST
 	apply_impulse((bullet_global_trans.origin - global_transform.origin).normalized(), direction_vect * damage)

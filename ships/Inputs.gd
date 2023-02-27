@@ -1,4 +1,4 @@
-extends Node
+extends MultiplayerSynchronizer
 
 # Eventually each individual engine will be modeled to react to the desired
 # pilot Input. For now it is just generic
@@ -17,6 +17,11 @@ extends Node
 @export var debug_all_stop: bool = false
 @export var fire_primary: bool = false
 @export var fire_secondary: bool = false
+
+
+func _ready():
+	# Only process for the local player.
+	set_process(get_multiplayer_authority() == multiplayer.get_unique_id())
 
 
 func update():
@@ -55,7 +60,7 @@ func update():
 	if (Input.is_action_pressed("counter_clockwise_full")):
 		rotation_throttle.z = -1
 	if (Input.is_action_pressed("debug_all_stop")):
-		print("Debug all stop")
+		print_debug("Debug all stop")
 		throttle = Vector3(0, 0, 0)
 		rotation_throttle = Vector3(0, 0, 0)
 		debug_all_stop = true

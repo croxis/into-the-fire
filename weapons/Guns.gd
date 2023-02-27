@@ -7,7 +7,7 @@ var fire = false
 
 func _physics_process(dt: float) -> void:
 	# Make sure this is the last part of the physics function because of the return!
-	if get_node("../Inputs").fire_primary and is_multiplayer_authority():
+	if get_node("../InputsSync").fire_primary and is_multiplayer_authority():
 		# Pew, fire only one gun. For now
 		for gun in get_children():
 			gun.fire(damage)

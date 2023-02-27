@@ -18,10 +18,10 @@ radius = 0.0280877
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_bues7"]
 properties/0/path = NodePath(".:rpm")
-properties/0/spawn = true
+properties/0/spawn = false
 properties/0/sync = true
 properties/1/path = NodePath(".:rotation")
-properties/1/spawn = true
+properties/1/spawn = false
 properties/1/sync = true
 
 [node name="babylon_5_scale" instance=ExtResource("1_osxqi")]
