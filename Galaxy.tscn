@@ -1,7 +1,7 @@
-[gd_scene load_steps=4 format=3 uid="uid://dnvtbx2vtugs0"]
+[gd_scene load_steps=4 format=3 uid="uid://c45aut53d0eru"]
 
 [ext_resource type="Script" path="res://Galaxy.gd" id="1_3em77"]
-[ext_resource type="PackedScene" uid="uid://c4wlmqxolhksu" path="res://systems/test_system/test_system.tscn" id="1_47d16"]
+[ext_resource type="PackedScene" uid="uid://sl64gsa8wdih" path="res://systems/test_system/test_system.tscn" id="2_fj3b8"]
 [ext_resource type="PackedScene" uid="uid://bxf8p4mhhuvra" path="res://ui/spawn_picker/spawn_picker.tscn" id="3_87ncl"]
 
 [node name="Galaxy" type="Node"]
@@ -9,7 +9,7 @@ script = ExtResource("1_3em77")
 
 [node name="Systems" type="Node" parent="."]
 
-[node name="test_system" parent="Systems" instance=ExtResource("1_47d16")]
+[node name="System" parent="Systems" instance=ExtResource("2_fj3b8")]
 
 [node name="Hyperspace" type="Node" parent="."]
 

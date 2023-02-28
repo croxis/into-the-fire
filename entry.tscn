@@ -27,8 +27,8 @@ layout_mode = 2
 [node name="loading" parent="." instance=ExtResource("3_ry4g3")]
 
 [node name="MainMenu" parent="." instance=ExtResource("7_j7gch")]
-visible = false
 
 [connection signal="connection_succeeded" from="network" to="." method="_on_network_connection_succeeded"]
 [connection signal="connection_succeeded" from="network" to="Galaxy" method="_on_network_connection_succeeded"]
+[connection signal="new_game" from="MainMenu" to="." method="_on_main_menu_new_game"]
 [connection signal="new_game" from="MainMenu" to="network" method="host_server"]

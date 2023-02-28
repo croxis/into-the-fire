@@ -1,0 +1,81 @@
+[gd_scene load_steps=12 format=3 uid="uid://c4wlmqxolhksu"]
+
+[ext_resource type="Script" path="res://systems/test_system/test_system.gd" id="1_jsspt"]
+[ext_resource type="Environment" uid="uid://d1el1icbym1qc" path="res://systems/test_system/test_system_environment.tres" id="2_b3oqd"]
+[ext_resource type="Script" path="res://systems/BoltSpawner.gd" id="3_gayar"]
+[ext_resource type="Script" path="res://systems/test_system/ShipSpawner.gd" id="4_ar2em"]
+[ext_resource type="PackedScene" uid="uid://b46swjkskju5j" path="res://ships/earth alliance/babylon 5/babylon_5_scale.tscn" id="5_t3qrg"]
+[ext_resource type="Script" path="res://addons/star_field/star_field_manager.gd" id="6_cmh76"]
+[ext_resource type="PackedScene" uid="uid://kay1bansjucq" path="res://addons/star_field/StarDB.tscn" id="7_vsasn"]
+[ext_resource type="PackedScene" uid="uid://boog6nwte8hjq" path="res://addons/star_field/StarRender.tscn" id="8_xfxai"]
+[ext_resource type="Texture2D" uid="uid://b8mr0hea1ghdh" path="res://systems/ran/epsilon_nebulae_texture_by_amras_arfeiniel.png" id="9_t6tp0"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_e7jat"]
+transparency = 1
+shading_mode = 0
+albedo_texture = ExtResource("9_t6tp0")
+heightmap_scale = 0.0
+uv1_scale = Vector3(1, 2, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_sya4v"]
+flip_faces = true
+top_radius = 10000.0
+bottom_radius = 10000.0
+height = 10000.0
+rings = 2
+cap_top = false
+cap_bottom = false
+
+[node name="Node3D" type="Node3D"]
+script = ExtResource("1_jsspt")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = ExtResource("2_b3oqd")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.892358, 0, 0.451329, 0, 1, 0, -0.451329, 0, 0.892358, 0, 0, 0)
+light_color = Color(1, 0.92549, 0.901961, 1)
+shadow_enabled = true
+directional_shadow_max_distance = 1000.0
+
+[node name="NebulaDirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.791042, 0, -0.611762, 0.383873, 0.778627, -0.496369, 0.476334, -0.627488, -0.615926, 0, 0, 0)
+light_color = Color(0.360784, 0.223529, 1, 1)
+light_energy = 0.31
+
+[node name="BoltSpawner" type="MultiplayerSpawner" parent="."]
+spawn_path = NodePath("../Bolts")
+script = ExtResource("3_gayar")
+
+[node name="ShipSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://ships/earth alliance/aurora_starfury/auora_starfury.tscn")
+spawn_path = NodePath("../ships")
+script = ExtResource("4_ar2em")
+
+[node name="Bolts" type="Node3D" parent="."]
+
+[node name="ships" type="Node3D" parent="."]
+
+[node name="stations" type="Node3D" parent="."]
+
+[node name="Babylon 5" parent="stations" instance=ExtResource("5_t3qrg")]
+transform = Transform3D(0.911561, 0, -0.411164, 0, 1, 0, 0.411164, 0, 0.911561, 0, 0, 0)
+
+[node name="StarField" type="Node3D" parent="."]
+script = ExtResource("6_cmh76")
+mag_ref = 7.0
+mag_limit = 7.0
+star_labels_visible = false
+celestial_coords = Vector3(1.899, 2.541, -0.529)
+
+[node name="StarDB" parent="StarField" instance=ExtResource("7_vsasn")]
+
+[node name="StarRender" parent="StarField" instance=ExtResource("8_xfxai")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5315.98, -2.541, 1163.07)
+mag_limit = 7.0
+star_labels_visible = false
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.983132, 0.182794, -0.0061107, 0.182771, -0.983147, -0.00420464, -0.0067763, 0.00301686, -0.999972, 0, 0, 0)
+material_override = SubResource("StandardMaterial3D_e7jat")
+mesh = SubResource("CylinderMesh_sya4v")

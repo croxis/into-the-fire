@@ -39,13 +39,10 @@ func _ready():
 
 
 func end_title_sequence() -> void:
-	print("start end")
 	if get_parent().has_node("title screen"):
-		print("ending title")
+		print_debug("ending title")
 		get_parent().get_node("title screen").queue_free()
 	$MainMenu.visible = false
-	# Hack until we figure out what we are doing
-	$Galaxy.player_enter_system("test_system")
 
 
 func _process(delta):
@@ -62,3 +59,11 @@ func _process(delta):
 
 func _on_network_connection_succeeded():
 	end_title_sequence()
+	# Hack until we figure out what we are doing
+	$Galaxy.player_enter_system("test_system")
+
+
+func _on_main_menu_new_game(_player_name, _port):
+	end_title_sequence()
+	# Hack until we figure out what we are doing
+	$Galaxy.player_enter_system("test_system")
