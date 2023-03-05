@@ -4,7 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://cu705v7qv6lnp" path="res://network/network.tscn" id="2_phwwb"]
 [ext_resource type="PackedScene" uid="uid://deqh6h2wkuvel" path="res://ui/loadingscreen/loading.tscn" id="3_ry4g3"]
 [ext_resource type="Script" path="res://ui/debug/DebugContainer.gd" id="4_h8ft4"]
-[ext_resource type="PackedScene" uid="uid://dnvtbx2vtugs0" path="res://Galaxy.tscn" id="4_l50de"]
+[ext_resource type="PackedScene" uid="uid://c45aut53d0eru" path="res://Galaxy.tscn" id="4_l50de"]
 [ext_resource type="PackedScene" uid="uid://dgsj2su1f5ppc" path="res://ui/debug/widgets/TextList/DebugTextList.tscn" id="5_ro4nv"]
 [ext_resource type="PackedScene" uid="uid://d31wy0m5b7d3b" path="res://ui/main_menu/main_menu.tscn" id="7_j7gch"]
 

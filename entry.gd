@@ -67,3 +67,4 @@ func _on_main_menu_new_game(_player_name, _port):
 	end_title_sequence()
 	# Hack until we figure out what we are doing
 	$Galaxy.player_enter_system("test_system")
+	$Galaxy._on_network_connection_succeeded()

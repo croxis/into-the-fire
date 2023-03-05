@@ -44,9 +44,12 @@ func _on_network_connection_succeeded():
 	$spawn_picker.show_spawn(get_spawn_points(""))
 
 
-@rpc("any_peer")
+@rpc("any_peer", "call_local")
 func request_spawn(system_name, spawner_name):
+	if not multiplayer.is_server():
+		return
 	var peer_id := multiplayer.get_remote_sender_id()
+	print_debug("Spawn requested in ", system_name, " ", spawner_name, " by ", peer_id)
 	var top_system := $Systems.get_node(system_name)
 	var system := top_system.get_node("SubViewport/Node3D")
 	var spawner: Node3D
@@ -65,8 +68,9 @@ func request_spawn(system_name, spawner_name):
 	ship.global_transform.origin = spawn_position
 	
 
-func _on_spawn_picker_request_spawn(system_name, spawner_name):
+func _on_spawn_picker_request_spawn(system_name, spawner_name):	
 	rpc("request_spawn", system_name, spawner_name)
+	
 	$spawn_picker.visible = false
 	
 	

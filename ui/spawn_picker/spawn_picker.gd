@@ -25,7 +25,6 @@ func _on_tree_item_selected():
 
 
 func _on_spawn_button_pressed():
-	print("Client Requesting spawn")
 	var selected = $Tree.get_selected()
 	var spawn_name = selected.get_text(0)
 	var system_name = selected.get_parent().get_text(0)

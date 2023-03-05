@@ -5,9 +5,11 @@ signal new_game(player_name, port: int)
 
 func _ready():
 	if OS.has_environment("USERNAME"):
+		$HBoxContainer/VBoxContainerOption/VBoxContainerNew/GridContainer/LineEditCallsign.text = OS.get_environment("USERNAME")
 		$HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer/LineEditCallsign.text = OS.get_environment("USERNAME")
 	else:
 		var desktop_path = OS.get_system_dir(0).replace("\\", "/").split("/")
+		$HBoxContainer/VBoxContainerOption/VBoxContainerNew/GridContainer/LineEditCallsign.text = desktop_path[desktop_path.size() - 2]
 		$HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer/LineEditCallsign.text = desktop_path[desktop_path.size() - 2]
 		
 
@@ -42,7 +44,7 @@ func _on_button_new_server_pressed():
 	var new_player_name = $HBoxContainer/VBoxContainerOption/VBoxContainerNew/GridContainer/LineEditCallsign.text
 	if new_player_name == "":
 		print_debug("Error: Not valid player name")
-	new_game.emit("Server", port)
+	new_game.emit(new_player_name, port)
 
 
 func _on_button_join_server_pressed():
