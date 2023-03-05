@@ -62,7 +62,7 @@ void fragment() {
 
 // UVFunc:4
 	vec2 n_in4p2 = vec2(0.00000, 0.00000);
-	vec2 n_out4p0 = fma(n_in4p2, vec2(n_out5p0), UV);
+	vec2 n_out4p0 = n_in4p2 * vec2(n_out5p0) + UV;
 
 
 // Texture2D:2

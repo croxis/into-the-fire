@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://c4wlmqxolhksu"]
+[gd_scene load_steps=13 format=3 uid="uid://c4wlmqxolhksu"]
 
 [ext_resource type="Script" path="res://systems/test_system/test_system.gd" id="1_jsspt"]
 [ext_resource type="Environment" uid="uid://d1el1icbym1qc" path="res://systems/test_system/test_system_environment.tres" id="2_b3oqd"]
@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://kay1bansjucq" path="res://addons/star_field/StarDB.tscn" id="7_vsasn"]
 [ext_resource type="PackedScene" uid="uid://boog6nwte8hjq" path="res://addons/star_field/StarRender.tscn" id="8_xfxai"]
 [ext_resource type="Texture2D" uid="uid://b8mr0hea1ghdh" path="res://systems/ran/epsilon_nebulae_texture_by_amras_arfeiniel.png" id="9_t6tp0"]
+[ext_resource type="AudioStream" uid="uid://m1fuxurnle23" path="res://music/Christopher Franke - Battle Themes Track 1.ogg" id="10_cg1xv"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_e7jat"]
 transparency = 1
@@ -81,3 +82,7 @@ star_labels_visible = false
 transform = Transform3D(0.983132, 0.182794, -0.0061107, 0.182771, -0.983147, -0.00420464, -0.0067763, 0.00301686, -0.999972, 0, 0, 0)
 material_override = SubResource("StandardMaterial3D_e7jat")
 mesh = SubResource("CylinderMesh_sya4v")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("10_cg1xv")
+autoplay = true

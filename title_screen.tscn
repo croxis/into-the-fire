@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://fog63swldmub"]
+[gd_scene load_steps=14 format=3 uid="uid://fog63swldmub"]
 
 [ext_resource type="Script" path="res://title_screen.gd" id="1_v3ado"]
 [ext_resource type="PackedScene" uid="uid://b46swjkskju5j" path="res://ships/earth alliance/babylon 5/babylon_5_scale.tscn" id="2_a5wwe"]
@@ -7,6 +7,7 @@
 [ext_resource type="AudioStream" uid="uid://mn5widkbv53p" path="res://music/Season-3-Edited-Titles.ogg" id="4_jke73"]
 [ext_resource type="Script" path="res://addons/star_field/star_field_manager.gd" id="6_bsqdu"]
 [ext_resource type="Texture2D" uid="uid://b8mr0hea1ghdh" path="res://systems/ran/epsilon_nebulae_texture_by_amras_arfeiniel.png" id="7_26dio"]
+[ext_resource type="AudioStream" uid="uid://byjpf6fb6ihv1" path="res://music/Combat Sim - Main Theme Extended.ogg" id="8_coigh"]
 
 [sub_resource type="Animation" id="Animation_kiqxv"]
 resource_name = "Camera"
@@ -296,3 +297,7 @@ tracker = &"left_hand"
 [node name="RightHand" type="XRController3D" parent="XROrigin3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 1, 0.5)
 tracker = &"right_hand"
+
+[node name="AudioStreamPlayer2" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("8_coigh")
+autoplay = true
