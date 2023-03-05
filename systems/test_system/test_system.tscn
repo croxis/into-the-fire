@@ -1,5 +1,8 @@
-[gd_scene load_steps=2 format=3 uid="uid://sl64gsa8wdih"]
+[gd_scene load_steps=3 format=3 uid="uid://sl64gsa8wdih"]
 
 [ext_resource type="PackedScene" uid="uid://dnx0pyfaqlkqi" path="res://systems/system_template.tscn" id="1_ctlaf"]
+[ext_resource type="PackedScene" uid="uid://c4wlmqxolhksu" path="res://systems/test_system/test_system_hardcode.tscn" id="2_2gq3a"]
 
-[node name="System" instance=ExtResource("1_ctlaf")]
+[node name="test_system" instance=ExtResource("1_ctlaf")]
+
+[node name="Node3D" parent="SubViewport" index="0" instance=ExtResource("2_2gq3a")]

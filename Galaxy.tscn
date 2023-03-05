@@ -9,7 +9,7 @@ script = ExtResource("1_3em77")
 
 [node name="Systems" type="Node" parent="."]
 
-[node name="System" parent="Systems" instance=ExtResource("2_fj3b8")]
+[node name="test_system" parent="Systems" instance=ExtResource("2_fj3b8")]
 
 [node name="Hyperspace" type="Node" parent="."]
 

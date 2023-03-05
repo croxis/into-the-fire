@@ -5,6 +5,7 @@ var time = 0.0
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	print_debug("Rotation camera")
 	$"Camera3D".current = true
 
 
@@ -14,5 +15,5 @@ func _process(delta):
 	time += delta
 	if time > 5.0 and x:
 		self.set_node_b("")
-		print("pop")
+		print_debug("pop")
 		x = false

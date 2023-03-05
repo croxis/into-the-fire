@@ -44,7 +44,8 @@ light_color = Color(0.360784, 0.223529, 1, 1)
 light_energy = 0.31
 
 [node name="BoltSpawner" type="MultiplayerSpawner" parent="."]
-spawn_path = NodePath("../Bolts")
+_spawnable_scenes = PackedStringArray("res://weapons/effects/bolt/Bolt.tscn")
+spawn_path = NodePath("../bolts")
 script = ExtResource("3_gayar")
 
 [node name="ShipSpawner" type="MultiplayerSpawner" parent="."]
@@ -52,7 +53,7 @@ _spawnable_scenes = PackedStringArray("res://ships/earth alliance/aurora_starfur
 spawn_path = NodePath("../ships")
 script = ExtResource("4_ar2em")
 
-[node name="Bolts" type="Node3D" parent="."]
+[node name="bolts" type="Node3D" parent="."]
 
 [node name="ships" type="Node3D" parent="."]
 
@@ -63,6 +64,7 @@ transform = Transform3D(0.911561, 0, -0.411164, 0, 1, 0, 0.411164, 0, 0.911561, 
 
 [node name="StarField" type="Node3D" parent="."]
 script = ExtResource("6_cmh76")
+use_active_camera = true
 mag_ref = 7.0
 mag_limit = 7.0
 star_labels_visible = false

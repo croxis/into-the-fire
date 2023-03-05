@@ -40,13 +40,6 @@ var thruster_force: Vector3 = Vector3(0, 0, 0)
 var thruster_torque: Vector3 = Vector3(0, 0, 0)
 var _debug_all_stop := false
 
-# Values to sync accross the network
-@export var sync_position := Vector3()
-@export var sync_orientation := Quaternion()
-@export var sync_angular_velocity := Vector3()
-@export var sync_linear_velocity := Vector3()
-@export var sync_health := max_health
-
 var start_speed = 0
 
 signal destroyed(name)
@@ -68,20 +61,9 @@ func _ready():
 	$InputsSync.set_multiplayer_authority(_player_pilot_id)
 	can_sleep = false
 	print_debug("Ship created: ", _player_pilot_id)
-	# Only process on server.
-	# While in the blog tutorial, I suspect this wouldn't work well for our more dynamic game.
-	#set_physics_process(multiplayer.is_server())
 
 
 func _integrate_forces(state: PhysicsDirectBodyState3D):
-	if not is_multiplayer_authority():
-	# Check if there is any correction to be done
-		state.transform.origin = sync_position
-		state.transform.basis = Basis(sync_orientation)
-		state.angular_velocity = sync_angular_velocity
-		state.linear_velocity = sync_linear_velocity
-		set_health(sync_health)
-
 	if _debug_all_stop:
 		state.angular_velocity = Vector3(0,0,0)
 		state.linear_velocity = Vector3(0,0,0)
@@ -142,18 +124,6 @@ func _physics_process(dt: float) -> void:
 	thruster_torque = thruster_torque / 7  # Modifyer to make the fury not SOOOO twitchy
 	apply_torque(global_transform.basis * thruster_torque)
 	
-	# Server will set the values to sync to the clients
-	if multiplayer.multiplayer_peer == null or is_multiplayer_authority():
-		sync_position = transform.origin
-		sync_orientation = transform.basis
-		sync_angular_velocity = angular_velocity
-		sync_linear_velocity = linear_velocity
-		sync_health = health
-		
-	#$NetMeshInstancePod/Viewport_HUD/Control.set_acceleration((linear_velocity.length() - start_speed)/dt)
-	#$NetMeshInstancePod/UIScreens/LeftWindowView/Velocity.current_velocity = int(global_transform.basis.xform_inv(linear_velocity).z)
-	#$NetMeshInstancePod/UIScreens/MiddleWindowView/X.current_velocity = -int(global_transform.basis.xform_inv(linear_velocity).x)
-	#$NetMeshInstancePod/UIScreens/RightWindowView/Y.current_velocity = int(global_transform.basis.xform_inv(linear_velocity).y)
 	start_speed = linear_velocity.length()
 
 

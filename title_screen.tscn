@@ -240,6 +240,7 @@ environment = ExtResource("2_xlnt3")
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(0.364068, 0, 0.931373, 0, 1, 0, -0.931373, 0, 0.364068, 5317.88, 0, 1162.54)
 current = true
+fov = 47.8125
 near = 0.1
 far = 20000.0
 

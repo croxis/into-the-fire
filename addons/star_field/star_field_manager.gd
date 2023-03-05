@@ -7,6 +7,8 @@ var star_db : Node
 var camera : Camera3D
 var star_render
 
+@export var use_active_camera := false
+
 const AU_IN_PARSEC := 0.000004848
 const LY_IN_PARSEC := 0.3066
 const PARSEC_IN_AU := 206265
@@ -87,7 +89,11 @@ func get_star_proper(name: String):
 
 
 func _process(delta):
-	if camera:
+	if use_active_camera:
+		var active_camera = get_viewport().get_camera_3d()
+		if active_camera:
+			star_render.position = active_camera.position - celestial_coords
+	elif camera:
 		star_render.position = camera.position - celestial_coords
 
 
