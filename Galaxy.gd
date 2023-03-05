@@ -36,6 +36,8 @@ func player_enter_system(system_name) -> void:
 	#system.size = DisplayServer.window_get_real_size()
 	system.get_node("SubViewport").size = DisplayServer.window_get_size()
 	system.visible = true
+	#Music Hack
+	system.get_node("SubViewport/Node3D/AudioStreamPlayer").playing = true
 
 
 func _on_network_connection_succeeded():

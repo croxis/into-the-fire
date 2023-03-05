@@ -23,8 +23,6 @@ func _physics_process(dt: float) -> void:
 
 
 func fire(damage_mod):
-	if can_fire():
-		$AudioStreamPlayer3D.play()
 	if ((multiplayer.multiplayer_peer == null or is_multiplayer_authority()) and can_fire()):
 		cooldown_timer = cooldown
 		var bolt_node: Bolt = bolt_resource.instantiate()
@@ -33,3 +31,9 @@ func fire(damage_mod):
 		get_node('../../../../bolts').add_child(bolt_node, true)
 		bolt_node.global_transform.origin = global_transform.origin
 		bolt_node.global_transform.basis = Basis(global_transform.basis)
+		fire_sound.rpc()
+
+
+@rpc("call_local")
+func fire_sound():
+	$AudioStreamPlayer3D.play()

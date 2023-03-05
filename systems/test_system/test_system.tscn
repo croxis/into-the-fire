@@ -5,4 +5,7 @@
 
 [node name="test_system" instance=ExtResource("1_ctlaf")]
 
+[node name="SubViewport" parent="." index="0"]
+positional_shadow_atlas_size = 4096
+
 [node name="Node3D" parent="SubViewport" index="0" instance=ExtResource("2_2gq3a")]

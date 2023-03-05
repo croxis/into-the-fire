@@ -37,12 +37,12 @@ environment = ExtResource("2_b3oqd")
 transform = Transform3D(0.892358, 0, 0.451329, 0, 1, 0, -0.451329, 0, 0.892358, 0, 0, 0)
 light_color = Color(1, 0.92549, 0.901961, 1)
 shadow_enabled = true
-directional_shadow_max_distance = 1000.0
+directional_shadow_max_distance = 2000.0
 
 [node name="NebulaDirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(-0.791042, 0, -0.611762, 0.383873, 0.778627, -0.496369, 0.476334, -0.627488, -0.615926, 0, 0, 0)
 light_color = Color(0.360784, 0.223529, 1, 1)
-light_energy = 0.31
+light_energy = 0.1
 
 [node name="BoltSpawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("res://weapons/effects/bolt/Bolt.tscn")
@@ -85,4 +85,3 @@ mesh = SubResource("CylinderMesh_sya4v")
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("10_cg1xv")
-autoplay = true
