@@ -136,7 +136,9 @@ func bullet_hit(damage, bullet_global_trans):
 
 
 func set_health(new_health):
+	print_debug("New Health: ", new_health)
 	health = new_health
 	#$NetMeshInstancePod/Viewport_HUD/Control.set_health(health)
-	if (health <= 0):
+	if (health <= 0.0):
+		print_debug("Destroyed: ", name)
 		emit_signal("destroyed", name)
