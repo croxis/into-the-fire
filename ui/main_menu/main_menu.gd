@@ -28,6 +28,11 @@ func _on_button_join_game_pressed():
 	$HBoxContainer/VBoxContainerOption/VBoxContainerJoin.visible = true
 
 
+func _on_button_options_pressed():
+	close_all()
+	$HBoxContainer/VBoxContainerOption/VBoxContainerOption.visible = true
+
+
 func _on_button_exit_desktop_pressed():
 	get_tree().quit()
 
@@ -62,3 +67,15 @@ func _on_button_join_server_pressed():
 		print("Error: Not valid player name")
 		return
 	join_game.emit(ip, port, new_player_name)
+
+
+
+func _on_option_button_item_selected(index):
+	if index == 0:
+		DisplayServer.window_set_size(DisplayServer.screen_get_size())
+	elif index == 1:
+		DisplayServer.window_set_size(Vector2i(1280, 800))
+	elif index == 2:
+		DisplayServer.window_set_size(Vector2i(1920, 1080))
+	elif index == 3:
+		DisplayServer.window_set_size(Vector2i(2560, 1440))

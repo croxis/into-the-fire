@@ -164,14 +164,13 @@ theme_override_font_sizes/font_size = 48
 text = "Join Server"
 
 [node name="VBoxContainerOption" type="VBoxContainer" parent="HBoxContainer/VBoxContainerOption"]
-visible = false
 layout_mode = 2
 
 [node name="GridContainer" type="GridContainer" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption"]
 layout_mode = 2
 columns = 2
 
-[node name="Label2" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer"]
+[node name="LabelResolution" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer"]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_type_variation = &"HeaderLarge"
@@ -185,39 +184,47 @@ theme_override_font_sizes/font_size = 42
 item_count = 4
 selected = 0
 popup/item_0/text = "Native"
-popup/item_0/id = 3
+popup/item_0/id = 0
 popup/item_1/text = "1280x800 (SteamDeck)"
-popup/item_1/id = 0
+popup/item_1/id = 1
 popup/item_2/text = "1920x1080"
-popup/item_2/id = 1
+popup/item_2/id = 2
 popup/item_3/text = "2560x1440"
-popup/item_3/id = 2
+popup/item_3/id = 3
 
-[node name="Label" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer"]
+[node name="LabelVsync" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer"]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_type_variation = &"HeaderLarge"
 theme_override_font_sizes/font_size = 48
 text = "VSYNC"
 
-[node name="CheckBox" type="CheckBox" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer"]
+[node name="CheckBoxVSync" type="CheckBox" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer"]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_override_font_sizes/font_size = 48
 
-[node name="Label3" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer"]
+[node name="LabelFullScreen" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer"]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_type_variation = &"HeaderLarge"
 theme_override_font_sizes/font_size = 48
 text = "Full Screen"
 
-[node name="CheckBox2" type="CheckBox" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer"]
+[node name="OptionButtonWindowMode" type="OptionButton" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer"]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_override_font_sizes/font_size = 48
+item_count = 3
+selected = 1
+popup/item_0/text = "Windowed"
+popup/item_0/id = 0
+popup/item_1/text = "Boarderless Fullscreen"
+popup/item_1/id = 3
+popup/item_2/text = "Exclusive Fullscreen"
+popup/item_2/id = 4
 
-[node name="Label4" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer"]
+[node name="LabelAA" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer"]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_type_variation = &"HeaderLarge"
@@ -243,6 +250,8 @@ popup/item_4/id = 1
 
 [connection signal="pressed" from="HBoxContainer/VBoxContainerMain/ButtonNewGame" to="." method="_on_button_new_game_pressed"]
 [connection signal="pressed" from="HBoxContainer/VBoxContainerMain/ButtonJoinGame" to="." method="_on_button_join_game_pressed"]
+[connection signal="pressed" from="HBoxContainer/VBoxContainerMain/ButtonOptions" to="." method="_on_button_options_pressed"]
 [connection signal="pressed" from="HBoxContainer/VBoxContainerMain/ButtonExitDesktop" to="." method="_on_button_exit_desktop_pressed"]
 [connection signal="pressed" from="HBoxContainer/VBoxContainerOption/VBoxContainerNew/ButtonNewServer" to="." method="_on_button_new_server_pressed"]
 [connection signal="pressed" from="HBoxContainer/VBoxContainerOption/VBoxContainerJoin/ButtonJoinServer" to="." method="_on_button_join_server_pressed"]
+[connection signal="item_selected" from="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer/OptionButton" to="." method="_on_option_button_item_selected"]

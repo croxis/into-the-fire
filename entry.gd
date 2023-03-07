@@ -37,6 +37,7 @@ func _ready():
 			#TODO: Do this all with an option window, but this is default!
 			DisplayServer.window_set_size(DisplayServer.screen_get_size())
 			for system in $Galaxy.get_node("Systems").get_children():
+				system.size = DisplayServer.window_get_size()
 				system.get_node("SubViewport").size = DisplayServer.window_get_size()
 			get_viewport()
 		#Set window size here
