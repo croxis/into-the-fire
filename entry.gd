@@ -35,13 +35,7 @@ func _ready():
 				print("OpenXR not initialised, please check if your headset is connected")
 		else:
 			#TODO: Do this all with an option window, but this is default!
-			DisplayServer.window_set_size(DisplayServer.screen_get_size())
-			for system in $Galaxy.get_node("Systems").get_children():
-				system.size = DisplayServer.window_get_size()
-				system.get_node("SubViewport").size = DisplayServer.window_get_size()
-			get_viewport()
-		#Set window size here
-		#get_tree().get_root().size = DisplayServer.window_get_real_size()
+			$DisplayManager.set_resolution(Vector2i(0, 0))
 		$loading.load_scene("res://title_screen.tscn")
 
 

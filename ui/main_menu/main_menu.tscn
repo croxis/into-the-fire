@@ -164,6 +164,7 @@ theme_override_font_sizes/font_size = 48
 text = "Join Server"
 
 [node name="VBoxContainerOption" type="VBoxContainer" parent="HBoxContainer/VBoxContainerOption"]
+visible = false
 layout_mode = 2
 
 [node name="GridContainer" type="GridContainer" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption"]

@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://t1o4wdeijm68"]
+[gd_scene load_steps=9 format=3 uid="uid://t1o4wdeijm68"]
 
 [ext_resource type="Script" path="res://entry.gd" id="1_ox4k0"]
 [ext_resource type="PackedScene" uid="uid://cu705v7qv6lnp" path="res://network/network.tscn" id="2_phwwb"]
@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://c45aut53d0eru" path="res://Galaxy.tscn" id="4_l50de"]
 [ext_resource type="PackedScene" uid="uid://dgsj2su1f5ppc" path="res://ui/debug/widgets/TextList/DebugTextList.tscn" id="5_ro4nv"]
 [ext_resource type="PackedScene" uid="uid://d31wy0m5b7d3b" path="res://ui/main_menu/main_menu.tscn" id="7_j7gch"]
+[ext_resource type="Script" path="res://DisplayManager.gd" id="8_oa1x6"]
 
 [node name="entry" type="Node"]
 script = ExtResource("1_ox4k0")
@@ -28,7 +29,11 @@ layout_mode = 2
 
 [node name="MainMenu" parent="." instance=ExtResource("7_j7gch")]
 
+[node name="DisplayManager" type="Node" parent="."]
+script = ExtResource("8_oa1x6")
+
 [connection signal="connection_succeeded" from="network" to="." method="_on_network_connection_succeeded"]
 [connection signal="connection_succeeded" from="network" to="Galaxy" method="_on_network_connection_succeeded"]
 [connection signal="new_game" from="MainMenu" to="." method="_on_main_menu_new_game"]
 [connection signal="new_game" from="MainMenu" to="network" method="host_server"]
+[connection signal="set_resolution" from="MainMenu" to="DisplayManager" method="set_resolution"]

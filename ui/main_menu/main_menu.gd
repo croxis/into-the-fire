@@ -2,6 +2,7 @@ extends Control
 
 signal join_game(ip, port: int, player_name)
 signal new_game(player_name, port: int)
+signal set_resolution(resolution: Vector2i)
 
 func _ready():
 	if OS.has_environment("USERNAME"):
@@ -72,10 +73,10 @@ func _on_button_join_server_pressed():
 
 func _on_option_button_item_selected(index):
 	if index == 0:
-		DisplayServer.window_set_size(DisplayServer.screen_get_size())
+		set_resolution.emit(Vector2i(0, 0))
 	elif index == 1:
-		DisplayServer.window_set_size(Vector2i(1280, 800))
+		set_resolution.emit(Vector2i(1280, 800))
 	elif index == 2:
-		DisplayServer.window_set_size(Vector2i(1920, 1080))
+		set_resolution.emit(Vector2i(1920, 1080))
 	elif index == 3:
-		DisplayServer.window_set_size(Vector2i(2560, 1440))
+		set_resolution.emit(Vector2i(2560, 1440))
