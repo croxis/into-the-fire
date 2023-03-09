@@ -80,3 +80,13 @@ func _on_option_button_item_selected(index):
 		set_resolution.emit(Vector2i(1920, 1080))
 	elif index == 3:
 		set_resolution.emit(Vector2i(2560, 1440))
+
+
+func _on_option_button_v_sync_item_selected(index):
+	print_debug("Setting vsync mode: ", index)
+	DisplayServer.window_set_vsync_mode(index)
+
+
+func _on_option_button_window_mode_item_selected(index):
+	print_debug("Setting window mode: ", index)
+	DisplayServer.window_set_mode(index)

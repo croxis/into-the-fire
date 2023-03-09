@@ -164,7 +164,6 @@ theme_override_font_sizes/font_size = 48
 text = "Join Server"
 
 [node name="VBoxContainerOption" type="VBoxContainer" parent="HBoxContainer/VBoxContainerOption"]
-visible = false
 layout_mode = 2
 
 [node name="GridContainer" type="GridContainer" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption"]
@@ -200,10 +199,20 @@ theme_type_variation = &"HeaderLarge"
 theme_override_font_sizes/font_size = 48
 text = "VSYNC"
 
-[node name="CheckBoxVSync" type="CheckBox" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer"]
+[node name="OptionButtonVSync" type="OptionButton" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer"]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_override_font_sizes/font_size = 48
+item_count = 4
+selected = 0
+popup/item_0/text = "Disabled"
+popup/item_0/id = 0
+popup/item_1/text = "Enabled"
+popup/item_1/id = 1
+popup/item_2/text = "Adaptive"
+popup/item_2/id = 2
+popup/item_3/text = "Mailbox"
+popup/item_3/id = 3
 
 [node name="LabelFullScreen" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer"]
 layout_mode = 2
@@ -225,29 +234,46 @@ popup/item_1/id = 3
 popup/item_2/text = "Exclusive Fullscreen"
 popup/item_2/id = 4
 
-[node name="LabelAA" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer"]
+[node name="Label" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer"]
+layout_mode = 2
+theme = ExtResource("1_dnqi6")
+theme_override_font_sizes/font_size = 48
+text = "TAA"
+
+[node name="CheckBoxTAA" type="CheckBox" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer"]
+layout_mode = 2
+
+[node name="LabelMSAA" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer"]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_type_variation = &"HeaderLarge"
 theme_override_font_sizes/font_size = 48
-text = "Antialiasing"
+text = "MSAA"
 
-[node name="OptionButton2" type="OptionButton" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer"]
+[node name="OptionButtonMSAA" type="OptionButton" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer"]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_override_font_sizes/font_size = 42
-item_count = 5
+item_count = 4
 selected = 0
 popup/item_0/text = "None"
-popup/item_0/id = 3
-popup/item_1/text = "FXAA"
-popup/item_1/id = 4
-popup/item_2/text = "TAA"
+popup/item_0/id = 0
+popup/item_1/text = "2x"
+popup/item_1/id = 1
+popup/item_2/text = "4x"
 popup/item_2/id = 2
-popup/item_3/text = "MSAA 2x"
-popup/item_3/id = 0
-popup/item_4/text = "MSAA 4x"
-popup/item_4/id = 1
+popup/item_3/text = "8x"
+popup/item_3/id = 3
+
+[node name="LabelMSAA2" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer"]
+layout_mode = 2
+theme = ExtResource("1_dnqi6")
+theme_type_variation = &"HeaderLarge"
+theme_override_font_sizes/font_size = 48
+text = "SSAA"
+
+[node name="CheckBoxSSAA" type="CheckBox" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer"]
+layout_mode = 2
 
 [connection signal="pressed" from="HBoxContainer/VBoxContainerMain/ButtonNewGame" to="." method="_on_button_new_game_pressed"]
 [connection signal="pressed" from="HBoxContainer/VBoxContainerMain/ButtonJoinGame" to="." method="_on_button_join_game_pressed"]
@@ -256,3 +282,5 @@ popup/item_4/id = 1
 [connection signal="pressed" from="HBoxContainer/VBoxContainerOption/VBoxContainerNew/ButtonNewServer" to="." method="_on_button_new_server_pressed"]
 [connection signal="pressed" from="HBoxContainer/VBoxContainerOption/VBoxContainerJoin/ButtonJoinServer" to="." method="_on_button_join_server_pressed"]
 [connection signal="item_selected" from="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer/OptionButton" to="." method="_on_option_button_item_selected"]
+[connection signal="item_selected" from="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer/OptionButtonVSync" to="." method="_on_option_button_v_sync_item_selected"]
+[connection signal="item_selected" from="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer/OptionButtonWindowMode" to="." method="_on_option_button_window_mode_item_selected"]
