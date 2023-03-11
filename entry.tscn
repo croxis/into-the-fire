@@ -1,6 +1,7 @@
-[gd_scene load_steps=9 format=3 uid="uid://t1o4wdeijm68"]
+[gd_scene load_steps=10 format=3 uid="uid://t1o4wdeijm68"]
 
 [ext_resource type="Script" path="res://entry.gd" id="1_ox4k0"]
+[ext_resource type="Script" path="res://addons/monitor_overlay/monitor_overlay.gd" id="2_7886r"]
 [ext_resource type="PackedScene" uid="uid://cu705v7qv6lnp" path="res://network/network.tscn" id="2_phwwb"]
 [ext_resource type="PackedScene" uid="uid://deqh6h2wkuvel" path="res://ui/loadingscreen/loading.tscn" id="3_ry4g3"]
 [ext_resource type="Script" path="res://ui/debug/DebugContainer.gd" id="4_h8ft4"]
@@ -12,10 +13,34 @@
 [node name="entry" type="Node"]
 script = ExtResource("1_ox4k0")
 
+[node name="MonitorOverlay" type="VBoxContainer" parent="."]
+visible = false
+custom_minimum_size = Vector2(300, 0)
+offset_right = 300.0
+offset_bottom = 50.0
+script = ExtResource("2_7886r")
+process = true
+physics_process = true
+static_memory = true
+objects = true
+resources = true
+nodes = true
+objects_drawn = true
+primitives_drawn = true
+total_draw_calls = true
+video_memory = true
+texture_memory = true
+active_objects_3d = true
+collision_pairs_3d = true
+islands_3d = true
+audio_output_latency = true
+
 [node name="DebugBenchmark" type="MarginContainer" parent="."]
 visible = false
-offset_right = 40.0
-offset_bottom = 40.0
+offset_left = 221.0
+offset_top = 2.0
+offset_right = 694.0
+offset_bottom = 290.0
 script = ExtResource("4_h8ft4")
 
 [node name="TextListBenchmark" parent="DebugBenchmark" instance=ExtResource("5_ro4nv")]
@@ -36,4 +61,7 @@ script = ExtResource("8_oa1x6")
 [connection signal="connection_succeeded" from="network" to="Galaxy" method="_on_network_connection_succeeded"]
 [connection signal="new_game" from="MainMenu" to="." method="_on_main_menu_new_game"]
 [connection signal="new_game" from="MainMenu" to="network" method="host_server"]
+[connection signal="set_msaa" from="MainMenu" to="DisplayManager" method="_on_main_menu_set_msaa"]
 [connection signal="set_resolution" from="MainMenu" to="DisplayManager" method="set_resolution"]
+[connection signal="set_ssaa" from="MainMenu" to="DisplayManager" method="_on_main_menu_set_ssaa"]
+[connection signal="set_taa" from="MainMenu" to="DisplayManager" method="_on_main_menu_set_taa"]

@@ -240,7 +240,7 @@ theme = ExtResource("1_dnqi6")
 theme_override_font_sizes/font_size = 48
 text = "TAA"
 
-[node name="CheckBoxTAA" type="CheckBox" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer"]
+[node name="CheckButtonTAA" type="CheckButton" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer"]
 layout_mode = 2
 
 [node name="LabelMSAA" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer"]
@@ -265,16 +265,6 @@ popup/item_2/id = 2
 popup/item_3/text = "8x"
 popup/item_3/id = 3
 
-[node name="LabelMSAA2" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer"]
-layout_mode = 2
-theme = ExtResource("1_dnqi6")
-theme_type_variation = &"HeaderLarge"
-theme_override_font_sizes/font_size = 48
-text = "SSAA"
-
-[node name="CheckBoxSSAA" type="CheckBox" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer"]
-layout_mode = 2
-
 [connection signal="pressed" from="HBoxContainer/VBoxContainerMain/ButtonNewGame" to="." method="_on_button_new_game_pressed"]
 [connection signal="pressed" from="HBoxContainer/VBoxContainerMain/ButtonJoinGame" to="." method="_on_button_join_game_pressed"]
 [connection signal="pressed" from="HBoxContainer/VBoxContainerMain/ButtonOptions" to="." method="_on_button_options_pressed"]
@@ -284,3 +274,5 @@ layout_mode = 2
 [connection signal="item_selected" from="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer/OptionButton" to="." method="_on_option_button_item_selected"]
 [connection signal="item_selected" from="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer/OptionButtonVSync" to="." method="_on_option_button_v_sync_item_selected"]
 [connection signal="item_selected" from="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer/OptionButtonWindowMode" to="." method="_on_option_button_window_mode_item_selected"]
+[connection signal="toggled" from="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer/CheckButtonTAA" to="." method="_on_check_button_taa_toggled"]
+[connection signal="item_selected" from="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer/OptionButtonMSAA" to="." method="_on_option_button_msaa_item_selected"]

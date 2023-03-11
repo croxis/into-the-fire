@@ -79,3 +79,13 @@ func set_resolution(resolution: Vector2i) -> void:
 	for subviewportcontainer in $Systems.get_children():
 		#subviewportcontainer.size = resolution
 		subviewportcontainer.get_node("SubViewport").size = resolution
+
+
+func set_msaa(status):
+	for subviewportcontainer in $Systems.get_children():
+		subviewportcontainer.get_node("SubViewport").msaa_3d = status
+
+
+func set_taa(status):
+	for subviewportcontainer in $Systems.get_children():
+		subviewportcontainer.get_node("SubViewport").use_taa = status

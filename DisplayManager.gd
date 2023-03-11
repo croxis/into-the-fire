@@ -18,5 +18,11 @@ func set_resolution(resolution: Vector2i) -> void:
 	get_viewport().size = resolution
 	get_window().content_scale_size = Vector2i(0, 0)
 	$"../Galaxy".set_resolution(resolution)
-	
-	
+
+
+func _on_main_menu_set_msaa(status):
+	get_viewport().msaa_3d = status
+
+
+func _on_main_menu_set_taa(status):
+	get_viewport().use_taa = status

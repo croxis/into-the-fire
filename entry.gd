@@ -7,6 +7,8 @@ var interface : XRInterface
 func _input(event):
 	if event.is_action_pressed("ui_cancel"):
 		$MainMenu.visible = not $MainMenu.visible
+	if Input.is_action_pressed("ui_debug"):
+		$MonitorOverlay.visible = not $MonitorOverlay.visible
 
 
 func _ready():
@@ -44,10 +46,12 @@ func end_title_sequence() -> void:
 		print_debug("ending title")
 		get_parent().get_node("title screen").queue_free()
 	$MainMenu.visible = false
-
+	
 
 func _process(delta):
+	
 	if not _dedicated_server:
+		return
 		Debug.update_widget('DebugBenchmark:TextListBenchmark.add_label', { 'name': 'FPS', 'value': "FPS: " + str(Performance.get_monitor(Performance.TIME_FPS)) })
 		Debug.update_widget('DebugBenchmark:TextListBenchmark.add_label', { 'name': 'Physics Time', 'value': str(Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) / 1000.0) + " ms" })
 		Debug.update_widget('DebugBenchmark:TextListBenchmark.add_label', { 'name': 'Objects', 'value': str(Performance.get_monitor(Performance.OBJECT_COUNT)) + " objects" })
@@ -69,3 +73,6 @@ func _on_main_menu_new_game(_player_name, _port):
 	# Hack until we figure out what we are doing
 	$Galaxy.player_enter_system("test_system")
 	$Galaxy._on_network_connection_succeeded()
+	
+
+

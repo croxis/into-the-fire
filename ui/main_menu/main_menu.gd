@@ -3,6 +3,9 @@ extends Control
 signal join_game(ip, port: int, player_name)
 signal new_game(player_name, port: int)
 signal set_resolution(resolution: Vector2i)
+signal set_taa(status: bool)
+signal set_msaa(status: int)
+signal set_ssaa(status: bool)
 
 func _ready():
 	if OS.has_environment("USERNAME"):
@@ -70,7 +73,6 @@ func _on_button_join_server_pressed():
 	join_game.emit(ip, port, new_player_name)
 
 
-
 func _on_option_button_item_selected(index):
 	if index == 0:
 		set_resolution.emit(Vector2i(0, 0))
@@ -90,3 +92,14 @@ func _on_option_button_v_sync_item_selected(index):
 func _on_option_button_window_mode_item_selected(index):
 	print_debug("Setting window mode: ", index)
 	DisplayServer.window_set_mode(index)
+
+
+func _on_check_button_taa_toggled(button_pressed):
+	print_debug("Set tta: ", button_pressed)
+	set_taa.emit(button_pressed)
+
+
+func _on_option_button_msaa_item_selected(index):
+	print_debug("Set msaa: ", index)
+	set_msaa.emit(index)
+

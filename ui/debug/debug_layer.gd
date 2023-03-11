@@ -28,6 +28,7 @@ func _set_ui_container_visibility(boolean) -> void:
 
 
 func _input(_event) -> void:
+	return
 	if Input.is_action_just_pressed('ui_debug'):
 		show_debug_interface = !show_debug_interface
 		print("Toggle Debug Interface: ", str(show_debug_interface))
