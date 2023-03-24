@@ -180,3 +180,6 @@ anti_aliasing/quality/msaa=0
 shadows/directional_shadow/soft_shadow_quality=3
 shadows/shadows/soft_shadow_quality=3
 xr/enabled=false
+scaling_3d/quality/msaa=1
+scaling_3d/quality/screen_space_aa=1
+scaling_3d/screen_space_roughness_limiter/enabled=true
