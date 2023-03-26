@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://c4wlmqxolhksu"]
+[gd_scene load_steps=13 format=3 uid="uid://c4wlmqxolhksu"]
 
 [ext_resource type="Script" path="res://systems/test_system/test_system.gd" id="1_jsspt"]
 [ext_resource type="Environment" uid="uid://d1el1icbym1qc" path="res://systems/test_system/test_system_environment.tres" id="2_b3oqd"]
@@ -6,17 +6,67 @@
 [ext_resource type="Script" path="res://systems/test_system/ShipSpawner.gd" id="4_ar2em"]
 [ext_resource type="PackedScene" uid="uid://b46swjkskju5j" path="res://ships/earth alliance/babylon 5/babylon_5_scale.tscn" id="5_t3qrg"]
 [ext_resource type="Script" path="res://addons/star_field/star_field_manager.gd" id="6_cmh76"]
+[ext_resource type="Script" path="res://systems/test_system/nebula_hardcode.gd" id="7_v3mos"]
 [ext_resource type="Texture2D" uid="uid://b8mr0hea1ghdh" path="res://systems/ran/epsilon_nebulae_texture_by_amras_arfeiniel.png" id="9_t6tp0"]
 [ext_resource type="AudioStream" uid="uid://m1fuxurnle23" path="res://music/Christopher Franke - Battle Themes Track 1.ogg" id="10_cg1xv"]
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_e7jat"]
-transparency = 1
-shading_mode = 0
-albedo_texture = ExtResource("9_t6tp0")
-heightmap_scale = 0.0
-uv1_scale = Vector3(1, 2, 1)
+[sub_resource type="Shader" id="Shader_m7q1b"]
+code = "// NOTE: Shader automatically converted from Godot Engine 4.0.1.stable's StandardMaterial3D.
+
+shader_type spatial;
+render_mode blend_mix,depth_draw_opaque,cull_back,diffuse_burley,specular_schlick_ggx,unshaded;
+uniform vec4 albedo : source_color;
+uniform sampler2D texture_albedo : source_color,filter_linear_mipmap,repeat_enable;
+uniform float point_size : hint_range(0,128);
+uniform float roughness : hint_range(0,1);
+uniform sampler2D texture_metallic : hint_default_white,filter_linear_mipmap,repeat_enable;
+uniform vec4 metallic_texture_channel;
+uniform sampler2D texture_roughness : hint_roughness_r,filter_linear_mipmap,repeat_enable;
+uniform float specular;
+uniform float metallic;
+uniform vec3 uv1_scale;
+uniform vec3 uv1_offset;
+uniform vec3 uv2_scale;
+uniform vec3 uv2_offset;
+
+
+void vertex() {
+	UV=UV*uv1_scale.xy+uv1_offset.xy;
+}
+
+
+void fragment() {
+	vec2 base_uv = UV;
+	vec4 albedo_tex = texture(texture_albedo,base_uv);
+	ALBEDO = albedo.rgb * albedo_tex.rgb;
+	float metallic_tex = dot(texture(texture_metallic,base_uv),metallic_texture_channel);
+	METALLIC = metallic_tex * metallic;
+	vec4 roughness_texture_channel = vec4(1.0,0.0,0.0,0.0);
+	float roughness_tex = dot(texture(texture_roughness,base_uv),roughness_texture_channel);
+	ROUGHNESS = roughness_tex * roughness;
+	SPECULAR = specular;
+	ALPHA *= albedo.a * albedo_tex.a;
+	DEPTH = 0.999998;
+}
+"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_jv4xp"]
+render_priority = 0
+shader = SubResource("Shader_m7q1b")
+shader_parameter/albedo = Color(1, 1, 1, 1)
+shader_parameter/point_size = 1.0
+shader_parameter/roughness = 1.0
+shader_parameter/metallic_texture_channel = Plane(1, 0, 0, 0)
+shader_parameter/specular = 0.5
+shader_parameter/metallic = 0.0
+shader_parameter/uv1_scale = Vector3(1, 2, 1)
+shader_parameter/uv1_offset = Vector3(0, 0, 0)
+shader_parameter/uv2_scale = Vector3(1, 1, 1)
+shader_parameter/uv2_offset = Vector3(0, 0, 0)
+shader_parameter/texture_albedo = ExtResource("9_t6tp0")
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_sya4v"]
+material = SubResource("ShaderMaterial_jv4xp")
 flip_faces = true
 top_radius = 10000.0
 bottom_radius = 10000.0
@@ -63,8 +113,8 @@ transform = Transform3D(0.911561, 0, -0.411164, 0, 1, 0, 0.411164, 0, 0.911561, 
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 transform = Transform3D(0.983132, 0.182794, -0.0061107, 0.182771, -0.983147, -0.00420464, -0.0067763, 0.00301686, -0.999972, 0, 0, 0)
-material_override = SubResource("StandardMaterial3D_e7jat")
 mesh = SubResource("CylinderMesh_sya4v")
+script = ExtResource("7_v3mos")
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("10_cg1xv")
