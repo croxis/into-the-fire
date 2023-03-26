@@ -3,37 +3,35 @@ extends Control
 # https://www.reddit.com/r/godot/comments/kdimah/ui_create_altimeter_right_bar_and_airspeed/
 
 @onready var font:Font = Control.new().get_font('font')
-var current_velocity:int = 0 setget setCurrentVelocity
+var current_velocity:int = 0:
+	set(velocity):
+		current_velocity = velocity
+		#trigger redraw
+		queue_redraw()
 var displayAbove = 300
 var displayBelow = 300
 var displayStepText  = 100
 var displayStepSmallLines = 20
-@export var display_color: Color = Color.green
+@export var display_color: Color = Color.GREEN
 #onready var font:DynamicFont = DynamicFont.new()
 
 func _ready():
 	#font.font_data = load("res://shared/fonts/DejaVuSans.ttf")
 	#current_velocity = 523
 	#temp test setup
-	margin_bottom = 0
-	margin_top = 0
-	margin_left = 0
-	margin_right = 0
-	rect_size = Vector2(400, 100)
-	rect_position = Vector2(0, 0)
+	offset_bottom = 0
+	offset_top = 0
+	offset_left = 0
+	offset_right = 0
+	size = Vector2(100, 400)
+	position = Vector2(0, 0)
 
 func _process(delta):
 	pass
 
 	
-func setCurrentVelocity(velocity:int):
-	current_velocity = velocity
-	#trigger redraw
-	update()
-
-	
 func _draw():
-	var localRect = Rect2(rect_position, self.rect_size )
+	var localRect = Rect2(position, self.size )
 	
 	#draw outline shape
 	#draw_rect(localRect,Color.white,false,2.0,true)
@@ -56,10 +54,10 @@ func _draw():
 	#var colors = PoolColorArray([display_color])
 	#draw_polygon(points, colors)
 	
-	var label_size = font.get_string_size(String( current_velocity) + " m/s")
+	var label_size = font.get_string_size(str( current_velocity) + " m/s")
 	
 	#draw_string(font, Vector2(localRect.position.x + 120, self.rect_size.y/2 + lineHeight), "< " + String(current_velocity) + " m/s", display_color, -1)
-	draw_string(font, Vector2(self.rect_size.x/2 - label_size.x/2, 34 + lineHeight),  String(current_velocity) + " m/s", display_color,-1)
+	draw_string(font, Vector2(self.rect_size.x/2 - label_size.x/2, 34 + lineHeight),  str(current_velocity) + " m/s", HORIZONTAL_ALIGNMENT_LEFT, -1, 16.0, display_color)
 	
 	for velocity in range(  current_velocity - displayBelow, current_velocity + displayAbove, 1 ):
 		
@@ -68,8 +66,8 @@ func _draw():
 		if velocity % displayStepText == 0:
 			#altitude Number
 			#
-			var string_size = font.get_string_size(String(velocity))
-			draw_string(font, Vector2(cursorPosition.x - string_size.x / 2, cursorPosition.y + 26), String(velocity), display_color, -1)
+			var string_size = font.get_string_size(str(velocity))
+			draw_string(font, Vector2(cursorPosition.x - string_size.x / 2, cursorPosition.y + 26), str(velocity), HORIZONTAL_ALIGNMENT_LEFT, -1, 16.0, display_color)
 			
 			#altitude Line
 			#var linePositionStart = Vector2(cursorPosition.x-20, cursorPosition.y - lineHeight/2 + 2)
