@@ -90,11 +90,11 @@ func get_star_proper(name: String):
 
 func _process(delta):
 	if use_active_camera:
-		var active_camera = get_viewport().get_camera_3d()
+		var active_camera := get_viewport().get_camera_3d()
 		if active_camera:
-			star_render.position = active_camera.position - celestial_coords
+			star_render.position = active_camera.global_position - celestial_coords
 	elif camera:
-		star_render.position = camera.position - celestial_coords
+		star_render.position = camera.global_position - celestial_coords
 
 
 func debug(msg):
