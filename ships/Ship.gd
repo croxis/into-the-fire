@@ -68,7 +68,7 @@ func _integrate_forces(state: PhysicsDirectBodyState3D):
 		state.angular_velocity = Vector3(0,0,0)
 		state.linear_velocity = Vector3(0,0,0)
 		_debug_all_stop = false
-		#$NetMeshInstancePod/Viewport_HUD/Control.set_speed(state.linear_velocity.length())
+	#$SubViewport_HUD/center_ui.set_speed(state.linear_velocity.length())
 
 
 func _physics_process(dt: float) -> void:
@@ -124,6 +124,13 @@ func _physics_process(dt: float) -> void:
 	thruster_torque = thruster_torque / 7  # Modifyer to make the fury not SOOOO twitchy
 	apply_torque(global_transform.basis * thruster_torque)
 	
+	#$SubViewport_HUD/center_ui.set_acceleration((linear_velocity.length() - start_speed)/dt)
+	#$NetMeshInstancePod/Viewport_HUD/Control.set_acceleration((linear_velocity.length() - start_speed)/dt)
+	#$NetMeshInstancePod/UIScreens/LeftWindowView/Velocity.current_velocity = int(global_transform.basis.xform_inv(linear_velocity).z)
+	#$NetMeshInstancePod/UIScreens/MiddleWindowView/X.current_velocity = -int(global_transform.basis.xform_inv(linear_velocity).x)
+	#$NetMeshInstancePod/UIScreens/RightWindowView/Y.current_velocity = int(global_transform.basis.xform_inv(linear_velocity).y)
+
+	
 	start_speed = linear_velocity.length()
 
 
@@ -138,7 +145,7 @@ func bullet_hit(damage, bullet_global_trans):
 func set_health(new_health):
 	print_debug("New Health: ", new_health)
 	health = new_health
-	#$NetMeshInstancePod/Viewport_HUD/Control.set_health(health)
+	#$SubViewport_HUD/center_ui.set_health(health)
 	if (health <= 0.0):
 		print_debug("Destroyed: ", name)
 		emit_signal("destroyed", name)
