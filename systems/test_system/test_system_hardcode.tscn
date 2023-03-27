@@ -51,7 +51,7 @@ void fragment() {
 "
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_jv4xp"]
-render_priority = 0
+render_priority = -1
 shader = SubResource("Shader_m7q1b")
 shader_parameter/albedo = Color(1, 1, 1, 1)
 shader_parameter/point_size = 1.0
