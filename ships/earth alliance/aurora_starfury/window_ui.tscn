@@ -44,13 +44,16 @@ right_justify = true
 draw_outline = false
 
 [node name="X_Velocity" parent="." instance=ExtResource("3_aiy7f")]
-layout_mode = 1
-offset_left = 128.0
-offset_top = 324.0
-offset_right = -128.0
-offset_bottom = -187.0
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode = 0
+anchors_preset = 0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 139.0
+offset_top = 279.0
+offset_right = 377.0
+offset_bottom = 400.0
+draw_outline = false
+font_size = null
 
 [node name="ColorRect3" type="ColorRect" parent="."]
 visible = false

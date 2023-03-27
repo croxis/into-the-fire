@@ -1,3 +1,4 @@
+@tool
 extends Control
 
 # https://www.reddit.com/r/godot/comments/kdimah/ui_create_altimeter_right_bar_and_airspeed/
@@ -8,33 +9,19 @@ var current_velocity:int = 0:
 		current_velocity = velocity
 		#trigger redraw
 		queue_redraw()
-var displayAbove = 300
-var displayBelow = 300
-var displayStepText  = 100
-var displayStepSmallLines = 20
+@export var displayAbove = 300
+@export var displayBelow = 300
+@export var displayStepText  = 100
+@export var displayStepSmallLines = 20
 @export var display_color: Color = Color.GREEN
-#onready var font:DynamicFont = DynamicFont.new()
-
-func _ready():
-	#font.font_data = load("res://shared/fonts/DejaVuSans.ttf")
-	#current_velocity = 523
-	#temp test setup
-	offset_bottom = 0
-	offset_top = 0
-	offset_left = 0
-	offset_right = 0
-	size = Vector2(100, 400)
-	position = Vector2(0, 0)
-
-func _process(delta):
-	pass
+@export var draw_outline: bool = true
+@export var font_size := 12.0
 
 	
 func _draw():
-	var localRect = Rect2(position, self.size )
-	
-	#draw outline shape
-	#draw_rect(localRect,Color.white,false,2.0,true)
+	var localRect = Rect2(Vector2(0, 0), size)
+	if draw_outline:
+		draw_rect(localRect, Color.GREEN, false, 2.0)
 	
 	#scale display range to control size
 	var totalRange = displayAbove + displayBelow
