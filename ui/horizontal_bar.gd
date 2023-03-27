@@ -2,7 +2,7 @@ extends Control
 
 # https://www.reddit.com/r/godot/comments/kdimah/ui_create_altimeter_right_bar_and_airspeed/
 
-@onready var font:Font = Control.new().get_font('font')
+@onready var font:Font = Control.new().get_theme_font('font')
 var current_velocity:int = 0:
 	set(velocity):
 		current_velocity = velocity
@@ -57,7 +57,7 @@ func _draw():
 	var label_size = font.get_string_size(str( current_velocity) + " m/s")
 	
 	#draw_string(font, Vector2(localRect.position.x + 120, self.rect_size.y/2 + lineHeight), "< " + String(current_velocity) + " m/s", display_color, -1)
-	draw_string(font, Vector2(self.rect_size.x/2 - label_size.x/2, 34 + lineHeight),  str(current_velocity) + " m/s", HORIZONTAL_ALIGNMENT_LEFT, -1, 16.0, display_color)
+	draw_string(font, Vector2(self.size.x/2 - label_size.x/2, 34 + lineHeight),  str(current_velocity) + " m/s", HORIZONTAL_ALIGNMENT_LEFT, -1, 16.0, display_color)
 	
 	for velocity in range(  current_velocity - displayBelow, current_velocity + displayAbove, 1 ):
 		

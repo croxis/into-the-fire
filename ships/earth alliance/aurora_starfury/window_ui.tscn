@@ -1,0 +1,70 @@
+[gd_scene load_steps=4 format=3 uid="uid://dvqrq0kpihdlc"]
+
+[ext_resource type="Script" path="res://ships/earth alliance/aurora_starfury/window_ui.gd" id="1_77lo8"]
+[ext_resource type="PackedScene" uid="uid://bhmsxfhfk4tpu" path="res://ui/velocity.tscn" id="1_erljw"]
+[ext_resource type="PackedScene" uid="uid://k1lqwbon6uiq" path="res://ui/x_axis_bar.tscn" id="3_aiy7f"]
+
+[node name="window_ui" type="Control"]
+layout_mode = 3
+anchor_right = 0.267
+anchor_bottom = 0.474
+offset_right = -0.639954
+offset_bottom = 0.0799866
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_77lo8")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 0
+offset_right = 512.0
+offset_bottom = 277.0
+color = Color(0.898039, 0, 1, 1)
+
+[node name="Velocity" parent="." instance=ExtResource("1_erljw")]
+layout_mode = 0
+anchors_preset = 0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 60.0
+offset_top = 276.0
+offset_right = 200.0
+offset_bottom = 525.0
+draw_outline = false
+
+[node name="Y_Velocity" parent="." instance=ExtResource("1_erljw")]
+layout_mode = 0
+anchors_preset = 0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 312.0
+offset_top = 276.0
+offset_right = 452.0
+offset_bottom = 525.0
+right_justify = true
+draw_outline = false
+
+[node name="X_Velocity" parent="." instance=ExtResource("3_aiy7f")]
+layout_mode = 1
+offset_left = 128.0
+offset_top = 324.0
+offset_right = -128.0
+offset_bottom = -187.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ColorRect3" type="ColorRect" parent="."]
+visible = false
+layout_mode = 0
+offset_left = 452.0
+offset_top = 276.0
+offset_right = 512.0
+offset_bottom = 521.0
+color = Color(0.454902, 1, 0.027451, 1)
+
+[node name="ColorRect4" type="ColorRect" parent="."]
+visible = false
+layout_mode = 0
+offset_top = 275.0
+offset_right = 60.0
+offset_bottom = 520.0
+color = Color(0, 1, 0.945098, 1)
