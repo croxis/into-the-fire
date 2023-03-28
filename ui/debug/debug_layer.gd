@@ -29,11 +29,11 @@ func _set_ui_container_visibility(boolean) -> void:
 
 func _input(_event) -> void:
 	return
-	if Input.is_action_just_pressed('ui_debug'):
-		show_debug_interface = !show_debug_interface
-		print("Toggle Debug Interface: ", str(show_debug_interface))
-		_set_ui_container_visibility(show_debug_interface)
-		_debugContainer.show()
+	#if Input.is_action_just_pressed('ui_debug'):
+	#	show_debug_interface = !show_debug_interface
+	#	print("Toggle Debug Interface: ", str(show_debug_interface))
+	#	_set_ui_container_visibility(show_debug_interface)
+	#	_debugContainer.show()
 
 
 func register_debug_container(containerNode) -> void:

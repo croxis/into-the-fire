@@ -12,7 +12,7 @@ func _ready():
 		$HBoxContainer/VBoxContainerOption/VBoxContainerNew/GridContainer/LineEditCallsign.text = OS.get_environment("USERNAME")
 		$HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer/LineEditCallsign.text = OS.get_environment("USERNAME")
 	else:
-		var desktop_path = OS.get_system_dir(0).replace("\\", "/").split("/")
+		var desktop_path = OS.get_system_dir(OS.SYSTEM_DIR_DESKTOP).replace("\\", "/").split("/")
 		$HBoxContainer/VBoxContainerOption/VBoxContainerNew/GridContainer/LineEditCallsign.text = desktop_path[desktop_path.size() - 2]
 		$HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer/LineEditCallsign.text = desktop_path[desktop_path.size() - 2]
 		

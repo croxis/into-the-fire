@@ -22,7 +22,7 @@ func _physics_process(dt: float) -> void:
 		cooldown_timer = 0.0
 
 
-func fire(damage_mod):
+func fire(_damage_mod):
 	if ((multiplayer.multiplayer_peer == null or is_multiplayer_authority()) and can_fire()):
 		cooldown_timer = cooldown
 		var bolt_node: Bolt = bolt_resource.instantiate()

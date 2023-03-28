@@ -16,7 +16,7 @@ var current_velocity:int = 0:
 @export var display_color: Color = Color.GREEN
 @export var right_justify: bool = false
 @export var draw_outline: bool = true
-@export var font_size := 12.0
+@export var font_size := 12
 
 
 func _draw():

@@ -15,7 +15,7 @@ var current_velocity:int = 0:
 @export var displayStepSmallLines = 20
 @export var display_color: Color = Color.GREEN
 @export var draw_outline: bool = true
-@export var font_size := 12.0
+@export var font_size := 12
 
 	
 func _draw():
@@ -25,7 +25,7 @@ func _draw():
 	
 	#scale display range to control size
 	var totalRange = displayAbove + displayBelow
-	var height = localRect.size.y
+	#var height = localRect.size.y
 	var width = localRect.size.x
 	var altScale = width/totalRange
 
@@ -43,11 +43,9 @@ func _draw():
 	
 	var label_size = font.get_string_size(str( current_velocity) + " m/s")
 	
-	#draw_string(font, Vector2(localRect.position.x + 120, self.rect_size.y/2 + lineHeight), "< " + String(current_velocity) + " m/s", display_color, -1)
 	draw_string(font, Vector2(self.size.x/2 - label_size.x/2, 34 + lineHeight),  str(current_velocity) + " m/s", HORIZONTAL_ALIGNMENT_LEFT, -1, 16.0, display_color)
 	
 	for velocity in range(  current_velocity - displayBelow, current_velocity + displayAbove, 1 ):
-		
 		cursorPosition.x += altScale 
 		
 		if velocity % displayStepText == 0:
@@ -57,18 +55,12 @@ func _draw():
 			draw_string(font, Vector2(cursorPosition.x - string_size.x / 2, cursorPosition.y + 26), str(velocity), HORIZONTAL_ALIGNMENT_LEFT, -1, 16.0, display_color)
 			
 			#altitude Line
-			#var linePositionStart = Vector2(cursorPosition.x-20, cursorPosition.y - lineHeight/2 + 2)
 			var linePositionStart = Vector2(cursorPosition.x, cursorPosition.y)
-			#var linePositionEnd  =  Vector2(linePositionStart.x + 15, linePositionStart.y)
 			var linePositionEnd  =  Vector2(linePositionStart.x, linePositionStart.y + 15)
 			draw_line(linePositionStart,linePositionEnd, display_color,1.0, true)
 		
 		elif velocity % displayStepSmallLines == 0:
-		#small lines inbetween
-		
-			#var linePositionStart = Vector2(cursorPosition.x-20, cursorPosition.y )
+			#small lines inbetween
 			var linePositionStart = Vector2(cursorPosition.x, cursorPosition.y )
-			var linePositionEnd = Vector2(linePositionStart.x, linePositionStart.y + 5)
-			
-			
+			var linePositionEnd = Vector2(linePositionStart.x, linePositionStart.y + 5)		
 			draw_line(linePositionStart,linePositionEnd, display_color,1.0, true)	  

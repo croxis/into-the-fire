@@ -10,7 +10,7 @@ func _ready():
 	get_spawn_points("")
 
 
-func get_spawn_points(team) -> Dictionary:
+func get_spawn_points(_team) -> Dictionary:
 	# For now return spawn points in {system_name: [spawn_ship]} type format
 	# Eventually we will migrate to some other type of thing, such as checking
 	# Inventory for ships

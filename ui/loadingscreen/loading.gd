@@ -6,7 +6,7 @@ var loadpath
 @onready
 var progress = $CenterContainer/VBoxContainer/ProgressBar
 
-func _process(delta):
+func _process(_delta):
 	if loadpath:
 		var progressmeter = []
 		var status = ResourceLoader.load_threaded_get_status(loadpath, progressmeter)
