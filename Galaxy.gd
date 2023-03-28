@@ -29,19 +29,26 @@ func get_spawn_points(team) -> Dictionary:
 	return spawn_points
 
 
+func player_died(player_id: int) -> void:
+	show_spawn()
+
+
 func player_enter_system(system_name) -> void:
 	#TODO: This needs to be this client only
 	print_debug("Sizing: ", DisplayServer.window_get_size()," for ", system_name )
 	var system: SubViewportContainer = get_node("Systems/" + system_name)
-	#system.size = DisplayServer.window_get_real_size()
 	system.get_node("SubViewport").size = DisplayServer.window_get_size()
 	system.visible = true
 	#Music Hack
 	system.get_node("SubViewport/Node3D/AudioStreamPlayer").playing = true
 
 
-func _on_network_connection_succeeded():
+func show_spawn() -> void:
 	$spawn_picker.show_spawn(get_spawn_points(""))
+
+
+func _on_network_connection_succeeded():
+	show_spawn()
 
 
 @rpc("any_peer", "call_local")
@@ -70,7 +77,6 @@ func request_spawn(system_name, spawner_name):
 
 func _on_spawn_picker_request_spawn(system_name, spawner_name):	
 	rpc("request_spawn", system_name, spawner_name)
-	
 	$spawn_picker.visible = false
 	
 	

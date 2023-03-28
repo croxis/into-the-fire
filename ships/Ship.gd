@@ -34,7 +34,13 @@ class_name Ship
 # that functionality is available
 
 @export var max_health := 100
-var health := max_health
+var health := max_health:
+	set(new_health):
+		print_debug("New Health: ", new_health)
+		health = new_health
+		$SubViewportCenter/center_ui.set_health(health)
+		if (health <= 0.0) and multiplayer.is_server():
+			destroy()
 var engine_length = 7.5
 var thruster_force: Vector3 = Vector3(0, 0, 0)
 var thruster_torque: Vector3 = Vector3(0, 0, 0)
@@ -61,6 +67,11 @@ func _ready():
 	$InputsSync.set_multiplayer_authority(_player_pilot_id)
 	can_sleep = false
 	print_debug("Ship created: ", _player_pilot_id)
+
+
+func _input(event):
+	if event.is_action_pressed("debug_kill"):
+		health = -1
 
 
 func _integrate_forces(state: PhysicsDirectBodyState3D):
@@ -133,13 +144,10 @@ func bullet_hit(damage, bullet_global_trans):
 	var BASE_BULLET_BOOST = 1
 	var direction_vect = bullet_global_trans.basis.z.normalized() * BASE_BULLET_BOOST
 	apply_impulse((bullet_global_trans.origin - global_transform.origin).normalized(), direction_vect * damage)
-	set_health(health - damage)
+	health -= damage
 
 
-func set_health(new_health):
-	print_debug("New Health: ", new_health)
-	health = new_health
-	$SubViewportCenter/center_ui.set_health(health)
-	if (health <= 0.0):
-		print_debug("Destroyed: ", name)
-		emit_signal("destroyed", name)
+func destroy() -> void:
+	print_debug("Destroyed: ", _player_pilot_id)
+	emit_signal("destroyed", _player_pilot_id)
+	queue_free()

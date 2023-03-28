@@ -49,7 +49,6 @@ func end_title_sequence() -> void:
 	
 
 func _process(delta):
-	
 	if not _dedicated_server:
 		return
 		Debug.update_widget('DebugBenchmark:TextListBenchmark.add_label', { 'name': 'FPS', 'value': "FPS: " + str(Performance.get_monitor(Performance.TIME_FPS)) })
