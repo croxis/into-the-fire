@@ -4,7 +4,6 @@ class_name Ship
 
 
 # Cache the pilot ID in here
-#@export var _player_pilot_id:= 1 :
 @export var _player_pilot_id: int:
 	set(id):
 		_player_pilot_id = id
@@ -39,7 +38,7 @@ var health := max_health:
 		print_debug("New Health: ", new_health)
 		health = new_health
 		$SubViewportCenter/center_ui.set_health(health)
-		if (health <= 0.0) and multiplayer.is_server():
+		if (health <= 0.0):
 			destroy()
 var engine_length = 7.5
 var thruster_force: Vector3 = Vector3(0, 0, 0)
@@ -48,7 +47,7 @@ var _debug_all_stop := false
 
 var start_speed = 0
 
-signal destroyed(name)
+signal destroyed(id)
 
 
 # Called when the node enters the scene tree for the first time.
@@ -71,7 +70,14 @@ func _ready():
 
 func _input(event):
 	if event.is_action_pressed("debug_kill"):
-		health = -1
+		print_debug("Debug kill request by ", multiplayer.get_unique_id())
+		#health = -1
+		rpc("debug_set_health", -1)
+
+@rpc("any_peer")
+func debug_set_health(new_health):
+	print("RPC called by: ", multiplayer.get_remote_sender_id())
+	health = new_health
 
 
 func _integrate_forces(state: PhysicsDirectBodyState3D):

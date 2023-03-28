@@ -30,7 +30,10 @@ func get_spawn_points(team) -> Dictionary:
 
 
 func player_died(player_id: int) -> void:
-	show_spawn()
+	print_debug("Player died: ", player_id, " ", multiplayer.get_unique_id())
+	rpc_id(player_id, "show_spawn")
+	#if player_id == multiplayer.get_unique_id():
+	#	show_spawn()
 
 
 func player_enter_system(system_name) -> void:
@@ -43,6 +46,7 @@ func player_enter_system(system_name) -> void:
 	system.get_node("SubViewport/Node3D/AudioStreamPlayer").playing = true
 
 
+@rpc("any_peer", "call_local")
 func show_spawn() -> void:
 	$spawn_picker.show_spawn(get_spawn_points(""))
 
@@ -73,6 +77,7 @@ func request_spawn(system_name, spawner_name):
 	ship._player_pilot_id = peer_id
 	system.get_node("ships").add_child(ship, true)
 	ship.global_transform.origin = spawn_position
+	ship.connect("destroyed", player_died)
 	
 
 func _on_spawn_picker_request_spawn(system_name, spawner_name):	

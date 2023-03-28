@@ -50,15 +50,16 @@ func unregister_player(id):
 	#player_list_changed.emit()
 
 
-func host_server(new_player_name, port: int=DEFAULT_PORT):
+func host_server(new_player_name, port: int=DEFAULT_PORT) -> bool:
 	player_name = new_player_name
 	peer = ENetMultiplayerPeer.new()
 	peer.create_server(port, MAX_PEERS)
 	if peer.get_connection_status() == MultiplayerPeer.CONNECTION_DISCONNECTED:
 		OS.alert("Failed to start multiplayer server.")
-		return
+		return false
 	multiplayer.multiplayer_peer = peer
 	print_debug("Server hosted on port: ", port)
+	return true
 
 
 func join_game(ip, port, new_player_name):

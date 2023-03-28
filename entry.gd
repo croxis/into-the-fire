@@ -21,10 +21,14 @@ func _ready():
 			arguments[argument.lstrip("--")] = 1
 	print("Arguments: ", arguments)
 	if ("server" in arguments || OS.has_feature("dedicated_server")):
+		var success := false
 		if "port" in arguments:
-			$network.host_server("Server", arguments["port"])
+			success = $network.host_server("Server", arguments["port"])
 		else:
-			$network.host_server("Server")
+			success = $network.host_server("Server")
+		if not success:
+			print("Failure to activate network. Is port in use?")
+			get_tree().quit()
 		_dedicated_server = true
 	else:
 		if "vr" in arguments:
@@ -35,6 +39,7 @@ func _ready():
 				get_viewport().use_xr = true
 			else:
 				print("OpenXR not initialised, please check if your headset is connected")
+				get_tree().quit()
 		else:
 			#TODO: Do this all with an option window, but this is default!
 			$DisplayManager.set_resolution(Vector2i(0, 0))
@@ -67,7 +72,9 @@ func _on_network_connection_succeeded():
 	$Galaxy.player_enter_system("test_system")
 
 
-func _on_main_menu_new_game(_player_name, _port):
+func _on_main_menu_new_game(player_name, port):
+	if not $network.host_server(player_name, port):
+		return
 	end_title_sequence()
 	# Hack until we figure out what we are doing
 	$Galaxy.player_enter_system("test_system")

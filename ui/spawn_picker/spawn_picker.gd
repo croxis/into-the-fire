@@ -4,6 +4,7 @@ signal request_spawn(system_name, spawner_name)
 
 
 func show_spawn(spawn_points: Dictionary) -> void:
+	$Tree.clear()
 	var root = $Tree.create_item()
 	$Tree.set_column_title(0, "test")
 	root.set_text(0, "ROOT")
