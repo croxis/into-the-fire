@@ -20,6 +20,7 @@ script = ExtResource("1_ox4k0")
 [node name="loading" parent="." instance=ExtResource("3_ry4g3")]
 
 [node name="MainMenu" parent="." instance=ExtResource("7_j7gch")]
+visible = false
 
 [node name="DisplayManager" type="Node" parent="."]
 script = ExtResource("8_oa1x6")

@@ -44,7 +44,8 @@ func _ready():
 		else:
 			#TODO: Do this all with an option window, but this is default!
 			$DisplayManager.set_resolution(Vector2i(0, 0))
-		$loading.load_scene("res://title_screen.tscn")
+		$loading.load_scene("res://title_screen.tscn", get_tree().root, true, true)
+		$MainMenu.visible = true
 
 
 func end_title_sequence() -> void:

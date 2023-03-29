@@ -1,7 +1,8 @@
 extends Control
 
-var thread = null
 var loadpath
+var parent_node: Node
+var make_active := false
 
 @onready
 var progress = $CenterContainer/VBoxContainer/ProgressBar
@@ -15,9 +16,10 @@ func _process(_delta):
 		if status == ResourceLoader.THREAD_LOAD_LOADED:
 			var resource:Resource = ResourceLoader.load_threaded_get(loadpath)
 			var new_scene = resource.instantiate()
-			get_tree().root.add_child(new_scene)
-			get_tree().current_scene = new_scene
-			loadpath = null
+			parent_node.add_child(new_scene)
+			if make_active:
+				get_tree().current_scene = new_scene
+			loadpath = null  
 			visible = false
 			Debug.update_widget('LoaderDebugContainer:TextListLoad.remove_label', {'name': 'load_counter'})
 		elif status == ResourceLoader.THREAD_LOAD_FAILED:
@@ -26,7 +28,10 @@ func _process(_delta):
 			print("I invalid dead")
 
 
-func load_scene(path):
+func load_scene(path, node: Node, make_active_scene: bool, show_load_screen = false):
+	print_debug("Loading screen: ", path, " ", "make_active: ", make_active_scene, " show_load_screen: ", show_load_screen)
 	ResourceLoader.load_threaded_request(path)
 	loadpath = path
-	visible = true
+	parent_node = node
+	make_active = make_active_scene
+	visible = show_load_screen
