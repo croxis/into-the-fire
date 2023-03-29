@@ -8,6 +8,7 @@ func _input(event):
 	if event.is_action_pressed("ui_cancel"):
 		$MainMenu.visible = not $MainMenu.visible
 	if Input.is_action_pressed("ui_debug"):
+		print_debug("Debug UI")
 		$MonitorOverlay.visible = not $MonitorOverlay.visible
 
 

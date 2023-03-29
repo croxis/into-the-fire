@@ -13,11 +13,22 @@
 [node name="entry" type="Node"]
 script = ExtResource("1_ox4k0")
 
+[node name="Galaxy" parent="." instance=ExtResource("4_l50de")]
+
+[node name="network" parent="." instance=ExtResource("2_phwwb")]
+
+[node name="loading" parent="." instance=ExtResource("3_ry4g3")]
+
+[node name="MainMenu" parent="." instance=ExtResource("7_j7gch")]
+
+[node name="DisplayManager" type="Node" parent="."]
+script = ExtResource("8_oa1x6")
+
 [node name="MonitorOverlay" type="VBoxContainer" parent="."]
 visible = false
 custom_minimum_size = Vector2(300, 0)
 offset_right = 300.0
-offset_bottom = 50.0
+offset_bottom = 7286.0
 script = ExtResource("2_7886r")
 process = true
 physics_process = true
@@ -45,17 +56,6 @@ script = ExtResource("4_h8ft4")
 
 [node name="TextListBenchmark" parent="DebugBenchmark" instance=ExtResource("5_ro4nv")]
 layout_mode = 2
-
-[node name="Galaxy" parent="." instance=ExtResource("4_l50de")]
-
-[node name="network" parent="." instance=ExtResource("2_phwwb")]
-
-[node name="loading" parent="." instance=ExtResource("3_ry4g3")]
-
-[node name="MainMenu" parent="." instance=ExtResource("7_j7gch")]
-
-[node name="DisplayManager" type="Node" parent="."]
-script = ExtResource("8_oa1x6")
 
 [connection signal="connection_succeeded" from="network" to="." method="_on_network_connection_succeeded"]
 [connection signal="connection_succeeded" from="network" to="Galaxy" method="_on_network_connection_succeeded"]
