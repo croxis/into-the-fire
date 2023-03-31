@@ -1,3 +1,4 @@
+@tool
 extends MeshInstance3D
 
 @export var rpm = 0.75

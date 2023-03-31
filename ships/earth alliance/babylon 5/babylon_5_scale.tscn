@@ -1,6 +1,6 @@
 [gd_scene load_steps=13 format=3 uid="uid://b46swjkskju5j"]
 
-[ext_resource type="PackedScene" uid="uid://b17xc0jqxnpqh" path="res://ships/earth alliance/babylon 5/babylon_5_scale.glb" id="1_osxqi"]
+[ext_resource type="PackedScene" uid="uid://dbtgyr2jxouuv" path="res://ships/earth alliance/babylon 5/babylon_5_scale.glb" id="1_osxqi"]
 [ext_resource type="Shape3D" uid="uid://duvfvby0pvbhl" path="res://ships/earth alliance/babylon 5/babylon_5_scale_reactor.shape" id="2_0vhrt"]
 [ext_resource type="Script" path="res://ships/earth alliance/babylon 5/rotation.gd" id="2_1swvk"]
 [ext_resource type="Script" path="res://ships/earth alliance/babylon 5/babylon_5_scale.gd" id="2_qfki3"]

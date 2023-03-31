@@ -34,9 +34,9 @@ tracks/1/path = NodePath("XROrigin3D:position:x")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
-"handle_modes": PackedInt32Array(),
-"points": PackedFloat32Array(),
-"times": PackedFloat32Array()
+"handle_modes": PackedInt32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+"points": PackedFloat32Array(-3987.15, -0.25, 0, 0.25, 0, -4432.19, -0.25, 0, 0.25, 0, -3543.35, -0.1, -39.645, 0.1, 41.355, -513.008, -0.0981445, -31.9918, 0.101854, 28.0082, 1045.76, -0.200804, -39.761, 0.199196, 46.239, 2565.29, -0.0994453, -26.2922, 0.200554, 46.7078, 3619.12, -0.699444, -191.118, 0.700554, 171.882, 4637.29, -1.09945, -0.294922, 1.20055, 0.705078, 4057.45, -0.537941, 80.552, 0.66206, -100.448, 3776.51, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0, 8.0001, 9.5, 19, 25.1, 31, 34, 39, 43, 45)
 }
 tracks/2/type = "bezier"
 tracks/2/imported = false
@@ -45,9 +45,9 @@ tracks/2/path = NodePath("XROrigin3D:position:y")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = {
-"handle_modes": PackedInt32Array(),
-"points": PackedFloat32Array(),
-"times": PackedFloat32Array()
+"handle_modes": PackedInt32Array(0, 0, 0, 0, 0, 0, 0, 0, 0),
+"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.25, 0, 1013.83, -2.68791, -1.83215, 2.61917, 0.167847, 0, -1.09549, 56, 0.25, 0, -32.8547, -0.25, 0, 0.96508, 1.85467, -488.793, -0.724369, 2.79321, 1.27563, -1.20679, -77.6547, -0.454662, -39.3453, 0.945335, 54.6547, 0, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0, 8, 19, 25.1, 31, 34, 39, 43, 45)
 }
 tracks/3/type = "bezier"
 tracks/3/imported = false
@@ -56,9 +56,9 @@ tracks/3/path = NodePath("XROrigin3D:position:z")
 tracks/3/interp = 1
 tracks/3/loop_wrap = true
 tracks/3/keys = {
-"handle_modes": PackedInt32Array(),
-"points": PackedFloat32Array(),
-"times": PackedFloat32Array()
+"handle_modes": PackedInt32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.707116, 6, 511.338, -0.577645, -12.3385, 0.922355, 29.6615, 0, -0.861385, 44, 0.838614, -34, -837.242, -0.917133, -7.75842, 0.482868, -14.7584, -703.016, -0.768482, -67.9844, 0.331518, 37.0156, -266.97, -0.605614, -72.0296, 0.794388, 56.9704, 0, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0, 8, 9.5, 19, 25.1, 31, 34, 39, 43, 45)
 }
 tracks/4/type = "bezier"
 tracks/4/imported = false
@@ -272,7 +272,7 @@ mag_ref = 7.0
 mag_limit = 7.0
 star_labels_visible = false
 celestial_coords = Vector3(1.899, 2.541, -0.529)
-camera_path = NodePath("../Camera3D")
+camera_path = NodePath("../Camera3D_Moving")
 
 [node name="DirectionalLight3D2" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.997803, 0, 0.0662565, -0.025043, 0.925818, 0.37714, -0.0613414, -0.37797, 0.923783, 0, 0, 2856.64)
@@ -284,9 +284,12 @@ material_override = SubResource("StandardMaterial3D_8r0lf")
 mesh = SubResource("CylinderMesh_qcncl")
 
 [node name="XROrigin3D" type="XROrigin3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -3987.15, 0, 0)
+current = true
 
 [node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, 0)
+current = true
 
 [node name="LeftHand" type="XRController3D" parent="XROrigin3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 1, -0.5)
@@ -300,7 +303,7 @@ tracker = &"right_hand"
 stream = ExtResource("8_coigh")
 
 [node name="Camera3D_Moving" type="Camera3D" parent="."]
-transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -3987.15, 0, 0)
+transform = Transform3D(-3.61999e-06, 0, -1, 0, 1, 0, 1, 0, -3.61999e-06, -3987.15, 0, 0)
 current = true
 fov = 55.0
 near = 0.1

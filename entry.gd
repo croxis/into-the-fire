@@ -3,6 +3,7 @@ extends Node
 var _dedicated_server := false
 var _vr := false
 var interface : XRInterface
+var VR_DEBUG := false
 
 func _input(event):
 	if event.is_action_pressed("ui_cancel"):
@@ -32,12 +33,15 @@ func _ready():
 			get_tree().quit()
 		_dedicated_server = true
 	else:
-		if "vr" in arguments:
+		if "xr_mode" in arguments or VR_DEBUG:
 			interface = XRServer.find_interface("OpenXR")
+			print_debug(interface)
+			interface.initialize()
 			if interface and interface.is_initialized():
 				print("OpenXR initialised successfully")
 				_vr = true
 				get_viewport().use_xr = true
+				DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 			else:
 				print("OpenXR not initialised, please check if your headset is connected")
 				get_tree().quit()
