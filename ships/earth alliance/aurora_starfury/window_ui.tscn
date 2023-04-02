@@ -8,8 +8,8 @@
 layout_mode = 3
 anchor_right = 0.267
 anchor_bottom = 0.474
-offset_right = -0.639954
-offset_bottom = 0.0799866
+offset_right = -0.640015
+offset_bottom = 0.0799561
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_77lo8")
@@ -53,19 +53,16 @@ offset_top = 279.0
 offset_right = 377.0
 offset_bottom = 400.0
 draw_outline = false
-font_size = null
 
 [node name="ColorRect3" type="ColorRect" parent="."]
-visible = false
 layout_mode = 0
-offset_left = 452.0
-offset_top = 276.0
-offset_right = 512.0
-offset_bottom = 521.0
+offset_left = 449.0
+offset_top = 279.0
+offset_right = 509.0
+offset_bottom = 524.0
 color = Color(0.454902, 1, 0.027451, 1)
 
 [node name="ColorRect4" type="ColorRect" parent="."]
-visible = false
 layout_mode = 0
 offset_top = 275.0
 offset_right = 60.0
