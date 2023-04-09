@@ -36,13 +36,13 @@ func update():
 	rotation_throttle.z = Input.get_axis("clock_rotation", "counter_rotation")
 	
 	if (Input.is_action_pressed("forward_full_thrust")):
-		throttle.z = 1
-	if (Input.is_action_pressed("backward_full_thrust")):
 		throttle.z = -1
+	if (Input.is_action_pressed("backward_full_thrust")):
+		throttle.z = 1
 	if (Input.is_action_pressed("slide_left_full")):
-		throttle.x = 1
-	if (Input.is_action_pressed("slide_right_full")):
 		throttle.x = -1
+	if (Input.is_action_pressed("slide_right_full")):
+		throttle.x = 1
 	if (Input.is_action_pressed("slide_up_full")):
 		throttle.y = 1
 	if (Input.is_action_pressed("slide_down_full")):
