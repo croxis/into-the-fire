@@ -1,8 +1,9 @@
-[gd_scene load_steps=6 format=3 uid="uid://bhhs2v02syo8j"]
+[gd_scene load_steps=7 format=3 uid="uid://bhhs2v02syo8j"]
 
 [ext_resource type="Script" path="res://ships/Ship.gd" id="1_lh74f"]
 [ext_resource type="Script" path="res://ships/Inputs.gd" id="2_im5dg"]
 [ext_resource type="Script" path="res://weapons/Guns.gd" id="3_fckih"]
+[ext_resource type="Script" path="res://ships/Engines.gd" id="4_ob5l3"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_2c0xb"]
 properties/0/path = NodePath(".:linear_velocity")
@@ -45,7 +46,6 @@ properties/4/sync = true
 continuous_cd = true
 can_sleep = false
 script = ExtResource("1_lh74f")
-sync_health = 0
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_2c0xb")
@@ -57,3 +57,6 @@ script = ExtResource("2_im5dg")
 
 [node name="Guns" type="Node3D" parent="."]
 script = ExtResource("3_fckih")
+
+[node name="Engines" type="Node3D" parent="."]
+script = ExtResource("4_ob5l3")

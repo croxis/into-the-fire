@@ -1,0 +1,13 @@
+[gd_scene load_steps=4 format=3 uid="uid://b2sfwpev7j0fm"]
+
+[ext_resource type="PackedScene" uid="uid://dn5v6rnkojjyq" path="res://sfx/engine_plume.blend" id="1_cwvh3"]
+[ext_resource type="Shader" uid="uid://drkgumwhksi6n" path="res://sfx/Thruster.tres" id="2_i46bi"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_hiq7g"]
+render_priority = 0
+shader = ExtResource("2_i46bi")
+
+[node name="engine_plume" instance=ExtResource("1_cwvh3")]
+
+[node name="Circle" parent="Armature/Skeleton3D" index="0"]
+surface_material_override/0 = SubResource("ShaderMaterial_hiq7g")

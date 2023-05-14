@@ -93,6 +93,60 @@ func _physics_process(dt: float) -> void:
 		# The client which this player represent will update the controls state, and notify it to everyone.
 		inputs.update()
 	
+	# This codeblock is to cheat
+	$Engines.apply_linear_thrust(inputs.throttle)
+	
+	print_debug($Engines.linear_force)
+	
+	# add_force is cleared after every frame
+	apply_central_force(global_transform.basis * $Engines.linear_force)
+	
+	if inputs.debug_all_stop:
+		_debug_all_stop = true
+	
+	$SubViewportCenter/center_ui.set_acceleration((linear_velocity.length() - start_speed)/dt)	
+	start_speed = linear_velocity.length()
+	return
+	
+	# Code below this was an attempt to make a realistic controler for thrusters
+	var stableize := false
+	
+	if stableize:
+		# Code here to reduce motion by requesting the opposite thrust
+		pass
+	
+	var thruster_control_vector := []
+	thruster_control_vector.resize($Engines.thrusters.size())
+	
+	var user_input_vector := [inputs.rotation_throttle.x, inputs.rotation_throttle.y, inputs.rotation_throttle.z, inputs.throttle.x, inputs.throttle.y, inputs.throttle.z]  #6 Components (Tx,Ty,Tz,Fx,Fy,Fz)
+	for i in range(user_input_vector.size()):
+		if user_input_vector[i] >= 0:
+			# Use positive Torque or Force ControlVector
+			#thruster_control_vector += $Engines.twelve_control_vectors[2 * i] * user_input_vector[i]
+			var tcv = $Engines.twelve_control_vectors[2 * i]
+			var uiv = user_input_vector[i]
+			print_debug(tcv, " ", uiv)
+			thruster_control_vector += tcv * uiv
+		else:
+			# Use negative Torque or Force ControlVector, also negate component since its negative
+			thruster_control_vector += ($Engines.twelve_control_vectors[2 * i] + 1) * -user_input_vector[i]
+	
+	var absolute_maximum := 0.0
+	for item in thruster_control_vector:
+		if abs(item) > absolute_maximum:
+			absolute_maximum = abs(item)
+	if absolute_maximum > 1:
+		for i in thruster_control_vector.size():
+			thruster_control_vector[i] = thruster_control_vector[i] / absolute_maximum
+	
+	for i in range($Engines.thrusters.size()):
+		$Engines.thrusters[i].power = thruster_control_vector[i]
+		
+	return
+	
+	
+	# Old code below	
+	
 	if inputs.throttle.x > 0:
 		thruster_force.x = max_thrust[4] * inputs.throttle.x
 	elif inputs.throttle.x < 0:

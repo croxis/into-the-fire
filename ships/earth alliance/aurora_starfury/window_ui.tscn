@@ -30,6 +30,7 @@ offset_top = 276.0
 offset_right = 200.0
 offset_bottom = 525.0
 draw_outline = false
+font_size = 11
 
 [node name="Y_Velocity" parent="." instance=ExtResource("1_erljw")]
 layout_mode = 0
@@ -42,6 +43,7 @@ offset_right = 452.0
 offset_bottom = 525.0
 right_justify = true
 draw_outline = false
+font_size = 11
 
 [node name="X_Velocity" parent="." instance=ExtResource("3_aiy7f")]
 layout_mode = 0
@@ -53,8 +55,10 @@ offset_top = 279.0
 offset_right = 377.0
 offset_bottom = 400.0
 draw_outline = false
+font_size = 11
 
 [node name="ColorRect3" type="ColorRect" parent="."]
+visible = false
 layout_mode = 0
 offset_left = 449.0
 offset_top = 279.0
@@ -63,6 +67,7 @@ offset_bottom = 524.0
 color = Color(0.454902, 1, 0.027451, 1)
 
 [node name="ColorRect4" type="ColorRect" parent="."]
+visible = false
 layout_mode = 0
 offset_top = 275.0
 offset_right = 60.0
