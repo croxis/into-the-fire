@@ -94,12 +94,21 @@ func _physics_process(dt: float) -> void:
 		inputs.update()
 	
 	# This codeblock is to cheat
+	# Linear and torque are modeled independently 
 	$Engines.apply_linear_thrust(inputs.throttle)
-	
-	print_debug($Engines.linear_force)
+	$Engines.apply_torque_thrust(inputs.rotation_throttle)
 	
 	# add_force is cleared after every frame
-	apply_central_force(global_transform.basis * $Engines.linear_force)
+	#apply_central_force(global_transform.basis * $Engines.linear_force)
+	#apply_torque(global_transform.basis * $Engines.torque_force)
+	#if $Engines.torque_force:
+	#	print_debug($Engines.torque_force)
+	#apply_torque($Engines.torque_force)
+	
+	for thruster in $Engines.thrusters:
+		apply_force(global_transform.basis * thruster.force_vector, global_transform.basis * thruster.position)
+		if thruster.name == 'Thruster5' && thruster.power > 0.0:
+			print_debug(thruster.force_vector, thruster.position)
 	
 	if inputs.debug_all_stop:
 		_debug_all_stop = true
@@ -145,30 +154,7 @@ func _physics_process(dt: float) -> void:
 	return
 	
 	
-	# Old code below	
-	
-	if inputs.throttle.x > 0:
-		thruster_force.x = max_thrust[4] * inputs.throttle.x
-	elif inputs.throttle.x < 0:
-		thruster_force.x = max_thrust[5] * inputs.throttle.x
-	else:
-		thruster_force.x = 0
-	if inputs.throttle.y > 0:
-		thruster_force.y = max_thrust[2] * inputs.throttle.y
-	elif inputs.throttle.y < 0:
-		thruster_force.y = max_thrust[3] * inputs.throttle.y
-	else:
-		thruster_force.y = 0
-	if inputs.throttle.z > 0:
-		thruster_force.z = max_thrust[0] * inputs.throttle.z
-	elif inputs.throttle.z < 0:
-		thruster_force.z = max_thrust[1] * inputs.throttle.z
-	else:
-		thruster_force.z = 0
-	if inputs.debug_all_stop:
-		_debug_all_stop = true
-	# add_force is cleared after every frame
-	apply_central_force(global_transform.basis * thruster_force)
+	# Old code below
 	
 	# Torque is, simplified, force times length. The length of the engines from
 	# axis is currently eyeballed. Math will be more elaborate later when indiv

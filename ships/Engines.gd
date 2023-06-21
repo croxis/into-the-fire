@@ -22,6 +22,12 @@ var linear_force: Vector3:
 		for thruster in thrusters:
 			force += thruster.force_vector
 		return force
+var torque_force: Vector3:
+	get:
+		var force := Vector3(0.0, 0.0, 0.0)
+		for thruster in thrusters:
+			force += thruster.torque_vector
+		return force
 
 
 # Called when the node enters the scene tree for the first time.
@@ -92,8 +98,32 @@ func apply_linear_thrust(throttle: Vector3):
 		for thruster in right_lateral_thrusters:
 			thruster.power = 0.0
 
-	
-	
+
+# NOTE: I am SERIOUSLY cheating here. We're just summing up the appropriate vectors
+# instead of modeling actual ship orientation software
+func apply_torque_thrust(throttle: Vector3):
+	#if throttle.x != 0 || throttle.y !=0 || throttle.z !=0:
+	#	print_debug("E-ATT: ", throttle)
+	for thruster in thrusters:
+		if throttle.x < 0:
+			#print_debug(thruster, " ", thruster.max_force_vector, thruster.max_torque_vector, thruster.max_torque_vector.normalized())
+			if thruster.max_torque_vector.normalized().x > 0.4:
+				thruster.power = abs(throttle.x)
+		elif throttle.x > 0:
+			if thruster.max_torque_vector.normalized().x < -0.4:
+				thruster.power = abs(throttle.x)
+		if throttle.y < 0:
+			if thruster.max_torque_vector.normalized().y < -0.4:
+				thruster.power = abs(throttle.y)
+		elif throttle.y > 0:
+			if thruster.max_torque_vector.normalized().y > 0.4:
+				thruster.power = abs(throttle.y)
+		if throttle.z < 0:
+			if thruster.max_torque_vector.normalized().z > 0.4:
+				thruster.power = abs(throttle.z)
+		elif throttle.z > 0:
+			if thruster.max_torque_vector.normalized().z < -0.4:
+				thruster.power = abs(throttle.z)
 
 # One of these days I'll properly simulate the thrusters
 # https://github.com/XEonAX/PolitePonderous/blob/master/Assets/Scripts/Spaceship.cs
@@ -165,7 +195,6 @@ func bootup_thrusters():
 		[ 0, 0, 0, 0, 0, 1],
 		[ 0, 0, 0, 0, 0,-1],
 	]
-	
 	
 	twelve_control_vectors.resize(12)
 	for i in range(twelve_control_vectors.size()):

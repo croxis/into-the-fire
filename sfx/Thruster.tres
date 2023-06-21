@@ -41,7 +41,7 @@ constant = Vector2(10, 10)
 
 [resource]
 code = "shader_type spatial;
-render_mode cull_disabled, unshaded, shadows_disabled;
+render_mode blend_mix, depth_draw_opaque, cull_disabled, diffuse_lambert, specular_schlick_ggx, unshaded, shadows_disabled;
 
 uniform sampler2D tex_frg_2;
 
