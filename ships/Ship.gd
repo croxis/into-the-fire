@@ -107,8 +107,6 @@ func _physics_process(dt: float) -> void:
 	
 	for thruster in $Engines.thrusters:
 		apply_force(global_transform.basis * thruster.force_vector, global_transform.basis * thruster.position)
-		if thruster.name == 'Thruster5' && thruster.power > 0.0:
-			print_debug(thruster.force_vector, thruster.position)
 	
 	if inputs.debug_all_stop:
 		_debug_all_stop = true
