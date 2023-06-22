@@ -4,21 +4,17 @@
 
 [node name="DebugLayer" type="CanvasLayer"]
 layer = 128
-script = ExtResource( "1_3xm6f" )
+script = ExtResource("1_3xm6f")
 
 [node name="DebugUIContainer" type="MarginContainer" parent="."]
 offset_right = 1920.0
 offset_bottom = 1080.0
 
 [node name="VBoxContainer" type="VBoxContainer" parent="DebugUIContainer"]
-offset_right = 1920.0
-offset_bottom = 1080.0
+layout_mode = 2
 
 [node name="DebugTabBar" type="TabBar" parent="DebugUIContainer/VBoxContainer"]
-offset_right = 1920.0
-tab_alignment = 0
+layout_mode = 2
 
 [node name="DebugContentContainer" type="MarginContainer" parent="DebugUIContainer/VBoxContainer"]
-offset_top = 4.0
-offset_right = 1920.0
-offset_bottom = 4.0
+layout_mode = 2
