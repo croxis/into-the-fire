@@ -42,9 +42,9 @@ func _ready():
 func calculate_force() -> float:
 	var force = maxf(max_force * power * health, 0.0)
 	if force > 0.0:
-		$engine_plume2.visible = true
+		$engine_plume.visible = true
 	else:
-		$engine_plume2.visible = false
+		$engine_plume.visible = false
 	return force
 
 

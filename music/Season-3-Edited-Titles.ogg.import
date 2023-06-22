@@ -1,0 +1,16 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOGGVorbis"
+uid="uid://mn5widkbv53p"
+path="res://.godot/imported/Season-3-Edited-Titles.ogg-bc567fd5aced28cbdff6ef4a0b92c13b.oggvorbisstr"
+
+[deps]
+
+source_file="res://music/Season-3-Edited-Titles.ogg"
+dest_files=["res://.godot/imported/Season-3-Edited-Titles.ogg-bc567fd5aced28cbdff6ef4a0b92c13b.oggvorbisstr"]
+
+[params]
+
+loop=true
+loop_offset=0

@@ -1,0 +1,16 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOGGVorbis"
+uid="uid://byjpf6fb6ihv1"
+path="res://.godot/imported/Combat Sim - Main Theme Extended.ogg-ac0aa41f672a2ff74745ec686f84890b.oggvorbisstr"
+
+[deps]
+
+source_file="res://music/Combat Sim - Main Theme Extended.ogg"
+dest_files=["res://.godot/imported/Combat Sim - Main Theme Extended.ogg-ac0aa41f672a2ff74745ec686f84890b.oggvorbisstr"]
+
+[params]
+
+loop=true
+loop_offset=0

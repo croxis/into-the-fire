@@ -1,0 +1,16 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOGGVorbis"
+uid="uid://m1fuxurnle23"
+path="res://.godot/imported/Christopher Franke - Battle Themes Track 1.ogg-827426d0f5caa7ec8afa8eeee959950f.oggvorbisstr"
+
+[deps]
+
+source_file="res://music/Christopher Franke - Battle Themes Track 1.ogg"
+dest_files=["res://.godot/imported/Christopher Franke - Battle Themes Track 1.ogg-827426d0f5caa7ec8afa8eeee959950f.oggvorbisstr"]
+
+[params]
+
+loop=true
+loop_offset=0
