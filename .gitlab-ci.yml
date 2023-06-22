@@ -1,20 +1,27 @@
-image: registry.gitlab.com/croxis/itf:4.0.2
+image: registry.gitlab.com/croxis/itf:4.0.3
 
 # NOTE: the `cd` command in each build stage is not necessary if your
 # project.godot is at the repo root
 
 # Cache imported assets between runs
-#cache:
-#  key: import-assets
-#  paths:
-#    - .import/
+cache:
+  key: import-assets
+  paths:
+    - .godot/imported
 
 stages:
+  - import-assets
   - export
   - deploy
 
 variables:
   EXPORT_NAME: itf
+
+# Open the editor to import assets in case the cache was empty or outdated
+import-assets:
+  stage: import-assets
+  script:
+    - godot -v -e --quit --headless
 
 linux:
   stage: export
