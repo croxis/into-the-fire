@@ -95,8 +95,9 @@ func _physics_process(dt: float) -> void:
 	
 	# This codeblock is to cheat
 	# Linear and torque are modeled independently 
-	$Engines.apply_linear_thrust(inputs.throttle)
-	$Engines.apply_torque_thrust(inputs.rotation_throttle)
+	#$Engines.apply_linear_thrust(inputs.throttle)
+	#$Engines.apply_torque_thrust(inputs.rotation_throttle)
+	$Engines.request_thrust(inputs.throttle, inputs.rotation_throttle)
 	
 	# add_force is cleared after every frame
 	#apply_central_force(global_transform.basis * $Engines.linear_force)

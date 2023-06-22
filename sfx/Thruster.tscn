@@ -9,8 +9,8 @@ script = ExtResource("1_ww0jo")
 [node name="engine_plume2" parent="." instance=ExtResource("1_mm0qw")]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
 
-[node name="OmniLight3D" type="OmniLight3D" parent="engine_plume2"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.8813, 1.25945e-07)
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, -6.53699e-13, -2.8813)
 light_color = Color(0.172549, 0.976471, 1, 1)
 light_size = 0.099
 shadow_enabled = true

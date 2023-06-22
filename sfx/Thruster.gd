@@ -16,8 +16,16 @@ var health := 1.0:
 		if new_power < 0.0:
 			new_power = 0.0
 		power = new_power
-		$engine_plume2/OmniLight3D.light_energy = power * 4.0
+		$OmniLight3D.light_energy = power * 4.0
 		calculate_force()
+var requested_power := 0.0:
+	set(new_power):
+		if new_power < 0.0:
+			new_power = 0.0
+		if new_power > requested_power:
+			requested_power = new_power
+		if new_power == 0.0:
+			requested_power = 0.0
 var force_vector: Vector3:
 	get:
 		return max_force_vector * power * health

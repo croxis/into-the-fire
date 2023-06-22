@@ -50,80 +50,57 @@ func calculate_thrusters():
 		thruster.calculate_vectors()
 
 
-# NOTE: I am SERIOUSLY cheating here. We're just summing up the appropriate vectors
-# instead of modeling actual ship orientation software
-func apply_linear_thrust(throttle: Vector3):
-	if throttle.z > 0:
-		# Backwards
-		for thruster in reverse_thrusters:
-			thruster.power = throttle.z
-	elif throttle.z < 0:
-		# Forward
-		#print_debug("-z: ", throttle)
-		for thruster in main_thrusters:
-			thruster.power = -throttle.z
-	else:
-		for thruster in main_thrusters:
-			thruster.power = 0.0
-		for thruster in reverse_thrusters:
-			thruster.power = 0.0
-	
-	if throttle.y > 0:
-		# Backwards
-		for thruster in ventral_thrusters:
-			thruster.power = throttle.y
-	elif throttle.y < 0:
-		# Forward
-		#print_debug("-z: ", throttle)
-		for thruster in dorsal_thrusters:
-			thruster.power = -throttle.y
-	else:
-		for thruster in dorsal_thrusters:
-			thruster.power = 0.0
-		for thruster in ventral_thrusters:
-			thruster.power = 0.0
-			
-	if throttle.x > 0:
-		# Backwards
-		for thruster in left_lateral_thrusters:
-			thruster.power = throttle.x
-	elif throttle.x < 0:
-		# Forward
-		#print_debug("-z: ", throttle)
-		for thruster in right_lateral_thrusters:
-			thruster.power = -throttle.x
-	else:
-		for thruster in left_lateral_thrusters:
-			thruster.power = 0.0
-		for thruster in right_lateral_thrusters:
-			thruster.power = 0.0
-
-
-# NOTE: I am SERIOUSLY cheating here. We're just summing up the appropriate vectors
-# instead of modeling actual ship orientation software
-func apply_torque_thrust(throttle: Vector3):
-	#if throttle.x != 0 || throttle.y !=0 || throttle.z !=0:
-	#	print_debug("E-ATT: ", throttle)
+func request_thrust(linear_throttle: Vector3, rotation_throttle: Vector3):
+	# NOTE: I am cheating here. We're just summing up the appropriate vectors
+	# instead of modeling actual ship orientation software
 	for thruster in thrusters:
-		if throttle.x < 0:
-			#print_debug(thruster, " ", thruster.max_force_vector, thruster.max_torque_vector, thruster.max_torque_vector.normalized())
-			if thruster.max_torque_vector.normalized().x > 0.4:
-				thruster.power = abs(throttle.x)
-		elif throttle.x > 0:
-			if thruster.max_torque_vector.normalized().x < -0.4:
-				thruster.power = abs(throttle.x)
-		if throttle.y < 0:
-			if thruster.max_torque_vector.normalized().y < -0.4:
-				thruster.power = abs(throttle.y)
-		elif throttle.y > 0:
-			if thruster.max_torque_vector.normalized().y > 0.4:
-				thruster.power = abs(throttle.y)
-		if throttle.z < 0:
-			if thruster.max_torque_vector.normalized().z > 0.4:
-				thruster.power = abs(throttle.z)
-		elif throttle.z > 0:
-			if thruster.max_torque_vector.normalized().z < -0.4:
-				thruster.power = abs(throttle.z)
+		thruster.power = 0
+	
+	if linear_throttle.z > 0:
+		# Backwards
+		for thruster in reverse_thrusters:
+			thruster.requested_power = linear_throttle.z
+	elif linear_throttle.z < 0:
+		# Forward
+		for thruster in main_thrusters:
+			thruster.requested_power = -linear_throttle.z
+	
+	if linear_throttle.y > 0:
+		# Backwards
+		for thruster in ventral_thrusters:
+			thruster.requested_power = linear_throttle.y
+	elif linear_throttle.y < 0:
+		# Forward
+		for thruster in dorsal_thrusters:
+			thruster.requested_power = -linear_throttle.y
+			
+	if linear_throttle.x > 0:
+		# Backwards
+		for thruster in left_lateral_thrusters:
+			thruster.requested_power = linear_throttle.x
+	elif linear_throttle.x < 0:
+		# Forward
+		for thruster in right_lateral_thrusters:
+			thruster.requested_power = -linear_throttle.x
+	
+	for thruster in thrusters:
+		if rotation_throttle.x < 0 && thruster.max_torque_vector.normalized().x > 0.4:
+			thruster.requested_power = abs(rotation_throttle.x)
+		elif rotation_throttle.x > 0 && thruster.max_torque_vector.normalized().x < -0.4:
+			thruster.requested_power = abs(rotation_throttle.x)
+		if rotation_throttle.y < 0 && thruster.max_torque_vector.normalized().y < -0.4:
+			thruster.requested_power = abs(rotation_throttle.y)
+		elif rotation_throttle.y > 0 && thruster.max_torque_vector.normalized().y > 0.4:
+			thruster.requested_power = abs(rotation_throttle.y)
+		if rotation_throttle.z < 0 && thruster.max_torque_vector.normalized().z > 0.4:
+			thruster.requested_power = abs(rotation_throttle.z)
+		elif rotation_throttle.z > 0 && thruster.max_torque_vector.normalized().z < -0.4:
+			thruster.requested_power = abs(rotation_throttle.z)
+	
+	for thruster in thrusters:
+		thruster.power = thruster.requested_power
+		thruster.requested_power = 0
+
 
 # One of these days I'll properly simulate the thrusters
 # https://github.com/XEonAX/PolitePonderous/blob/master/Assets/Scripts/Spaceship.cs
