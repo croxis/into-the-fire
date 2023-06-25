@@ -15,22 +15,11 @@ class_name Ship
 @onready var camera: Camera3D = get_node_or_null(camera_path)
 
 @export var ship_class := ""
-# Thrust values. Eventually this will be per engine
-# Max thrust is 8 gs
-# Thrust = 3800000 N
-# Array +x, -x, +y, -y, +z, -z
-# In furute individual engines will be modeled. This is the "aggrigate" of all
-# engines in that direction
-@export var max_thrust = [3800000, 3800000 / 2, 3800000 / 4, 3800000 / 4, 3800000 / 4, 3800000 / 4]
-		
 
-# Eventually each individual engine will be modeled to react to the desired
-# pilot input. For now it is just generic
-# For now throttle is capped at  1. In the future we can boost power to engines.
-# In Godot 3.2 add_force is cleared every physics frame
-# Engine distance from origin. Estimated by eyeballing. For torque
-# TODO: Move these to export and editable in the editor as soon as 
-# that functionality is available
+@export var target_rot = Vector3(0,0,0)
+@export var target_pos = Vector3(0,0,0)
+@export var autospin := true
+@export var autobreak := true
 
 @export var max_health := 100
 var health := max_health:
@@ -65,6 +54,7 @@ func _ready():
 		print_debug("Setting camera")
 	$InputsSync.set_multiplayer_authority(_player_pilot_id)
 	can_sleep = false
+	target_rot = rotation
 	print_debug("Ship created: ", _player_pilot_id)
 
 
@@ -84,27 +74,57 @@ func _integrate_forces(state: PhysicsDirectBodyState3D):
 	if _debug_all_stop:
 		state.angular_velocity = Vector3(0,0,0)
 		state.linear_velocity = Vector3(0,0,0)
+		target_rot = rotation
 		_debug_all_stop = false
 	$SubViewportCenter/center_ui.set_speed(state.linear_velocity.length())
 
 
 func _physics_process(dt: float) -> void:
+	# For now throttle is capped at  1. In the future we can boost power to engines.
+	# In Godot 3.2 add_force is cleared every physics frame
 	if multiplayer.multiplayer_peer == null or multiplayer.get_unique_id() == _player_pilot_id:
 		# The client which this player represent will update the controls state, and notify it to everyone.
 		inputs.update()
+		
+	# Start of PID code
+	# https://raw.githubusercontent.com/itspacchu/GodotRocket/master/scripts/rocket.gd
+	var rotation_throttle = inputs.rotation_throttle
+	var throttle = inputs.throttle
 	
-	# This codeblock is to cheat
-	# Linear and torque are modeled independently 
-	#$Engines.apply_linear_thrust(inputs.throttle)
-	#$Engines.apply_torque_thrust(inputs.rotation_throttle)
-	$Engines.request_thrust(inputs.throttle, inputs.rotation_throttle)
+	if(autospin):
+		target_rot.x += inputs.rotation_throttle.x * dt
+		if target_rot.x > 3.14159:
+			target_rot.x = 2 * -3.14159 + target_rot.x
+		target_rot.y += inputs.rotation_throttle.y * dt
+		if target_rot.y > 3.14159:
+			target_rot.y = 2 * -3.14159 + target_rot.y
+		target_rot.z += inputs.rotation_throttle.z * dt
+		if target_rot.z > 3.14159:
+			target_rot.z = 2 * -3.14159 + target_rot.z
 	
-	# add_force is cleared after every frame
-	#apply_central_force(global_transform.basis * $Engines.linear_force)
-	#apply_torque(global_transform.basis * $Engines.torque_force)
-	#if $Engines.torque_force:
-	#	print_debug($Engines.torque_force)
-	#apply_torque($Engines.torque_force)
+		var rx = -rotation.x
+		var ry = rotation.y
+		var rz = -rotation.z
+		var err_rot_x := 0.0
+		var err_rot_y := 0.0
+		var err_rot_z := 0.0
+		
+		err_rot_x = target_rot.x - rx
+		err_rot_y = target_rot.y - ry
+		err_rot_z = target_rot.z - rz
+	
+		var pidx = $PIDS/PID_rotate_X._update(err_rot_x,dt)
+		var pidy = $PIDS/PID_rotate_Y._update(err_rot_y,dt)
+		var pidz = $PIDS/PID_rotate_Z._update(err_rot_z,dt)
+		
+		rotation_throttle = Vector3(pidx, pidy, pidz)
+		
+	if autobreak:
+		pass
+		#throttle = new_input
+		
+	print_debug(target_rot, rotation, " ", rotation_throttle)
+	$Engines.request_thrust(throttle, rotation_throttle)
 	
 	for thruster in $Engines.thrusters:
 		apply_force(global_transform.basis * thruster.force_vector, global_transform.basis * thruster.position)
@@ -149,39 +169,6 @@ func _physics_process(dt: float) -> void:
 	
 	for i in range($Engines.thrusters.size()):
 		$Engines.thrusters[i].power = thruster_control_vector[i]
-		
-	return
-	
-	
-	# Old code below
-	
-	# Torque is, simplified, force times length. The length of the engines from
-	# axis is currently eyeballed. Math will be more elaborate later when indiv
-	# thrusters are moddled
-	
-	if inputs.rotation_throttle.x > 0:
-		thruster_torque.x = engine_length * max_thrust[5] * inputs.rotation_throttle.x
-	elif inputs.rotation_throttle.x < 0:
-		thruster_torque.x = engine_length * max_thrust[5] * inputs.rotation_throttle.x
-	else:
-		thruster_torque.x = 0
-	if inputs.rotation_throttle.y > 0:
-		thruster_torque.y = engine_length * max_thrust[5] * inputs.rotation_throttle.y
-	elif inputs.rotation_throttle.y < 0:
-		thruster_torque.y = engine_length * max_thrust[5] * inputs.rotation_throttle.y
-	else:
-		thruster_torque.y = 0
-	if inputs.rotation_throttle.z > 0:
-		thruster_torque.z = engine_length * max_thrust[5] * inputs.rotation_throttle.z
-	elif inputs.rotation_throttle.z < 0:
-		thruster_torque.z = engine_length * max_thrust[5] * inputs.rotation_throttle.z
-	else:
-		thruster_torque.z = 0
-	thruster_torque = thruster_torque / 7  # Modifyer to make the fury not SOOOO twitchy
-	apply_torque(global_transform.basis * thruster_torque)
-	
-	$SubViewportCenter/center_ui.set_acceleration((linear_velocity.length() - start_speed)/dt)	
-	start_speed = linear_velocity.length()
 
 
 func bullet_hit(damage, bullet_global_trans):

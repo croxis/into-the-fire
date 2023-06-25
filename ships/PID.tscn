@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://hivg2o6wgagj"]
+
+[ext_resource type="Script" path="res://ships/PID.gd" id="1_xbe3g"]
+
+[node name="PID" type="Node"]
+editor_description = "PID Controller"
+script = ExtResource("1_xbe3g")
