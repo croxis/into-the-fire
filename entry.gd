@@ -46,8 +46,7 @@ func _ready():
 				print("OpenXR not initialised, please check if your headset is connected")
 				get_tree().quit()
 		else:
-			#TODO: Do this all with an option window, but this is default!
-			$DisplayManager.set_resolution(Vector2i(0, 0))
+			print_debug("resolution:",$MainMenu.config.get_value("graphics", "resolution_x"))
 		$loading.load_scene("res://title_screen.tscn", get_tree().root, true, true)
 		$MainMenu.visible = true
 
