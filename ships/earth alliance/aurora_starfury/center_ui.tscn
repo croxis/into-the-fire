@@ -27,20 +27,32 @@ offset_right = 79.0
 grow_horizontal = 2
 grow_vertical = 0
 
+[node name="AutoBreak" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+theme = ExtResource("1_vo86i")
+theme_type_variation = &"HeaderMedium"
+text = "AutoBreak: OFF"
+
+[node name="AutoSpin" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+theme = ExtResource("1_vo86i")
+theme_type_variation = &"HeaderMedium"
+text = "AutoSpin: On"
+
 [node name="Health" type="Label" parent="VBoxContainer"]
 layout_mode = 2
 theme = ExtResource("1_vo86i")
-theme_type_variation = &"HeaderLarge"
+theme_type_variation = &"HeaderMedium"
 text = "Health: 100"
 
 [node name="Speed" type="Label" parent="VBoxContainer"]
 layout_mode = 2
 theme = ExtResource("1_vo86i")
-theme_type_variation = &"HeaderLarge"
+theme_type_variation = &"HeaderMedium"
 text = "Speed: 0 m/s"
 
 [node name="Gs" type="Label" parent="VBoxContainer"]
 layout_mode = 2
 theme = ExtResource("1_vo86i")
-theme_type_variation = &"HeaderLarge"
+theme_type_variation = &"HeaderMedium"
 text = "G: 0 g"

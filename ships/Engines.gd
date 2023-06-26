@@ -84,17 +84,17 @@ func request_thrust(linear_throttle: Vector3, rotation_throttle: Vector3):
 			thruster.requested_power = -linear_throttle.x
 	
 	for thruster in thrusters:
-		if rotation_throttle.x < 0 && thruster.max_torque_vector.normalized().x > 0.4:
+		if rotation_throttle.x > 0 && thruster.max_torque_vector.normalized().x > 0.4:
 			thruster.requested_power = abs(rotation_throttle.x)
-		elif rotation_throttle.x > 0 && thruster.max_torque_vector.normalized().x < -0.4:
+		elif rotation_throttle.x < 0 && thruster.max_torque_vector.normalized().x < -0.4:
 			thruster.requested_power = abs(rotation_throttle.x)
 		if rotation_throttle.y < 0 && thruster.max_torque_vector.normalized().y < -0.4:
 			thruster.requested_power = abs(rotation_throttle.y)
 		elif rotation_throttle.y > 0 && thruster.max_torque_vector.normalized().y > 0.4:
 			thruster.requested_power = abs(rotation_throttle.y)
-		if rotation_throttle.z < 0 && thruster.max_torque_vector.normalized().z > 0.4:
+		if rotation_throttle.z > 0 && thruster.max_torque_vector.normalized().z > 0.4:
 			thruster.requested_power = abs(rotation_throttle.z)
-		elif rotation_throttle.z > 0 && thruster.max_torque_vector.normalized().z < -0.4:
+		elif rotation_throttle.z < 0 && thruster.max_torque_vector.normalized().z < -0.4:
 			thruster.requested_power = abs(rotation_throttle.z)
 	
 	for thruster in thrusters:

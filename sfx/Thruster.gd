@@ -13,7 +13,7 @@ var health := 1.0:
 # Dec. percent. 0-100% is 0-1.0.
 @export var power := 0.0:
 	set(new_power):
-		if new_power < 0.0:
+		if new_power < 0.009:
 			new_power = 0.0
 		power = new_power
 		$OmniLight3D.light_energy = power * 4.0

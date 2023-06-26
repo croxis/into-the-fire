@@ -55,6 +55,8 @@ func _ready():
 	$InputsSync.set_multiplayer_authority(_player_pilot_id)
 	can_sleep = false
 	target_rot = rotation
+	$SubViewportCenter/center_ui.set_autobreak(autobreak)
+	$SubViewportCenter/center_ui.set_autospin(autospin)
 	print_debug("Ship created: ", _player_pilot_id)
 
 
@@ -63,11 +65,29 @@ func _input(event):
 		print_debug("Debug kill request by ", multiplayer.get_unique_id())
 		#health = -1
 		rpc("debug_set_health", -1)
+	if event.is_action_pressed("autobreak_toggle"):
+		rpc("autobreak_toggle")
+	if event.is_action_pressed("autospin_toggle"):
+		rpc("autospin_toggle")
+
 
 @rpc("any_peer")
 func debug_set_health(new_health):
 	print("RPC called by: ", multiplayer.get_remote_sender_id())
 	health = new_health
+
+
+@rpc("any_peer", "call_local")
+func autobreak_toggle():
+	autobreak = !autobreak
+	$SubViewportCenter/center_ui.set_autobreak(autobreak)
+
+
+@rpc("any_peer", "call_local")
+func autospin_toggle():
+	autospin = !autospin
+	target_rot = rotation
+	$SubViewportCenter/center_ui.set_autospin(autospin)
 
 
 func _integrate_forces(state: PhysicsDirectBodyState3D):
@@ -93,37 +113,40 @@ func _physics_process(dt: float) -> void:
 	
 	if(autospin):
 		target_rot.x += inputs.rotation_throttle.x * dt
-		if target_rot.x > 3.14159:
-			target_rot.x = 2 * -3.14159 + target_rot.x
 		target_rot.y += inputs.rotation_throttle.y * dt
-		if target_rot.y > 3.14159:
-			target_rot.y = 2 * -3.14159 + target_rot.y
 		target_rot.z += inputs.rotation_throttle.z * dt
-		if target_rot.z > 3.14159:
-			target_rot.z = 2 * -3.14159 + target_rot.z
-	
-		var rx = -rotation.x
+			
+		var rx = rotation.x
 		var ry = rotation.y
-		var rz = -rotation.z
+		var rz = rotation.z
+		
 		var err_rot_x := 0.0
 		var err_rot_y := 0.0
 		var err_rot_z := 0.0
 		
+		# Correct for wraparound at 180/-180 or pi/-pi
+		if target_rot.x - rx > 3.14159: target_rot.x -= 2*3.14159
+		elif target_rot.x - rx < -3.14159: target_rot.x += 2*3.14159
+		if target_rot.y - ry > 3.14159: target_rot.y -= 2*3.14159
+		elif target_rot.y - ry < -3.14159: target_rot.y += 2*3.14159
+		if target_rot.z - rz > 3.14159: target_rot.z -= 2*3.14159
+		elif target_rot.z - rz < -3.14159: target_rot.z += 2*3.14159
+		
 		err_rot_x = target_rot.x - rx
 		err_rot_y = target_rot.y - ry
-		err_rot_z = target_rot.z - rz
+		err_rot_z = target_rot.z - rz			
 	
 		var pidx = $PIDS/PID_rotate_X._update(err_rot_x,dt)
 		var pidy = $PIDS/PID_rotate_Y._update(err_rot_y,dt)
 		var pidz = $PIDS/PID_rotate_Z._update(err_rot_z,dt)
-		
+		#print_debug(target_rot.x, " ", rx, " ", pidx)
 		rotation_throttle = Vector3(pidx, pidy, pidz)
-		
+				
 	if autobreak:
 		pass
 		#throttle = new_input
 		
-	print_debug(target_rot, rotation, " ", rotation_throttle)
+	#print_debug(target_rot.z, " ", rotation.z, " ", rotation_throttle.z)
 	$Engines.request_thrust(throttle, rotation_throttle)
 	
 	for thruster in $Engines.thrusters:

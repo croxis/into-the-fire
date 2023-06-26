@@ -1,9 +1,7 @@
 extends MultiplayerSynchronizer
 
-# Eventually each individual engine will be modeled to react to the desired
-# pilot Input. For now it is just generic
+
 # For now throttle is capped at  1. In the future we can boost power to engines.
-# In Godot 3.2 add_force is cleared every physics frame
 @export var throttle: Vector3 = Vector3():
 	set(value):
 		# This will be sent by players, make sure values are within limits.
@@ -17,6 +15,8 @@ extends MultiplayerSynchronizer
 @export var debug_all_stop: bool = false
 @export var fire_primary: bool = false
 @export var fire_secondary: bool = false
+@export var autospin_toggle := false
+@export var autobreak_toggle := false
 
 
 func _ready():
@@ -52,13 +52,13 @@ func update():
 	if (Input.is_action_pressed("rotate_right_full")):
 		rotation_throttle.y = -1
 	if (Input.is_action_pressed("rotate_down_full")):
-		rotation_throttle.x = 1
-	if (Input.is_action_pressed("rotate_up_full")):
 		rotation_throttle.x = -1
+	if (Input.is_action_pressed("rotate_up_full")):
+		rotation_throttle.x = 1
 	if (Input.is_action_pressed("clockwise_full")):
-		rotation_throttle.z = 1
-	if (Input.is_action_pressed("counter_clockwise_full")):
 		rotation_throttle.z = -1
+	if (Input.is_action_pressed("counter_clockwise_full")):
+		rotation_throttle.z = 1
 	if (Input.is_action_pressed("debug_all_stop")):
 		print_debug("Debug all stop")
 		throttle = Vector3(0, 0, 0)
@@ -66,3 +66,5 @@ func update():
 		debug_all_stop = true
 	fire_primary = Input.is_action_pressed("fire_primary")
 	fire_secondary = Input.is_action_pressed("fire_secondary")
+	#autobreak_toggle = Input.is_action_pressed("autobreak_toggle")
+	#autospin_toggle = Input.is_action_pressed("autospin_toggle")

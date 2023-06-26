@@ -12,6 +12,8 @@ Left control moves backwards
 
 Arrow keys are lateral motion
 
+[ and ] Turn on auto spin stabalize and auto break (still need tuning)
+
 Backslash \ is a debug all stop key
 
 Space Fire primary weapons
