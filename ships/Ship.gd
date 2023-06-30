@@ -143,8 +143,35 @@ func _physics_process(dt: float) -> void:
 		rotation_throttle = Vector3(pidx, pidy, pidz)
 				
 	if autobreak:
-		pass
-		#throttle = new_input
+		var local_velocity := global_transform.basis.transposed() * linear_velocity
+		if -0.009 < throttle.x and throttle.x < 0.009:
+			if local_velocity.x > 5:
+				throttle.x = -1
+			elif local_velocity.x > 0:
+				throttle.x = -0.2
+			if local_velocity.x < -5:
+				throttle.x = 1
+			elif local_velocity.x < 0:
+				throttle.x = 0.2
+		if -0.009 < throttle.y and throttle.y < 0.009:
+			if local_velocity.y > 5:
+				throttle.y = -1
+			elif local_velocity.y > 0:
+				throttle.y = -0.2
+			if local_velocity.y < -5:
+				throttle.y = 1
+			elif local_velocity.y < 0:
+				throttle.y = 0.2
+		if -0.009 < throttle.z and throttle.z < 0.009:
+			if local_velocity.z > 5:
+				throttle.z = -1
+			elif local_velocity.z > 0:
+				throttle.z = -0.2
+			if local_velocity.z < -5:
+				throttle.z = 1
+			elif local_velocity.z < 0:
+				throttle.z = 0.2
+			
 		
 	#print_debug(target_rot.z, " ", rotation.z, " ", rotation_throttle.z)
 	$Engines.request_thrust(throttle, rotation_throttle)
