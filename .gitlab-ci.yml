@@ -1,4 +1,4 @@
-image: registry.gitlab.com/croxis/itf:4.0.3
+image: registry.gitlab.com/croxis/itf:4.2.1
 
 # NOTE: the `cd` command in each build stage is not necessary if your
 # project.godot is at the repo root
@@ -21,7 +21,7 @@ variables:
 import-assets:
   stage: import-assets
   script:
-    - godot -v -e --quit --headless
+    - godot --verbose --editor --quit --headless
 
 linux:
   stage: export
