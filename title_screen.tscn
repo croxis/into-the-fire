@@ -4,10 +4,10 @@
 [ext_resource type="PackedScene" uid="uid://b46swjkskju5j" path="res://ships/earth alliance/babylon 5/babylon_5_scale.tscn" id="2_a5wwe"]
 [ext_resource type="Environment" uid="uid://d084u3xtn7nyp" path="res://title_screen_env.tres" id="2_xlnt3"]
 [ext_resource type="PackedScene" uid="uid://smyq0lsgeetn" path="res://systems/ran/epsilon 3/epsilon3.tscn" id="3_si7s7"]
-[ext_resource type="AudioStream" uid="uid://dcdej076lg7h6" path="res://music/Season-3-Edited-Titles.ogg" id="4_jke73"]
+[ext_resource type="AudioStream" uid="uid://mn5widkbv53p" path="res://music/Season-3-Edited-Titles.ogg" id="4_jke73"]
 [ext_resource type="Script" path="res://addons/star_field/star_field_manager.gd" id="6_bsqdu"]
-[ext_resource type="Texture2D" uid="uid://n0t1lrore51q" path="res://systems/ran/epsilon_nebulae_texture_by_amras_arfeiniel.png" id="7_26dio"]
-[ext_resource type="AudioStream" uid="uid://cdoc5ls2xyrli" path="res://music/Combat Sim - Main Theme Extended.ogg" id="8_coigh"]
+[ext_resource type="Texture2D" uid="uid://b8mr0hea1ghdh" path="res://systems/ran/epsilon_nebulae_texture_by_amras_arfeiniel.png" id="7_26dio"]
+[ext_resource type="AudioStream" uid="uid://byjpf6fb6ihv1" path="res://music/Combat Sim - Main Theme Extended.ogg" id="8_coigh"]
 
 [sub_resource type="Animation" id="Animation_kiqxv"]
 resource_name = "Camera"

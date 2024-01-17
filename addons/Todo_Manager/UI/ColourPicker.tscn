@@ -5,7 +5,7 @@
 [node name="TODOColour" type="HBoxContainer"]
 offset_right = 105.0
 offset_bottom = 31.0
-script = ExtResource( "1" )
+script = ExtResource("1")
 metadata/_edit_use_custom_anchors = false
 
 [node name="Label" type="Label" parent="."]
