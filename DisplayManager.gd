@@ -4,6 +4,7 @@ extends Node
 func set_resolution(resolution: Vector2i) -> void:
 	# if server:
 	#	return
+	print_debug("DisplayManager: Setting render resolution: ", resolution)
 	var interface = XRServer.find_interface("OpenXR")
 	if interface and interface.is_initialized():
 		return
@@ -17,7 +18,7 @@ func set_resolution(resolution: Vector2i) -> void:
 
 	get_viewport().size = resolution
 	get_window().content_scale_size = Vector2i(0, 0)
-	$"../Galaxy".set_resolution(resolution)
+	$"../Galaxy".set_render_resolution(resolution)
 
 
 func _on_main_menu_set_msaa(status):

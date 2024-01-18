@@ -1,4 +1,6 @@
-[gd_scene format=3 uid="uid://dnx0pyfaqlkqi"]
+[gd_scene load_steps=2 format=3 uid="uid://dnx0pyfaqlkqi"]
+
+[ext_resource type="PackedScene" uid="uid://1tfn6krikklo" path="res://ui/cameras/RTSCamera.tscn" id="1_iuvpb"]
 
 [node name="System" type="SubViewportContainer"]
 visible = false
@@ -11,3 +13,8 @@ handle_input_locally = false
 audio_listener_enable_3d = true
 size = Vector2i(1920, 1080)
 render_target_update_mode = 0
+
+[node name="RTSCameras" type="Node" parent="SubViewport"]
+
+[node name="RtsCamera" parent="SubViewport/RTSCameras" instance=ExtResource("1_iuvpb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 100, 0)

@@ -1,10 +1,11 @@
-[gd_scene load_steps=8 format=3 uid="uid://bhhs2v02syo8j"]
+[gd_scene load_steps=9 format=3 uid="uid://bhhs2v02syo8j"]
 
 [ext_resource type="Script" path="res://ships/Ship.gd" id="1_lh74f"]
+[ext_resource type="Script" path="res://ship_systems/weapons/Guns.gd" id="2_b1wmj"]
 [ext_resource type="Script" path="res://ships/Inputs.gd" id="2_im5dg"]
-[ext_resource type="Script" path="res://weapons/Guns.gd" id="3_fckih"]
 [ext_resource type="Script" path="res://ships/Engines.gd" id="4_ob5l3"]
 [ext_resource type="PackedScene" uid="uid://hivg2o6wgagj" path="res://ships/PID.tscn" id="5_itaim"]
+[ext_resource type="PackedScene" uid="uid://c8kn4ojrwda3e" path="res://ship_systems/pilots/Pilot.tscn" id="5_j57yf"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_2c0xb"]
 properties/0/path = NodePath(".:linear_velocity")
@@ -51,13 +52,8 @@ script = ExtResource("1_lh74f")
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_2c0xb")
 
-[node name="InputsSync" type="MultiplayerSynchronizer" parent="."]
-root_path = NodePath(".")
-replication_config = SubResource("SceneReplicationConfig_2cgfk")
-script = ExtResource("2_im5dg")
-
 [node name="Guns" type="Node3D" parent="."]
-script = ExtResource("3_fckih")
+script = ExtResource("2_b1wmj")
 
 [node name="Engines" type="Node3D" parent="."]
 script = ExtResource("4_ob5l3")
@@ -75,3 +71,10 @@ script = ExtResource("4_ob5l3")
 [node name="PID_Y" parent="PIDS" instance=ExtResource("5_itaim")]
 
 [node name="PID_Z" parent="PIDS" instance=ExtResource("5_itaim")]
+
+[node name="Pilot" parent="." instance=ExtResource("5_j57yf")]
+
+[node name="InputsSync" type="MultiplayerSynchronizer" parent="Pilot"]
+root_path = NodePath(".")
+replication_config = SubResource("SceneReplicationConfig_2cgfk")
+script = ExtResource("2_im5dg")

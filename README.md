@@ -18,7 +18,9 @@ Backslash \ is a debug all stop key
 
 Space Fire primary weapons
 
-F5 Switch Camera
+F4 Switch to RTS camera
+
+F5 Switch 1st and 3rd Camera
 
 ` (next to the 1 key) opens performance metrics
 
@@ -26,3 +28,7 @@ Esc brings up the menu
 
 ## Build instructions
 Requires gd4 branch of the [Starfield addon](https://gitlab.com/croxis/starfield)
+
+
+## Tutorials that helped me alot
+[Make an RTS camera](https://www.youtube.com/watch?v=t-tkFxhpiCs&list=PLUzx1-8efVAoswyWSJh-du7HCCuVL3ckt)

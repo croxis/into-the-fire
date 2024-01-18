@@ -8,9 +8,9 @@ class_name Ship
 	set(id):
 		_player_pilot_id = id
 		# Give authority over the player input to the appropriate peer.
-		$InputsSync.set_multiplayer_authority(id)
+		$Pilot/InputsSync.set_multiplayer_authority(id)
 
-@onready var inputs = $InputsSync
+@onready var inputs = $Pilot/InputsSync
 @export_node_path("Camera3D") var camera_path: NodePath
 @onready var camera: Camera3D = get_node_or_null(camera_path)
 
@@ -52,7 +52,7 @@ func _ready():
 		# Ensure it is the active one
 		camera.current = true
 		print_debug("Setting camera")
-	$InputsSync.set_multiplayer_authority(_player_pilot_id)
+	inputs.set_multiplayer_authority(_player_pilot_id)
 	can_sleep = false
 	target_rot = rotation
 	$SubViewportCenter/center_ui.set_autobreak(autobreak)

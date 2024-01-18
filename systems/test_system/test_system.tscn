@@ -9,3 +9,7 @@
 positional_shadow_atlas_size = 4096
 
 [node name="Node3D" parent="SubViewport" index="0" instance=ExtResource("2_2gq3a")]
+
+[node name="RtsCamera" parent="SubViewport/RTSCameras" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3000, 1000, 2000)
+camera_move_speed = 100.0

@@ -1,0 +1,13 @@
+[gd_scene load_steps=2 format=3 uid="uid://1tfn6krikklo"]
+
+[ext_resource type="Script" path="res://ui/cameras/RTSCamera.gd" id="1_5ccp5"]
+
+[node name="RTSCamera" type="Node3D"]
+script = ExtResource("1_5ccp5")
+
+[node name="RTSCameraSocket" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 0, 0)
+
+[node name="Camera3D" type="Camera3D" parent="RTSCameraSocket"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+far = 20000.0

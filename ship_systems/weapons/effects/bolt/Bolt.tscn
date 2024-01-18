@@ -1,0 +1,59 @@
+[gd_scene load_steps=6 format=3 uid="uid://yw5s3jdg5lfg"]
+
+[ext_resource type="Script" path="res://ship_systems/weapons/effects/bolt/Bolt.gd" id="1_nrree"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_essqy"]
+shading_mode = 0
+albedo_color = Color(0, 0.980392, 1, 1)
+disable_receive_shadows = true
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_d7k2v"]
+material = SubResource("StandardMaterial3D_essqy")
+radius = 0.1
+height = 0.4
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_il74u"]
+radius = 0.111983
+height = 0.403912
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_257ph"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath(".:rotation")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+properties/2/path = NodePath(".:scale")
+properties/2/spawn = true
+properties/2/replication_mode = 1
+properties/3/path = NodePath(".:speed")
+properties/3/spawn = true
+properties/3/replication_mode = 1
+properties/4/path = NodePath(".:damage")
+properties/4/spawn = true
+properties/4/replication_mode = 1
+properties/5/path = NodePath(".:KILL_TIMER")
+properties/5/spawn = true
+properties/5/replication_mode = 1
+properties/6/path = NodePath(".:timer")
+properties/6/spawn = true
+properties/6/replication_mode = 1
+
+[node name="Bolt" type="Area3D"]
+script = ExtResource("1_nrree")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
+mesh = SubResource("CapsuleMesh_d7k2v")
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+light_color = Color(0.0156863, 0.960784, 1, 1)
+shadow_enabled = true
+distance_fade_enabled = true
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
+shape = SubResource("CapsuleShape3D_il74u")
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_257ph")

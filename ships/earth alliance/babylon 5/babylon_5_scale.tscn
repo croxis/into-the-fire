@@ -48,6 +48,7 @@ shape = ExtResource("4_4utfw")
 shape = ExtResource("5_w6e8i")
 
 [node name="rotation" parent="." index="4"]
+transform = Transform3D(1, 0, 0, 0, -0.682016, 0.731337, 0, -0.731337, -0.682016, 0, 0, 0)
 script = ExtResource("2_1swvk")
 
 [node name="Spawner" type="StaticBody3D" parent="rotation/Cobra_Bays" index="0"]
@@ -407,3 +408,4 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3916.83, -35.6664, -35.5712)
 
 [node name="Camera3D" type="Camera3D" parent="rotation/CnC" index="0"]
 transform = Transform3D(0, 0, -1, -0.707107, 0.707107, 0, 0.707107, 0.707107, 0, 0, 0, 0)
+current = true

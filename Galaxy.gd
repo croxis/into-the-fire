@@ -85,8 +85,8 @@ func _on_spawn_picker_request_spawn(system_name, spawner_name):
 	$spawn_picker.visible = false
 	
 	
-func set_resolution(resolution: Vector2i) -> void:
-	print_debug("Setting resolution: ", resolution)
+func set_render_resolution(resolution: Vector2i) -> void:
+	print_debug("Galaxy: Setting render resolution: ", resolution)
 	for subviewportcontainer in $Systems.get_children():
 		#subviewportcontainer.size = resolution
 		subviewportcontainer.get_node("SubViewport").size = resolution
