@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://c8kn4ojrwda3e"]
+
+[ext_resource type="Script" path="res://ship_systems/pilots/Pilot.gd" id="1_gf7ba"]
+
+[node name="Pilot" type="Node"]
+script = ExtResource("1_gf7ba")
