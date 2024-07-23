@@ -1,7 +1,7 @@
 extends Control
 
-signal join_game(ip, port: int, player_name, server_password)
-signal new_game(game_name, player_name, port: int, server_password)
+signal join_game(ip, port: int, player_name: String, server_password: String, player_password: String)
+signal new_game(game_name: String, player_name: String, port: int, server_password: String, player_password: String)
 signal set_resolution(resolution: Vector2i)
 signal set_taa(status: bool)
 signal set_msaa(status: int)
@@ -77,9 +77,10 @@ func _on_button_new_server_pressed():
 		print_debug("Error: Not valid player name")
 		return
 	var server_pass = $HBoxContainer/VBoxContainerOption/VBoxContainerNew/GridContainer/LineEditServerPass.text
+	var player_pass = $HBoxContainer/VBoxContainerOption/VBoxContainerNew/GridContainer/LineEditPlayerPass.text
 	AppConfig.set_value("player", "name", new_player_name)
 	AppConfig.set_value("player", "port", port)
-	new_game.emit(game_name, new_player_name, port, server_pass)
+	new_game.emit(game_name, new_player_name, port, server_pass, player_pass)
 
 
 func _on_button_join_server_pressed():
@@ -97,10 +98,11 @@ func _on_button_join_server_pressed():
 		print("Error: Not valid player name")
 		return
 	var server_pass = $HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer/LineEditServerPass.text
+	var player_pass = $HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer/LineEditPlayerPass.text
 	AppConfig.set_value("player", "name", new_player_name)
 	AppConfig.set_value("player", "ip", ip)
 	AppConfig.set_value("player", "port", port)
-	join_game.emit(ip, port, new_player_name, server_pass)
+	join_game.emit(ip, port, new_player_name, server_pass, player_pass)
 
 
 func _on_option_button_item_selected(index):

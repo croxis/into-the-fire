@@ -9,12 +9,15 @@ script = ExtResource("1_3em77")
 
 [node name="Hyperspace" type="Node" parent="."]
 
-[node name="spawn_picker" parent="." instance=ExtResource("3_87ncl")]
+[node name="Players" type="Node" parent="."]
+script = ExtResource("4_quywd")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+layer = 2
+
+[node name="spawn_picker" parent="CanvasLayer" instance=ExtResource("3_87ncl")]
 visible = false
 offset_bottom = 996.0
 size_flags_vertical = 1
 
-[node name="Players" type="Node" parent="."]
-script = ExtResource("4_quywd")
-
-[connection signal="request_spawn" from="spawn_picker" to="." method="_on_spawn_picker_request_spawn"]
+[connection signal="request_spawn" from="CanvasLayer/spawn_picker" to="." method="_on_spawn_picker_request_spawn"]

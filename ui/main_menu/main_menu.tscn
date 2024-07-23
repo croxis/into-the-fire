@@ -73,6 +73,7 @@ alignment = 0
 layout_mode = 2
 
 [node name="VBoxContainerNew" type="VBoxContainer" parent="HBoxContainer/VBoxContainerOption"]
+visible = false
 layout_mode = 2
 
 [node name="GridContainer" type="GridContainer" parent="HBoxContainer/VBoxContainerOption/VBoxContainerNew"]
@@ -127,6 +128,18 @@ layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_override_font_sizes/font_size = 48
 placeholder_text = "Dolphin"
+expand_to_text_length = true
+
+[node name="Label6" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerNew/GridContainer"]
+layout_mode = 2
+theme = ExtResource("1_dnqi6")
+theme_override_font_sizes/font_size = 48
+text = "Player Pass"
+
+[node name="LineEditPlayerPass" type="LineEdit" parent="HBoxContainer/VBoxContainerOption/VBoxContainerNew/GridContainer"]
+layout_mode = 2
+theme = ExtResource("1_dnqi6")
+theme_override_font_sizes/font_size = 48
 expand_to_text_length = true
 
 [node name="ButtonNewServer" type="Button" parent="HBoxContainer/VBoxContainerOption/VBoxContainerNew"]
@@ -192,6 +205,18 @@ text = "Server Pass"
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_override_font_sizes/font_size = 48
+
+[node name="Label6" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer"]
+layout_mode = 2
+theme = ExtResource("1_dnqi6")
+theme_override_font_sizes/font_size = 48
+text = "Player Pass"
+
+[node name="LineEditPlayerPass" type="LineEdit" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer"]
+layout_mode = 2
+theme = ExtResource("1_dnqi6")
+theme_override_font_sizes/font_size = 48
+expand_to_text_length = true
 
 [node name="ButtonJoinServer" type="Button" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin"]
 layout_mode = 2

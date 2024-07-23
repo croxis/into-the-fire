@@ -77,7 +77,7 @@ func _on_network_connection_succeeded():
 	$Galaxy.player_enter_system("test_system")
 
 
-func _on_main_menu_new_game(game_name, player_name, port, server_password):
+func _on_main_menu_new_game(game_name, player_name, port, server_password, player_password):
 	if not $network.host_server(player_name, port):
 		return
 	end_title_sequence()

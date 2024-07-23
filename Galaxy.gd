@@ -53,7 +53,7 @@ func player_enter_system(system_name) -> void:
 
 @rpc("any_peer", "call_local")
 func show_spawn() -> void:
-	$spawn_picker.show_spawn(get_spawn_points(""))
+	$CanvasLayer/spawn_picker.show_spawn(get_spawn_points(""))
 
 
 func _on_network_connection_succeeded():
@@ -87,7 +87,7 @@ func request_spawn(system_name, spawner_name):
 
 func _on_spawn_picker_request_spawn(system_name, spawner_name):	
 	rpc("request_spawn", system_name, spawner_name)
-	$spawn_picker.visible = false
+	$CanvasLayer/spawn_picker.visible = false
 	
 	
 func set_render_resolution(resolution: Vector2i) -> void:
@@ -114,9 +114,11 @@ func update_graphics():
 			subviewportcontainer.get_node("SubViewport").use_taa = taa
 
 
-func _on_main_menu_new_game(g_name, player_name, port, server_password):
+func _on_main_menu_new_game(g_name, player_name, port, server_password, player_password):
 	game_name = g_name
+	$Players.check_player(player_name, player_password)
 	setup_new_galaxy()
+	
 
 
 func setup_new_galaxy():

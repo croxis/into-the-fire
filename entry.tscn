@@ -14,6 +14,7 @@
 script = ExtResource("1_ox4k0")
 
 [node name="loading" parent="." instance=ExtResource("3_ry4g3")]
+z_index = 10
 
 [node name="Galaxy" parent="." instance=ExtResource("4_l50de")]
 
