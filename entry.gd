@@ -46,7 +46,7 @@ func _ready():
 				print("OpenXR not initialised, please check if your headset is connected")
 				get_tree().quit()
 		else:
-			print_debug("resolution:",$MainMenu.config.get_value("graphics", "resolution_x"))
+			print_debug("resolution:", AppConfig.get_value("graphics", "resolution_x"))
 		$loading.load_scene("res://title_screen.tscn", get_tree().root, true, true)
 		$MainMenu.visible = true
 
@@ -77,13 +77,11 @@ func _on_network_connection_succeeded():
 	$Galaxy.player_enter_system("test_system")
 
 
-func _on_main_menu_new_game(player_name, port):
+func _on_main_menu_new_game(game_name, player_name, port, server_password):
 	if not $network.host_server(player_name, port):
 		return
 	end_title_sequence()
-	# Hack until we figure out what we are doing
-	$Galaxy.player_enter_system("test_system")
-	$Galaxy._on_network_connection_succeeded()
+	
 	
 
 

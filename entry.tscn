@@ -13,11 +13,11 @@
 [node name="entry" type="Node"]
 script = ExtResource("1_ox4k0")
 
+[node name="loading" parent="." instance=ExtResource("3_ry4g3")]
+
 [node name="Galaxy" parent="." instance=ExtResource("4_l50de")]
 
 [node name="network" parent="." instance=ExtResource("2_phwwb")]
-
-[node name="loading" parent="." instance=ExtResource("3_ry4g3")]
 
 [node name="MainMenu" parent="." instance=ExtResource("7_j7gch")]
 visible = false
@@ -58,9 +58,11 @@ script = ExtResource("4_h8ft4")
 [node name="TextListBenchmark" parent="DebugBenchmark" instance=ExtResource("5_ro4nv")]
 layout_mode = 2
 
+[connection signal="load_scene" from="Galaxy" to="loading" method="_on_galaxy_load_scene"]
 [connection signal="connection_succeeded" from="network" to="." method="_on_network_connection_succeeded"]
 [connection signal="connection_succeeded" from="network" to="Galaxy" method="_on_network_connection_succeeded"]
 [connection signal="new_game" from="MainMenu" to="." method="_on_main_menu_new_game"]
+[connection signal="new_game" from="MainMenu" to="Galaxy" method="_on_main_menu_new_game"]
 [connection signal="set_msaa" from="MainMenu" to="DisplayManager" method="_on_main_menu_set_msaa"]
 [connection signal="set_resolution" from="MainMenu" to="DisplayManager" method="set_resolution"]
 [connection signal="set_ssaa" from="MainMenu" to="DisplayManager" method="_on_main_menu_set_ssaa"]

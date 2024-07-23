@@ -38,7 +38,7 @@ func register_player(new_player_name):
 	var id = multiplayer.get_remote_sender_id()
 	players[id] = new_player_name
 	print("Current Players: ", players)
-	var player = preload("res://network/player.tscn").instantiate()
+	var player = preload("res://accounts/player.tscn").instantiate()
 	player.set_name(str(id))
 	#player.set_network_master(id)
 	$players.add_child(player)
@@ -63,7 +63,7 @@ func host_server(new_player_name, port: int=DEFAULT_PORT) -> bool:
 
 
 func join_game(ip, port, new_player_name):
-	#Client Only
+	# Client Only
 	print("Joining Game: ", ip, ":", port, " as " , new_player_name)
 	player_name = new_player_name
 	peer = ENetMultiplayerPeer.new()

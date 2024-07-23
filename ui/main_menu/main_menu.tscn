@@ -73,12 +73,24 @@ alignment = 0
 layout_mode = 2
 
 [node name="VBoxContainerNew" type="VBoxContainer" parent="HBoxContainer/VBoxContainerOption"]
-visible = false
 layout_mode = 2
 
 [node name="GridContainer" type="GridContainer" parent="HBoxContainer/VBoxContainerOption/VBoxContainerNew"]
 layout_mode = 2
 columns = 2
+
+[node name="Label5" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerNew/GridContainer"]
+layout_mode = 2
+theme = ExtResource("1_dnqi6")
+theme_override_font_sizes/font_size = 48
+text = "Game Name"
+
+[node name="LineEditGameName" type="LineEdit" parent="HBoxContainer/VBoxContainerOption/VBoxContainerNew/GridContainer"]
+layout_mode = 2
+theme = ExtResource("1_dnqi6")
+theme_override_font_sizes/font_size = 48
+text = "default"
+placeholder_text = "default"
 
 [node name="Label2" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerNew/GridContainer"]
 layout_mode = 2
@@ -92,6 +104,17 @@ theme = ExtResource("1_dnqi6")
 theme_override_font_sizes/font_size = 48
 text = "2258"
 placeholder_text = "2258"
+
+[node name="Label4" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerNew/GridContainer"]
+layout_mode = 2
+theme = ExtResource("1_dnqi6")
+theme_override_font_sizes/font_size = 48
+text = "Server Pass"
+
+[node name="LineEditServerPass" type="LineEdit" parent="HBoxContainer/VBoxContainerOption/VBoxContainerNew/GridContainer"]
+layout_mode = 2
+theme = ExtResource("1_dnqi6")
+theme_override_font_sizes/font_size = 48
 
 [node name="Label3" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerNew/GridContainer"]
 layout_mode = 2
@@ -158,6 +181,17 @@ theme = ExtResource("1_dnqi6")
 theme_override_font_sizes/font_size = 48
 placeholder_text = "Dolphin"
 expand_to_text_length = true
+
+[node name="Label4" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer"]
+layout_mode = 2
+theme = ExtResource("1_dnqi6")
+theme_override_font_sizes/font_size = 48
+text = "Server Pass"
+
+[node name="LineEditServerPass" type="LineEdit" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer"]
+layout_mode = 2
+theme = ExtResource("1_dnqi6")
+theme_override_font_sizes/font_size = 48
 
 [node name="ButtonJoinServer" type="Button" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin"]
 layout_mode = 2
@@ -285,6 +319,10 @@ popup/item_3/id = 3
 visible = false
 layout_mode = 0
 anchors_preset = 0
+anchor_right = 0.0
+anchor_bottom = 0.0
+grow_horizontal = 1
+grow_vertical = 1
 
 [connection signal="pressed" from="HBoxContainer/VBoxContainerMain/ButtonNewGame" to="." method="_on_button_new_game_pressed"]
 [connection signal="pressed" from="HBoxContainer/VBoxContainerMain/ButtonJoinGame" to="." method="_on_button_join_game_pressed"]

@@ -1,13 +1,18 @@
 extends Node
 
 var PlayerScene := preload("res://ships/earth alliance/aurora_starfury/auora_starfury.tscn")
+var game_name := "default"
+var render_resolution := Vector2i(0, 0)
+@onready var msaa = AppConfig.get_value("graphics", "msaa")
+@onready var taa = AppConfig.get_value("graphics", "taa")
 
 signal enter_system(system_name)
-
+signal load_scene(path, node: Node, make_active_scene: bool, show_load_screen: bool, callback)
 
 func _ready():
 	# Debug
-	get_spawn_points("")
+	#get_spawn_points("")
+	pass
 
 
 func get_spawn_points(_team) -> Dictionary:
@@ -87,16 +92,42 @@ func _on_spawn_picker_request_spawn(system_name, spawner_name):
 	
 func set_render_resolution(resolution: Vector2i) -> void:
 	print_debug("Galaxy: Setting render resolution: ", resolution)
-	for subviewportcontainer in $Systems.get_children():
-		#subviewportcontainer.size = resolution
-		subviewportcontainer.get_node("SubViewport").size = resolution
+	render_resolution = resolution
+	update_graphics()
 
 
 func set_msaa(status):
-	for subviewportcontainer in $Systems.get_children():
-		subviewportcontainer.get_node("SubViewport").msaa_3d = status
+	msaa = status
+	update_graphics()
 
 
 func set_taa(status):
-	for subviewportcontainer in $Systems.get_children():
-		subviewportcontainer.get_node("SubViewport").use_taa = status
+	taa = status
+	update_graphics()
+
+
+func update_graphics():
+	if self.has_node("Systems"):
+		for subviewportcontainer in $Systems.get_children():
+			subviewportcontainer.get_node("SubViewport").size = render_resolution
+			subviewportcontainer.get_node("SubViewport").msaa_3d = msaa
+			subviewportcontainer.get_node("SubViewport").use_taa = taa
+
+
+func _on_main_menu_new_game(g_name, player_name, port, server_password):
+	game_name = g_name
+	setup_new_galaxy()
+
+
+func setup_new_galaxy():
+	# TODO: See if the multiplayer synconizer can spawn scenes
+	var callback = Callable(self, "finish_setup_new_galaxy")
+	emit_signal("load_scene", "res://systems/systems.tscn", self, false, true, callback)
+
+
+func finish_setup_new_galaxy() -> void:
+	update_graphics()
+	# Hack until we figure out what we are doing #
+	player_enter_system("test_system")
+	_on_network_connection_succeeded()
+	

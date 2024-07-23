@@ -1,11 +1,9 @@
-[gd_scene load_steps=9 format=3 uid="uid://bhhs2v02syo8j"]
+[gd_scene load_steps=6 format=3 uid="uid://bhhs2v02syo8j"]
 
 [ext_resource type="Script" path="res://ships/Ship.gd" id="1_lh74f"]
 [ext_resource type="Script" path="res://ship_systems/weapons/Guns.gd" id="2_b1wmj"]
-[ext_resource type="Script" path="res://ships/Inputs.gd" id="2_im5dg"]
 [ext_resource type="Script" path="res://ships/Engines.gd" id="4_ob5l3"]
 [ext_resource type="PackedScene" uid="uid://hivg2o6wgagj" path="res://ships/PID.tscn" id="5_itaim"]
-[ext_resource type="PackedScene" uid="uid://c8kn4ojrwda3e" path="res://ship_systems/pilots/Pilot.tscn" id="5_j57yf"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_2c0xb"]
 properties/0/path = NodePath(".:linear_velocity")
@@ -22,27 +20,22 @@ properties/3/spawn = true
 properties/3/replication_mode = 1
 properties/4/path = NodePath(".:health")
 properties/4/spawn = true
-properties/4/replication_mode = 1
-properties/5/path = NodePath(".:_player_pilot_id")
+properties/4/replication_mode = 2
+properties/5/path = NodePath(".:autospin")
 properties/5/spawn = true
-properties/5/replication_mode = 0
-
-[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_2cgfk"]
-properties/0/path = NodePath(".:throttle")
-properties/0/spawn = true
-properties/0/replication_mode = 1
-properties/1/path = NodePath(".:rotation_throttle")
-properties/1/spawn = true
-properties/1/replication_mode = 1
-properties/2/path = NodePath(".:debug_all_stop")
-properties/2/spawn = true
-properties/2/replication_mode = 1
-properties/3/path = NodePath(".:fire_primary")
-properties/3/spawn = true
-properties/3/replication_mode = 1
-properties/4/path = NodePath(".:fire_secondary")
-properties/4/spawn = true
-properties/4/replication_mode = 1
+properties/5/replication_mode = 2
+properties/6/path = NodePath(".:autobreak")
+properties/6/spawn = true
+properties/6/replication_mode = 2
+properties/7/path = NodePath(".:target_rot")
+properties/7/spawn = true
+properties/7/replication_mode = 2
+properties/8/path = NodePath(".:target_pos")
+properties/8/spawn = true
+properties/8/replication_mode = 2
+properties/9/path = NodePath(".:ship_id")
+properties/9/spawn = true
+properties/9/replication_mode = 2
 
 [node name="Ship" type="RigidBody3D"]
 can_sleep = false
@@ -72,9 +65,10 @@ script = ExtResource("4_ob5l3")
 
 [node name="PID_Z" parent="PIDS" instance=ExtResource("5_itaim")]
 
-[node name="Pilot" parent="." instance=ExtResource("5_j57yf")]
+[node name="Crew" type="Node" parent="."]
 
-[node name="InputsSync" type="MultiplayerSynchronizer" parent="Pilot"]
-root_path = NodePath(".")
-replication_config = SubResource("SceneReplicationConfig_2cgfk")
-script = ExtResource("2_im5dg")
+[node name="Pilot" type="Node" parent="Crew"]
+
+[node name="Gunners" type="Node" parent="Crew"]
+
+[node name="Engineerings" type="Node" parent="Crew"]

@@ -19,6 +19,8 @@ config/icon="res://icon.png"
 [autoload]
 
 Debug="*res://ui/debug/debug_layer.tscn"
+AppConfig="*res://app_config.gd"
+SaveManager="*res://save_manager.gd"
 
 [display]
 
@@ -30,7 +32,7 @@ window/vsync/vsync_mode=2
 
 [editor]
 
-movie_writer/movie_file="D:/src/itf.avi"
+movie_writer/movie_file="/home/croxis/Videos/itf2.avi"
 
 [editor_plugins]
 
@@ -50,8 +52,7 @@ throttle_backward={
 }
 throttle_forward={
 "deadzone": 0.5,
-"events": [Object(InputEventJoypadMotion,"resource_local_to_scene":false,"resource_name":"","device":0,"axis":3,"axis_value":-1.0,"script":null)
-, Object(InputEventJoypadMotion,"resource_local_to_scene":false,"resource_name":"","device":0,"axis":2,"axis_value":-1.0,"script":null)
+"events": [Object(InputEventJoypadMotion,"resource_local_to_scene":false,"resource_name":"","device":-1,"axis":2,"axis_value":-1.0,"script":null)
 ]
 }
 right_rotation={
@@ -76,12 +77,12 @@ down_rotation={
 }
 clock_rotation={
 "deadzone": 0.5,
-"events": [Object(InputEventJoypadMotion,"resource_local_to_scene":false,"resource_name":"","device":0,"axis":2,"axis_value":1.0,"script":null)
+"events": [Object(InputEventJoypadMotion,"resource_local_to_scene":false,"resource_name":"","device":0,"axis":5,"axis_value":1.0,"script":null)
 ]
 }
 counter_rotation={
 "deadzone": 0.5,
-"events": [Object(InputEventJoypadMotion,"resource_local_to_scene":false,"resource_name":"","device":0,"axis":2,"axis_value":-1.0,"script":null)
+"events": [Object(InputEventJoypadMotion,"resource_local_to_scene":false,"resource_name":"","device":0,"axis":5,"axis_value":-1.0,"script":null)
 ]
 }
 forward_full_thrust={

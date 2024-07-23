@@ -1,6 +1,37 @@
-[gd_scene load_steps=2 format=3 uid="uid://c8kn4ojrwda3e"]
+[gd_scene load_steps=5 format=3 uid="uid://c8kn4ojrwda3e"]
 
 [ext_resource type="Script" path="res://ship_systems/pilots/Pilot.gd" id="1_gf7ba"]
+[ext_resource type="Script" path="res://ships/Inputs.gd" id="2_uhore"]
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_hiqvf"]
+properties/0/path = NodePath(".:throttle")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath(".:rotation_throttle")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+properties/2/path = NodePath(".:debug_all_stop")
+properties/2/spawn = true
+properties/2/replication_mode = 1
+properties/3/path = NodePath(".:fire_primary")
+properties/3/spawn = true
+properties/3/replication_mode = 1
+properties/4/path = NodePath(".:fire_secondary")
+properties/4/spawn = true
+properties/4/replication_mode = 1
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_38dqk"]
+properties/0/path = NodePath(".:_player_pilot_id")
+properties/0/spawn = true
+properties/0/replication_mode = 2
 
 [node name="Pilot" type="Node"]
 script = ExtResource("1_gf7ba")
+
+[node name="InputsSync" type="MultiplayerSynchronizer" parent="."]
+root_path = NodePath(".")
+replication_config = SubResource("SceneReplicationConfig_hiqvf")
+script = ExtResource("2_uhore")
+
+[node name="PilotSync" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_38dqk")

@@ -2,15 +2,20 @@
 extends RigidBody3D
 class_name Ship
 
+@onready var inputs:
+	get:
+		if (self.has_node("Pilot")):
+			return $Pilot/InputsSync
 
-# Cache the pilot ID in here
+@export var ship_id: int
+
 @export var _player_pilot_id: int:
-	set(id):
-		_player_pilot_id = id
-		# Give authority over the player input to the appropriate peer.
-		$Pilot/InputsSync.set_multiplayer_authority(id)
+	get:
+		if (self.has_node("Pilot")):
+			return $Pilot._player_pilot_id
+		else:
+			return -1
 
-@onready var inputs = $Pilot/InputsSync
 @export_node_path("Camera3D") var camera_path: NodePath
 @onready var camera: Camera3D = get_node_or_null(camera_path)
 
@@ -18,7 +23,7 @@ class_name Ship
 
 @export var target_rot = Vector3(0,0,0)
 @export var target_pos = Vector3(0,0,0)
-@export var autospin := true
+@export var autospin := false
 @export var autobreak := true
 
 @export var max_health := 100
@@ -134,11 +139,14 @@ func _physics_process(dt: float) -> void:
 		
 		err_rot_x = target_rot.x - rx
 		err_rot_y = target_rot.y - ry
-		err_rot_z = target_rot.z - rz			
+		err_rot_z = target_rot.z - rz		
 	
 		var pidx = $PIDS/PID_rotate_X._update(err_rot_x,dt)
 		var pidy = $PIDS/PID_rotate_Y._update(err_rot_y,dt)
 		var pidz = $PIDS/PID_rotate_Z._update(err_rot_z,dt)
+		
+		#DebugDraw3D.draw_arrow_ray(self.global_position, target_rot, 100, Color.MAGENTA, 10.0)
+		#print_debug(self.global_position, target_rot)
 		#print_debug(target_rot.x, " ", rx, " ", pidx)
 		rotation_throttle = Vector3(pidx, pidy, pidz)
 				
