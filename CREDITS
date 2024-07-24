@@ -15,3 +15,5 @@ Omega Destroyer by Matt Tarling, adapted by Eternity and A2597. Freeware
 PID controller script by itspacchu https://github.com/itspacchu/GodotRocket/tree/master MIT license
 
 Some menu code from Maaack (MIT) https://github.com/Maaack/Godot-Game-Template
+
+Some logging and netcode from Liblast (MIT) https://libla.st/

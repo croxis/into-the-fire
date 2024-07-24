@@ -21,6 +21,7 @@ config/icon="res://icon.png"
 Debug="*res://ui/debug/debug_layer.tscn"
 AppConfig="*res://app_config.gd"
 SaveManager="*res://save_manager.gd"
+Logger="*res://logger.gd"
 
 [display]
 
@@ -33,6 +34,7 @@ window/vsync/vsync_mode=2
 [editor]
 
 movie_writer/movie_file="/home/croxis/Videos/itf2.avi"
+version_control/autoload_on_startup=true
 
 [editor_plugins]
 
