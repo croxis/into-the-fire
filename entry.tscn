@@ -62,6 +62,7 @@ layout_mode = 2
 [connection signal="load_scene" from="Galaxy" to="loading" method="_on_galaxy_load_scene"]
 [connection signal="connection_succeeded" from="network" to="." method="_on_network_connection_succeeded"]
 [connection signal="connection_succeeded" from="network" to="Galaxy" method="_on_network_connection_succeeded"]
+[connection signal="join_game" from="MainMenu" to="network" method="_on_main_menu_join_game"]
 [connection signal="new_game" from="MainMenu" to="." method="_on_main_menu_new_game"]
 [connection signal="new_game" from="MainMenu" to="Galaxy" method="_on_main_menu_new_game"]
 [connection signal="set_msaa" from="MainMenu" to="DisplayManager" method="_on_main_menu_set_msaa"]

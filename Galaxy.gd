@@ -9,11 +9,6 @@ var render_resolution := Vector2i(0, 0)
 signal enter_system(system_name)
 signal load_scene(path, node: Node, make_active_scene: bool, show_load_screen: bool, callback)
 
-func _ready():
-	# Debug
-	#get_spawn_points("")
-	pass
-
 
 func get_spawn_points(_team) -> Dictionary:
 	# For now return spawn points in {system_name: [spawn_ship]} type format
@@ -37,8 +32,6 @@ func get_spawn_points(_team) -> Dictionary:
 func player_died(player_id: int) -> void:
 	print_debug("Player died: ", player_id, " ", multiplayer.get_unique_id())
 	rpc_id(player_id, "show_spawn")
-	#if player_id == multiplayer.get_unique_id():
-	#	show_spawn()
 
 
 func player_enter_system(system_name) -> void:
@@ -54,10 +47,6 @@ func player_enter_system(system_name) -> void:
 @rpc("any_peer", "call_local")
 func show_spawn() -> void:
 	$CanvasLayer/spawn_picker.show_spawn(get_spawn_points(""))
-
-
-func _on_network_connection_succeeded():
-	show_spawn()
 
 
 @rpc("any_peer", "call_local")
@@ -116,20 +105,36 @@ func update_graphics():
 
 func _on_main_menu_new_game(g_name, player_name, port, server_password, player_password):
 	game_name = g_name
-	$Players.check_player(player_name, player_password)
 	setup_new_galaxy()
 	
 
-
-func setup_new_galaxy():
+func setup_new_galaxy(dedicated: bool = false):
 	# TODO: See if the multiplayer synconizer can spawn scenes
 	var callback = Callable(self, "finish_setup_new_galaxy")
-	emit_signal("load_scene", "res://systems/systems.tscn", self, false, true, callback)
+	if dedicated:
+		emit_signal("load_scene", "res://systems/systems.tscn", self, false, false, null)
+	else:
+		emit_signal("load_scene", "res://systems/systems.tscn", self, false, true, callback)
 
 
 func finish_setup_new_galaxy() -> void:
 	update_graphics()
 	# Hack until we figure out what we are doing #
 	player_enter_system("test_system")
-	_on_network_connection_succeeded()
+	show_spawn()
 	
+
+func setup_galaxy_client():
+	# TODO: See if the multiplayer synconizer can spawn scenes
+	var callback = Callable(self, "finish_setup_galaxy_client")
+	emit_signal("load_scene", "res://systems/systems.tscn", self, false, true, callback)
+
+
+func finish_setup_galaxy_client():
+	update_graphics()
+	player_enter_system("test_system")
+	show_spawn()
+
+
+func _on_network_connection_succeeded():
+	setup_galaxy_client()

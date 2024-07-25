@@ -24,14 +24,21 @@ func _ready():
 	print("Arguments: ", arguments)
 	if ("server" in arguments || OS.has_feature("dedicated_server")):
 		var success := false
+		var game_name := "default"
+		var game_pass := ""
+		if "game" in arguments:
+			game_name = arguments["game"]
+		if "password" in arguments:
+			game_pass = arguments["password"]
 		if "port" in arguments:
-			success = $network.host_server("Server", arguments["port"])
+			success = $network.start_server(game_name, game_pass, arguments["port"])
 		else:
-			success = $network.host_server("Server")
+			success = $network.start_server(game_name, game_pass)
 		if not success:
 			print("Failure to activate network. Is port in use?")
 			get_tree().quit()
 		_dedicated_server = true
+		$Galaxy.setup_new_galaxy(true)
 	else:
 		if "xr_mode" in arguments or VR_DEBUG:
 			interface = XRServer.find_interface("OpenXR")
@@ -58,27 +65,12 @@ func end_title_sequence() -> void:
 	$MainMenu.visible = false
 	
 
-func _process(_delta):
-	if not _dedicated_server:
-		return
-		#Debug.update_widget('DebugBenchmark:TextListBenchmark.add_label', { 'name': 'FPS', 'value': "FPS: " + str(Performance.get_monitor(Performance.TIME_FPS)) })
-		#Debug.update_widget('DebugBenchmark:TextListBenchmark.add_label', { 'name': 'Physics Time', 'value': str(Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) / 1000.0) + " ms" })
-		#Debug.update_widget('DebugBenchmark:TextListBenchmark.add_label', { 'name': 'Objects', 'value': str(Performance.get_monitor(Performance.OBJECT_COUNT)) + " objects" })
-		#Debug.update_widget('DebugBenchmark:TextListBenchmark.add_label', { 'name': 'Objects Frame', 'value': str(Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME)) + " objects in frame" })
-		#Debug.update_widget('DebugBenchmark:TextListBenchmark.add_label', { 'name': 'Primatives Frame', 'value': str(Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME)) + " primatives in frame" })
-		#Debug.update_widget('DebugBenchmark:TextListBenchmark.add_label', { 'name': 'Draws', 'value': str(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)) + " draws" })
-		#Debug.update_widget('DebugBenchmark:TextListBenchmark.add_label', { 'name': 'Video Mem', 'value': str(Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0) + " MB" })
-		#Debug.update_widget('DebugBenchmark:TextListBenchmark.add_label', { 'name': 'Texture Mem', 'value': str(Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0) + " MB texture" })
-
-
 func _on_network_connection_succeeded():
 	end_title_sequence()
-	# Hack until we figure out what we are doing
-	$Galaxy.player_enter_system("test_system")
 
 
 func _on_main_menu_new_game(game_name, player_name, port, server_password, player_password):
-	if not $network.host_server(player_name, port):
+	if not $network.host_server(game_name, player_name, port, server_password, player_password):
 		return
 	end_title_sequence()
 	
