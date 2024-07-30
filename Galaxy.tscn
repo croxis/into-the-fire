@@ -1,12 +1,13 @@
-[gd_scene load_steps=3 format=3 uid="uid://c45aut53d0eru"]
+[gd_scene load_steps=6 format=3 uid="uid://c45aut53d0eru"]
 
 [ext_resource type="Script" path="res://Galaxy.gd" id="1_3em77"]
 [ext_resource type="PackedScene" uid="uid://bxf8p4mhhuvra" path="res://ui/spawn_picker/spawn_picker.tscn" id="3_87ncl"]
+[ext_resource type="PackedScene" uid="uid://dfgvemgkmlsqs" path="res://ui/faction_picker/faction_picker.tscn" id="3_bd71q"]
+[ext_resource type="PackedScene" uid="uid://bslpdqhki8tdr" path="res://factions/factions.tscn" id="3_xpwin"]
+[ext_resource type="Script" path="res://players.gd" id="5_ietyw"]
 
 [node name="Galaxy" type="Node"]
 script = ExtResource("1_3em77")
-
-[node name="Hyperspace" type="Node" parent="."]
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 layer = 2
@@ -16,4 +17,21 @@ visible = false
 offset_bottom = 996.0
 size_flags_vertical = 1
 
+[node name="FactionPicker" parent="CanvasLayer" instance=ExtResource("3_bd71q")]
+visible = false
+
+[node name="Factions" parent="." instance=ExtResource("3_xpwin")]
+
+[node name="Players" type="Node" parent="."]
+script = ExtResource("5_ietyw")
+
+[node name="Systems" type="Node" parent="."]
+
+[node name="PilotLimbo" type="Node" parent="Systems"]
+
+[node name="MultiplayerSpawnerPilots" type="MultiplayerSpawner" parent="Systems"]
+_spawnable_scenes = PackedStringArray("res://ship_systems/pilots/Pilot.tscn")
+spawn_path = NodePath("..")
+
 [connection signal="request_spawn" from="CanvasLayer/spawn_picker" to="." method="_on_spawn_picker_request_spawn"]
+[connection signal="child_entered_tree" from="Factions" to="CanvasLayer/FactionPicker" method="_on_factions_child_entered_tree"]

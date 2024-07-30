@@ -98,43 +98,48 @@ func set_taa(status):
 func update_graphics():
 	if self.has_node("Systems"):
 		for subviewportcontainer in $Systems.get_children():
-			subviewportcontainer.get_node("SubViewport").size = render_resolution
-			subviewportcontainer.get_node("SubViewport").msaa_3d = msaa
-			subviewportcontainer.get_node("SubViewport").use_taa = taa
+			if subviewportcontainer is SubViewportContainer:
+				subviewportcontainer.get_node("SubViewport").size = render_resolution
+				subviewportcontainer.get_node("SubViewport").msaa_3d = msaa
+				subviewportcontainer.get_node("SubViewport").use_taa = taa
+
+
+func setup_new_galaxy(dedicated=false, callback = null):
+	if dedicated:
+		callback = Callable(self, "finish_setup_galaxy_all")
+	emit_signal("load_scene", "res://systems/test_system/test_system.tscn", $Systems, false, true, callback)
 
 
 func _on_main_menu_new_game(g_name, player_name, port, server_password, player_password):
 	game_name = g_name
+	var callback := Callable(self, "finish_setup_galaxy_client")
+	setup_new_galaxy(false, callback)
+
+
+func _on_main_menu_join_game(ip, port, player_name, server_password, player_password):
 	setup_new_galaxy()
-	
-
-func setup_new_galaxy(dedicated: bool = false):
-	# TODO: See if the multiplayer synconizer can spawn scenes
-	var callback = Callable(self, "finish_setup_new_galaxy")
-	if dedicated:
-		emit_signal("load_scene", "res://systems/systems.tscn", self, false, false, null)
-	else:
-		emit_signal("load_scene", "res://systems/systems.tscn", self, false, true, callback)
 
 
-func finish_setup_new_galaxy() -> void:
-	update_graphics()
+func finish_setup_galaxy_all() -> void:
 	# Hack until we figure out what we are doing #
-	player_enter_system("test_system")
-	show_spawn()
-	
-
-func setup_galaxy_client():
-	# TODO: See if the multiplayer synconizer can spawn scenes
-	var callback = Callable(self, "finish_setup_galaxy_client")
-	emit_signal("load_scene", "res://systems/systems.tscn", self, false, true, callback)
+	if multiplayer.is_server():
+		var pilot = preload("res://ship_systems/pilots/Pilot.tscn")
+		var b5commander: Pilot = pilot.instantiate()
+		b5commander.name = "Commendar Eclair"
+		b5commander.faction = $"Factions/Earth Alliance/Babylon 5"
+		#$"Systems/test_system/SubViewport/Node3D/stations/Babylon 5".add_child(b5commander)
+		$Systems.add_child(b5commander)	
+	#player_enter_system("test_system")
+	#show_spawn()
 
 
 func finish_setup_galaxy_client():
 	update_graphics()
-	player_enter_system("test_system")
-	show_spawn()
+	$CanvasLayer/FactionPicker.build_faction_menu($Factions)
+	$CanvasLayer/FactionPicker.visible = true
+	finish_setup_galaxy_all()
 
 
-func _on_network_connection_succeeded():
-	setup_galaxy_client()
+
+
+

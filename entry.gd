@@ -56,6 +56,9 @@ func _ready():
 			print_debug("resolution:", AppConfig.get_value("graphics", "resolution_x"))
 		$loading.load_scene("res://title_screen.tscn", get_tree().root, true, true)
 		$MainMenu.visible = true
+		
+	# Yes this is gross
+	$network.players = $Galaxy/Players
 
 
 func end_title_sequence() -> void:

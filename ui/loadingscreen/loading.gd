@@ -3,7 +3,7 @@ extends Control
 var loadpath
 var parent_node: Node
 var make_active := false
-var callback: Callable
+var callback
 
 @onready
 var progress = $CenterContainer/VBoxContainer/ProgressBar
@@ -26,6 +26,7 @@ func _process(_delta):
 			Logger.log(["Scene loaded"], Logger.MessageType.INFO)
 			if callback:
 				callback.call()
+				callback = null
 		elif status == ResourceLoader.THREAD_LOAD_FAILED:
 			Logger.log(["Scene load failed"], Logger.MessageType.ERROR)
 		elif status == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
@@ -40,8 +41,11 @@ func load_scene(path, node: Node, make_active_scene: bool, show_load_screen = fa
 	make_active = make_active_scene
 	if cback:
 		callback = cback
-	visible = show_load_screen
+	# This extra check is for the main menu showing the loading screen, but the galaxy is prepping in the background
+	if show_load_screen:
+		visible = show_load_screen
 
 
 func _on_galaxy_load_scene(path, node, make_active_scene, show_load_screen, callback):
+	print("_on_galaxy: ", path, node)
 	load_scene(path, node, make_active_scene, show_load_screen, callback)

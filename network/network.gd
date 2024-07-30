@@ -15,8 +15,7 @@ const MAX_PEERS = 12
 
 var peer = null
 
-# Names for remote players in id:name format.
-var players = {}
+var players: Node
 var player_name := ""
 var player_password := ""
 var pending := {}
@@ -32,7 +31,7 @@ func host_server(new_game_name, new_player_name, port: int=DEFAULT_PORT, s_passw
 	var success := start_server(new_game_name, s_password, port)
 	if success:
 		player_name = new_player_name
-		$players.register_player(new_player_name, p_password, 0)
+		players.register_player(new_player_name, p_password, 0)
 	return success
 
 
@@ -56,7 +55,7 @@ func start_server(new_game_name, s_password:="", port: int=DEFAULT_PORT) -> bool
 
 func _player_disconnected(client_id):
 	Logger.log(["Client %d disconnected!" % [client_id]], Logger.MessageType.INFO)
-	$players.player_disconnect(client_id)
+	players.player_disconnect(client_id)
 
 
 func on_client_connected(client_id : int):
@@ -88,11 +87,11 @@ func _authenticate_callback(peer_id: int, data: PackedByteArray):
 		Logger.log(["Wrong server password"], Logger.MessageType.ERROR)
 		peer.disconnect_peer(peer_id)
 		return
-	if !$players.check_player(dict.player_name, dict.player_password, peer_id):
+	if !players.check_player(dict.player_name, dict.player_password, peer_id):
 		Logger.log(["Wrong player password"], Logger.MessageType.ERROR)
 		peer.disconnect_peer(peer_id)
 		return
-	if $players.is_logged_in_id(peer_id):
+	if players.is_logged_in_id(peer_id):
 		Logger.log(["Player is logged in"], Logger.MessageType.ERROR)
 		peer.disconnect_peer(peer_id)
 		return
