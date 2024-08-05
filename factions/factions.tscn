@@ -1,15 +1,16 @@
-[gd_scene load_steps=2 format=3 uid="uid://bslpdqhki8tdr"]
+[gd_scene load_steps=3 format=3 uid="uid://bslpdqhki8tdr"]
 
 [ext_resource type="PackedScene" uid="uid://btaqru1ieiria" path="res://factions/faction.tscn" id="1_5i5wf"]
+[ext_resource type="Script" path="res://factions/factions.gd" id="1_823mu"]
 
 [node name="Factions" type="Node"]
+script = ExtResource("1_823mu")
 
 [node name="Earth Alliance" parent="." instance=ExtResource("1_5i5wf")]
 
 [node name="Psi Corps" parent="Earth Alliance" instance=ExtResource("1_5i5wf")]
 
 [node name="Babylon 5" parent="Earth Alliance" instance=ExtResource("1_5i5wf")]
-accept_players = true
 accept_children = true
 
 [node name="Alpha Wing" parent="Earth Alliance/Babylon 5" instance=ExtResource("1_5i5wf")]

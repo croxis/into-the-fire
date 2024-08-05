@@ -97,7 +97,7 @@ spawn_path = NodePath("../bolts")
 script = ExtResource("3_gayar")
 
 [node name="ShipSpawner" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("res://ships/earth alliance/aurora_starfury/auora_starfury.tscn")
+_spawnable_scenes = PackedStringArray("res://ships/earth alliance/aurora_starfury/auora_starfury.tscn", "res://ship_systems/pilots/Pilot.tscn")
 spawn_path = NodePath("../ships")
 script = ExtResource("4_ar2em")
 
@@ -124,3 +124,7 @@ use_active_camera = true
 mag_ref = 7.0
 mag_limit = 7.0
 star_labels_visible = false
+
+[node name="StationSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://ships/earth alliance/babylon 5/babylon_5_scale.tscn", "")
+spawn_path = NodePath("../stations")

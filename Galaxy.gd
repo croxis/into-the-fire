@@ -5,6 +5,7 @@ var game_name := "default"
 var render_resolution := Vector2i(0, 0)
 @onready var msaa = AppConfig.get_value("graphics", "msaa")
 @onready var taa = AppConfig.get_value("graphics", "taa")
+var active_galaxy := false
 
 signal enter_system(system_name)
 signal load_scene(path, node: Node, make_active_scene: bool, show_load_screen: bool, callback)
@@ -107,7 +108,12 @@ func update_graphics():
 func setup_new_galaxy(dedicated=false, callback = null):
 	if dedicated:
 		callback = Callable(self, "finish_setup_galaxy_all")
-	emit_signal("load_scene", "res://systems/test_system/test_system.tscn", $Systems, false, true, callback)
+	if not active_galaxy and multiplayer.is_server():
+		print("not active and is server: ", active_galaxy, " ", multiplayer.is_server())
+		emit_signal("load_scene", "res://systems/test_system/test_system.tscn", $Systems, false, true, callback)
+		active_galaxy = true
+	else:
+		print("Galaxy already initalized")
 
 
 func _on_main_menu_new_game(g_name, player_name, port, server_password, player_password):
@@ -127,8 +133,11 @@ func finish_setup_galaxy_all() -> void:
 		var b5commander: Pilot = pilot.instantiate()
 		b5commander.name = "Commendar Eclair"
 		b5commander.faction = $"Factions/Earth Alliance/Babylon 5"
-		#$"Systems/test_system/SubViewport/Node3D/stations/Babylon 5".add_child(b5commander)
-		$Systems.add_child(b5commander)	
+		b5commander._multiplayer_id = multiplayer.get_unique_id()
+		#$Systems.add_child(b5commander)
+		#b5commander.reparent($"Systems/test_system/SubViewport/Node3D/stations/Babylon 5")
+		$"Systems/PilotLimbo".add_child(b5commander)
+		print($"Systems/PilotLimbo".get_children())
 	#player_enter_system("test_system")
 	#show_spawn()
 
@@ -140,6 +149,23 @@ func finish_setup_galaxy_client():
 	finish_setup_galaxy_all()
 
 
+func _on_faction_picker_request_faction(faction_name: String) -> void:
+	print_debug("Faction picker: ", faction_name)
+	$CanvasLayer/FactionPicker.visible = false
+	rpc("request_faction", faction_name)
+	$CanvasLayer/spawn_picker.visible = true
 
 
-
+@rpc("any_peer", "call_local")
+func request_faction(faction_name):
+	if not multiplayer.is_server():
+		return
+	var pilot = preload("res://ship_systems/pilots/Pilot.tscn")
+	var player_pilot: Pilot = pilot.instantiate()
+	player_pilot.faction = $Factions.get_faction(faction_name)
+	player_pilot._multiplayer_id = multiplayer.get_remote_sender_id()
+	var player: Player = $Players.find_player_by_netid(multiplayer.get_remote_sender_id())
+	player_pilot.name = player.name
+	player_pilot._player_pilot_id = player.player_id
+	$Systems/PilotLimbo.add_child(player_pilot)
+	Logger.log(["Created pilot: ", player_pilot, " in faction ", player_pilot.faction], Logger.MessageType.SUCCESS)

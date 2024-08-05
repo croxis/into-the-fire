@@ -34,4 +34,4 @@ disabled = true
 text = "Join Faction"
 
 [connection signal="item_selected" from="Tree" to="." method="_on_tree_item_selected"]
-[connection signal="pressed" from="JoinFactionButton" to="." method="_on_spawn_button_pressed"]
+[connection signal="pressed" from="JoinFactionButton" to="." method="_on_faction_button_pressed"]

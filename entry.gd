@@ -78,5 +78,3 @@ func _on_main_menu_new_game(game_name, player_name, port, server_password, playe
 	end_title_sequence()
 	
 	
-
-

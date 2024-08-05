@@ -22,6 +22,7 @@ func register_player(player_name: String, player_password: String, peer_id: int)
 	player.name = player_name
 	player.password = player_password
 	player.player_id = playerid_counter
+	player.network_id = peer_id
 	add_child(player)
 	playerid_counter += 1
 	Logger.log(["Registered player: " + player_name], Logger.MessageType.INFO)
@@ -29,9 +30,11 @@ func register_player(player_name: String, player_password: String, peer_id: int)
 
 
 func player_disconnect(peer_id: int):
+	print("Attempting to logout player with networkid: ", peer_id)
 	for child in get_children():
 		if child.network_id == peer_id:
 			child.network_id = -1
+			print("network.player_disconnected: ", child)
 			return
 
 
@@ -51,3 +54,11 @@ func is_logged_in_name(player_name: String) -> bool:
 
 func save_players():
 	pass
+
+
+func find_player_by_netid(id: int) -> Player:
+	print_debug("Find player by net id: ", id)
+	for player in get_children():
+		if player.network_id == id:
+			return player
+	return null

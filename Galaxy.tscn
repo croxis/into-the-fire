@@ -29,9 +29,10 @@ script = ExtResource("5_ietyw")
 
 [node name="PilotLimbo" type="Node" parent="Systems"]
 
-[node name="MultiplayerSpawnerPilots" type="MultiplayerSpawner" parent="Systems"]
-_spawnable_scenes = PackedStringArray("res://ship_systems/pilots/Pilot.tscn")
-spawn_path = NodePath("..")
+[node name="MultiplayerSpawnerSystems" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://systems/test_system/test_system.tscn")
+spawn_path = NodePath("../Systems")
 
 [connection signal="request_spawn" from="CanvasLayer/spawn_picker" to="." method="_on_spawn_picker_request_spawn"]
+[connection signal="request_faction" from="CanvasLayer/FactionPicker" to="." method="_on_faction_picker_request_faction"]
 [connection signal="child_entered_tree" from="Factions" to="CanvasLayer/FactionPicker" method="_on_factions_child_entered_tree"]

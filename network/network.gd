@@ -31,7 +31,7 @@ func host_server(new_game_name, new_player_name, port: int=DEFAULT_PORT, s_passw
 	var success := start_server(new_game_name, s_password, port)
 	if success:
 		player_name = new_player_name
-		players.register_player(new_player_name, p_password, 0)
+		players.register_player(new_player_name, p_password, multiplayer.get_unique_id())
 	return success
 
 
@@ -87,12 +87,13 @@ func _authenticate_callback(peer_id: int, data: PackedByteArray):
 		Logger.log(["Wrong server password"], Logger.MessageType.ERROR)
 		peer.disconnect_peer(peer_id)
 		return
-	if !players.check_player(dict.player_name, dict.player_password, peer_id):
-		Logger.log(["Wrong player password"], Logger.MessageType.ERROR)
-		peer.disconnect_peer(peer_id)
-		return
 	if players.is_logged_in_id(peer_id):
 		Logger.log(["Player is logged in"], Logger.MessageType.ERROR)
+		print(players.get_children())
+		peer.disconnect_peer(peer_id)
+		return
+	if !players.check_player(dict.player_name, dict.player_password, peer_id):
+		Logger.log(["Wrong player password"], Logger.MessageType.ERROR)
 		peer.disconnect_peer(peer_id)
 		return
 	
