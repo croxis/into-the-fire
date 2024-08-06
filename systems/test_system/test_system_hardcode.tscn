@@ -46,7 +46,7 @@ void fragment() {
 	ROUGHNESS = roughness_tex * roughness;
 	SPECULAR = specular;
 	ALPHA *= albedo.a * albedo_tex.a;
-	DEPTH = 0.999998;
+	DEPTH = 0.00002;
 }
 "
 
@@ -126,5 +126,5 @@ mag_limit = 7.0
 star_labels_visible = false
 
 [node name="StationSpawner" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("res://ships/earth alliance/babylon 5/babylon_5_scale.tscn", "")
+_spawnable_scenes = PackedStringArray("res://ships/earth alliance/babylon 5/babylon_5_scale.tscn")
 spawn_path = NodePath("../stations")
