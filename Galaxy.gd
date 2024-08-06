@@ -7,11 +7,13 @@ var render_resolution := Vector2i(0, 0)
 @onready var taa = AppConfig.get_value("graphics", "taa")
 var active_galaxy := false
 
+var ship_id_counter := 0
+
 signal enter_system(system_name)
 signal load_scene(path, node: Node, make_active_scene: bool, show_load_screen: bool, callback)
 
 
-func get_spawn_points(_team) -> Dictionary:
+func get_spawn_points(faction: Faction) -> Dictionary:
 	# For now return spawn points in {system_name: [spawn_ship]} type format
 	# Eventually we will migrate to some other type of thing, such as checking
 	# Inventory for ships
@@ -19,12 +21,13 @@ func get_spawn_points(_team) -> Dictionary:
 	# on the team of
 	var spawn_points = {}
 	for system in $Systems.get_children():
-		var viewport = system.get_node("SubViewport")
-		for station in viewport.get_node("Node3D/stations").get_children():
-			if station.has_spawn_points:
-				if system not in spawn_points:
-					spawn_points[system] = []
-				spawn_points[system].append(station)
+		if system.has_node("SubViewport"):
+			var viewport = system.get_node("SubViewport")
+			for station in viewport.get_node("Node3D/stations").get_children():
+				if station.has_spawn_points:
+					if system not in spawn_points:
+						spawn_points[system] = []
+					spawn_points[system].append(station)
 	# TODO: Add hyperspace here
 	# TODO: Add random generated deep space systems here
 	return spawn_points
@@ -46,8 +49,8 @@ func player_enter_system(system_name) -> void:
 
 
 @rpc("any_peer", "call_local")
-func show_spawn() -> void:
-	$CanvasLayer/spawn_picker.show_spawn(get_spawn_points(""))
+func show_spawn(faction: Faction) -> void:
+	$CanvasLayer/spawn_picker.show_spawn(get_spawn_points(faction))
 
 
 @rpc("any_peer", "call_local")
@@ -55,7 +58,7 @@ func request_spawn(system_name, spawner_name):
 	if not multiplayer.is_server():
 		return
 	var peer_id := multiplayer.get_remote_sender_id()
-	print_debug("Spawn requested in ", system_name, " ", spawner_name, " by ", peer_id)
+	Logger.log(["Spawn requested in ", system_name, " ", spawner_name, " by ", peer_id], Logger.MessageType.QUESTION)
 	var top_system := $Systems.get_node(system_name)
 	var system := top_system.get_node("SubViewport/Node3D")
 	var spawner: Node3D
@@ -69,10 +72,22 @@ func request_spawn(system_name, spawner_name):
 	var spawn_point = spawner.find_free_spawner()
 	var spawn_position = spawn_point.global_transform.origin
 	var ship := PlayerScene.instantiate()
-	ship._player_pilot_id = peer_id
+	#ship._player_pilot_id = peer_id
+	ship.ship_id = ship_id_counter
+	ship_id_counter += 1
 	system.get_node("ships").add_child(ship, true)
 	ship.global_transform.origin = spawn_position
 	ship.connect("destroyed", player_died)
+	var pilot := find_pilot_by_network_id(peer_id)
+	ship.add_captain(pilot)
+	ship.add_pilot(pilot)
+	
+
+func find_pilot_by_network_id(id: int) -> Pilot:
+	for pilot in $Systems.find_children("*", "Pilot"):
+		if pilot._multiplayer_id == id:
+			return pilot
+	return null
 	
 
 func _on_spawn_picker_request_spawn(system_name, spawner_name):	
@@ -134,12 +149,7 @@ func finish_setup_galaxy_all() -> void:
 		b5commander.name = "Commendar Eclair"
 		b5commander.faction = $"Factions/Earth Alliance/Babylon 5"
 		b5commander._multiplayer_id = multiplayer.get_unique_id()
-		#$Systems.add_child(b5commander)
-		#b5commander.reparent($"Systems/test_system/SubViewport/Node3D/stations/Babylon 5")
-		$"Systems/PilotLimbo".add_child(b5commander)
-		print($"Systems/PilotLimbo".get_children())
-	#player_enter_system("test_system")
-	#show_spawn()
+		$"Systems/test_system/SubViewport/Node3D/stations/Babylon 5".add_captain(b5commander)
 
 
 func finish_setup_galaxy_client():
@@ -150,10 +160,12 @@ func finish_setup_galaxy_client():
 
 
 func _on_faction_picker_request_faction(faction_name: String) -> void:
-	print_debug("Faction picker: ", faction_name)
+	#TODO: on clicking the different spawnpoints, the camera switches views
 	$CanvasLayer/FactionPicker.visible = false
 	rpc("request_faction", faction_name)
-	$CanvasLayer/spawn_picker.visible = true
+	var faction: Faction = $Factions.get_faction(faction_name)
+	player_enter_system("test_system")
+	show_spawn(faction)
 
 
 @rpc("any_peer", "call_local")
@@ -167,5 +179,6 @@ func request_faction(faction_name):
 	var player: Player = $Players.find_player_by_netid(multiplayer.get_remote_sender_id())
 	player_pilot.name = player.name
 	player_pilot._player_pilot_id = player.player_id
-	$Systems/PilotLimbo.add_child(player_pilot)
+	$"Systems/test_system/SubViewport/Node3D/stations/Babylon 5".add_passenger(player_pilot)
+	#$Systems/PilotLimbo.add_child(player_pilot)
 	Logger.log(["Created pilot: ", player_pilot, " in faction ", player_pilot.faction], Logger.MessageType.SUCCESS)

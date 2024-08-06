@@ -4,17 +4,24 @@ class_name Ship
 
 @onready var inputs:
 	get:
-		if (self.has_node("Pilot")):
-			return $Pilot/InputsSync
+		if ($Crew.pilot):
+			return $Crew.pilot.get_node("InputsSync")
 
 @export var ship_id: int
 
 @export var _player_pilot_id: int:
 	get:
-		if (self.has_node("Pilot")):
-			return $Pilot._player_pilot_id
+		if ($Crew.pilot):
+			return $Crew.pilot._player_pilot_id
 		else:
 			return -1
+
+var faction: Faction:
+	get:
+		if ($Crew.captain):
+			return $Crew.captain._player_pilot_id
+		else:
+			return null
 
 @export_node_path("Camera3D") var camera_path: NodePath
 @onready var camera: Camera3D = get_node_or_null(camera_path)
@@ -49,21 +56,44 @@ func _ready():
 	# If in editor simply disable processing as it's not needed here
 	if (Engine.is_editor_hint()):
 		set_physics_process(false)
-	print_debug("Creating ship with id: ", _player_pilot_id, ". My ID: ", multiplayer.get_unique_id())
-	if (multiplayer.get_unique_id() == _player_pilot_id):
+	Logger.log(["Creating ship with id: ", ship_id, ". My ID: ", multiplayer.get_unique_id()], Logger.MessageType.QUESTION)
+	
+	#TODO: Change to when pilot joins
+	#if (multiplayer.get_unique_id() == _player_pilot_id):
 		# Set the camera
 		#camera.set_znear(0.3)  # This should be set per ship
-		camera.far = 30000
+	#	camera.far = 30000
 		# Ensure it is the active one
-		camera.current = true
-		print_debug("Setting camera")
-	inputs.set_multiplayer_authority(_player_pilot_id)
+	#	camera.current = true
+	#	print_debug("Setting camera")
+	#inputs.set_multiplayer_authority(_player_pilot_id)
+	
 	can_sleep = false
 	target_rot = rotation
 	$SubViewportCenter/center_ui.set_autobreak(autobreak)
 	$SubViewportCenter/center_ui.set_autospin(autospin)
-	print_debug("Ship created: ", _player_pilot_id)
+	Logger.log(["Ship created: ", ship_id], Logger.MessageType.SUCCESS)
 
+
+func add_captain(pilot: Pilot):
+	if $Crew.captain:
+		return
+	$Crew.captain = pilot
+	if (multiplayer.get_unique_id() == pilot._multiplayer_id):
+		camera.far = 30000
+		camera.set_znear(0.3)
+		camera.current = true
+
+
+func add_pilot(pilot: Pilot):
+	if $Crew.pilot:
+		return
+	$Crew.pilot = pilot
+	if (multiplayer.get_unique_id() == pilot._multiplayer_id):
+		camera.far = 30000
+		camera.set_znear(0.3)
+		camera.current = true
+		
 
 func _input(event):
 	if event.is_action_pressed("debug_kill"):

@@ -1,9 +1,10 @@
-[gd_scene load_steps=6 format=3 uid="uid://bhhs2v02syo8j"]
+[gd_scene load_steps=7 format=3 uid="uid://bhhs2v02syo8j"]
 
 [ext_resource type="Script" path="res://ships/Ship.gd" id="1_lh74f"]
 [ext_resource type="Script" path="res://ship_systems/weapons/Guns.gd" id="2_b1wmj"]
 [ext_resource type="Script" path="res://ships/Engines.gd" id="4_ob5l3"]
 [ext_resource type="PackedScene" uid="uid://hivg2o6wgagj" path="res://ships/PID.tscn" id="5_itaim"]
+[ext_resource type="Script" path="res://ships/crew.gd" id="5_tgeno"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_2c0xb"]
 properties/0/path = NodePath(".:linear_velocity")
@@ -66,9 +67,7 @@ script = ExtResource("4_ob5l3")
 [node name="PID_Z" parent="PIDS" instance=ExtResource("5_itaim")]
 
 [node name="Crew" type="Node" parent="."]
+script = ExtResource("5_tgeno")
 
-[node name="Pilot" type="Node" parent="Crew"]
-
-[node name="Gunners" type="Node" parent="Crew"]
-
-[node name="Engineerings" type="Node" parent="Crew"]
+[node name="CrewMultiplayerSpawner" type="MultiplayerSpawner" parent="."]
+spawn_path = NodePath("../Crew")

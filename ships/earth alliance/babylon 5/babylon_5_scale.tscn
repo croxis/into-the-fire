@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://b46swjkskju5j"]
+[gd_scene load_steps=14 format=3 uid="uid://b46swjkskju5j"]
 
 [ext_resource type="PackedScene" uid="uid://b17xc0jqxnpqh" path="res://ships/earth alliance/babylon 5/babylon_5_scale.glb" id="1_osxqi"]
 [ext_resource type="Shape3D" uid="uid://duvfvby0pvbhl" path="res://ships/earth alliance/babylon 5/babylon_5_scale_reactor.shape" id="2_0vhrt"]
@@ -9,6 +9,7 @@
 [ext_resource type="Shape3D" uid="uid://bsbnaoqyifb31" path="res://ships/earth alliance/babylon 5/babylon_5_scale_upper_frame.shape" id="5_w6e8i"]
 [ext_resource type="Shape3D" uid="uid://bo4nqwnbhewbg" path="res://ships/earth alliance/babylon 5/babylon_5_scale_main_cylinder.shape" id="7_t4phd"]
 [ext_resource type="Shape3D" uid="uid://chocchf85tgv1" path="res://ships/earth alliance/babylon 5/babylon_5_scale_neck.shape" id="8_4xixx"]
+[ext_resource type="Script" path="res://ships/crew.gd" id="10_ndfbt"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_u5rss"]
 height = 1.30568
@@ -48,7 +49,7 @@ shape = ExtResource("4_4utfw")
 shape = ExtResource("5_w6e8i")
 
 [node name="rotation" parent="." index="4"]
-transform = Transform3D(1, 0, 0, 0, -0.682016, 0.731337, 0, -0.731337, -0.682016, 0, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 0.177941, 0.984041, 0, -0.984041, 0.177941, 0, 0, 0)
 script = ExtResource("2_1swvk")
 
 [node name="Spawner" type="StaticBody3D" parent="rotation/Cobra_Bays" index="0"]
@@ -409,3 +410,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3916.83, -35.6664, -35.5712)
 [node name="Camera3D" type="Camera3D" parent="rotation/CnC" index="0"]
 transform = Transform3D(0, 0, -1, -0.707107, 0.707107, 0, 0.707107, 0.707107, 0, 0, 0, 0)
 current = true
+
+[node name="Crew" type="Node" parent="." index="5"]
+script = ExtResource("10_ndfbt")
+max_passengers = 250000
+
+[node name="CrewMultiplayerSpawner" type="MultiplayerSpawner" parent="." index="6"]
+_spawnable_scenes = PackedStringArray("res://ship_systems/pilots/Pilot.tscn")
+spawn_path = NodePath("../Crew")

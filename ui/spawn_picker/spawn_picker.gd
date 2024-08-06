@@ -11,10 +11,8 @@ func show_spawn(spawn_points: Dictionary) -> void:
 	for system in spawn_points:
 		var system_child = $Tree.create_item(root)
 		system_child.set_text(0, system.name)
-		print_debug("System_child: ", system_child.get_text(0))
 		system_child.set_selectable(0, false)
 		for point in spawn_points[system]:
-			print_debug("Spawn Point:", point.name)
 			var spawn_child = $Tree.create_item(system_child)
 			spawn_child.set_text(0, point.name)
 	visible = true

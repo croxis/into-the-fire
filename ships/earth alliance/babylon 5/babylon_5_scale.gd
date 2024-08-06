@@ -3,6 +3,7 @@ extends Node3D
 var bay: int = 1
 var slot: int = 1
 var has_spawn_points := true
+@onready var camera := $rotation/CnC/Camera3D
 
 func find_free_spawner() -> Node3D:
 	var search = true
@@ -25,3 +26,28 @@ func find_free_spawner() -> Node3D:
 			bay = 1
 			slot = 1
 	return spawn_joint
+
+func add_captain(pilot: Pilot):
+	if $Crew.captain:
+		return
+	$Crew.captain = pilot
+	if (multiplayer.get_unique_id() == pilot._multiplayer_id):
+		camera.far = 30000
+		camera.near = 0.3
+		camera.current = true
+	$Crew.add_child(pilot)
+
+
+func add_passenger(pilot: Pilot):
+	if $Crew.passengers.size() >= $Crew.max_passengers:
+		return
+	$Crew.passengers.append(pilot)
+	if (multiplayer.get_unique_id() == pilot._multiplayer_id):
+		camera.far = 30000
+		camera.near = 0.3
+		camera.current = true
+	$Crew.add_child(pilot)
+
+
+func remove_passenger() -> Pilot:
+	return null
