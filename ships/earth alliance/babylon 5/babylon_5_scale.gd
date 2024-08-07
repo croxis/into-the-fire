@@ -39,9 +39,13 @@ func add_captain(pilot: Pilot):
 
 
 func add_passenger(pilot: Pilot):
-	if $Crew.passengers.size() >= $Crew.max_passengers:
+	var max_capacity: int = $Crew.max_passengers
+	if $Crew.pilot:
+		max_capacity += 1
+	if $Crew.captain:
+		max_capacity += 1
+	if $Crew.get_child_count() >= max_capacity:
 		return
-	$Crew.passengers.append(pilot)
 	if (multiplayer.get_unique_id() == pilot._multiplayer_id):
 		camera.far = 30000
 		camera.near = 0.3

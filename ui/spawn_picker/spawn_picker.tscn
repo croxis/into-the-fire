@@ -5,7 +5,7 @@
 
 [node name="SpawnPicker" type="VBoxContainer"]
 offset_right = 459.0
-offset_bottom = 215.0
+offset_bottom = 456.0
 size_flags_vertical = 3
 script = ExtResource("1_3e3fn")
 

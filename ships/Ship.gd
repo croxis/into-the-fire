@@ -34,6 +34,9 @@ var faction: Faction:
 @export var autobreak := true
 
 @export var max_health := 100
+@export var is_station := false
+
+
 var health := max_health:
 	set(new_health):
 		print_debug("New Health: ", new_health)
@@ -49,6 +52,10 @@ var _debug_all_stop := false
 var start_speed = 0
 
 signal destroyed(id)
+
+var bay: int = 1
+var slot: int = 1
+var has_spawn_points := true
 
 
 # Called when the node enters the scene tree for the first time.
@@ -70,8 +77,9 @@ func _ready():
 	
 	can_sleep = false
 	target_rot = rotation
-	$SubViewportCenter/center_ui.set_autobreak(autobreak)
-	$SubViewportCenter/center_ui.set_autospin(autospin)
+	if has_node("$SubViewportCenter"):
+		$SubViewportCenter/center_ui.set_autobreak(autobreak)
+		$SubViewportCenter/center_ui.set_autospin(autospin)
 	Logger.log(["Ship created: ", ship_id], Logger.MessageType.SUCCESS)
 
 
@@ -81,8 +89,23 @@ func add_captain(pilot: Pilot):
 	$Crew.captain = pilot
 	if (multiplayer.get_unique_id() == pilot._multiplayer_id):
 		camera.far = 30000
-		camera.set_znear(0.3)
+		camera.near = 0.3
 		camera.current = true
+
+
+func add_passenger(pilot: Pilot):
+	var max_capacity: int = $Crew.max_passengers
+	if $Crew.pilot:
+		max_capacity += 1
+	if $Crew.captain:
+		max_capacity += 1
+	if $Crew.get_child_count() >= max_capacity:
+		return
+	if (multiplayer.get_unique_id() == pilot._multiplayer_id):
+		camera.far = 30000
+		camera.near = 0.3
+		camera.current = true
+	$Crew.add_child(pilot)
 
 
 func add_pilot(pilot: Pilot):
@@ -91,7 +114,7 @@ func add_pilot(pilot: Pilot):
 	$Crew.pilot = pilot
 	if (multiplayer.get_unique_id() == pilot._multiplayer_id):
 		camera.far = 30000
-		camera.set_znear(0.3)
+		camera.near = 0.3
 		camera.current = true
 		
 
@@ -126,6 +149,8 @@ func autospin_toggle():
 
 
 func _integrate_forces(state: PhysicsDirectBodyState3D):
+	if is_station:
+		return
 	if _debug_all_stop:
 		state.angular_velocity = Vector3(0,0,0)
 		state.linear_velocity = Vector3(0,0,0)
@@ -135,6 +160,8 @@ func _integrate_forces(state: PhysicsDirectBodyState3D):
 
 
 func _physics_process(dt: float) -> void:
+	if is_station:
+		return
 	# For now throttle is capped at  1. In the future we can boost power to engines.
 	# In Godot 3.2 add_force is cleared every physics frame
 	if multiplayer.multiplayer_peer == null or multiplayer.get_unique_id() == _player_pilot_id:
@@ -271,3 +298,26 @@ func destroy() -> void:
 	print_debug("Destroyed: ", _player_pilot_id)
 	emit_signal("destroyed", _player_pilot_id)
 	queue_free()
+
+
+func find_free_spawner() -> Node3D:
+	var search = true
+	var spawn_joint
+	print_debug("Children: ", get_child_count())
+	for c in get_children():
+		print(c)
+	var spawners := $rotation/Cobra_Bays/Spawner
+	while search:
+		#if get_node("rotation/Cobra_Bays/Spawner/Bay" + str(bay) + "/" + str(slot) + "/Area3D").get_overlapping_bodies().is_empty():
+		if spawners.get_node("Bay" + str(bay) + "/" + str(slot) + "/Area3D").get_overlapping_bodies().is_empty():
+			var spawn_point = spawners.get_node("Bay" + str(bay) + "/" + str(slot))
+			search = false
+			spawn_joint = spawn_point
+		slot += 1
+		if slot > 7:
+			bay += 1
+			slot = 1
+		if bay > 4:
+			bay = 1
+			slot = 1
+	return spawn_joint

@@ -23,7 +23,7 @@ func get_spawn_points(faction: Faction) -> Dictionary:
 	for system in $Systems.get_children():
 		if system.has_node("SubViewport"):
 			var viewport = system.get_node("SubViewport")
-			for station in viewport.get_node("Node3D/stations").get_children():
+			for station in viewport.get_node("stations").get_children():
 				if station.has_spawn_points:
 					if system not in spawn_points:
 						spawn_points[system] = []
@@ -45,7 +45,7 @@ func player_enter_system(system_name) -> void:
 	system.get_node("SubViewport").size = DisplayServer.window_get_size()
 	system.visible = true
 	#Music Hack
-	system.get_node("SubViewport/Node3D/AudioStreamPlayer").playing = true
+	system.get_node("SubViewport/AudioStreamPlayer").playing = true
 
 
 @rpc("any_peer", "call_local")
@@ -60,7 +60,7 @@ func request_spawn(system_name, spawner_name):
 	var peer_id := multiplayer.get_remote_sender_id()
 	Logger.log(["Spawn requested in ", system_name, " ", spawner_name, " by ", peer_id], Logger.MessageType.QUESTION)
 	var top_system := $Systems.get_node(system_name)
-	var system := top_system.get_node("SubViewport/Node3D")
+	var system := top_system.get_node("SubViewport")
 	var spawner: Node3D
 	if system.get_node("stations").has_node(spawner_name):
 		spawner = system.get_node("stations").get_node(spawner_name)
@@ -84,9 +84,13 @@ func request_spawn(system_name, spawner_name):
 	
 
 func find_pilot_by_network_id(id: int) -> Pilot:
-	for pilot in $Systems.find_children("*", "Pilot"):
+	print("Searching for pilots with id: ", id)
+	print("Pilots: ", $Systems.find_children("*", "Pilot", true, false))
+	for pilot in $Systems.find_children("*", "Pilot", true, false):
+		print("Found pilot: ", pilot, " ", pilot._multiplayer_id)
 		if pilot._multiplayer_id == id:
 			return pilot
+	
 	return null
 	
 
@@ -123,8 +127,9 @@ func update_graphics():
 func setup_new_galaxy(dedicated=false, callback = null):
 	if dedicated:
 		callback = Callable(self, "finish_setup_galaxy_all")
-	if not active_galaxy and multiplayer.is_server():
-		print("not active and is server: ", active_galaxy, " ", multiplayer.is_server())
+	#if not active_galaxy and multiplayer.is_server():
+	if not active_galaxy and get_tree().root.get_node("entry").is_server:
+		#print(active_galaxy, " ", multiplayer.is_server())
 		emit_signal("load_scene", "res://systems/test_system/test_system.tscn", $Systems, false, true, callback)
 		active_galaxy = true
 	else:
@@ -142,14 +147,16 @@ func _on_main_menu_join_game(ip, port, player_name, server_password, player_pass
 
 
 func finish_setup_galaxy_all() -> void:
-	# Hack until we figure out what we are doing #
-	if multiplayer.is_server():
+	# Hack until we figure"res://ships/earth alliance/babylon 5/babylon_5.tscn" out what we are doing #
+	#if multiplayer.is_server():
+	if get_tree().root.get_node("entry").is_server:
+		var babylon5 := preload("res://ships/earth alliance/babylon 5/babylon_5.tscn").instantiate()
+		$Systems.add_station(babylon5, "test_system")
 		var pilot = preload("res://ship_systems/pilots/Pilot.tscn")
 		var b5commander: Pilot = pilot.instantiate()
 		b5commander.name = "Commendar Eclair"
 		b5commander.faction = $"Factions/Earth Alliance/Babylon 5"
-		b5commander._multiplayer_id = multiplayer.get_unique_id()
-		$"Systems/test_system/SubViewport/Node3D/stations/Babylon 5".add_captain(b5commander)
+		$"Systems/test_system/SubViewport/stations/Babylon 5".add_captain(b5commander)
 
 
 func finish_setup_galaxy_client():
@@ -179,6 +186,6 @@ func request_faction(faction_name):
 	var player: Player = $Players.find_player_by_netid(multiplayer.get_remote_sender_id())
 	player_pilot.name = player.name
 	player_pilot._player_pilot_id = player.player_id
-	$"Systems/test_system/SubViewport/Node3D/stations/Babylon 5".add_passenger(player_pilot)
+	$"Systems/test_system/SubViewport/stations/Babylon 5".add_passenger(player_pilot)
 	#$Systems/PilotLimbo.add_child(player_pilot)
 	Logger.log(["Created pilot: ", player_pilot, " in faction ", player_pilot.faction], Logger.MessageType.SUCCESS)

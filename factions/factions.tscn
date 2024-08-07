@@ -8,8 +8,6 @@ script = ExtResource("1_823mu")
 
 [node name="Earth Alliance" parent="." instance=ExtResource("1_5i5wf")]
 
-[node name="Psi Corps" parent="Earth Alliance" instance=ExtResource("1_5i5wf")]
-
 [node name="Babylon 5" parent="Earth Alliance" instance=ExtResource("1_5i5wf")]
 accept_children = true
 
@@ -29,6 +27,8 @@ accept_players = true
 
 [node name="Proxima" parent="Earth Alliance" instance=ExtResource("1_5i5wf")]
 
+[node name="Psi Corps" parent="Earth Alliance" instance=ExtResource("1_5i5wf")]
+
 [node name="Minbari" parent="." instance=ExtResource("1_5i5wf")]
 
 [node name="Warrior Caste" parent="Minbari" instance=ExtResource("1_5i5wf")]
@@ -36,6 +36,10 @@ accept_players = true
 [node name="Worker Caste" parent="Minbari" instance=ExtResource("1_5i5wf")]
 
 [node name="Religious Caste" parent="Minbari" instance=ExtResource("1_5i5wf")]
+
+[node name="Narn" parent="." instance=ExtResource("1_5i5wf")]
+
+[node name="Centauri" parent="." instance=ExtResource("1_5i5wf")]
 
 [node name="MultiplayerSpawnerFactions" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("res://factions/faction.tscn")

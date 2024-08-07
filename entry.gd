@@ -1,6 +1,7 @@
 extends Node
 
 var _dedicated_server := false
+var is_server := false
 var _vr := false
 var interface : XRInterface
 var VR_DEBUG := false

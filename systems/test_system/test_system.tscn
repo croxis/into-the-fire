@@ -1,15 +1,133 @@
-[gd_scene load_steps=3 format=3 uid="uid://sl64gsa8wdih"]
+[gd_scene load_steps=13 format=3 uid="uid://sl64gsa8wdih"]
 
 [ext_resource type="PackedScene" uid="uid://dnx0pyfaqlkqi" path="res://systems/system_template.tscn" id="1_ctlaf"]
-[ext_resource type="PackedScene" uid="uid://c4wlmqxolhksu" path="res://systems/test_system/test_system_hardcode.tscn" id="2_2gq3a"]
+[ext_resource type="Script" path="res://systems/test_system/test_system.gd" id="2_qwl84"]
+[ext_resource type="Environment" uid="uid://d1el1icbym1qc" path="res://systems/test_system/test_system_environment.tres" id="3_byhm0"]
+[ext_resource type="Script" path="res://systems/BoltSpawner.gd" id="4_x4pox"]
+[ext_resource type="Script" path="res://systems/test_system/ShipSpawner.gd" id="5_0ymdr"]
+[ext_resource type="Texture2D" uid="uid://b8mr0hea1ghdh" path="res://systems/ran/epsilon_nebulae_texture_by_amras_arfeiniel.png" id="6_s3eqy"]
+[ext_resource type="Script" path="res://systems/test_system/nebula_hardcode.gd" id="7_6xt1f"]
+[ext_resource type="AudioStream" uid="uid://m1fuxurnle23" path="res://music/Christopher Franke - Battle Themes Track 1.ogg" id="8_oq5h5"]
+[ext_resource type="Script" path="res://addons/star_field/star_field_manager.gd" id="9_ytnqx"]
+
+[sub_resource type="Shader" id="Shader_53waj"]
+code = "// NOTE: Shader automatically converted from Godot Engine 4.0.1.stable's StandardMaterial3D.
+
+shader_type spatial;
+render_mode blend_mix,depth_draw_opaque,cull_back,diffuse_burley,specular_schlick_ggx,unshaded;
+uniform vec4 albedo : source_color;
+uniform sampler2D texture_albedo : source_color,filter_linear_mipmap,repeat_enable;
+uniform float point_size : hint_range(0,128);
+uniform float roughness : hint_range(0,1);
+uniform sampler2D texture_metallic : hint_default_white,filter_linear_mipmap,repeat_enable;
+uniform vec4 metallic_texture_channel;
+uniform sampler2D texture_roughness : hint_roughness_r,filter_linear_mipmap,repeat_enable;
+uniform float specular;
+uniform float metallic;
+uniform vec3 uv1_scale;
+uniform vec3 uv1_offset;
+uniform vec3 uv2_scale;
+uniform vec3 uv2_offset;
+
+
+void vertex() {
+	UV=UV*uv1_scale.xy+uv1_offset.xy;
+}
+
+
+void fragment() {
+	vec2 base_uv = UV;
+	vec4 albedo_tex = texture(texture_albedo,base_uv);
+	ALBEDO = albedo.rgb * albedo_tex.rgb;
+	float metallic_tex = dot(texture(texture_metallic,base_uv),metallic_texture_channel);
+	METALLIC = metallic_tex * metallic;
+	vec4 roughness_texture_channel = vec4(1.0,0.0,0.0,0.0);
+	float roughness_tex = dot(texture(texture_roughness,base_uv),roughness_texture_channel);
+	ROUGHNESS = roughness_tex * roughness;
+	SPECULAR = specular;
+	ALPHA *= albedo.a * albedo_tex.a;
+	DEPTH = 0.00002;
+}
+"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_jv4xp"]
+render_priority = -1
+shader = SubResource("Shader_53waj")
+shader_parameter/albedo = Color(1, 1, 1, 1)
+shader_parameter/point_size = 1.0
+shader_parameter/roughness = 1.0
+shader_parameter/metallic_texture_channel = null
+shader_parameter/specular = 0.5
+shader_parameter/metallic = 0.0
+shader_parameter/uv1_scale = Vector3(1, 2, 1)
+shader_parameter/uv1_offset = Vector3(0, 0, 0)
+shader_parameter/uv2_scale = Vector3(1, 1, 1)
+shader_parameter/uv2_offset = Vector3(0, 0, 0)
+shader_parameter/texture_albedo = ExtResource("6_s3eqy")
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_byahp"]
+material = SubResource("ShaderMaterial_jv4xp")
+flip_faces = true
+top_radius = 10000.0
+bottom_radius = 10000.0
+height = 10000.0
+rings = 2
+cap_top = false
+cap_bottom = false
 
 [node name="test_system" instance=ExtResource("1_ctlaf")]
+script = ExtResource("2_qwl84")
 
 [node name="SubViewport" parent="." index="0"]
 positional_shadow_atlas_size = 4096
 
-[node name="Node3D" parent="SubViewport" index="0" instance=ExtResource("2_2gq3a")]
-
 [node name="RtsCamera" parent="SubViewport/RTSCameras" index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3000, 1000, 2000)
 camera_move_speed = 100.0
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="SubViewport" index="1"]
+environment = ExtResource("3_byhm0")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="SubViewport" index="2"]
+transform = Transform3D(0.892358, 0, 0.451329, 0, 1, 0, -0.451329, 0, 0.892358, 0, 0, 0)
+light_color = Color(1, 0.92549, 0.901961, 1)
+shadow_enabled = true
+directional_shadow_max_distance = 2000.0
+
+[node name="NebulaDirectionalLight3D" type="DirectionalLight3D" parent="SubViewport" index="3"]
+transform = Transform3D(-0.791042, 0, -0.611762, 0.383873, 0.778627, -0.496369, 0.476334, -0.627488, -0.615926, 0, 0, 0)
+light_color = Color(0.360784, 0.223529, 1, 1)
+light_energy = 0.1
+
+[node name="BoltSpawner" type="MultiplayerSpawner" parent="SubViewport" index="4"]
+spawn_path = NodePath("../bolts")
+script = ExtResource("4_x4pox")
+
+[node name="ShipSpawner" type="MultiplayerSpawner" parent="SubViewport" index="5"]
+_spawnable_scenes = PackedStringArray("res://ships/earth alliance/aurora_starfury/auora_starfury.tscn", "res://ship_systems/pilots/Pilot.tscn")
+spawn_path = NodePath("../ships")
+script = ExtResource("5_0ymdr")
+
+[node name="bolts" type="Node3D" parent="SubViewport" index="6"]
+
+[node name="ships" type="Node3D" parent="SubViewport" index="7"]
+
+[node name="stations" type="Node3D" parent="SubViewport" index="8"]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="SubViewport" index="9"]
+transform = Transform3D(0.983132, 0.182794, -0.0061107, 0.182771, -0.983147, -0.00420464, -0.0067763, 0.00301686, -0.999972, 0, 0, 0)
+mesh = SubResource("CylinderMesh_byahp")
+script = ExtResource("7_6xt1f")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="SubViewport" index="10"]
+stream = ExtResource("8_oq5h5")
+
+[node name="StarField" type="Node3D" parent="SubViewport" index="11"]
+script = ExtResource("9_ytnqx")
+use_active_camera = true
+mag_ref = 7.0
+star_labels_visible = false
+
+[node name="StationSpawner" type="MultiplayerSpawner" parent="SubViewport" index="12"]
+_spawnable_scenes = PackedStringArray("res://ships/earth alliance/babylon 5/babylon_5.tscn")
+spawn_path = NodePath("../stations")

@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=3 uid="uid://c45aut53d0eru"]
+[gd_scene load_steps=7 format=3 uid="uid://c45aut53d0eru"]
 
 [ext_resource type="Script" path="res://Galaxy.gd" id="1_3em77"]
 [ext_resource type="PackedScene" uid="uid://bxf8p4mhhuvra" path="res://ui/spawn_picker/spawn_picker.tscn" id="3_87ncl"]
 [ext_resource type="PackedScene" uid="uid://dfgvemgkmlsqs" path="res://ui/faction_picker/faction_picker.tscn" id="3_bd71q"]
 [ext_resource type="PackedScene" uid="uid://bslpdqhki8tdr" path="res://factions/factions.tscn" id="3_xpwin"]
 [ext_resource type="Script" path="res://players.gd" id="5_ietyw"]
+[ext_resource type="Script" path="res://systems.gd" id="6_ioa4q"]
 
 [node name="Galaxy" type="Node"]
 script = ExtResource("1_3em77")
@@ -26,8 +27,7 @@ visible = false
 script = ExtResource("5_ietyw")
 
 [node name="Systems" type="Node" parent="."]
-
-[node name="PilotLimbo" type="Node" parent="Systems"]
+script = ExtResource("6_ioa4q")
 
 [node name="MultiplayerSpawnerSystems" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("res://systems/test_system/test_system.tscn")

@@ -50,6 +50,7 @@ func start_server(new_game_name, s_password:="", port: int=DEFAULT_PORT) -> bool
 	multiplayer.peer_disconnected.connect(_player_disconnected)
 	Logger.log(["Server hosted on port: " + str(port)], Logger.MessageType.INFO)
 	server_password = s_password
+	get_tree().root.get_node("entry").is_server = true
 	return true
 
 
