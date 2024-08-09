@@ -30,11 +30,9 @@ func register_player(player_name: String, player_password: String, peer_id: int)
 
 
 func player_disconnect(peer_id: int):
-	print("Attempting to logout player with networkid: ", peer_id)
 	for child in get_children():
 		if child.network_id == peer_id:
 			child.network_id = -1
-			print("network.player_disconnected: ", child)
 			return
 
 

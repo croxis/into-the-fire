@@ -5,39 +5,41 @@
 [ext_resource type="Script" path="res://ui/debug/DebugContainer.gd" id="3_13r42"]
 [ext_resource type="PackedScene" uid="uid://dgsj2su1f5ppc" path="res://ui/debug/widgets/TextList/DebugTextList.tscn" id="4_mfwyk"]
 
-[sub_resource type="Animation" id="Animation_kdnid"]
-length = 0.001
-tracks/0/type = "bezier"
+[sub_resource type="Animation" id="Animation_32a75"]
+resource_name = "yellow jump"
+length = 4.0
+tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("CenterContainer/Label2:rect_rotation")
+tracks/0/path = NodePath("Label2:rotation")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"handle_modes": PackedInt32Array(),
-"points": PackedFloat32Array(),
-"times": PackedFloat32Array()
+"times": PackedFloat32Array(0, 4),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0.0, 6.28319]
 }
 
-[sub_resource type="Animation" id="Animation_5cda2"]
-resource_name = "Yellow Jump"
-length = 30.0
-tracks/0/type = "bezier"
+[sub_resource type="Animation" id="Animation_6jfq5"]
+length = 0.001
+tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("CenterContainer/Label2:rect_rotation")
+tracks/0/path = NodePath("Label2:rotation")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"handle_modes": PackedInt32Array(),
-"points": PackedFloat32Array(),
-"times": PackedFloat32Array()
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_sdfms"]
 _data = {
-"RESET": SubResource("Animation_kdnid"),
-"Yellow Jump": SubResource("Animation_5cda2")
+"RESET": SubResource("Animation_6jfq5"),
+"yellow jump": SubResource("Animation_32a75")
 }
 
 [node name="loading" type="Control"]
@@ -59,12 +61,6 @@ color = Color(0, 0, 0, 1)
 layout_mode = 0
 offset_right = 1920.0
 offset_bottom = 1080.0
-
-[node name="Label2" type="Label" parent="CenterContainer"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.964706, 0.627451, 0.0470588, 1)
-theme_override_font_sizes/font_size = 400
-text = "*"
 
 [node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer"]
 layout_mode = 2
@@ -108,6 +104,7 @@ horizontal_alignment = 1
 libraries = {
 "": SubResource("AnimationLibrary_sdfms")
 }
+autoplay = "yellow jump"
 
 [node name="LoaderDebugContainer" type="MarginContainer" parent="."]
 layout_mode = 0
@@ -119,3 +116,16 @@ script = ExtResource("3_13r42")
 
 [node name="TextListLoad" parent="LoaderDebugContainer" instance=ExtResource("4_mfwyk")]
 layout_mode = 2
+
+[node name="Label2" type="Label" parent="."]
+layout_mode = 2
+offset_left = 852.0
+offset_top = 362.0
+offset_right = 1072.0
+offset_bottom = 908.0
+pivot_offset = Vector2(110, 214)
+theme_override_colors/font_color = Color(0.964706, 0.627451, 0.0470588, 1)
+theme_override_font_sizes/font_size = 400
+text = "*"
+horizontal_alignment = 1
+vertical_alignment = 1

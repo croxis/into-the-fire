@@ -41,7 +41,8 @@ var health := max_health:
 	set(new_health):
 		print_debug("New Health: ", new_health)
 		health = new_health
-		$SubViewportCenter/center_ui.set_health(health)
+		if has_node("SubViewportCenter"):
+			$SubViewportCenter/center_ui.set_health(health)
 		if (health <= 0.0):
 			destroy()
 var engine_length = 7.5
@@ -63,7 +64,7 @@ func _ready():
 	# If in editor simply disable processing as it's not needed here
 	if (Engine.is_editor_hint()):
 		set_physics_process(false)
-	Logger.log(["Creating ship with id: ", ship_id, ". My ID: ", multiplayer.get_unique_id()], Logger.MessageType.QUESTION)
+	Logger.log(["Creating ship with id: ", ship_id, ". Name: ", name], Logger.MessageType.QUESTION)
 	
 	#TODO: Change to when pilot joins
 	#if (multiplayer.get_unique_id() == _player_pilot_id):
@@ -161,6 +162,8 @@ func _integrate_forces(state: PhysicsDirectBodyState3D):
 
 func _physics_process(dt: float) -> void:
 	if is_station:
+		return
+	if not $Crew.pilot:
 		return
 	# For now throttle is capped at  1. In the future we can boost power to engines.
 	# In Godot 3.2 add_force is cleared every physics frame

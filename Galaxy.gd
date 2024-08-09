@@ -143,7 +143,7 @@ func _on_main_menu_new_game(g_name, player_name, port, server_password, player_p
 
 
 func _on_main_menu_join_game(ip, port, player_name, server_password, player_password):
-	setup_new_galaxy()
+	pass
 
 
 func finish_setup_galaxy_all() -> void:
@@ -189,3 +189,7 @@ func request_faction(faction_name):
 	$"Systems/test_system/SubViewport/stations/Babylon 5".add_passenger(player_pilot)
 	#$Systems/PilotLimbo.add_child(player_pilot)
 	Logger.log(["Created pilot: ", player_pilot, " in faction ", player_pilot.faction], Logger.MessageType.SUCCESS)
+
+
+func _on_network_connection_succeeded() -> void:
+	finish_setup_galaxy_client()

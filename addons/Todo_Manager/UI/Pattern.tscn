@@ -6,14 +6,21 @@
 script = ExtResource("1")
 
 [node name="LineEdit" type="LineEdit" parent="."]
-minimum_size = Vector2(200, 0)
-offset_right = 200.0
-offset_bottom = 31.0
+layout_mode = 2
 size_flags_horizontal = 0
+expand_to_text_length = true
 
 [node name="RemoveButton" type="Button" parent="."]
-minimum_size = Vector2(24, 24)
-offset_left = 204.0
-offset_right = 228.0
-offset_bottom = 31.0
+layout_mode = 2
 text = "-"
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+custom_minimum_size = Vector2(20, 0)
+layout_mode = 2
+size_flags_horizontal = 0
+
+[node name="CaseSensativeCheckbox" type="CheckBox" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 0
+text = "Case Sensitive"

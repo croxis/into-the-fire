@@ -13,7 +13,7 @@ const DEFAULT_PORT = 2258
 # Max number of players.
 const MAX_PEERS = 12
 
-var peer = null
+var peer: ENetMultiplayerPeer = null
 
 var players: Node
 var player_name := ""
@@ -97,7 +97,8 @@ func _authenticate_callback(peer_id: int, data: PackedByteArray):
 		Logger.log(["Wrong player password"], Logger.MessageType.ERROR)
 		peer.disconnect_peer(peer_id)
 		return
-	
+	var client := peer.get_peer(peer_id)
+	client.set_timeout(1000, 4000, 6000)
 	Logger.log(["Client ", dict.player_name, "authenticated"], Logger.MessageType.SUCCESS)
 	multiplayer.complete_auth(peer_id)
 
