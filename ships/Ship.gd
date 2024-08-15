@@ -19,7 +19,7 @@ class_name Ship
 var faction: Faction:
 	get:
 		if ($Crew.captain):
-			return $Crew.captain._player_pilot_id
+			return $Crew.captain.faction
 		else:
 			return null
 
@@ -92,21 +92,24 @@ func add_captain(pilot: Pilot):
 		camera.far = 30000
 		camera.near = 0.3
 		camera.current = true
+	$Crew.add_child(pilot)
 
 
 func add_passenger(pilot: Pilot):
+	Logger.log(["Adding pilot ", pilot, "to ship ", self], Logger.MessageType.QUESTION)
 	var max_capacity: int = $Crew.max_passengers
 	if $Crew.pilot:
 		max_capacity += 1
 	if $Crew.captain:
 		max_capacity += 1
 	if $Crew.get_child_count() >= max_capacity:
+		Logger.log(["Too many passengers."], Logger.MessageType.WARNING)
 		return
 	if (multiplayer.get_unique_id() == pilot._multiplayer_id):
 		camera.far = 30000
 		camera.near = 0.3
 		camera.current = true
-	$Crew.add_child(pilot)
+	pilot.reparent($Crew)
 
 
 func add_pilot(pilot: Pilot):
@@ -117,6 +120,7 @@ func add_pilot(pilot: Pilot):
 		camera.far = 30000
 		camera.near = 0.3
 		camera.current = true
+	$Crew.add_child(pilot)
 		
 
 func _input(event):

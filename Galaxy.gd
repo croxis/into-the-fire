@@ -79,8 +79,10 @@ func request_spawn(system_name, spawner_name):
 	ship.global_transform.origin = spawn_position
 	ship.connect("destroyed", player_died)
 	var pilot := find_pilot_by_network_id(peer_id)
+	Logger.log(["Pilot ID: ", peer_id, " Pilot name: ", pilot, "Ship: ", ship], Logger.MessageType.INFO)
 	ship.add_captain(pilot)
 	ship.add_pilot(pilot)
+	Logger.log(["Spawn complete for ", pilot], Logger.MessageType.SUCCESS)
 	
 
 func find_pilot_by_network_id(id: int) -> Pilot:
@@ -90,7 +92,6 @@ func find_pilot_by_network_id(id: int) -> Pilot:
 		print("Found pilot: ", pilot, " ", pilot._multiplayer_id)
 		if pilot._multiplayer_id == id:
 			return pilot
-	
 	return null
 	
 
