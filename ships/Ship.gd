@@ -109,7 +109,10 @@ func add_passenger(pilot: Pilot):
 		camera.far = 30000
 		camera.near = 0.3
 		camera.current = true
-	pilot.reparent($Crew)
+	if pilot.get_parent():
+		pilot.reparent($Crew)
+	else:
+		$Crew.add_child(pilot)
 
 
 func add_pilot(pilot: Pilot):
