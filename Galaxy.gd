@@ -78,10 +78,17 @@ func request_spawn(system_name, spawner_name):
 	system.get_node("ships").add_child(ship, true)
 	ship.global_transform.origin = spawn_position
 	ship.connect("destroyed", player_died)
-	var pilot := find_pilot_by_network_id(peer_id)
-	Logger.log(["Pilot ID: ", peer_id, " Pilot name: ", pilot, "Ship: ", ship], Logger.MessageType.INFO)
+	
+	var old_pilot: Pilot = find_pilot_by_network_id(peer_id)
+	var pilot: Pilot = preload("res://ship_systems/pilots/Pilot.tscn").instantiate()
+	pilot.name = old_pilot.name
+	pilot.faction = pilot.faction
+	pilot._player_pilot_id = old_pilot._player_pilot_id
+	old_pilot.queue_free()
 	ship.add_captain(pilot)
 	ship.add_pilot(pilot)
+	pilot.multiplayer_id = old_pilot.multiplayer_id
+	
 	Logger.log(["Spawn complete for ", pilot], Logger.MessageType.SUCCESS)
 	
 
@@ -89,13 +96,13 @@ func find_pilot_by_network_id(id: int) -> Pilot:
 	print("Searching for pilots with id: ", id)
 	print("Pilots: ", $Systems.find_children("*", "Pilot", true, false))
 	for pilot in $Systems.find_children("*", "Pilot", true, false):
-		print("Found pilot: ", pilot, " ", pilot._multiplayer_id)
-		if pilot._multiplayer_id == id:
+		print("Found pilot: ", pilot, " ", pilot.multiplayer_id)
+		if pilot.multiplayer_id == id:
 			return pilot
 	return null
 	
 
-func _on_spawn_picker_request_spawn(system_name, spawner_name):	
+func _on_spawn_picker_request_spawn(system_name, spawner_name):
 	rpc("request_spawn", system_name, spawner_name)
 	$CanvasLayer/spawn_picker.visible = false
 	
@@ -157,6 +164,7 @@ func finish_setup_galaxy_all() -> void:
 		var b5commander: Pilot = pilot.instantiate()
 		b5commander.name = "Commendar Eclair"
 		b5commander.faction = $"Factions/Earth Alliance/Babylon 5"
+		b5commander.set_multiplayer_authority(multiplayer.get_unique_id())
 		$"Systems/test_system/SubViewport/stations/Babylon 5".add_captain(b5commander)
 
 
@@ -183,12 +191,11 @@ func request_faction(faction_name):
 	var pilot = preload("res://ship_systems/pilots/Pilot.tscn")
 	var player_pilot: Pilot = pilot.instantiate()
 	player_pilot.faction = $Factions.get_faction(faction_name)
-	player_pilot._multiplayer_id = multiplayer.get_remote_sender_id()
 	var player: Player = $Players.find_player_by_netid(multiplayer.get_remote_sender_id())
 	player_pilot.name = player.name
 	player_pilot._player_pilot_id = player.player_id
 	$"Systems/test_system/SubViewport/stations/Babylon 5".add_passenger(player_pilot)
-	#$Systems/PilotLimbo.add_child(player_pilot)
+	player_pilot.multiplayer_id = multiplayer.get_remote_sender_id()
 	Logger.log(["Created pilot: ", player_pilot, " in faction ", player_pilot.faction], Logger.MessageType.SUCCESS)
 
 

@@ -5,9 +5,9 @@ extends Node
 # If this is the player, set the id to 0 or more
 # Cache the pilot ID in here
 @export var _player_pilot_id: int
-@export var _multiplayer_id: int:
+@export var multiplayer_id: int:
 	set(id):
-		_multiplayer_id = id
+		multiplayer_id = id
 		# Give authority over the player input to the appropriate peer.
 		$InputsSync.set_multiplayer_authority(id)
 		$PilotSync.set_multiplayer_authority(id)

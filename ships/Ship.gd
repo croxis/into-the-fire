@@ -19,7 +19,7 @@ class_name Ship
 var faction: Faction:
 	get:
 		if ($Crew.captain):
-			return $Crew.captain.faction
+			return $Crew.get_node($Crew.captain).faction
 		else:
 			return null
 
@@ -85,51 +85,32 @@ func _ready():
 
 
 func add_captain(pilot: Pilot):
-	if $Crew.captain:
-		return
-	$Crew.captain = pilot
-	if (multiplayer.get_unique_id() == pilot._multiplayer_id):
-		camera.far = 30000
-		camera.near = 0.3
-		camera.current = true
-	$Crew.add_child(pilot)
+	Logger.log(["Adding captain: ", pilot.multiplayer_id, " on ", self], Logger.MessageType.QUESTION)
+	if $Crew.set_captain(pilot) and pilot.multiplayer_id:
+		set_camera.rpc_id(pilot.multiplayer_id)
 
 
 func add_passenger(pilot: Pilot):
-	Logger.log(["Adding pilot ", pilot, "to ship ", self], Logger.MessageType.QUESTION)
-	var max_capacity: int = $Crew.max_passengers
-	if $Crew.pilot:
-		max_capacity += 1
-	if $Crew.captain:
-		max_capacity += 1
-	if $Crew.get_child_count() >= max_capacity:
-		Logger.log(["Too many passengers."], Logger.MessageType.WARNING)
-		return
-	if (multiplayer.get_unique_id() == pilot._multiplayer_id):
-		camera.far = 30000
-		camera.near = 0.3
-		camera.current = true
-	if pilot.get_parent():
-		pilot.reparent($Crew)
-	else:
-		$Crew.add_child(pilot)
+	if $Crew.add_passenger(pilot) and pilot.multiplayer_id:
+		set_camera.rpc_id(pilot.multiplayer_id)
 
 
 func add_pilot(pilot: Pilot):
-	if $Crew.pilot:
-		return
-	$Crew.pilot = pilot
-	if (multiplayer.get_unique_id() == pilot._multiplayer_id):
-		camera.far = 30000
-		camera.near = 0.3
-		camera.current = true
-	$Crew.add_child(pilot)
+	Logger.log(["Adding pilot: ", pilot.multiplayer_id, " on ", self], Logger.MessageType.QUESTION)
+	if $Crew.set_pilot(pilot) and pilot.multiplayer_id:
+		set_camera.rpc_id(pilot.multiplayer_id)
+
+
+@rpc("call_local")
+func set_camera():
+	Logger.log(["Setting Camera"], Logger.MessageType.QUESTION)
+	camera.far = 30000
+	camera.near = 0.3
+	camera.current = true
 		
 
 func _input(event):
 	if event.is_action_pressed("debug_kill"):
-		print_debug("Debug kill request by ", multiplayer.get_unique_id())
-		#health = -1
 		rpc("debug_set_health", -1)
 	if event.is_action_pressed("autobreak_toggle"):
 		rpc("autobreak_toggle")
@@ -139,7 +120,6 @@ func _input(event):
 
 @rpc("any_peer")
 func debug_set_health(new_health):
-	print("RPC called by: ", multiplayer.get_remote_sender_id())
 	health = new_health
 
 
@@ -278,7 +258,6 @@ func _physics_process(dt: float) -> void:
 			#thruster_control_vector += $Engines.twelve_control_vectors[2 * i] * user_input_vector[i]
 			var tcv = $Engines.twelve_control_vectors[2 * i]
 			var uiv = user_input_vector[i]
-			print_debug(tcv, " ", uiv)
 			thruster_control_vector += tcv * uiv
 		else:
 			# Use negative Torque or Force ControlVector, also negate component since its negative
@@ -297,7 +276,6 @@ func _physics_process(dt: float) -> void:
 
 
 func bullet_hit(damage, bullet_global_trans):
-	print_debug("Hit")
 	var BASE_BULLET_BOOST = 1
 	var direction_vect = bullet_global_trans.basis.z.normalized() * BASE_BULLET_BOOST
 	apply_impulse((bullet_global_trans.origin - global_transform.origin).normalized(), direction_vect * damage)
@@ -305,7 +283,6 @@ func bullet_hit(damage, bullet_global_trans):
 
 
 func destroy() -> void:
-	print_debug("Destroyed: ", _player_pilot_id)
 	emit_signal("destroyed", _player_pilot_id)
 	queue_free()
 
