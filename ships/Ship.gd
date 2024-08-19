@@ -16,12 +16,7 @@ class_name Ship
 		else:
 			return -1
 
-var faction: Faction:
-	get:
-		if ($Crew.captain):
-			return $Crew.get_node($Crew.captain).faction
-		else:
-			return null
+@export var faction_name: String
 
 @export_node_path("Camera3D") var camera_path: NodePath
 @onready var camera: Camera3D = get_node_or_null(camera_path)
@@ -85,8 +80,11 @@ func _ready():
 
 
 func add_captain(pilot: Pilot):
-	Logger.log(["Adding captain: ", pilot.multiplayer_id, " on ", self], Logger.MessageType.QUESTION)
+	Logger.log(["Adding captain: ", pilot.multiplayer_id, " on ", self], Logger.MessageType.INFO)
 	if $Crew.set_captain(pilot) and pilot.multiplayer_id:
+		# This does not work as the pilot does not have a multiplayer_id when it is added.
+		# This is because the multiplayerspawner only seems to work when multiplayer 
+		# authority is set AFTER the pilot is child to a parent.
 		set_camera.rpc_id(pilot.multiplayer_id)
 
 
@@ -96,8 +94,9 @@ func add_passenger(pilot: Pilot):
 
 
 func add_pilot(pilot: Pilot):
-	Logger.log(["Adding pilot: ", pilot.multiplayer_id, " on ", self], Logger.MessageType.QUESTION)
+	Logger.log(["Adding pilot: ", pilot.multiplayer_id, " on ", self], Logger.MessageType.INFO)
 	if $Crew.set_pilot(pilot) and pilot.multiplayer_id:
+		Logger.log(["Requesting camera rpc"], Logger.MessageType.QUESTION)
 		set_camera.rpc_id(pilot.multiplayer_id)
 
 

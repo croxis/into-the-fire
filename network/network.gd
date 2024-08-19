@@ -103,8 +103,8 @@ func _authenticate_callback(peer_id: int, data: PackedByteArray):
 	multiplayer.complete_auth(peer_id)
 
 
-func _auth_failed(peer):
-	auth_failed.emit(peer, "")
+func _auth_failed(client_peer):
+	auth_failed.emit(client_peer, "")
 
 
 # Client
@@ -172,12 +172,12 @@ func _client_auth_callback(client_id: int, buf : PackedByteArray):
 	multiplayer.complete_auth(1)
 
 
-func _refuse(peer, p_msg:=""):
-	multiplayer.disconnect_peer(peer)
-	pending.erase(peer)
-	_auth_failed(peer)
-	auth_failed.emit(peer, p_msg)
+func _refuse(server_peer, p_msg:=""):
+	multiplayer.disconnect_peer(server_peer)
+	pending.erase(server_peer)
+	_auth_failed(server_peer)
+	auth_failed.emit(server_peer, p_msg)
 
 
-func _on_main_menu_join_game(ip, port, player_name, server_password, player_password):
-	join_game(ip, port, player_name, server_password, player_password)
+func _on_main_menu_join_game(ip, port, p_name, s_password, p_password):
+	join_game(ip, port, p_name, s_password, p_password)

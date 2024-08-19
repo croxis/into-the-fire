@@ -11,6 +11,6 @@ func save_players(data):
 		print("An error happened while saving data: ", error)
 
 
-func _on_main_menu_new_game(gname, player_name, port, server_password):
+func _on_main_menu_new_game(gname, _player_name, _port, _server_password):
 	game_name = gname
 	save_path = "user://" + game_name + "/"

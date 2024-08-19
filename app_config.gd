@@ -47,7 +47,7 @@ func get_value(section: String, key: String, default: Variant = null):
 
 
 func gen_random_password(length: int) -> String:
-	var output_string
+	var output_string := ""
 	for i in range(length):
 		output_string += chars[randi() % chars.length()]
 	return output_string

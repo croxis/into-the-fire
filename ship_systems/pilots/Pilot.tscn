@@ -7,6 +7,12 @@
 properties/0/path = NodePath(".:_player_pilot_id")
 properties/0/spawn = true
 properties/0/replication_mode = 2
+properties/1/path = NodePath(".:_faction_name")
+properties/1/spawn = true
+properties/1/replication_mode = 2
+properties/2/path = NodePath(".:multiplayer_id")
+properties/2/spawn = true
+properties/2/replication_mode = 1
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_hiqvf"]
 properties/0/path = NodePath(".:throttle")

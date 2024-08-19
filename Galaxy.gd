@@ -39,8 +39,6 @@ func player_died(player_id: int) -> void:
 
 
 func player_enter_system(system_name) -> void:
-	#TODO: This needs to be this client only
-	print_debug("Sizing: ", DisplayServer.window_get_size()," for ", system_name )
 	var system: SubViewportContainer = get_node("Systems/" + system_name)
 	system.get_node("SubViewport").size = DisplayServer.window_get_size()
 	system.visible = true
@@ -82,21 +80,17 @@ func request_spawn(system_name, spawner_name):
 	var old_pilot: Pilot = find_pilot_by_network_id(peer_id)
 	var pilot: Pilot = preload("res://ship_systems/pilots/Pilot.tscn").instantiate()
 	pilot.name = old_pilot.name
-	pilot.faction = pilot.faction
+	pilot._faction_name = old_pilot._faction_name
 	pilot._player_pilot_id = old_pilot._player_pilot_id
-	old_pilot.queue_free()
-	ship.add_captain(pilot)
 	ship.add_pilot(pilot)
 	pilot.multiplayer_id = old_pilot.multiplayer_id
-	
+	old_pilot.queue_free()
+	ship.set_camera.rpc_id(pilot.multiplayer_id)
 	Logger.log(["Spawn complete for ", pilot], Logger.MessageType.SUCCESS)
 	
 
 func find_pilot_by_network_id(id: int) -> Pilot:
-	print("Searching for pilots with id: ", id)
-	print("Pilots: ", $Systems.find_children("*", "Pilot", true, false))
 	for pilot in $Systems.find_children("*", "Pilot", true, false):
-		print("Found pilot: ", pilot, " ", pilot.multiplayer_id)
 		if pilot.multiplayer_id == id:
 			return pilot
 	return null
@@ -163,9 +157,9 @@ func finish_setup_galaxy_all() -> void:
 		var pilot = preload("res://ship_systems/pilots/Pilot.tscn")
 		var b5commander: Pilot = pilot.instantiate()
 		b5commander.name = "Commendar Eclair"
-		b5commander.faction = $"Factions/Earth Alliance/Babylon 5"
-		b5commander.set_multiplayer_authority(multiplayer.get_unique_id())
+		b5commander.set_faction($"Factions/Earth Alliance/Babylon 5")
 		$"Systems/test_system/SubViewport/stations/Babylon 5".add_captain(b5commander)
+		b5commander.multiplayer_id = multiplayer.get_unique_id()
 
 
 func finish_setup_galaxy_client():
@@ -190,13 +184,14 @@ func request_faction(faction_name):
 		return
 	var pilot = preload("res://ship_systems/pilots/Pilot.tscn")
 	var player_pilot: Pilot = pilot.instantiate()
-	player_pilot.faction = $Factions.get_faction(faction_name)
+	player_pilot.set_faction($Factions.get_faction(faction_name))
 	var player: Player = $Players.find_player_by_netid(multiplayer.get_remote_sender_id())
 	player_pilot.name = player.name
 	player_pilot._player_pilot_id = player.player_id
+	#player_pilot.multiplayer_id = multiplayer.get_remote_sender_id()
 	$"Systems/test_system/SubViewport/stations/Babylon 5".add_passenger(player_pilot)
 	player_pilot.multiplayer_id = multiplayer.get_remote_sender_id()
-	Logger.log(["Created pilot: ", player_pilot, " in faction ", player_pilot.faction], Logger.MessageType.SUCCESS)
+	Logger.log(["Created pilot: ", player_pilot, " in faction ", player_pilot._faction_name, " with mpid: ", player_pilot.multiplayer_id], Logger.MessageType.SUCCESS)
 
 
 func _on_network_connection_succeeded() -> void:

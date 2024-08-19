@@ -158,4 +158,3 @@ func camera_automatic_panning(delta: float) -> void:
 		if current_mouse_position.y > viewport_size.y / 2:
 			pan_direction.y = 1
 		translate(Vector3(0, 0, pan_direction.y * delta * camera_automatic_pan_speed)) # Remember in 3D z is screen up
-

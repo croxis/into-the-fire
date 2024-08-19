@@ -43,6 +43,9 @@ properties/10/replication_mode = 2
 properties/11/path = NodePath("Crew:pilot")
 properties/11/spawn = true
 properties/11/replication_mode = 2
+properties/12/path = NodePath(".:faction_name")
+properties/12/spawn = true
+properties/12/replication_mode = 2
 
 [node name="Ship" type="RigidBody3D"]
 can_sleep = false

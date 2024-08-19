@@ -46,6 +46,5 @@ func load_scene(path, node: Node, make_active_scene: bool, show_load_screen = fa
 		visible = show_load_screen
 
 
-func _on_galaxy_load_scene(path, node, make_active_scene, show_load_screen, callback):
-	print("_on_galaxy: ", path, node)
-	load_scene(path, node, make_active_scene, show_load_screen, callback)
+func _on_galaxy_load_scene(path, node, make_active_scene, show_load_screen, cback):
+	load_scene(path, node, make_active_scene, show_load_screen, cback)
