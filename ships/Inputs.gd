@@ -1,6 +1,5 @@
 extends MultiplayerSynchronizer
 
-
 # For now throttle is capped at  1. In the future we can boost power to engines.
 @export var throttle: Vector3 = Vector3():
 	set(value):

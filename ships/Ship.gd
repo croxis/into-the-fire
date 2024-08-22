@@ -16,6 +16,13 @@ class_name Ship
 		else:
 			return -1
 
+var multiplayer_pilot_id: int:
+	get:
+		if ($Crew.pilot):
+			return $Crew.pilot.multiplayer_id
+		else:
+			return -1
+
 @export var faction_name: String
 
 @export_node_path("Camera3D") var camera_path: NodePath
@@ -34,7 +41,6 @@ class_name Ship
 
 var health := max_health:
 	set(new_health):
-		print_debug("New Health: ", new_health)
 		health = new_health
 		if has_node("SubViewportCenter"):
 			$SubViewportCenter/center_ui.set_health(health)
@@ -57,20 +63,9 @@ var has_spawn_points := true
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	# If in editor simply disable processing as it's not needed here
-	if (Engine.is_editor_hint()):
-		set_physics_process(false)
 	Logger.log(["Creating ship with id: ", ship_id, ". Name: ", name], Logger.MessageType.QUESTION)
-	
-	#TODO: Change to when pilot joins
-	#if (multiplayer.get_unique_id() == _player_pilot_id):
-		# Set the camera
-		#camera.set_znear(0.3)  # This should be set per ship
-	#	camera.far = 30000
-		# Ensure it is the active one
-	#	camera.current = true
-	#	print_debug("Setting camera")
-	#inputs.set_multiplayer_authority(_player_pilot_id)
-	
+	if (Engine.is_editor_hint()):
+		set_physics_process(false)	
 	can_sleep = false
 	target_rot = rotation
 	if has_node("$SubViewportCenter"):
@@ -149,11 +144,11 @@ func _integrate_forces(state: PhysicsDirectBodyState3D):
 func _physics_process(dt: float) -> void:
 	if is_station:
 		return
-	if not $Crew.pilot:
+	if not $Crew.pilot_name:
 		return
 	# For now throttle is capped at  1. In the future we can boost power to engines.
 	# In Godot 3.2 add_force is cleared every physics frame
-	if multiplayer.multiplayer_peer == null or multiplayer.get_unique_id() == _player_pilot_id:
+	if multiplayer.multiplayer_peer == null or multiplayer.get_unique_id() == multiplayer_pilot_id:
 		# The client which this player represent will update the controls state, and notify it to everyone.
 		inputs.update()
 		

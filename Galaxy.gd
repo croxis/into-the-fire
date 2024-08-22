@@ -78,12 +78,12 @@ func request_spawn(system_name, spawner_name):
 	ship.connect("destroyed", player_died)
 	
 	var old_pilot: Pilot = find_pilot_by_network_id(peer_id)
-	var pilot: Pilot = preload("res://ship_systems/pilots/Pilot.tscn").instantiate()
-	pilot.name = old_pilot.name
+	var pilot: Pilot = ship.get_node("CrewMultiplayerSpawner").spawn({"name": old_pilot.name, "multiplayer_id": old_pilot.multiplayer_id})
+	#pilot.name = old_pilot.name
 	pilot._faction_name = old_pilot._faction_name
 	pilot._player_pilot_id = old_pilot._player_pilot_id
 	ship.add_pilot(pilot)
-	pilot.multiplayer_id = old_pilot.multiplayer_id
+	#pilot.multiplayer_id = old_pilot.multiplayer_id
 	old_pilot.queue_free()
 	ship.set_camera.rpc_id(pilot.multiplayer_id)
 	Logger.log(["Spawn complete for ", pilot], Logger.MessageType.SUCCESS)
@@ -138,13 +138,13 @@ func setup_new_galaxy(dedicated=false, callback = null):
 		print("Galaxy already initalized")
 
 
-func _on_main_menu_new_game(g_name, player_name, port, server_password, player_password):
+func _on_main_menu_new_game(g_name, _player_name, _port, _server_password, _player_password):
 	game_name = g_name
 	var callback := Callable(self, "finish_setup_galaxy_client")
 	setup_new_galaxy(false, callback)
 
 
-func _on_main_menu_join_game(ip, port, player_name, server_password, player_password):
+func _on_main_menu_join_game(_ip, _port, _player_name, _server_password, _player_password):
 	pass
 
 
@@ -188,9 +188,9 @@ func request_faction(faction_name):
 	var player: Player = $Players.find_player_by_netid(multiplayer.get_remote_sender_id())
 	player_pilot.name = player.name
 	player_pilot._player_pilot_id = player.player_id
-	#player_pilot.multiplayer_id = multiplayer.get_remote_sender_id()
-	$"Systems/test_system/SubViewport/stations/Babylon 5".add_passenger(player_pilot)
 	player_pilot.multiplayer_id = multiplayer.get_remote_sender_id()
+	$"Systems/test_system/SubViewport/stations/Babylon 5".add_passenger(player_pilot)
+	player_pilot.set_multiplayer_id(multiplayer.get_remote_sender_id())
 	Logger.log(["Created pilot: ", player_pilot, " in faction ", player_pilot._faction_name, " with mpid: ", player_pilot.multiplayer_id], Logger.MessageType.SUCCESS)
 
 

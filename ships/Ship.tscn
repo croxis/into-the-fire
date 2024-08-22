@@ -1,10 +1,11 @@
-[gd_scene load_steps=7 format=3 uid="uid://bhhs2v02syo8j"]
+[gd_scene load_steps=8 format=3 uid="uid://bhhs2v02syo8j"]
 
 [ext_resource type="Script" path="res://ships/Ship.gd" id="1_lh74f"]
 [ext_resource type="Script" path="res://ship_systems/weapons/Guns.gd" id="2_b1wmj"]
 [ext_resource type="Script" path="res://ships/Engines.gd" id="4_ob5l3"]
 [ext_resource type="PackedScene" uid="uid://hivg2o6wgagj" path="res://ships/PID.tscn" id="5_itaim"]
 [ext_resource type="Script" path="res://ships/crew.gd" id="5_tgeno"]
+[ext_resource type="Script" path="res://ships/crew_multiplayer_spawner.gd" id="6_1a8so"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_2c0xb"]
 properties/0/path = NodePath(".:linear_velocity")
@@ -37,13 +38,13 @@ properties/8/replication_mode = 2
 properties/9/path = NodePath(".:ship_id")
 properties/9/spawn = true
 properties/9/replication_mode = 2
-properties/10/path = NodePath("Crew:captain")
+properties/10/path = NodePath(".:faction_name")
 properties/10/spawn = true
 properties/10/replication_mode = 2
-properties/11/path = NodePath("Crew:pilot")
+properties/11/path = NodePath("Crew:captain_name")
 properties/11/spawn = true
 properties/11/replication_mode = 2
-properties/12/path = NodePath(".:faction_name")
+properties/12/path = NodePath("Crew:pilot_name")
 properties/12/spawn = true
 properties/12/replication_mode = 2
 
@@ -81,3 +82,4 @@ script = ExtResource("5_tgeno")
 [node name="CrewMultiplayerSpawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("res://ship_systems/pilots/Pilot.tscn")
 spawn_path = NodePath("../Crew")
+script = ExtResource("6_1a8so")

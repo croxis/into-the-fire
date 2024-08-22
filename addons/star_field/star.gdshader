@@ -30,24 +30,24 @@ float circle(vec2 position, float radius, float feather)
 
 void vertex() {
 	UV=UV*uv1_scale.xy+uv1_offset.xy;
-    
+
     // Calculate distance to camera, in parsecs
 	vec3 view_vertex = (MODELVIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	float distance_parsecs = distance(view_vertex, vec3(0.0, 0.0, 0.0));
-    
+
     // Calculate magnitude
     // https://github.com/tlareywi/Infinitarium/blob/master/Renderers/Vulkan/starsDefault.vert.glsl
     apparent_magnitude = INSTANCE_CUSTOM.x - 5.0 * ( 1.0 - log10(distance_parsecs));
-    
-    
+
+
     //https://astronomy.stackexchange.com/questions/33145/rendering-stars-in-3d-space-absmag-to-opengl-scale-values
 	// So, that is for individual pixel brightness, not the "size", boo
     // Luminocity has been pre-calculated. It is in INSTANCE_CUSTOM.y
     //https://github.com/paulhoux/Cinder-Samples/blob/master/Stars/assets/shaders/stars.vert
     //https://www.researchgate.net/publication/287031803_Single-pass_Rendering_of_Day_and_Night_Sky_Phenomena
-	
+
 	//2022.7.29: Consider this as an option: https://astronomy.stackexchange.com/questions/36406/best-way-to-simulate-star-sizes-to-scale-in-celestial-sphere?rq=1
-	
+
 	// 2022.07.31 Method https://erwanleroy.com/rendering-a-plausible-night-sky-making-stars-gizmo-part-2-2/
 	float base_point_size = sqrt(2);  // The minimum size needed to prevent aliasing issues
 	float intensity_ref = 1.0;
@@ -67,8 +67,8 @@ void fragment() {
         discard;
     }
 	ALBEDO = COLOR.rgb;
-	
-    float dist = length(POINT_COORD - vec2(0.5, 0.5)); 
+
+    float dist = length(POINT_COORD - vec2(0.5, 0.5));
     if (dist > 0.5f){
 		discard;
 	} else if (dist > 0.3f){
@@ -76,7 +76,7 @@ void fragment() {
     } else {
         //ALPHA = 0.1;
     }
-	
+
 	METALLIC = metallic;
 	ROUGHNESS = roughness;
 	SPECULAR = specular;
