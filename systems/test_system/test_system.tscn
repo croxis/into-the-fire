@@ -100,6 +100,7 @@ light_color = Color(0.360784, 0.223529, 1, 1)
 light_energy = 0.1
 
 [node name="BoltSpawner" type="MultiplayerSpawner" parent="SubViewport" index="4"]
+_spawnable_scenes = PackedStringArray("res://ship_systems/weapons/effects/bolt/Bolt.tscn")
 spawn_path = NodePath("../bolts")
 script = ExtResource("4_x4pox")
 
