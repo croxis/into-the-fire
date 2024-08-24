@@ -83,3 +83,7 @@ script = ExtResource("5_tgeno")
 _spawnable_scenes = PackedStringArray("res://ship_systems/pilots/Pilot.tscn")
 spawn_path = NodePath("../Crew")
 script = ExtResource("6_1a8so")
+
+[node name="Area3DDock" type="Area3D" parent="."]
+
+[connection signal="body_entered" from="Area3DDock" to="." method="_on_area_3d_dock_body_entered"]

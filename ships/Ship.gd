@@ -101,33 +101,10 @@ func set_camera():
 	camera.far = 30000
 	camera.near = 0.3
 	camera.current = true
-		
-
-func _input(event):
-	if event.is_action_pressed("debug_kill"):
-		rpc("debug_set_health", -1)
-	if event.is_action_pressed("autobreak_toggle"):
-		rpc("autobreak_toggle")
-	if event.is_action_pressed("autospin_toggle"):
-		rpc("autospin_toggle")
 
 
-@rpc("any_peer")
 func debug_set_health(new_health):
 	health = new_health
-
-
-@rpc("any_peer", "call_local")
-func autobreak_toggle():
-	autobreak = !autobreak
-	$SubViewportCenter/center_ui.set_autobreak(autobreak)
-
-
-@rpc("any_peer", "call_local")
-func autospin_toggle():
-	autospin = !autospin
-	target_rot = rotation
-	$SubViewportCenter/center_ui.set_autospin(autospin)
 
 
 func _integrate_forces(state: PhysicsDirectBodyState3D):
@@ -151,6 +128,17 @@ func _physics_process(dt: float) -> void:
 	if multiplayer.multiplayer_peer == null or multiplayer.get_unique_id() == multiplayer_pilot_id:
 		# The client which this player represent will update the controls state, and notify it to everyone.
 		inputs.update()
+	
+	if inputs.autobreak_toggle:
+		autobreak = !autobreak
+		$SubViewportCenter/center_ui.set_autobreak(autobreak)
+
+
+	if inputs.autospin_toggle:
+		autospin = !autospin
+		target_rot = rotation
+		Logger.log(["Requesting autospin set to ", autospin, " for ", self], Logger.MessageType.QUESTION)
+		$SubViewportCenter/center_ui.set_autospin(autospin)
 		
 	# Start of PID code
 	# https://raw.githubusercontent.com/itspacchu/GodotRocket/master/scripts/rocket.gd
@@ -235,7 +223,7 @@ func _physics_process(dt: float) -> void:
 	start_speed = linear_velocity.length()
 	return
 	
-	# Code below this was an attempt to make a realistic controler for thrusters
+	"""# Code below this was an attempt to make a realistic controler for thrusters
 	var stableize := false
 	
 	if stableize:
@@ -266,7 +254,7 @@ func _physics_process(dt: float) -> void:
 			thruster_control_vector[i] = thruster_control_vector[i] / absolute_maximum
 	
 	for i in range($Engines.thrusters.size()):
-		$Engines.thrusters[i].power = thruster_control_vector[i]
+		$Engines.thrusters[i].power = thruster_control_vector[i]"""
 
 
 func bullet_hit(damage, bullet_global_trans):
@@ -302,3 +290,7 @@ func find_free_spawner() -> Node3D:
 			bay = 1
 			slot = 1
 	return spawn_joint
+
+
+func _on_area_3d_dock_body_entered(body: Node3D) -> void:
+	Logger.log(["Ship entered dock:", body], Logger.MessageType.INFO)

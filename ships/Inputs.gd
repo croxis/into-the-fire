@@ -16,6 +16,7 @@ extends MultiplayerSynchronizer
 @export var fire_secondary: bool = false
 @export var autospin_toggle := false
 @export var autobreak_toggle := false
+@export var debug_kill_ship := false
 
 
 func _ready():
@@ -59,11 +60,11 @@ func update():
 	if (Input.is_action_pressed("counter_clockwise_full")):
 		rotation_throttle.z = 1
 	if (Input.is_action_pressed("debug_all_stop")):
-		print_debug("Debug all stop")
 		throttle = Vector3(0, 0, 0)
 		rotation_throttle = Vector3(0, 0, 0)
 		debug_all_stop = true
 	fire_primary = Input.is_action_pressed("fire_primary")
 	fire_secondary = Input.is_action_pressed("fire_secondary")
-	#autobreak_toggle = Input.is_action_pressed("autobreak_toggle")
-	#autospin_toggle = Input.is_action_pressed("autospin_toggle")
+	autobreak_toggle = Input.is_action_just_pressed("autobreak_toggle")
+	autospin_toggle = Input.is_action_just_pressed("autospin_toggle")
+	debug_kill_ship = Input.is_action_just_pressed("debug_kill")
