@@ -49,3 +49,10 @@ func add_passenger(passenger: Pilot) -> bool:
 	else:
 		add_child(passenger)
 	return true
+
+
+func _on_child_exiting_tree(node: Node) -> void:
+	if node.name == captain_name:
+		captain_name = ""
+	if node.name == pilot_name:
+		pilot_name = ""

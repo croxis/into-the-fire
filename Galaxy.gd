@@ -1,3 +1,4 @@
+class_name Galaxy
 extends Node
 
 var PlayerScene := preload("res://ships/earth alliance/aurora_starfury/auora_starfury.tscn")
@@ -52,7 +53,7 @@ func show_spawn(faction: Faction) -> void:
 
 
 @rpc("any_peer", "call_local")
-func request_spawn(system_name, spawner_name):
+func request_spawn(system_name: String, spawner_name: String):
 	if not multiplayer.is_server():
 		return
 	var peer_id := multiplayer.get_remote_sender_id()

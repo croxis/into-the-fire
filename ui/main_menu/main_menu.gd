@@ -144,4 +144,3 @@ func _on_option_button_msaa_item_selected(index):
 	print_debug("Set msaa: ", index)
 	AppConfig.set_value("graphics", "msaa", index)
 	set_msaa.emit(index)
-

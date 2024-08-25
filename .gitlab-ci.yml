@@ -10,7 +10,7 @@ cache:
     - .godot/imported
 
 stages:
-  - import-assets
+  #- import-assets
   - export
   - deploy
 

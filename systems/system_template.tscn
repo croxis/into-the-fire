@@ -1,11 +1,16 @@
-[gd_scene load_steps=2 format=3 uid="uid://dnx0pyfaqlkqi"]
+[gd_scene load_steps=6 format=3 uid="uid://dnx0pyfaqlkqi"]
 
 [ext_resource type="PackedScene" uid="uid://1tfn6krikklo" path="res://ui/cameras/RTSCamera.tscn" id="1_iuvpb"]
+[ext_resource type="Script" path="res://systems/system_template.gd" id="1_y2tf5"]
+[ext_resource type="Script" path="res://systems/BoltSpawner.gd" id="2_05tas"]
+[ext_resource type="Script" path="res://systems/test_system/ShipSpawner.gd" id="3_hjsre"]
+[ext_resource type="Script" path="res://addons/star_field/star_field_manager.gd" id="4_swkmc"]
 
 [node name="System" type="SubViewportContainer"]
 visible = false
 offset_right = 40.0
 offset_bottom = 40.0
+script = ExtResource("1_y2tf5")
 
 [node name="SubViewport" type="SubViewport" parent="."]
 own_world_3d = true
@@ -18,3 +23,29 @@ render_target_update_mode = 0
 
 [node name="RtsCamera" parent="SubViewport/RTSCameras" instance=ExtResource("1_iuvpb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 100, 0)
+
+[node name="bolts" type="Node3D" parent="SubViewport"]
+
+[node name="stations" type="Node3D" parent="SubViewport"]
+
+[node name="ships" type="Node3D" parent="SubViewport"]
+
+[node name="StationSpawner" type="MultiplayerSpawner" parent="SubViewport"]
+_spawnable_scenes = PackedStringArray("res://ships/earth alliance/babylon 5/babylon_5.tscn")
+spawn_path = NodePath("../stations")
+
+[node name="BoltSpawner" type="MultiplayerSpawner" parent="SubViewport"]
+_spawnable_scenes = PackedStringArray("res://ship_systems/weapons/effects/bolt/Bolt.tscn")
+spawn_path = NodePath("../bolts")
+script = ExtResource("2_05tas")
+
+[node name="ShipSpawner" type="MultiplayerSpawner" parent="SubViewport"]
+_spawnable_scenes = PackedStringArray("res://ships/earth alliance/aurora_starfury/auora_starfury.tscn", "res://ship_systems/pilots/Pilot.tscn")
+spawn_path = NodePath("../ships")
+script = ExtResource("3_hjsre")
+
+[node name="StarField" type="Node3D" parent="SubViewport"]
+script = ExtResource("4_swkmc")
+use_active_camera = true
+mag_ref = 7.0
+star_labels_visible = false

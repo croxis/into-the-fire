@@ -37,7 +37,9 @@ var multiplayer_pilot_id: int:
 
 @export var max_health := 100
 @export var is_station := false
+@export var is_capital := false
 
+var galaxy: Galaxy
 
 var health := max_health:
 	set(new_health):
@@ -71,6 +73,7 @@ func _ready():
 	if has_node("$SubViewportCenter"):
 		$SubViewportCenter/center_ui.set_autobreak(autobreak)
 		$SubViewportCenter/center_ui.set_autospin(autospin)
+	galaxy = get_tree().root.get_node("entry/Galaxy")
 	Logger.log(["Ship created: ", ship_id], Logger.MessageType.SUCCESS)
 
 
@@ -86,6 +89,14 @@ func add_captain(pilot: Pilot):
 func add_passenger(pilot: Pilot):
 	if $Crew.add_passenger(pilot) and pilot.multiplayer_id:
 		set_camera.rpc_id(pilot.multiplayer_id)
+		set_capital_ui.rpc_id(pilot.multiplayer_id)
+
+
+func get_crew() -> Array[Pilot]:
+	var crew: Array[Pilot] = []
+	for c in $Crew.get_children():
+		crew.append(c)
+	return crew
 
 
 func add_pilot(pilot: Pilot):
@@ -101,6 +112,12 @@ func set_camera():
 	camera.far = 30000
 	camera.near = 0.3
 	camera.current = true
+
+
+@rpc("call_local")
+func set_capital_ui():
+	if is_capital or is_station:
+		$CapitalShipControl.visible = true
 
 
 func debug_set_health(new_health):
@@ -180,6 +197,7 @@ func _physics_process(dt: float) -> void:
 		rotation_throttle = Vector3(pidx, pidy, pidz)
 				
 	if autobreak:
+		#TODO: Change to pid
 		var local_velocity := global_transform.basis.transposed() * linear_velocity
 		if -0.009 < throttle.x and throttle.x < 0.009:
 			if local_velocity.x > 5:
@@ -208,9 +226,7 @@ func _physics_process(dt: float) -> void:
 				throttle.z = 1
 			elif local_velocity.z < 0:
 				throttle.z = 0.2
-			
-		
-	#print_debug(target_rot.z, " ", rotation.z, " ", rotation_throttle.z)
+	
 	$Engines.request_thrust(throttle, rotation_throttle)
 	
 	for thruster in $Engines.thrusters:
@@ -272,9 +288,6 @@ func destroy() -> void:
 func find_free_spawner() -> Node3D:
 	var search = true
 	var spawn_joint
-	print_debug("Children: ", get_child_count())
-	for c in get_children():
-		print(c)
 	var spawners := $rotation/Cobra_Bays/Spawner
 	while search:
 		#if get_node("rotation/Cobra_Bays/Spawner/Bay" + str(bay) + "/" + str(slot) + "/Area3D").get_overlapping_bodies().is_empty():
@@ -292,5 +305,20 @@ func find_free_spawner() -> Node3D:
 	return spawn_joint
 
 
-func _on_area_3d_dock_body_entered(body: Node3D) -> void:
+func _on_area_3d_dock_body_entered(body: Ship) -> void:
 	Logger.log(["Ship entered dock:", body], Logger.MessageType.INFO)
+	body.get_node("Crew").captain_name = ""
+	body.get_node("Crew").pilot_name = ""
+	for c in body.get_crew():
+		add_passenger(c)
+	body.queue_free()
+
+
+func _on_crew_child_exiting_tree(node: Node) -> void:
+	$CapitalShipControl.visible = false
+
+
+func _on_button_launch_pressed() -> void:
+	var system_name := get_parent().get_parent().get_parent().name
+	galaxy.rpc("request_spawn", system_name, name)
+	$CapitalShipControl.visible = false
