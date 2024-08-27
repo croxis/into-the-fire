@@ -702,6 +702,7 @@ size = Vector3(17.2803, 9.06311, 9.61979)
 mass = 48000.0
 camera_path = NodePath("Starfury_CPEjection_Pod/Starfury_Pilot/Camera3DPilot")
 ship_class = "Auora"
+autobreak = true
 
 [node name="Guns" parent="." index="1"]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 8.02169e-05, 0, -0.0104009)
@@ -715,6 +716,7 @@ bolt_resource = ExtResource("3_esua1")
 
 [node name="AudioStreamPlayer3D" parent="Guns/Gun" index="0"]
 stream = ExtResource("4_ne3i3")
+volume_db = -10.0
 
 [node name="Gun2" parent="Guns" index="1" instance=ExtResource("2_0j46h")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.00127, -1.73706, 4.77451)
@@ -725,6 +727,7 @@ bolt_resource = ExtResource("3_esua1")
 
 [node name="AudioStreamPlayer3D" parent="Guns/Gun2" index="0"]
 stream = ExtResource("4_ne3i3")
+volume_db = -10.0
 
 [node name="Gun3" parent="Guns" index="2" instance=ExtResource("2_0j46h")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.44258, 0.553743, 4.25554)
@@ -735,6 +738,7 @@ bolt_resource = ExtResource("3_esua1")
 
 [node name="AudioStreamPlayer3D" parent="Guns/Gun3" index="0"]
 stream = ExtResource("4_ne3i3")
+volume_db = -10.0
 
 [node name="Gun4" parent="Guns" index="3" instance=ExtResource("2_0j46h")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.46376, 0.554, 4.25583)
@@ -745,6 +749,7 @@ bolt_resource = ExtResource("3_esua1")
 
 [node name="AudioStreamPlayer3D" parent="Guns/Gun4" index="0"]
 stream = ExtResource("4_ne3i3")
+volume_db = -10.0
 
 [node name="Engines" parent="." index="2"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.28609)
@@ -1008,6 +1013,9 @@ data = ExtResource("18_u5ira")
 
 [node name="Crew" parent="." index="14"]
 max_passengers = 1
+
+[node name="HBoxContainer" parent="CapitalShipControl" index="0"]
+layout_mode = 0
 
 [editable path="Guns/Gun"]
 [editable path="Guns/Gun2"]

@@ -33,7 +33,7 @@ var multiplayer_pilot_id: int:
 @export var target_rot = Vector3(0,0,0)
 @export var target_pos = Vector3(0,0,0)
 @export var autospin := false
-@export var autobreak := true
+@export var autobreak := false
 
 @export var max_health := 100
 @export var is_station := false
