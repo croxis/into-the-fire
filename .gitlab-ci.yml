@@ -10,7 +10,7 @@ cache:
     - .godot/imported
 
 stages:
-  #- import-assets
+  - import-assets
   - export
   - deploy
 
@@ -18,10 +18,10 @@ variables:
   EXPORT_NAME: itf
 
 # Open the editor to import assets in case the cache was empty or outdated
-#import-assets:
-#  stage: import-assets
-#  script:
-#    - godot --verbose --editor --quit --headless
+import-assets:
+  stage: import-assets
+  script:
+    - godot --verbose --headless --import
 
 linux:
   stage: export

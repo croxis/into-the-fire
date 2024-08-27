@@ -190,10 +190,7 @@ func _physics_process(dt: float) -> void:
 		var pidrx = $PIDS/PID_rotate_X._update(err_rot_x,dt)
 		var pidry = $PIDS/PID_rotate_Y._update(err_rot_y,dt)
 		var pidrz = $PIDS/PID_rotate_Z._update(err_rot_z,dt)
-		
-		#DebugDraw3D.draw_arrow_ray(self.global_position, target_rot, 100, Color.MAGENTA, 10.0)
-		#print_debug(self.global_position, target_rot)
-		#print_debug(target_rot.x, " ", rx, " ", pidx)
+
 		rotation_throttle = Vector3(pidrx, pidry, pidrz)
 				
 	if autobreak:
