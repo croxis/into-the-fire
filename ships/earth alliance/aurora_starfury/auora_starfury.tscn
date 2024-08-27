@@ -993,7 +993,8 @@ kp = 1.0
 kd = 2.0
 
 [node name="PID_X" parent="PIDS" index="3"]
-kp = 0.1
+kp = 0.5
+kd = 0.1
 
 [node name="PID_Y" parent="PIDS" index="4"]
 kp = 0.1
@@ -1013,9 +1014,6 @@ data = ExtResource("18_u5ira")
 
 [node name="Crew" parent="." index="14"]
 max_passengers = 1
-
-[node name="HBoxContainer" parent="CapitalShipControl" index="0"]
-layout_mode = 0
 
 [editable path="Guns/Gun"]
 [editable path="Guns/Gun2"]

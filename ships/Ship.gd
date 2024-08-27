@@ -162,7 +162,7 @@ func _physics_process(dt: float) -> void:
 	var rotation_throttle = inputs.rotation_throttle
 	var throttle = inputs.throttle
 	
-	if(autospin):
+	if autospin:
 		target_rot.x += inputs.rotation_throttle.x * dt
 		target_rot.y += inputs.rotation_throttle.y * dt
 		target_rot.z += inputs.rotation_throttle.z * dt
@@ -187,45 +187,32 @@ func _physics_process(dt: float) -> void:
 		err_rot_y = target_rot.y - ry
 		err_rot_z = target_rot.z - rz		
 	
-		var pidx = $PIDS/PID_rotate_X._update(err_rot_x,dt)
-		var pidy = $PIDS/PID_rotate_Y._update(err_rot_y,dt)
-		var pidz = $PIDS/PID_rotate_Z._update(err_rot_z,dt)
+		var pidrx = $PIDS/PID_rotate_X._update(err_rot_x,dt)
+		var pidry = $PIDS/PID_rotate_Y._update(err_rot_y,dt)
+		var pidrz = $PIDS/PID_rotate_Z._update(err_rot_z,dt)
 		
 		#DebugDraw3D.draw_arrow_ray(self.global_position, target_rot, 100, Color.MAGENTA, 10.0)
 		#print_debug(self.global_position, target_rot)
 		#print_debug(target_rot.x, " ", rx, " ", pidx)
-		rotation_throttle = Vector3(pidx, pidy, pidz)
+		rotation_throttle = Vector3(pidrx, pidry, pidrz)
 				
 	if autobreak:
-		#TODO: Change to pid
 		var local_velocity := global_transform.basis.transposed() * linear_velocity
-		if -0.009 < throttle.x and throttle.x < 0.009:
-			if local_velocity.x > 5:
-				throttle.x = -1
-			elif local_velocity.x > 0:
-				throttle.x = -0.2
-			if local_velocity.x < -5:
-				throttle.x = 1
-			elif local_velocity.x < 0:
-				throttle.x = 0.2
-		if -0.009 < throttle.y and throttle.y < 0.009:
-			if local_velocity.y > 5:
-				throttle.y = -1
-			elif local_velocity.y > 0:
-				throttle.y = -0.2
-			if local_velocity.y < -5:
-				throttle.y = 1
-			elif local_velocity.y < 0:
-				throttle.y = 0.2
-		if -0.009 < throttle.z and throttle.z < 0.009:
-			if local_velocity.z > 5:
-				throttle.z = -1
-			elif local_velocity.z > 0:
-				throttle.z = -0.2
-			if local_velocity.z < -5:
-				throttle.z = 1
-			elif local_velocity.z < 0:
-				throttle.z = 0.2
+		if throttle.x == 0:
+			var err_x := 0.0 - local_velocity.x
+			throttle.x = $PIDS/PID_X._update(err_x, dt)
+			if abs(throttle.x) < 0.02:
+				throttle.x = 0.0
+		if throttle.y == 0:
+			var err_y := 0.0 - local_velocity.y
+			throttle.y = $PIDS/PID_X._update(err_y, dt)
+			if abs(throttle.y) < 0.02:
+				throttle.y = 0.0
+		if throttle.z == 0:
+			var err_z := 0.0 - local_velocity.z
+			throttle.z = $PIDS/PID_X._update(err_z, dt)
+			if abs(throttle.z) < 0.02:
+				throttle.z = 0.0
 	
 	$Engines.request_thrust(throttle, rotation_throttle)
 	

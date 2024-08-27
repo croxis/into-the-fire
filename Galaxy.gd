@@ -80,11 +80,9 @@ func request_spawn(system_name: String, spawner_name: String):
 	
 	var old_pilot: Pilot = find_pilot_by_network_id(peer_id)
 	var pilot: Pilot = ship.get_node("CrewMultiplayerSpawner").spawn({"name": old_pilot.name, "multiplayer_id": old_pilot.multiplayer_id})
-	#pilot.name = old_pilot.name
 	pilot._faction_name = old_pilot._faction_name
 	pilot._player_pilot_id = old_pilot._player_pilot_id
 	ship.add_pilot(pilot)
-	#pilot.multiplayer_id = old_pilot.multiplayer_id
 	old_pilot.queue_free()
 	ship.set_camera.rpc_id(pilot.multiplayer_id)
 	Logger.log(["Spawn complete for ", pilot], Logger.MessageType.SUCCESS)
