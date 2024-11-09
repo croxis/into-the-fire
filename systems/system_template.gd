@@ -15,3 +15,8 @@ func add_station(station: Ship):
 	$SubViewport/stations.add_child(station)
 	Logger.log(["Added station ", station, " to system ", name], Logger.MessageType.SUCCESS)
 	
+
+func add_ship(ship: Ship):
+	Logger.log(["Adding ship ", ship, " to system ", name], Logger.MessageType.QUESTION)
+	$SubViewport/ships.add_child(ship)
+	Logger.log(["Added shipn ", ship, " to system ", name], Logger.MessageType.SUCCESS)
