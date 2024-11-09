@@ -16,30 +16,34 @@ stages:
 
 variables:
   EXPORT_NAME: itf
+  PROJECT_PATH: itf
 
 # Open the editor to import assets in case the cache was empty or outdated
 import-assets:
   stage: import-assets
   script:
-    - godot --verbose --headless --import
+    - godot --verbose --headless --editor --quit
 
 linux:
   stage: export
   script:
     - mkdir -v -p export/linux
+    - EXPORT_DIR="$(readlink -f build)"
+    - cd $PROJECT_PATH
     - godot -v --headless --export-debug "Linux/X11" export/linux/$EXPORT_NAME.x86_64
   artifacts:
     name: $EXPORT_NAME-$CI_JOB_NAME
     paths:
-      - export/linux/
+      - export/linux
 
 windows:
   stage: export
   script:
     - mkdir -v -p export/windows
+    - cd $PROJECT_PATH
     - godot -v --headless --export-debug "Windows Desktop" export/windows/$EXPORT_NAME.exe
   artifacts:
     name: $EXPORT_NAME-$CI_JOB_NAME
     paths:
-      - export/windows/
+      - export/windows
 

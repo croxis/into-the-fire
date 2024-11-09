@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://bcyhqn6r6h3a5"]
+
+[ext_resource type="PackedScene" uid="uid://d442gfulgdeu" path="res://ships/earth alliance/hyperion/EABrehenyHyperion.glb" id="1_qpj7m"]
+
+[node name="Hyperion" instance=ExtResource("1_qpj7m")]
+
+[node name="HYP_DOORS_LIGHT" parent="." index="73"]
+visible = false
+
+[node name="HYP_DOORS_DARK" parent="." index="77"]
+visible = false

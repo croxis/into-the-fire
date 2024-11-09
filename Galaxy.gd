@@ -29,6 +29,11 @@ func get_spawn_points(faction: Faction) -> Dictionary:
 					if system not in spawn_points:
 						spawn_points[system] = []
 					spawn_points[system].append(station)
+			for ship in viewport.get_node("ships").get_children():
+				if ship.has_spawn_points:
+					if system not in spawn_points:
+						spawn_points[system] = []
+					spawn_points[system].append(ship)
 	# TODO: Add hyperspace here
 	# TODO: Add random generated deep space systems here
 	return spawn_points
@@ -159,6 +164,9 @@ func finish_setup_galaxy_all() -> void:
 		b5commander.set_faction($"Factions/Earth Alliance/Babylon 5")
 		$"Systems/test_system/SubViewport/stations/Babylon 5".add_captain(b5commander)
 		b5commander.multiplayer_id = multiplayer.get_unique_id()
+		
+		var hyperion := preload("res://ships/earth alliance/hyperion/hyperion.tscn").instantiate()
+		$Systems.add_ship(hyperion, "test_system")
 
 
 func finish_setup_galaxy_client():

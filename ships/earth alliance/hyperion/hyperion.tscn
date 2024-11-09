@@ -1,14 +1,24 @@
-[gd_scene load_steps=6 format=3 uid="uid://dmpj0ge68t2li"]
+[gd_scene load_steps=8 format=3 uid="uid://dmpj0ge68t2li"]
 
 [ext_resource type="PackedScene" uid="uid://bhhs2v02syo8j" path="res://ships/Ship.tscn" id="1_5mf3n"]
-[ext_resource type="PackedScene" uid="uid://d442gfulgdeu" path="res://ships/earth alliance/hyperion/EABrehenyHyperion.glb" id="2_5isd8"]
 [ext_resource type="PackedScene" uid="uid://bw6rueeoqv6a" path="res://ships/earth alliance/hyperion/hyperionturret.tscn" id="2_e1fw0"]
 [ext_resource type="PackedScene" uid="uid://r1x0fqeuxk04" path="res://sfx/Thruster.tscn" id="3_gm65t"]
+[ext_resource type="PackedScene" uid="uid://bcyhqn6r6h3a5" path="res://ships/earth alliance/hyperion/hyperion_ship.tscn" id="4_2gmgv"]
+[ext_resource type="Script" path="res://ships/earth alliance/hyperion/spawner.gd" id="4_nbv42"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_aqub1"]
+size = Vector3(28.2473, 15.9736, 21.8272)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_026a2"]
 size = Vector3(272.901, 304.723, 983.857)
 
 [node name="Ship" instance=ExtResource("1_5mf3n")]
+mass = 8.4e+09
+gravity_scale = 0.0
+ship_class = "Hyperion"
+max_health = 1000
+is_capital = true
+has_spawn_points = true
 
 [node name="Hyperion Turret" parent="Guns" index="0" instance=ExtResource("2_e1fw0")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.604607, 131.89, 70.9988)
@@ -49,8 +59,59 @@ transform = Transform3D(20, 0, 0, 0, 20, 0, 0, 0, 20, 72.8579, 4.89849, -456.706
 [node name="Thruster3" parent="Engines" index="2" instance=ExtResource("3_gm65t")]
 transform = Transform3D(20, 0, 0, 0, 20, 0, 0, 0, 20, -72.858, 4.898, -456.706)
 
-[node name="1" parent="." index="8" instance=ExtResource("2_5isd8")]
+[node name="Thruster4" parent="Engines" index="3" instance=ExtResource("3_gm65t")]
+transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, 76.7509, -32.3958, 83.3093)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="." index="9"]
+[node name="Thruster5" parent="Engines" index="4" instance=ExtResource("3_gm65t")]
+transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, 76.5397, -50.2495, 83.3093)
+
+[node name="Thruster6" parent="Engines" index="5" instance=ExtResource("3_gm65t")]
+transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, -76.751, -32.3958, 83.3093)
+
+[node name="Thruster7" parent="Engines" index="6" instance=ExtResource("3_gm65t")]
+transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, -76.751, -50.2495, 83.3093)
+
+[node name="Area3DDock" parent="." index="6"]
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3DDock" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.77002, 0.866997)
+shape = SubResource("BoxShape3D_aqub1")
+
+[node name="CollisionShape3D2" type="CollisionShape3D" parent="Area3DDock" index="1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.77002, 0.866997)
+shape = SubResource("BoxShape3D_aqub1")
+
+[node name="CollisionShape3D3" type="CollisionShape3D" parent="Area3DDock" index="2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.77002, 0.866997)
+shape = SubResource("BoxShape3D_aqub1")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." index="8"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.3346, 23.9711, -4.14067)
 shape = SubResource("BoxShape3D_026a2")
+
+[node name="Spawner" parent="." index="9"]
+script = ExtResource("4_nbv42")
+
+[node name="Bay1" type="Area3D" parent="Spawner" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 39.034, -91.98)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Spawner/Bay1" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.77002, 0.866997)
+shape = SubResource("BoxShape3D_aqub1")
+
+[node name="Bay2" type="Area3D" parent="Spawner" index="1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 39.034, -61.4097)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Spawner/Bay2" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.77002, 0.866997)
+shape = SubResource("BoxShape3D_aqub1")
+
+[node name="Bay3" type="Area3D" parent="Spawner" index="2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 39.034, -30.9941)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Spawner/Bay3" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.77002, 0.866997)
+shape = SubResource("BoxShape3D_aqub1")
+
+[node name="Hyperion" parent="." index="10" instance=ExtResource("4_2gmgv")]

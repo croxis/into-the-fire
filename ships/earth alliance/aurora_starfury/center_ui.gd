@@ -25,3 +25,7 @@ func set_health(new_health: int):
 
 func set_speed(speed):
 	$VBoxContainer/Speed.text = "SPEED: %.1f m/s" % speed
+
+
+func _physics_process(delta: float) -> void:
+	set_speed($"../..".linear_velocity.length())

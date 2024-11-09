@@ -109,6 +109,8 @@ theme_override_font_sizes/font_size = 64
 text = "Launch"
 alignment = 0
 
+[node name="Spawner" type="Node3D" parent="."]
+
 [connection signal="child_exiting_tree" from="Crew" to="." method="_on_crew_child_exiting_tree"]
 [connection signal="child_exiting_tree" from="Crew" to="Crew" method="_on_child_exiting_tree"]
 [connection signal="body_entered" from="Area3DDock" to="." method="_on_area_3d_dock_body_entered"]
