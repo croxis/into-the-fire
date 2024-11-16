@@ -14,4 +14,4 @@ func add_ship(ship: Ship, system_name: String) -> void:
 	if not system:
 		print_debug("System not found: ", system_name)
 		return
-	system.add_station(ship)
+	system.add_ship(ship)

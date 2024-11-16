@@ -19,4 +19,4 @@ func add_station(station: Ship):
 func add_ship(ship: Ship):
 	Logger.log(["Adding ship ", ship, " to system ", name], Logger.MessageType.QUESTION)
 	$SubViewport/ships.add_child(ship)
-	Logger.log(["Added shipn ", ship, " to system ", name], Logger.MessageType.SUCCESS)
+	Logger.log(["Added ship ", ship, " to system ", name], Logger.MessageType.SUCCESS)

@@ -166,6 +166,8 @@ func finish_setup_galaxy_all() -> void:
 		b5commander.multiplayer_id = multiplayer.get_unique_id()
 		
 		var hyperion := preload("res://ships/earth alliance/hyperion/hyperion.tscn").instantiate()
+		hyperion.name = "EASS Hyperion"
+		hyperion.position = Vector3(6000, 0, 0)
 		$Systems.add_ship(hyperion, "test_system")
 
 

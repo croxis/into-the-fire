@@ -1,4 +1,6 @@
-[gd_scene load_steps=14 format=4 uid="uid://bw6rueeoqv6a"]
+[gd_scene load_steps=15 format=4 uid="uid://bw6rueeoqv6a"]
+
+[ext_resource type="Script" path="res://ships/earth alliance/hyperion/hyperionturret.gd" id="1_svcmu"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4yt34"]
 resource_name = "Black.002"
@@ -183,32 +185,33 @@ shadow_mesh = SubResource("ArrayMesh_yufvt")
 
 [node name="Hyperion Turret" type="Node3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.111862, 0, 0)
+script = ExtResource("1_svcmu")
 
-[node name="Rotate" type="Node3D" parent="."]
+[node name="Body" type="Node3D" parent="."]
 
-[node name="HYP_TURRET_PIVOT_003" type="MeshInstance3D" parent="Rotate"]
+[node name="HYP_TURRET_PIVOT_003" type="MeshInstance3D" parent="Body"]
 transform = Transform3D(-1.41501, -0.00263446, 6.72529e-05, -7.06747e-05, 0.00183789, -1.41502, 0.00263437, -1.41501, -0.00183802, -0.158259, -0.0105042, 0.0216071)
 mesh = SubResource("ArrayMesh_4kd6m")
 skeleton = NodePath("")
 
-[node name="HYP_TURRET_DETAIL_003" type="MeshInstance3D" parent="Rotate"]
+[node name="HYP_TURRET_DETAIL_003" type="MeshInstance3D" parent="Body"]
 transform = Transform3D(-1.41501, -0.00263446, 6.72529e-05, -7.06747e-05, 0.00183789, -1.41502, 0.00263437, -1.41501, -0.00183802, -0.158259, -0.0105042, 0.0216071)
 mesh = SubResource("ArrayMesh_8m0hy")
 skeleton = NodePath("")
 
-[node name="Pitch" type="Node3D" parent="Rotate"]
+[node name="Head" type="Node3D" parent="Body"]
 
-[node name="HYP_TURRET_MAIN_003" type="MeshInstance3D" parent="Rotate/Pitch"]
+[node name="HYP_TURRET_MAIN_003" type="MeshInstance3D" parent="Body/Head"]
 transform = Transform3D(-1.41501, -0.00263446, 6.72529e-05, -7.06747e-05, 0.00183789, -1.41502, 0.00263437, -1.41501, -0.00183802, -0.158259, -0.0105042, 0.0216071)
 mesh = SubResource("ArrayMesh_e0m5j")
 skeleton = NodePath("")
 
-[node name="HYP_TURRET_MAIN_2_003" type="MeshInstance3D" parent="Rotate/Pitch"]
+[node name="HYP_TURRET_MAIN_2_003" type="MeshInstance3D" parent="Body/Head"]
 transform = Transform3D(-1.41501, -0.00263446, 6.72529e-05, -7.06747e-05, 0.00183789, -1.41502, 0.00263437, -1.41501, -0.00183802, -0.158259, -0.0105042, 0.0216071)
 mesh = SubResource("ArrayMesh_o1f33")
 skeleton = NodePath("")
 
-[node name="HYP_TURRET_GUN_003" type="MeshInstance3D" parent="Rotate/Pitch"]
+[node name="HYP_TURRET_GUN_003" type="MeshInstance3D" parent="Body/Head"]
 transform = Transform3D(-1.41501, -0.00263446, 6.72529e-05, -7.06747e-05, 0.00183789, -1.41502, 0.00263437, -1.41501, -0.00183802, -0.158259, -0.0105042, 0.0216071)
 mesh = SubResource("ArrayMesh_3e6v5")
 skeleton = NodePath("")

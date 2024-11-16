@@ -270,7 +270,10 @@ func find_free_spawner() -> Node3D:
 
 
 func _on_area_3d_dock_body_entered(body: Ship) -> void:
-	Logger.log(["Ship entered dock:", body], Logger.MessageType.INFO)
+	if body == self:
+		#can't dock with self, silly
+		return
+	Logger.log([body, " ship entered dock on ", name], Logger.MessageType.INFO)
 	body.get_node("Crew").captain_name = ""
 	body.get_node("Crew").pilot_name = ""
 	for c in body.get_crew():

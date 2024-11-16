@@ -22,7 +22,7 @@ variables:
 import-assets:
   stage: import-assets
   script:
-    - godot --verbose --headless --editor --quit
+    - godot --verbose --headless --import
 
 linux:
   stage: export
