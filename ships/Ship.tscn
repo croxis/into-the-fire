@@ -95,14 +95,17 @@ offset_right = 40.0
 offset_bottom = 40.0
 
 [node name="HBoxContainer" type="HBoxContainer" parent="CapitalShipControl"]
+visible = false
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
 
 [node name="VBoxContainer" type="VBoxContainer" parent="CapitalShipControl/HBoxContainer"]
+visible = false
 layout_mode = 2
 
 [node name="ButtonLaunch" type="Button" parent="CapitalShipControl/HBoxContainer/VBoxContainer"]
+visible = false
 layout_mode = 2
 theme = ExtResource("7_i5r3g")
 theme_override_font_sizes/font_size = 64

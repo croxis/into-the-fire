@@ -17,6 +17,8 @@ var current_velocity:int = 0:
 @export var right_justify: bool = false
 @export var draw_outline: bool = true
 @export var font_size := 12
+@export var big_line_length := 15.0
+@export var little_line_length := 5.0
 
 
 func _draw():
@@ -51,13 +53,13 @@ func _draw():
 				
 				#altitude Line
 				var linePositionStart = Vector2(cursorPosition.x, cursorPosition.y)
-				var linePositionEnd = Vector2(linePositionStart.x + 15, linePositionStart.y)
+				var linePositionEnd = Vector2(linePositionStart.x + big_line_length, linePositionStart.y)
 				draw_line(linePositionStart, linePositionEnd, display_color,1.0, true)
 			
 			elif velocity % displayStepSmallLines == 0:
 			#small lines inbetween
 				var linePositionStart = Vector2(cursorPosition.x, cursorPosition.y)
-				var linePositionEnd = Vector2(linePositionStart.x + 5, linePositionStart.y)
+				var linePositionEnd = Vector2(linePositionStart.x + little_line_length, linePositionStart.y)
 				
 				draw_line(linePositionStart, linePositionEnd, display_color, 1.0, true)  
 		else:
@@ -67,13 +69,13 @@ func _draw():
 				
 				#altitude Line
 				var linePositionStart = Vector2(localRect.end.x, cursorPosition.y)
-				var linePositionEnd = Vector2(linePositionStart.x - 15, linePositionStart.y)
+				var linePositionEnd = Vector2(linePositionStart.x - big_line_length, linePositionStart.y)
 				draw_line(linePositionStart, linePositionEnd, display_color, 1.0, true)
 			
 			elif velocity % displayStepSmallLines == 0:
 			#small lines inbetween
 			
 				var linePositionStart = Vector2(localRect.end.x, cursorPosition.y )
-				var linePositionEnd = Vector2(linePositionStart.x - 5, linePositionStart.y)
+				var linePositionEnd = Vector2(linePositionStart.x - little_line_length, linePositionStart.y)
 				
 				draw_line(linePositionStart, linePositionEnd, display_color, 1.0, true)  

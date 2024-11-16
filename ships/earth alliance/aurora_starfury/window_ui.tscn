@@ -27,23 +27,27 @@ anchor_right = 0.0
 anchor_bottom = 0.0
 offset_left = 60.0
 offset_top = 276.0
-offset_right = 200.0
+offset_right = 154.0
 offset_bottom = 525.0
 draw_outline = false
-font_size = 11
+font_size = 10
+big_line_length = 12.0
+little_line_length = 4.0
 
 [node name="Y_Velocity" parent="." instance=ExtResource("1_erljw")]
 layout_mode = 0
 anchors_preset = 0
 anchor_right = 0.0
 anchor_bottom = 0.0
-offset_left = 312.0
+offset_left = 343.0
 offset_top = 276.0
 offset_right = 452.0
 offset_bottom = 525.0
 right_justify = true
 draw_outline = false
-font_size = 11
+font_size = 10
+big_line_length = 12.0
+little_line_length = 4.0
 
 [node name="X_Velocity" parent="." instance=ExtResource("3_aiy7f")]
 layout_mode = 0
@@ -53,9 +57,11 @@ anchor_bottom = 0.0
 offset_left = 139.0
 offset_top = 279.0
 offset_right = 377.0
-offset_bottom = 400.0
+offset_bottom = 350.0
+grow_horizontal = 1
+grow_vertical = 1
 draw_outline = false
-font_size = 11
+font_size = 10
 
 [node name="ColorRect3" type="ColorRect" parent="."]
 visible = false
