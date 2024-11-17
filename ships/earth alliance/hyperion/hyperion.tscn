@@ -68,6 +68,10 @@ transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, -76.751, -32.3958, 83.3093)
 [node name="Thruster7" parent="Engines" index="6" instance=ExtResource("3_gm65t")]
 transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, -76.751, -50.2495, 83.3093)
 
+[node name="Crew" parent="." index="4"]
+max_gunners = 10
+max_passengers = 500
+
 [node name="Area3DDock" parent="." index="6"]
 monitorable = false
 
