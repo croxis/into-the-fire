@@ -102,11 +102,6 @@ func find_pilot_by_network_id(id: int) -> Pilot:
 	return null
 	
 
-func _on_spawn_picker_request_spawn(system_name, spawner_name):
-	rpc("request_spawn", system_name, spawner_name)
-	$CanvasLayer/spawn_picker.visible = false
-	
-	
 func set_render_resolution(resolution: Vector2i) -> void:
 	print_debug("Galaxy: Setting render resolution: ", resolution)
 	render_resolution = resolution
@@ -199,8 +194,9 @@ func first_spawn_player(faction: Faction, system_name: String, spawner_name: Str
 	player_pilot.set_multiplayer_id(remote_id)
 	
 	#TODO: Change this to be via system_name and spawner_name
-	player_enter_system("test_system")
+	player_enter_system(system_name)
 	$"Systems/test_system/SubViewport/stations/Babylon 5".add_passenger(player_pilot)
+	print_debug(system_name, spawner_name)
 	Logger.log(["Created pilot: ", player_pilot, " in faction ", player_pilot._faction_name, " with mpid: ", player_pilot.multiplayer_id], Logger.MessageType.SUCCESS)
 
 

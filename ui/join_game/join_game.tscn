@@ -30,8 +30,9 @@ horizontal_alignment = 1
 
 [node name="FactionTree" type="Tree" parent="HBoxContainer/FactionVBoxContainer"]
 clip_contents = false
-custom_minimum_size = Vector2(0, 120)
+custom_minimum_size = Vector2(300, 300)
 layout_mode = 2
+size_flags_vertical = 3
 column_titles_visible = true
 allow_reselect = true
 allow_rmb_select = true
@@ -50,8 +51,9 @@ horizontal_alignment = 1
 
 [node name="SpawnTree" type="Tree" parent="HBoxContainer/SpawnVBoxContainer"]
 clip_contents = false
-custom_minimum_size = Vector2(0, 120)
+custom_minimum_size = Vector2(0, 300)
 layout_mode = 2
+size_flags_vertical = 3
 column_titles_visible = true
 allow_reselect = true
 allow_rmb_select = true

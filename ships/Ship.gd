@@ -36,8 +36,22 @@ var multiplayer_pilot_id: int:
 @export var autobreak := false
 
 @export var max_health := 100
-@export var is_station := false
-@export var is_capital := false
+@export var is_station := false:
+	set(set_station):
+		if set_station:
+			add_to_group("station")
+		else:
+			remove_from_group("station")
+	get:
+		return is_in_group("station")
+@export var is_capital := false:
+	set(set_capital):
+		if set_capital:
+			add_to_group("capital")
+		else:
+			remove_from_group("capital")
+	get:
+		return is_in_group("capital")
 @export var has_spawn_points := false
 
 var galaxy: Galaxy

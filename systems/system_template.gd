@@ -1,4 +1,5 @@
 extends SubViewportContainer
+class_name System
 
 
 func _ready():
@@ -20,3 +21,8 @@ func add_ship(ship: Ship):
 	Logger.log(["Adding ship ", ship, " to system ", name], Logger.MessageType.QUESTION)
 	$SubViewport/ships.add_child(ship)
 	Logger.log(["Added ship ", ship, " to system ", name], Logger.MessageType.SUCCESS)
+
+
+#func get_ship_or_station(craft_name: String): -> Ship:
+#	pass
+	

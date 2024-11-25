@@ -9,16 +9,17 @@
 [sub_resource type="BoxShape3D" id="BoxShape3D_aqub1"]
 size = Vector3(28.2473, 15.9736, 21.8272)
 
-[node name="Ship" instance=ExtResource("1_5mf3n")]
+[node name="Ship" groups=["capital"] instance=ExtResource("1_5mf3n")]
 mass = 8.4e+09
 gravity_scale = 0.0
+camera_path = NodePath("Camera3D")
 ship_class = "Hyperion"
 max_health = 1000
 is_capital = true
 has_spawn_points = true
 
 [node name="Hyperion Turret" parent="Guns" index="0" instance=ExtResource("2_e1fw0")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.604607, 131.89, 70.9988)
+transform = Transform3D(0.95, 0, 0, 0, 0.95, 0, 0, 0, 0.95, 1.13347, 132.085, 70.999)
 
 [node name="Hyperion Turret9" parent="Guns" index="1" instance=ExtResource("2_e1fw0")]
 transform = Transform3D(-4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0, 1, 72.7733, -14.3058, 244.336)
@@ -112,3 +113,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.77002, 0.866997)
 shape = SubResource("BoxShape3D_aqub1")
 
 [node name="Hyperion" parent="." index="9" instance=ExtResource("4_2gmgv")]
+
+[node name="Camera3D" type="Camera3D" parent="." index="10"]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 118.699, 179.595)
+near = 0.1
+far = 50000.0
