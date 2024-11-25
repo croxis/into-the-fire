@@ -1,7 +1,6 @@
 class_name Galaxy
 extends Node
 
-var PlayerScene := preload("res://ships/earth alliance/aurora_starfury/auora_starfury.tscn")
 var game_name := "default"
 var render_resolution := Vector2i(0, 0)
 @onready var msaa = AppConfig.get_value("graphics", "msaa")
@@ -24,11 +23,6 @@ func get_spawn_points(faction: Faction) -> Dictionary:
 	for system in $Systems.get_children():
 		if system.has_node("SubViewport"):
 			var viewport = system.get_node("SubViewport")
-			for station in viewport.get_node("stations").get_children():
-				if station.has_spawn_points:
-					if system not in spawn_points:
-						spawn_points[system] = []
-					spawn_points[system].append(station)
 			for ship in viewport.get_node("ships").get_children():
 				if ship.has_spawn_points:
 					if system not in spawn_points:
@@ -51,49 +45,6 @@ func player_enter_system(system_name) -> void:
 	#Music Hack
 	system.get_node("SubViewport/AudioStreamPlayer").playing = true
 
-
-@rpc("any_peer", "call_local")
-func request_launch(system_name: String, spawner_name: String):
-	if not multiplayer.is_server():
-		return
-	var remote_id := multiplayer.get_remote_sender_id()
-	# If the host is calling this function, remote id is 0, change to its actual id
-	if remote_id == 0:
-		remote_id = multiplayer.get_unique_id()
-	
-	Logger.log(["Spawn requested in ", system_name, " ", spawner_name, " by ", remote_id], Logger.MessageType.QUESTION)
-	var top_system := $Systems.get_node(system_name)
-	var system := top_system.get_node("SubViewport")
-	var spawner: Node3D
-	if system.get_node("stations").has_node(spawner_name):
-		spawner = system.get_node("stations").get_node(spawner_name)
-	elif system.get_node("ships").has_node(spawner_name):
-		spawner = system.get_node("ships").get_node(spawner_name)
-	else:
-		print_debug("Critical error! ", system_name, " ", spawner_name, " does not exist")
-		return
-	var spawn_point = spawner.find_free_spawner()
-	var spawn_position = spawn_point.global_transform.origin
-	var ship := PlayerScene.instantiate()
-	#ship._player_pilot_id = peer_id
-	ship.ship_id = ship_id_counter
-	ship_id_counter += 1
-	system.get_node("ships").add_child(ship, true)
-	ship.global_transform.origin = spawn_position
-	ship.connect("destroyed", player_died)
-	
-	
-	
-	var old_pilot: Pilot = find_pilot_by_network_id(remote_id)
-	print_debug("old_pilot: ", remote_id, " ", old_pilot.name, " ", str(old_pilot.multiplayer_id))
-	var pilot: Pilot = ship.get_node("CrewMultiplayerSpawner").spawn({"name": old_pilot.name, "multiplayer_id": old_pilot.multiplayer_id})
-	pilot._faction_name = old_pilot._faction_name
-	pilot._player_pilot_id = old_pilot._player_pilot_id
-	ship.add_pilot(pilot)
-	old_pilot.queue_free()
-	ship.set_camera.rpc_id(pilot.multiplayer_id)
-	Logger.log(["Spawn complete for ", pilot], Logger.MessageType.SUCCESS)
-	
 
 func find_pilot_by_network_id(id: int) -> Pilot:
 	for pilot in $Systems.find_children("*", "Pilot", true, false):
@@ -159,7 +110,7 @@ func finish_setup_galaxy_all() -> void:
 		var b5commander: Pilot = pilot.instantiate()
 		b5commander.name = "Commendar Eclair"
 		b5commander.set_faction($"Factions/Earth Alliance/Babylon 5")
-		$"Systems/test_system/SubViewport/stations/Babylon 5".add_captain(b5commander)
+		$"Systems/test_system/SubViewport/ships/Babylon 5".add_captain(b5commander)
 		b5commander.multiplayer_id = multiplayer.get_unique_id()
 		
 		var hyperion := preload("res://ships/earth alliance/hyperion/hyperion.tscn").instantiate()
@@ -195,7 +146,7 @@ func first_spawn_player(faction: Faction, system_name: String, spawner_name: Str
 	
 	#TODO: Change this to be via system_name and spawner_name
 	player_enter_system(system_name)
-	$"Systems/test_system/SubViewport/stations/Babylon 5".add_passenger(player_pilot)
+	$"Systems/test_system/SubViewport/ships/Babylon 5".add_passenger(player_pilot)
 	print_debug(system_name, spawner_name)
 	Logger.log(["Created pilot: ", player_pilot, " in faction ", player_pilot._faction_name, " with mpid: ", player_pilot.multiplayer_id], Logger.MessageType.SUCCESS)
 

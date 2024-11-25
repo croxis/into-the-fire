@@ -51,6 +51,14 @@ func add_passenger(passenger: Pilot) -> bool:
 	return true
 
 
+func remove_passenger_by_id(pilot_id: int) -> Pilot:
+	for child in get_children():
+		if child._player_pilot_id == pilot_id:
+			remove_child(child)
+			return child
+	return null
+
+
 func _on_child_exiting_tree(node: Node) -> void:
 	if node.name == captain_name:
 		captain_name = ""

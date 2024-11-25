@@ -13,13 +13,13 @@ func _ready():
 
 func add_station(station: Ship):
 	Logger.log(["Adding station ", station, " to system ", name], Logger.MessageType.QUESTION)
-	$SubViewport/stations.add_child(station)
+	$SubViewport/ships.add_child(station, true)
 	Logger.log(["Added station ", station, " to system ", name], Logger.MessageType.SUCCESS)
 	
 
 func add_ship(ship: Ship):
 	Logger.log(["Adding ship ", ship, " to system ", name], Logger.MessageType.QUESTION)
-	$SubViewport/ships.add_child(ship)
+	$SubViewport/ships.add_child(ship, true)
 	Logger.log(["Added ship ", ship, " to system ", name], Logger.MessageType.SUCCESS)
 
 

@@ -26,13 +26,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 100, 0)
 
 [node name="bolts" type="Node3D" parent="SubViewport"]
 
-[node name="stations" type="Node3D" parent="SubViewport"]
-
 [node name="ships" type="Node3D" parent="SubViewport"]
-
-[node name="StationSpawner" type="MultiplayerSpawner" parent="SubViewport"]
-_spawnable_scenes = PackedStringArray("res://ships/earth alliance/babylon 5/babylon_5.tscn")
-spawn_path = NodePath("../stations")
 
 [node name="BoltSpawner" type="MultiplayerSpawner" parent="SubViewport"]
 _spawnable_scenes = PackedStringArray("res://ship_systems/weapons/effects/bolt/Bolt.tscn")

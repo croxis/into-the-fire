@@ -88,7 +88,7 @@ shape = SubResource("BoxShape3D_aqub1")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 39.7158, -91.0883)
 shape = SubResource("BoxShape3D_aqub1")
 
-[node name="Spawner" parent="." index="8"]
+[node name="Spawner" parent="." index="7"]
 script = ExtResource("4_nbv42")
 
 [node name="Bay1" type="Area3D" parent="Spawner" index="0"]

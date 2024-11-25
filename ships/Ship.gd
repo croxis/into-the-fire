@@ -70,7 +70,7 @@ var _debug_all_stop := false
 
 var start_speed = 0
 
-signal destroyed(id)
+signal destroyed(ship_id)
 
 
 # Called when the node enters the scene tree for the first time.
@@ -128,7 +128,7 @@ func set_camera():
 @rpc("call_local")
 func set_capital_ui():
 	if is_capital or is_station:
-		$CapitalShipControl.visible = true
+		$CapitalUI.visible = true
 
 
 func debug_set_health(new_health):
@@ -278,7 +278,7 @@ func bullet_hit(damage, bullet_global_trans):
 
 
 func destroy() -> void:
-	emit_signal("destroyed", _player_pilot_id)
+	emit_signal("destroyed", ship_id)
 	queue_free()
 
 
@@ -299,10 +299,51 @@ func _on_area_3d_dock_body_entered(body: Ship) -> void:
 
 
 func _on_crew_child_exiting_tree(node: Node) -> void:
-	$CapitalShipControl.visible = false
+	$CapitalUI.visible = false
 
 
 func _on_button_launch_pressed() -> void:
 	var system_name := get_parent().get_parent().get_parent().name
 	galaxy.rpc("request_spawn", system_name, name)
 	$CapitalShipControl.visible = false
+
+
+@rpc("any_peer", "call_local")
+func request_launch(ship_id: int, pilot_id: int):
+	if not multiplayer.is_server():
+		return
+	var remote_id := multiplayer.get_remote_sender_id()
+	# If the host is calling this function, remote id is 0, change to its actual id
+	if remote_id == 0:
+		remote_id = multiplayer.get_unique_id()
+	
+	Logger.log(["Spawn requested in ", get_current_system().name, " ", name, " by ", remote_id], Logger.MessageType.QUESTION)
+	var top_system := get_current_system()
+	var system := top_system.get_node("SubViewport")
+
+	var spawn_point = find_free_spawner()
+	var spawn_position = spawn_point.global_transform.origin
+	#TODO: Keep an inventory of docked ships
+	
+	var PlayerScene := load("res://ships/earth alliance/aurora_starfury/auora_starfury.tscn")
+	var new_ship = PlayerScene.instantiate()
+	
+	#TODO: Pull ship from existing invetory using the id
+	new_ship.ship_id = galaxy.ship_id_counter
+	galaxy.ship_id_counter += 1
+	top_system.add_ship(new_ship)
+	
+	new_ship.global_transform.origin = spawn_position
+	
+	var old_pilot: Pilot = $Crew.remove_passenger_by_id(pilot_id)
+	var pilot: Pilot = new_ship.get_node("CrewMultiplayerSpawner").spawn({"name": old_pilot.name, "multiplayer_id": old_pilot.multiplayer_id})
+	pilot._faction_name = old_pilot._faction_name
+	pilot._player_pilot_id = old_pilot._player_pilot_id
+	new_ship.add_pilot(pilot)
+	old_pilot.queue_free()
+	new_ship.set_camera.rpc_id(pilot.multiplayer_id)
+	Logger.log(["Spawn complete for ", pilot], Logger.MessageType.SUCCESS)
+
+
+func get_current_system() -> System:
+	return get_parent().get_parent().get_parent()

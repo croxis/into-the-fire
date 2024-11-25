@@ -6,7 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://hivg2o6wgagj" path="res://ships/PID.tscn" id="5_itaim"]
 [ext_resource type="Script" path="res://ships/crew.gd" id="5_tgeno"]
 [ext_resource type="Script" path="res://ships/crew_multiplayer_spawner.gd" id="6_1a8so"]
-[ext_resource type="Theme" uid="uid://iewuun72p7uj" path="res://ui/menu_theme.tres" id="7_i5r3g"]
+[ext_resource type="PackedScene" uid="uid://bywfmtvnxay38" path="res://ui/capital/capital_ui.tscn" id="7_dwaht"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_2c0xb"]
 properties/0/path = NodePath(".:linear_velocity")
@@ -87,34 +87,11 @@ script = ExtResource("6_1a8so")
 
 [node name="Area3DDock" type="Area3D" parent="."]
 
-[node name="CapitalShipControl" type="Control" parent="."]
-visible = false
-layout_mode = 3
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="HBoxContainer" type="HBoxContainer" parent="CapitalShipControl"]
-visible = false
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="VBoxContainer" type="VBoxContainer" parent="CapitalShipControl/HBoxContainer"]
-visible = false
-layout_mode = 2
-
-[node name="ButtonLaunch" type="Button" parent="CapitalShipControl/HBoxContainer/VBoxContainer"]
-visible = false
-layout_mode = 2
-theme = ExtResource("7_i5r3g")
-theme_override_font_sizes/font_size = 64
-text = "Launch"
-alignment = 0
-
 [node name="Spawner" type="Node3D" parent="."]
+
+[node name="CapitalUI" parent="." instance=ExtResource("7_dwaht")]
+visible = false
 
 [connection signal="child_exiting_tree" from="Crew" to="." method="_on_crew_child_exiting_tree"]
 [connection signal="child_exiting_tree" from="Crew" to="Crew" method="_on_child_exiting_tree"]
 [connection signal="body_entered" from="Area3DDock" to="." method="_on_area_3d_dock_body_entered"]
-[connection signal="pressed" from="CapitalShipControl/HBoxContainer/VBoxContainer/ButtonLaunch" to="." method="_on_button_launch_pressed"]

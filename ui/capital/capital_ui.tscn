@@ -1,0 +1,21 @@
+[gd_scene load_steps=3 format=3 uid="uid://bywfmtvnxay38"]
+
+[ext_resource type="Theme" uid="uid://iewuun72p7uj" path="res://ui/menu_theme.tres" id="1_1bkl4"]
+[ext_resource type="Script" path="res://ui/capital/capital_ui.gd" id="1_h8xvm"]
+
+[node name="CapitalUI" type="HBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = -991.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_h8xvm")
+
+[node name="Launch" type="Button" parent="."]
+layout_mode = 2
+theme = ExtResource("1_1bkl4")
+theme_override_font_sizes/font_size = 72
+text = "Launch"
+
+[connection signal="pressed" from="Launch" to="." method="_on_launch_pressed"]
