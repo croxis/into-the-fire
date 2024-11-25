@@ -49,6 +49,7 @@ func start_server(new_game_name, s_password:="", port: int=DEFAULT_PORT) -> bool
 	multiplayer.peer_connected.connect(on_client_connected)
 	multiplayer.peer_disconnected.connect(_player_disconnected)
 	Logger.log(["Server hosted on port: " + str(port)], Logger.MessageType.INFO)
+	Logger.log(["Server MP ID: ", multiplayer.get_unique_id()], Logger.MessageType.INFO)
 	server_password = s_password
 	get_tree().root.get_node("entry").is_server = true
 	return true
@@ -110,7 +111,7 @@ func _auth_failed(client_peer):
 # Client
 func join_game(ip, port, new_player_name, s_password, p_password):
 	# Client Only
-	Logger.log(["Joining Game: ", ip, ":", port, " as " , new_player_name], Logger.MessageType.INFO)
+	Logger.log(["Joining Game: ", ip, ":", port, " as " , new_player_name, " with id: ", multiplayer.get_unique_id()], Logger.MessageType.INFO)
 	player_name = new_player_name
 	peer = ENetMultiplayerPeer.new()
 	server_password = s_password

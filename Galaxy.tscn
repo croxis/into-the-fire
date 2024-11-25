@@ -1,8 +1,7 @@
-[gd_scene load_steps=7 format=3 uid="uid://c45aut53d0eru"]
+[gd_scene load_steps=6 format=3 uid="uid://c45aut53d0eru"]
 
 [ext_resource type="Script" path="res://Galaxy.gd" id="1_3em77"]
-[ext_resource type="PackedScene" uid="uid://bxf8p4mhhuvra" path="res://ui/spawn_picker/spawn_picker.tscn" id="3_87ncl"]
-[ext_resource type="PackedScene" uid="uid://dfgvemgkmlsqs" path="res://ui/faction_picker/faction_picker.tscn" id="3_bd71q"]
+[ext_resource type="PackedScene" uid="uid://dw740uyo1ubum" path="res://ui/join_game/join_game.tscn" id="2_saf80"]
 [ext_resource type="PackedScene" uid="uid://bslpdqhki8tdr" path="res://factions/factions.tscn" id="3_xpwin"]
 [ext_resource type="Script" path="res://players.gd" id="5_ietyw"]
 [ext_resource type="Script" path="res://systems.gd" id="6_ioa4q"]
@@ -13,12 +12,7 @@ script = ExtResource("1_3em77")
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 layer = 2
 
-[node name="spawn_picker" parent="CanvasLayer" instance=ExtResource("3_87ncl")]
-visible = false
-offset_bottom = 996.0
-size_flags_vertical = 1
-
-[node name="FactionPicker" parent="CanvasLayer" instance=ExtResource("3_bd71q")]
+[node name="JoinGame" parent="CanvasLayer" instance=ExtResource("2_saf80")]
 visible = false
 
 [node name="Factions" parent="." instance=ExtResource("3_xpwin")]
@@ -33,6 +27,5 @@ script = ExtResource("6_ioa4q")
 _spawnable_scenes = PackedStringArray("res://systems/test_system/test_system.tscn")
 spawn_path = NodePath("../Systems")
 
-[connection signal="request_spawn" from="CanvasLayer/spawn_picker" to="." method="_on_spawn_picker_request_spawn"]
-[connection signal="request_faction" from="CanvasLayer/FactionPicker" to="." method="_on_faction_picker_request_faction"]
-[connection signal="child_entered_tree" from="Factions" to="CanvasLayer/FactionPicker" method="_on_factions_child_entered_tree"]
+[connection signal="request_faction" from="CanvasLayer/JoinGame" to="." method="_on_join_game_request_faction"]
+[connection signal="request_spawn" from="CanvasLayer/JoinGame" to="." method="_on_join_game_request_spawn"]

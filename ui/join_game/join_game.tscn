@@ -1,0 +1,70 @@
+[gd_scene load_steps=3 format=3 uid="uid://dw740uyo1ubum"]
+
+[ext_resource type="Script" path="res://ui/join_game/join_game.gd" id="1_om4o2"]
+[ext_resource type="Theme" uid="uid://iewuun72p7uj" path="res://ui/menu_theme.tres" id="1_qwwcd"]
+
+[node name="JoinGame" type="VBoxContainer"]
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("1_om4o2")
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 2
+theme = ExtResource("1_qwwcd")
+theme_override_font_sizes/font_size = 72
+text = "Pick Your"
+horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="FactionVBoxContainer" type="VBoxContainer" parent="HBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/FactionVBoxContainer"]
+layout_mode = 2
+theme = ExtResource("1_qwwcd")
+theme_override_font_sizes/font_size = 72
+text = "Faction"
+horizontal_alignment = 1
+
+[node name="FactionTree" type="Tree" parent="HBoxContainer/FactionVBoxContainer"]
+clip_contents = false
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+column_titles_visible = true
+allow_reselect = true
+allow_rmb_select = true
+hide_root = true
+scroll_horizontal_enabled = false
+
+[node name="SpawnVBoxContainer" type="VBoxContainer" parent="HBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/SpawnVBoxContainer"]
+layout_mode = 2
+theme = ExtResource("1_qwwcd")
+theme_override_font_sizes/font_size = 72
+text = "SPAWN LOCATION"
+horizontal_alignment = 1
+
+[node name="SpawnTree" type="Tree" parent="HBoxContainer/SpawnVBoxContainer"]
+clip_contents = false
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+column_titles_visible = true
+allow_reselect = true
+allow_rmb_select = true
+hide_root = true
+scroll_horizontal_enabled = false
+
+[node name="JoinFactionButton" type="Button" parent="."]
+layout_mode = 2
+theme = ExtResource("1_qwwcd")
+theme_override_font_sizes/font_size = 72
+disabled = true
+text = "Join Game"
+
+[connection signal="item_selected" from="HBoxContainer/FactionVBoxContainer/FactionTree" to="." method="_on_faction_tree_item_selected"]
+[connection signal="item_selected" from="HBoxContainer/SpawnVBoxContainer/SpawnTree" to="." method="_on_spawn_tree_item_selected"]
+[connection signal="pressed" from="JoinFactionButton" to="." method="_on_join_faction_button_pressed"]

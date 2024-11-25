@@ -2,7 +2,7 @@ class_name Pilot
 extends Node
 
 @export var _faction_name: String
-# If this is the player, set the id to 0 or more
+# If this is the player, set the id to 1 or more
 # Cache the pilot ID in here
 @export var _player_pilot_id: int
 @export var multiplayer_id: int

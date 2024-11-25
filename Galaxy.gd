@@ -53,16 +53,15 @@ func player_enter_system(system_name) -> void:
 
 
 @rpc("any_peer", "call_local")
-func show_spawn(faction: Faction) -> void:
-	$CanvasLayer/spawn_picker.show_spawn(get_spawn_points(faction))
-
-
-@rpc("any_peer", "call_local")
-func request_spawn(system_name: String, spawner_name: String):
+func request_launch(system_name: String, spawner_name: String):
 	if not multiplayer.is_server():
 		return
-	var peer_id := multiplayer.get_remote_sender_id()
-	Logger.log(["Spawn requested in ", system_name, " ", spawner_name, " by ", peer_id], Logger.MessageType.QUESTION)
+	var remote_id := multiplayer.get_remote_sender_id()
+	# If the host is calling this function, remote id is 0, change to its actual id
+	if remote_id == 0:
+		remote_id = multiplayer.get_unique_id()
+	
+	Logger.log(["Spawn requested in ", system_name, " ", spawner_name, " by ", remote_id], Logger.MessageType.QUESTION)
 	var top_system := $Systems.get_node(system_name)
 	var system := top_system.get_node("SubViewport")
 	var spawner: Node3D
@@ -83,7 +82,10 @@ func request_spawn(system_name: String, spawner_name: String):
 	ship.global_transform.origin = spawn_position
 	ship.connect("destroyed", player_died)
 	
-	var old_pilot: Pilot = find_pilot_by_network_id(peer_id)
+	
+	
+	var old_pilot: Pilot = find_pilot_by_network_id(remote_id)
+	print_debug("old_pilot: ", remote_id, " ", old_pilot.name, " ", str(old_pilot.multiplayer_id))
 	var pilot: Pilot = ship.get_node("CrewMultiplayerSpawner").spawn({"name": old_pilot.name, "multiplayer_id": old_pilot.multiplayer_id})
 	pilot._faction_name = old_pilot._faction_name
 	pilot._player_pilot_id = old_pilot._player_pilot_id
@@ -167,41 +169,49 @@ func finish_setup_galaxy_all() -> void:
 		
 		var hyperion := preload("res://ships/earth alliance/hyperion/hyperion.tscn").instantiate()
 		hyperion.name = "EASS Hyperion"
-		hyperion.position = Vector3(6000, 0, 0)
+		hyperion.position = Vector3(5800, 0, 0)
 		$Systems.add_ship(hyperion, "test_system")
 
 
 func finish_setup_galaxy_client():
 	update_graphics()
-	$CanvasLayer/FactionPicker.build_faction_menu($Factions)
-	$CanvasLayer/FactionPicker.visible = true
+	$CanvasLayer/JoinGame.build_faction_menu($Factions)
+	$CanvasLayer/JoinGame.visible = true
 	finish_setup_galaxy_all()
 
 
-func _on_faction_picker_request_faction(faction_name: String) -> void:
-	#TODO: on clicking the different spawnpoints, the camera switches views
-	$CanvasLayer/FactionPicker.visible = false
-	rpc("request_faction", faction_name)
-	var faction: Faction = $Factions.get_faction(faction_name)
-	player_enter_system("test_system")
-	show_spawn(faction)
-
-
 @rpc("any_peer", "call_local")
-func request_faction(faction_name):
+func first_spawn_player(faction: Faction, system_name: String, spawner_name: String) -> void:
 	if not multiplayer.is_server():
 		return
+	var remote_id := multiplayer.get_remote_sender_id()
+	# If the host is calling this function, remote id is 0, change to its actual id
+	if remote_id == 0:
+		remote_id = multiplayer.get_unique_id()
+	
 	var pilot = preload("res://ship_systems/pilots/Pilot.tscn")
 	var player_pilot: Pilot = pilot.instantiate()
-	player_pilot.set_faction($Factions.get_faction(faction_name))
-	var player: Player = $Players.find_player_by_netid(multiplayer.get_remote_sender_id())
+	player_pilot.set_faction(faction)
+	
+	var player: Player = $Players.find_player_by_netid(remote_id)
 	player_pilot.name = player.name
 	player_pilot._player_pilot_id = player.player_id
-	player_pilot.multiplayer_id = multiplayer.get_remote_sender_id()
+	player_pilot.set_multiplayer_id(remote_id)
+	
+	#TODO: Change this to be via system_name and spawner_name
+	player_enter_system("test_system")
 	$"Systems/test_system/SubViewport/stations/Babylon 5".add_passenger(player_pilot)
-	player_pilot.set_multiplayer_id(multiplayer.get_remote_sender_id())
 	Logger.log(["Created pilot: ", player_pilot, " in faction ", player_pilot._faction_name, " with mpid: ", player_pilot.multiplayer_id], Logger.MessageType.SUCCESS)
 
 
 func _on_network_connection_succeeded() -> void:
 	finish_setup_galaxy_client()
+
+
+func _on_join_game_request_spawn(faction_name: String, system_name: String, spawner_name: String) -> void:
+	rpc("first_spawn_player", $Factions.get_faction(faction_name), system_name, spawner_name)
+	$CanvasLayer/JoinGame.visible = false
+
+
+func _on_join_game_request_faction(faction_name: String) -> void:
+	$CanvasLayer/JoinGame.show_spawn(get_spawn_points($Factions.get_faction(faction_name)))

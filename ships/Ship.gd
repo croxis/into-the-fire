@@ -144,14 +144,16 @@ func _physics_process(dt: float) -> void:
 	
 	if inputs.autobreak_toggle:
 		autobreak = !autobreak
-		$SubViewportCenter/center_ui.set_autobreak(autobreak)
+		if has_node("$SubViewportCenter"):
+			$SubViewportCenter/center_ui.set_autobreak(autobreak)
 
 
 	if inputs.autospin_toggle:
 		autospin = !autospin
 		target_rot = rotation
 		Logger.log(["Requesting autospin set to ", autospin, " for ", self], Logger.MessageType.QUESTION)
-		$SubViewportCenter/center_ui.set_autospin(autospin)
+		if has_node("$SubViewportCenter"):
+			$SubViewportCenter/center_ui.set_autospin(autospin)
 		
 	# Start of PID code
 	# https://raw.githubusercontent.com/itspacchu/GodotRocket/master/scripts/rocket.gd
@@ -215,7 +217,8 @@ func _physics_process(dt: float) -> void:
 	if inputs.debug_all_stop:
 		_debug_all_stop = true
 	
-	$SubViewportCenter/center_ui.set_acceleration((linear_velocity.length() - start_speed)/dt)	
+	if has_node("$SubViewportCenter"):
+		$SubViewportCenter/center_ui.set_acceleration((linear_velocity.length() - start_speed)/dt)	
 	start_speed = linear_velocity.length()
 	return
 	

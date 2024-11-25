@@ -1,6 +1,7 @@
 extends Node
 var playerid_counter := 1
 
+# 0 is reserved for npc
 # Do not use network syncronizers for this due to passwords!
 
 func check_player(player_name: String, player_password: String, peer_id: int) -> bool:
