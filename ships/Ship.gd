@@ -308,6 +308,10 @@ func _on_button_launch_pressed() -> void:
 	$CapitalShipControl.visible = false
 
 
+func _on_capital_ui_request_launch() -> void:
+	rpc("request_launch", 0, 0)
+
+
 @rpc("any_peer", "call_local")
 func request_launch(ship_id: int, pilot_id: int):
 	if not multiplayer.is_server():
