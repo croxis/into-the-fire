@@ -147,7 +147,6 @@ func first_spawn_player(faction: Faction, system_name: String, spawner_name: Str
 	#TODO: Change this to be via system_name and spawner_name
 	player_enter_system(system_name)
 	$"Systems/test_system/SubViewport/ships/Babylon 5".add_passenger(player_pilot)
-	print_debug(system_name, spawner_name)
 	Logger.log(["Created pilot: ", player_pilot, " in faction ", player_pilot._faction_name, " with mpid: ", player_pilot.multiplayer_id], Logger.MessageType.SUCCESS)
 
 

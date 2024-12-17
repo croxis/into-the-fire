@@ -70,6 +70,8 @@ var _debug_all_stop := false
 
 var start_speed = 0
 
+var is_spawning := false			
+
 signal destroyed(ship_id)
 
 
@@ -290,6 +292,8 @@ func _on_area_3d_dock_body_entered(body: Ship) -> void:
 	if body == self:
 		#can't dock with self, silly
 		return
+	if body.is_spawning:
+		return
 	Logger.log([body, " ship entered dock on ", name], Logger.MessageType.INFO)
 	body.get_node("Crew").captain_name = ""
 	body.get_node("Crew").pilot_name = ""
@@ -330,7 +334,8 @@ func request_launch(ship_id: int, pilot_id: int):
 	#TODO: Keep an inventory of docked ships
 	
 	var PlayerScene := load("res://ships/earth alliance/aurora_starfury/auora_starfury.tscn")
-	var new_ship = PlayerScene.instantiate()
+	var new_ship: Ship = PlayerScene.instantiate()
+	new_ship.is_spawning = true
 	
 	#TODO: Pull ship from existing invetory using the id
 	new_ship.ship_id = galaxy.ship_id_counter
@@ -339,13 +344,20 @@ func request_launch(ship_id: int, pilot_id: int):
 	
 	new_ship.global_transform.origin = spawn_position
 	
-	var old_pilot: Pilot = $Crew.remove_passenger_by_id(pilot_id)
+	var old_pilot: Pilot
+	if pilot_id:
+		old_pilot = $Crew.remove_passenger_by_id(pilot_id)
+	else:		
+		old_pilot = $Crew.remove_passenger_by_multiplayerid(remote_id)
+	print_debug(old_pilot, pilot_id)
 	var pilot: Pilot = new_ship.get_node("CrewMultiplayerSpawner").spawn({"name": old_pilot.name, "multiplayer_id": old_pilot.multiplayer_id})
 	pilot._faction_name = old_pilot._faction_name
 	pilot._player_pilot_id = old_pilot._player_pilot_id
 	new_ship.add_pilot(pilot)
 	old_pilot.queue_free()
 	new_ship.set_camera.rpc_id(pilot.multiplayer_id)
+	await get_tree().create_timer(1.0).timeout
+	new_ship.is_spawning = false
 	Logger.log(["Spawn complete for ", pilot], Logger.MessageType.SUCCESS)
 
 
