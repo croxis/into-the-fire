@@ -56,7 +56,6 @@ func save_players():
 
 
 func find_player_by_netid(id: int) -> Player:
-	print_debug("Find player by net id: ", id)
 	for player in get_children():
 		if player.network_id == id:
 			return player
