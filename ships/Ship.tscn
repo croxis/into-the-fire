@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://bhhs2v02syo8j"]
+[gd_scene load_steps=12 format=3 uid="uid://bhhs2v02syo8j"]
 
 [ext_resource type="Script" path="res://ships/Ship.gd" id="1_lh74f"]
 [ext_resource type="Script" path="res://ship_systems/weapons/Guns.gd" id="2_b1wmj"]
@@ -7,6 +7,9 @@
 [ext_resource type="Script" path="res://ships/crew.gd" id="5_tgeno"]
 [ext_resource type="Script" path="res://ships/crew_multiplayer_spawner.gd" id="6_1a8so"]
 [ext_resource type="PackedScene" uid="uid://bywfmtvnxay38" path="res://ui/capital/capital_ui.tscn" id="7_dwaht"]
+[ext_resource type="Script" path="res://ships/target_recticles.gd" id="8_gl6o0"]
+[ext_resource type="Texture2D" uid="uid://bmlaxe333nh4m" path="res://ui/crosshair/crosshair180.png" id="9_lqn33"]
+[ext_resource type="Texture2D" uid="uid://dumvw3t7fyxto" path="res://ui/crosshair/crosshair022.png" id="10_vyf3k"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_2c0xb"]
 properties/0/path = NodePath(".:linear_velocity")
@@ -91,6 +94,22 @@ script = ExtResource("6_1a8so")
 
 [node name="CapitalUI" parent="." instance=ExtResource("7_dwaht")]
 visible = false
+
+[node name="TargetRecticles" type="Node3D" parent="."]
+script = ExtResource("8_gl6o0")
+
+[node name="TargetRecticle" type="TextureRect" parent="TargetRecticles"]
+modulate = Color(1, 1, 1, 0.168627)
+offset_right = 40.0
+offset_bottom = 40.0
+texture = ExtResource("9_lqn33")
+
+[node name="OffscreenRecticle" type="TextureRect" parent="TargetRecticles"]
+modulate = Color(1, 1, 1, 0.560784)
+offset_right = 40.0
+offset_bottom = 40.0
+pivot_offset = Vector2(64, 64)
+texture = ExtResource("10_vyf3k")
 
 [connection signal="child_exiting_tree" from="Crew" to="." method="_on_crew_child_exiting_tree"]
 [connection signal="child_exiting_tree" from="Crew" to="Crew" method="_on_child_exiting_tree"]
