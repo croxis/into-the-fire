@@ -364,3 +364,7 @@ func request_launch(ship_id: int, pilot_id: int):
 
 func get_current_system() -> System:
 	return get_parent().get_parent().get_parent()
+
+
+func is_player_pilot() -> bool:
+	return multiplayer.multiplayer_peer == null or multiplayer.get_unique_id() == multiplayer_pilot_id
