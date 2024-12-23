@@ -112,6 +112,12 @@ func finish_setup_galaxy_all() -> void:
 		$"Systems/test_system/SubViewport/ships/Babylon 5".add_captain(b5commander)
 		b5commander.multiplayer_id = multiplayer.get_unique_id()
 		
+		var b5botpilot: Pilot = pilot.instantiate()
+		b5botpilot.name = "Karren Waffer"
+		b5botpilot.set_faction($"Factions/Earth Alliance/Babylon 5/Zeta Wing")
+		$"Systems/test_system/SubViewport/ships/Babylon 5".add_passenger(b5botpilot)
+		b5botpilot.multiplayer_id = multiplayer.get_unique_id()
+		
 		var hyperion := preload("res://ships/earth alliance/hyperion/hyperion.tscn").instantiate()
 		hyperion.name = "EASS Hyperion"
 		hyperion.position = Vector3(5800, 0, 0)
