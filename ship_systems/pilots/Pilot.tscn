@@ -1,7 +1,13 @@
-[gd_scene load_steps=5 format=3 uid="uid://c8kn4ojrwda3e"]
+[gd_scene load_steps=11 format=3 uid="uid://c8kn4ojrwda3e"]
 
 [ext_resource type="Script" path="res://ship_systems/pilots/Pilot.gd" id="1_gf7ba"]
 [ext_resource type="Script" path="res://ships/Inputs.gd" id="2_uhore"]
+[ext_resource type="Script" path="res://addons/godot_state_charts/state_chart.gd" id="3_agiy5"]
+[ext_resource type="Script" path="res://addons/godot_state_charts/compound_state.gd" id="4_3s61g"]
+[ext_resource type="Script" path="res://addons/godot_state_charts/parallel_state.gd" id="4_is8kl"]
+[ext_resource type="Script" path="res://addons/godot_state_charts/atomic_state.gd" id="5_hq3hp"]
+[ext_resource type="Script" path="res://addons/godot_state_charts/transition.gd" id="6_j4k67"]
+[ext_resource type="PackedScene" uid="uid://bcwkugn6v3oy7" path="res://addons/godot_state_charts/utilities/state_chart_debugger.tscn" id="7_xg8oa"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_38dqk"]
 properties/0/path = NodePath(".:_player_pilot_id")
@@ -50,3 +56,72 @@ replication_config = SubResource("SceneReplicationConfig_38dqk")
 root_path = NodePath(".")
 replication_config = SubResource("SceneReplicationConfig_hiqvf")
 script = ExtResource("2_uhore")
+
+[node name="StateChart" type="Node" parent="."]
+script = ExtResource("3_agiy5")
+
+[node name="ParallelState" type="Node" parent="StateChart"]
+script = ExtResource("4_is8kl")
+
+[node name="CrewStatus" type="Node" parent="StateChart/ParallelState"]
+script = ExtResource("4_3s61g")
+initial_state = NodePath("InCrew")
+
+[node name="InCrew" type="Node" parent="StateChart/ParallelState/CrewStatus"]
+script = ExtResource("5_hq3hp")
+
+[node name="ToPilot" type="Node" parent="StateChart/ParallelState/CrewStatus/InCrew"]
+script = ExtResource("6_j4k67")
+to = NodePath("../../InPilot")
+delay_in_seconds = "0.0"
+
+[node name="InPilot" type="Node" parent="StateChart/ParallelState/CrewStatus"]
+script = ExtResource("5_hq3hp")
+
+[node name="ToCrew" type="Node" parent="StateChart/ParallelState/CrewStatus/InPilot"]
+script = ExtResource("6_j4k67")
+to = NodePath("../../InCrew")
+delay_in_seconds = "0.0"
+
+[node name="InShipCommander" type="Node" parent="StateChart/ParallelState/CrewStatus"]
+script = ExtResource("5_hq3hp")
+
+[node name="InFleetCommander" type="Node" parent="StateChart/ParallelState/CrewStatus"]
+script = ExtResource("5_hq3hp")
+
+[node name="StanceStatus" type="Node" parent="StateChart/ParallelState"]
+script = ExtResource("4_3s61g")
+initial_state = NodePath("Hold")
+
+[node name="Hold" type="Node" parent="StateChart/ParallelState/StanceStatus"]
+script = ExtResource("5_hq3hp")
+
+[node name="Aggressive" type="Node" parent="StateChart/ParallelState/StanceStatus"]
+script = ExtResource("5_hq3hp")
+
+[node name="Defensive" type="Node" parent="StateChart/ParallelState/StanceStatus"]
+script = ExtResource("5_hq3hp")
+
+[node name="StandingOrders" type="Node" parent="StateChart/ParallelState"]
+script = ExtResource("4_3s61g")
+initial_state = NodePath("Defend")
+
+[node name="Defend" type="Node" parent="StateChart/ParallelState/StandingOrders"]
+script = ExtResource("5_hq3hp")
+
+[node name="ToPatrol" type="Node" parent="StateChart/ParallelState/StandingOrders/Defend"]
+script = ExtResource("6_j4k67")
+to = NodePath("../../Patrol")
+delay_in_seconds = "0.0"
+
+[node name="Patrol" type="Node" parent="StateChart/ParallelState/StandingOrders"]
+script = ExtResource("5_hq3hp")
+
+[node name="ToDefend" type="Node" parent="StateChart/ParallelState/StandingOrders/Patrol"]
+script = ExtResource("6_j4k67")
+to = NodePath("../../Defend")
+delay_in_seconds = "0.0"
+
+[node name="StateChartDebugger" parent="." instance=ExtResource("7_xg8oa")]
+offset_left = 1488.0
+initial_node_to_watch = NodePath("../StateChart")
