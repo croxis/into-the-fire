@@ -15,6 +15,10 @@ properties/2/replication_mode = 2
 
 [node name="Faction" type="Node"]
 script = ExtResource("1_ywg1y")
+relations = null
+accept_players = null
+accept_children = null
+is_wing = null
 
 [node name="FactionSync" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_5n1wd")

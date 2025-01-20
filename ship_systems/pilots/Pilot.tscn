@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://c8kn4ojrwda3e"]
+[gd_scene load_steps=12 format=3 uid="uid://c8kn4ojrwda3e"]
 
 [ext_resource type="Script" path="res://ship_systems/pilots/Pilot.gd" id="1_gf7ba"]
 [ext_resource type="Script" path="res://ships/Inputs.gd" id="2_uhore"]
@@ -8,17 +8,18 @@
 [ext_resource type="Script" path="res://addons/godot_state_charts/atomic_state.gd" id="5_hq3hp"]
 [ext_resource type="Script" path="res://addons/godot_state_charts/transition.gd" id="6_j4k67"]
 [ext_resource type="PackedScene" uid="uid://bcwkugn6v3oy7" path="res://addons/godot_state_charts/utilities/state_chart_debugger.tscn" id="7_xg8oa"]
+[ext_resource type="Script" path="res://ship_systems/pilots/game_state.gd" id="9_07umr"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_38dqk"]
 properties/0/path = NodePath(".:_player_pilot_id")
 properties/0/spawn = true
-properties/0/replication_mode = 1
+properties/0/replication_mode = 2
 properties/1/path = NodePath(".:_faction_name")
 properties/1/spawn = true
-properties/1/replication_mode = 1
+properties/1/replication_mode = 2
 properties/2/path = NodePath(".:multiplayer_id")
 properties/2/spawn = true
-properties/2/replication_mode = 1
+properties/2/replication_mode = 2
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_hiqvf"]
 properties/0/path = NodePath(".:throttle")
@@ -125,3 +126,6 @@ delay_in_seconds = "0.0"
 [node name="StateChartDebugger" parent="." instance=ExtResource("7_xg8oa")]
 offset_left = 1488.0
 initial_node_to_watch = NodePath("../StateChart")
+
+[node name="GameState" type="Node" parent="."]
+script = ExtResource("9_07umr")

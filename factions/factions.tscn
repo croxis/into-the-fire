@@ -13,15 +13,19 @@ accept_children = true
 
 [node name="Alpha Wing" parent="Earth Alliance/Babylon 5" instance=ExtResource("1_5i5wf")]
 accept_players = true
+is_wing = true
 
 [node name="Beta Wing" parent="Earth Alliance/Babylon 5" instance=ExtResource("1_5i5wf")]
 accept_players = true
+is_wing = true
 
 [node name="Delta Wing" parent="Earth Alliance/Babylon 5" instance=ExtResource("1_5i5wf")]
 accept_players = true
+is_wing = true
 
 [node name="Zeta Wing" parent="Earth Alliance/Babylon 5" instance=ExtResource("1_5i5wf")]
 accept_players = true
+is_wing = true
 
 [node name="Mars" parent="Earth Alliance" instance=ExtResource("1_5i5wf")]
 
