@@ -1,25 +1,28 @@
 [gd_scene load_steps=12 format=3 uid="uid://c8kn4ojrwda3e"]
 
-[ext_resource type="Script" path="res://ship_systems/pilots/Pilot.gd" id="1_gf7ba"]
-[ext_resource type="Script" path="res://ships/Inputs.gd" id="2_uhore"]
-[ext_resource type="Script" path="res://addons/godot_state_charts/state_chart.gd" id="3_agiy5"]
-[ext_resource type="Script" path="res://addons/godot_state_charts/compound_state.gd" id="4_3s61g"]
-[ext_resource type="Script" path="res://addons/godot_state_charts/parallel_state.gd" id="4_is8kl"]
-[ext_resource type="Script" path="res://addons/godot_state_charts/atomic_state.gd" id="5_hq3hp"]
-[ext_resource type="Script" path="res://addons/godot_state_charts/transition.gd" id="6_j4k67"]
+[ext_resource type="Script" uid="uid://cwrw4m3xxrbq7" path="res://ship_systems/pilots/Pilot.gd" id="1_gf7ba"]
+[ext_resource type="Script" uid="uid://c0xi03f7y32xl" path="res://ships/Inputs.gd" id="2_uhore"]
+[ext_resource type="Script" uid="uid://bc8ilhoyanrji" path="res://addons/godot_state_charts/state_chart.gd" id="3_agiy5"]
+[ext_resource type="Script" uid="uid://p8iec2s1773v" path="res://addons/godot_state_charts/compound_state.gd" id="4_3s61g"]
+[ext_resource type="Script" uid="uid://brlmdm6wyanfp" path="res://addons/godot_state_charts/parallel_state.gd" id="4_is8kl"]
+[ext_resource type="Script" uid="uid://ct8h407p8ubfb" path="res://addons/godot_state_charts/atomic_state.gd" id="5_hq3hp"]
+[ext_resource type="Script" uid="uid://c3xfy7wppk740" path="res://addons/godot_state_charts/transition.gd" id="6_j4k67"]
 [ext_resource type="PackedScene" uid="uid://bcwkugn6v3oy7" path="res://addons/godot_state_charts/utilities/state_chart_debugger.tscn" id="7_xg8oa"]
-[ext_resource type="Script" path="res://ship_systems/pilots/game_state.gd" id="9_07umr"]
+[ext_resource type="Script" uid="uid://baleoyb76kk5t" path="res://ship_systems/pilots/game_state.gd" id="9_07umr"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_38dqk"]
 properties/0/path = NodePath(".:_player_pilot_id")
 properties/0/spawn = true
 properties/0/replication_mode = 2
-properties/1/path = NodePath(".:_faction_name")
+properties/1/path = NodePath(".:multiplayer_id")
 properties/1/spawn = true
 properties/1/replication_mode = 2
-properties/2/path = NodePath(".:multiplayer_id")
+properties/2/path = NodePath(".:_faction_id")
 properties/2/spawn = true
 properties/2/replication_mode = 2
+properties/3/path = NodePath(".:pilot_id")
+properties/3/spawn = true
+properties/3/replication_mode = 2
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_hiqvf"]
 properties/0/path = NodePath(".:throttle")

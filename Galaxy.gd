@@ -105,16 +105,15 @@ func finish_setup_galaxy_all() -> void:
 	if get_tree().root.get_node("entry").is_server:
 		var babylon5 := preload("res://ships/earth alliance/babylon 5/babylon_5.tscn").instantiate()
 		$Systems.add_station(babylon5, "test_system")
-		var pilot = preload("res://ship_systems/pilots/Pilot.tscn")
-		var b5commander: Pilot = pilot.instantiate()
-		b5commander.name = "Commendar Eclair"
-		b5commander.set_faction($"Factions/Earth Alliance/Babylon 5")
+		var b5commander: Pilot = Pilot.new_pilot("Commendar Eclair")
+		var b5_faction: Faction = $Factions.get_faction("Babylon 5")
+		b5_faction.add_member(b5commander)
 		$"Systems/test_system/SubViewport/ships/Babylon 5".add_captain(b5commander)
 		b5commander.multiplayer_id = multiplayer.get_unique_id()
 		
-		var b5botpilot: Pilot = pilot.instantiate()
-		b5botpilot.name = "Karren Waffer"
-		b5botpilot.set_faction($"Factions/Earth Alliance/Babylon 5/Zeta Wing")
+		var b5botpilot: Pilot = Pilot.new_pilot("Karren Waffer")
+		var zeta_wing: Faction = $Factions.get_faction("Zeta Wing")
+		zeta_wing.add_member(b5botpilot)
 		$"Systems/test_system/SubViewport/ships/Babylon 5".add_passenger(b5botpilot)
 		b5botpilot.multiplayer_id = multiplayer.get_unique_id()
 		
@@ -140,19 +139,16 @@ func first_spawn_player(faction: Faction, system_name: String, spawner_name: Str
 	if remote_id == 0:
 		remote_id = multiplayer.get_unique_id()
 	
-	var pilot = preload("res://ship_systems/pilots/Pilot.tscn")
-	var player_pilot: Pilot = pilot.instantiate()
-	player_pilot.set_faction(faction)
-	
 	var player: Player = $Players.find_player_by_netid(remote_id)
-	player_pilot.name = player.name
+	var player_pilot: Pilot = Pilot.new_pilot(player.name)
+	faction.add_member(player_pilot)
 	player_pilot._player_pilot_id = player.player_id
 	player_pilot.set_multiplayer_id(remote_id)
 	
 	#TODO: Change this to be via system_name and spawner_name
 	player_enter_system(system_name)
 	$"Systems/test_system/SubViewport/ships/Babylon 5".add_passenger(player_pilot)
-	Logger.log(["Created pilot: ", player_pilot, " in faction ", player_pilot._faction_name, " with mpid: ", player_pilot.multiplayer_id], Logger.MessageType.SUCCESS)
+	Logger.log(["Created pilot: ", player_pilot, " in faction ", faction.name, " with mpid: ", player_pilot.multiplayer_id], Logger.MessageType.SUCCESS)
 
 
 func _on_network_connection_succeeded() -> void:

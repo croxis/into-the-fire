@@ -1,8 +1,8 @@
 [gd_scene load_steps=8 format=3 uid="uid://deqh6h2wkuvel"]
 
-[ext_resource type="Script" path="res://ui/loadingscreen/loading.gd" id="1_sn5rh"]
+[ext_resource type="Script" uid="uid://ccr4bjbc1pyp3" path="res://ui/loadingscreen/loading.gd" id="1_sn5rh"]
 [ext_resource type="Theme" uid="uid://iewuun72p7uj" path="res://ui/menu_theme.tres" id="2_ce0tu"]
-[ext_resource type="Script" path="res://ui/debug/DebugContainer.gd" id="3_13r42"]
+[ext_resource type="Script" uid="uid://bnrv1k0ouvwgx" path="res://ui/debug/DebugContainer.gd" id="3_13r42"]
 [ext_resource type="PackedScene" uid="uid://dgsj2su1f5ppc" path="res://ui/debug/widgets/TextList/DebugTextList.tscn" id="4_mfwyk"]
 
 [sub_resource type="Animation" id="Animation_6jfq5"]
@@ -38,8 +38,8 @@ tracks/0/keys = {
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_sdfms"]
 _data = {
-"RESET": SubResource("Animation_6jfq5"),
-"yellow jump": SubResource("Animation_32a75")
+&"RESET": SubResource("Animation_6jfq5"),
+&"yellow jump": SubResource("Animation_32a75")
 }
 
 [node name="loading" type="Control"]

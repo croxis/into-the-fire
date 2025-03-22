@@ -1,20 +1,22 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=9 format=3 uid="uid://d0wche4uxld5q"]
 
-[ext_resource type="PackedScene" path="res://ships/earth alliance/aurora_starfury/auora_starfury.bak.tscn" id="1_x31yl"]
-[ext_resource type="Script" path="res://ships/earth alliance/babylon 5/rotation_spawner.gd" id="2_uo3t0"]
+[ext_resource type="Script" uid="uid://bwoo5m4oaroho" path="res://ships/earth alliance/babylon 5/rotation_spawner.gd" id="2_uo3t0"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_n5xge"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_4gqrq"]
 
+[sub_resource type="Resource" id="Resource_ot6t1"]
+metadata/__load_path__ = "res://ships/earth alliance/aurora_starfury/auora_starfury.bak.tscn"
+
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1lwud"]
 
 [sub_resource type="Sky" id="Sky_ng4ck"]
-sky_material = SubResource( "ProceduralSkyMaterial_1lwud" )
+sky_material = SubResource("ProceduralSkyMaterial_1lwud")
 
 [sub_resource type="Environment" id="Environment_tsvfw"]
 background_mode = 2
-sky = SubResource( "Sky_ng4ck" )
+sky = SubResource("Sky_ng4ck")
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_27uut"]
 size = Vector3(30.4309, 20.2453, 42.8945)
@@ -26,7 +28,7 @@ angular_limit/enable = true
 angular_limit/lower = 0.0
 motor/enable = true
 motor/target_velocity = 4.0
-script = ExtResource( "2_uo3t0" )
+script = ExtResource("2_uo3t0")
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(0.0111674, -0.621777, 0.783115, 0.0088658, 0.783195, 0.621713, -0.999898, 1.81608e-08, 0.0142588, 21.9751, 13.3634, 6.79575)
@@ -34,20 +36,20 @@ current = true
 
 [node name="StaticBody3D" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 6.79575)
-physics_material_override = SubResource( "PhysicsMaterial_n5xge" )
+physics_material_override = SubResource("PhysicsMaterial_n5xge")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
-shape = SubResource( "BoxShape3D_4gqrq" )
+shape = SubResource("BoxShape3D_4gqrq")
 
-[node name="starfury" parent="." instance=ExtResource( "1_x31yl" )]
+[node name="starfury" parent="."]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 2, 0, 0)
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource( "Environment_tsvfw" )
+environment = SubResource("Environment_tsvfw")
 
 [node name="Area3D" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 6.79575)
 gravity_space_override = 3
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
-shape = SubResource( "BoxShape3D_27uut" )
+shape = SubResource("BoxShape3D_27uut")

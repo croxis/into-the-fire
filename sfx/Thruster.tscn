@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://r1x0fqeuxk04"]
 
 [ext_resource type="PackedScene" uid="uid://b2sfwpev7j0fm" path="res://sfx/engine_plume.tscn" id="1_mm0qw"]
-[ext_resource type="Script" path="res://sfx/Thruster.gd" id="1_ww0jo"]
+[ext_resource type="Script" uid="uid://blo6ct4hbeegv" path="res://sfx/Thruster.gd" id="1_ww0jo"]
 
 [node name="Thruster" type="Node3D"]
 script = ExtResource("1_ww0jo")

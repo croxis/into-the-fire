@@ -352,7 +352,7 @@ func request_launch(ship_id: int, pilot_id: int):
 		old_pilot = $Crew.remove_passenger_by_multiplayerid(remote_id)
 	print_debug(old_pilot, pilot_id)
 	var pilot: Pilot = new_ship.get_node("CrewMultiplayerSpawner").spawn({"name": old_pilot.name, "multiplayer_id": old_pilot.multiplayer_id})
-	pilot._faction_name = old_pilot._faction_name
+	pilot._faction_id = old_pilot._faction_id
 	pilot._player_pilot_id = old_pilot._player_pilot_id
 	new_ship.add_pilot(pilot)
 	old_pilot.queue_free()

@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://dvqrq0kpihdlc"]
 
-[ext_resource type="Script" path="res://ships/earth alliance/aurora_starfury/window_ui.gd" id="1_77lo8"]
+[ext_resource type="Script" uid="uid://byiwanyvamv31" path="res://ships/earth alliance/aurora_starfury/window_ui.gd" id="1_77lo8"]
 [ext_resource type="PackedScene" uid="uid://bhmsxfhfk4tpu" path="res://ui/velocity.tscn" id="1_erljw"]
 [ext_resource type="PackedScene" uid="uid://k1lqwbon6uiq" path="res://ui/x_axis_bar.tscn" id="3_aiy7f"]
 

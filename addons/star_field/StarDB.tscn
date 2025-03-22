@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://kay1bansjucq"]
 
-[ext_resource type="Script" path="res://addons/star_field/StarDB.gd" id="1"]
+[ext_resource type="Script" uid="uid://bb7it1stmg5i6" path="res://addons/star_field/StarDB.gd" id="1"]
 
 [node name="StarDB" type="Node"]
 script = ExtResource("1")

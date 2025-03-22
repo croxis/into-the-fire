@@ -3,7 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://dnx0pyfaqlkqi" path="res://systems/system_template.tscn" id="1_ctlaf"]
 [ext_resource type="Environment" uid="uid://d1el1icbym1qc" path="res://systems/test_system/test_system_environment.tres" id="3_byhm0"]
 [ext_resource type="Texture2D" uid="uid://b8mr0hea1ghdh" path="res://systems/ran/epsilon_nebulae_texture_by_amras_arfeiniel.png" id="6_s3eqy"]
-[ext_resource type="Script" path="res://systems/test_system/nebula_hardcode.gd" id="7_6xt1f"]
+[ext_resource type="Script" uid="uid://bryci0erdlvvw" path="res://systems/test_system/nebula_hardcode.gd" id="7_6xt1f"]
 [ext_resource type="AudioStream" uid="uid://m1fuxurnle23" path="res://music/Christopher Franke - Battle Themes Track 1.ogg" id="8_oq5h5"]
 
 [sub_resource type="Shader" id="Shader_53waj"]
@@ -50,16 +50,16 @@ void fragment() {
 render_priority = -1
 shader = SubResource("Shader_53waj")
 shader_parameter/albedo = Color(1, 1, 1, 1)
+shader_parameter/texture_albedo = ExtResource("6_s3eqy")
 shader_parameter/point_size = 1.0
 shader_parameter/roughness = 1.0
-shader_parameter/metallic_texture_channel = null
+shader_parameter/metallic_texture_channel = Vector4(0, 0, 0, 0)
 shader_parameter/specular = 0.5
 shader_parameter/metallic = 0.0
 shader_parameter/uv1_scale = Vector3(1, 2, 1)
 shader_parameter/uv1_offset = Vector3(0, 0, 0)
 shader_parameter/uv2_scale = Vector3(1, 1, 1)
 shader_parameter/uv2_offset = Vector3(0, 0, 0)
-shader_parameter/texture_albedo = ExtResource("6_s3eqy")
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_byahp"]
 material = SubResource("ShaderMaterial_jv4xp")

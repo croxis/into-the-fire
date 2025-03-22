@@ -1,11 +1,11 @@
 [gd_scene load_steps=14 format=3 uid="uid://fog63swldmub"]
 
-[ext_resource type="Script" path="res://title_screen.gd" id="1_v3ado"]
+[ext_resource type="Script" uid="uid://byqhx4358bnfk" path="res://title_screen.gd" id="1_v3ado"]
 [ext_resource type="PackedScene" uid="uid://bx03e1mn48l58" path="res://ships/earth alliance/babylon 5/babylon_5.tscn" id="2_a5wwe"]
 [ext_resource type="Environment" uid="uid://d084u3xtn7nyp" path="res://title_screen_env.tres" id="2_xlnt3"]
 [ext_resource type="PackedScene" uid="uid://smyq0lsgeetn" path="res://systems/ran/epsilon 3/epsilon3.tscn" id="3_si7s7"]
 [ext_resource type="AudioStream" uid="uid://mn5widkbv53p" path="res://music/Season-3-Edited-Titles.ogg" id="4_jke73"]
-[ext_resource type="Script" path="res://addons/star_field/star_field_manager.gd" id="6_bsqdu"]
+[ext_resource type="Script" uid="uid://gs3lowvoy088" path="res://addons/star_field/star_field_manager.gd" id="6_bsqdu"]
 [ext_resource type="Texture2D" uid="uid://b8mr0hea1ghdh" path="res://systems/ran/epsilon_nebulae_texture_by_amras_arfeiniel.png" id="7_26dio"]
 [ext_resource type="AudioStream" uid="uid://byjpf6fb6ihv1" path="res://music/Combat Sim - Main Theme Extended.ogg" id="8_coigh"]
 
@@ -210,8 +210,8 @@ tracks/6/keys = {
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_epepl"]
 _data = {
-"Camera": SubResource("Animation_kiqxv"),
-"RESET": SubResource("Animation_q455p")
+&"Camera": SubResource("Animation_kiqxv"),
+&"RESET": SubResource("Animation_q455p")
 }
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8r0lf"]

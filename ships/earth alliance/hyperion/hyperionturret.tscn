@@ -1,6 +1,6 @@
 [gd_scene load_steps=15 format=4 uid="uid://bw6rueeoqv6a"]
 
-[ext_resource type="Script" path="res://ships/earth alliance/hyperion/hyperionturret.gd" id="1_svcmu"]
+[ext_resource type="Script" uid="uid://wvrgbkp8kai2" path="res://ships/earth alliance/hyperion/hyperionturret.gd" id="1_svcmu"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4yt34"]
 resource_name = "Black.002"

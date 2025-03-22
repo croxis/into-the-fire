@@ -4,7 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://bw6rueeoqv6a" path="res://ships/earth alliance/hyperion/hyperionturret.tscn" id="2_e1fw0"]
 [ext_resource type="PackedScene" uid="uid://r1x0fqeuxk04" path="res://sfx/Thruster.tscn" id="3_gm65t"]
 [ext_resource type="PackedScene" uid="uid://bcyhqn6r6h3a5" path="res://ships/earth alliance/hyperion/hyperion_ship.tscn" id="4_2gmgv"]
-[ext_resource type="Script" path="res://ships/earth alliance/hyperion/spawner.gd" id="4_nbv42"]
+[ext_resource type="Script" uid="uid://cxlmehy0n2s54" path="res://ships/earth alliance/hyperion/spawner.gd" id="4_nbv42"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_aqub1"]
 size = Vector3(28.2473, 15.9736, 21.8272)

@@ -1,8 +1,8 @@
 [gd_scene load_steps=5 format=3 uid="uid://vh1ucj2rfbby"]
 
-[ext_resource type="Script" path="res://addons/maaacks_options_menus/base/scenes/Menus/OptionsMenu/MiniOptionsMenu.gd" id="1_32vm2"]
+[ext_resource type="Script" uid="uid://whq3mmh5hd6j" path="res://addons/maaacks_options_menus/base/scenes/Menus/OptionsMenu/MiniOptionsMenu.gd" id="1_32vm2"]
 [ext_resource type="PackedScene" uid="uid://cl416gdb1fgwr" path="res://addons/maaacks_options_menus/base/scenes/Menus/OptionsMenu/OptionControl/SliderOptionControl.tscn" id="2_kpc65"]
-[ext_resource type="Script" path="res://addons/maaacks_options_menus/base/scripts/CaptureFocus.gd" id="3_7qt1o"]
+[ext_resource type="Script" uid="uid://gmx6trvk5g1d" path="res://addons/maaacks_options_menus/base/scripts/CaptureFocus.gd" id="3_7qt1o"]
 [ext_resource type="PackedScene" uid="uid://bsxh6v7j0257h" path="res://addons/maaacks_options_menus/base/scenes/Menus/OptionsMenu/OptionControl/ToggleOptionControl.tscn" id="4_b20fb"]
 
 [node name="MiniOptionsMenu" type="VBoxContainer"]

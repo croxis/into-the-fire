@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://btaqru1ieiria"]
 
-[ext_resource type="Script" path="res://factions/faction.gd" id="1_ywg1y"]
+[ext_resource type="Script" uid="uid://diho6aq1oy16v" path="res://factions/faction.gd" id="1_ywg1y"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_5n1wd"]
 properties/0/path = NodePath(".:relations")
@@ -12,13 +12,15 @@ properties/1/replication_mode = 2
 properties/2/path = NodePath(".:accept_children")
 properties/2/spawn = true
 properties/2/replication_mode = 2
+properties/3/path = NodePath(".:faction_id")
+properties/3/spawn = true
+properties/3/replication_mode = 2
+properties/4/path = NodePath(".:is_wing")
+properties/4/spawn = true
+properties/4/replication_mode = 2
 
 [node name="Faction" type="Node"]
 script = ExtResource("1_ywg1y")
-relations = null
-accept_players = null
-accept_children = null
-is_wing = null
 
 [node name="FactionSync" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_5n1wd")

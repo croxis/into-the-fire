@@ -1,10 +1,10 @@
 [gd_scene load_steps=6 format=3 uid="uid://c45aut53d0eru"]
 
-[ext_resource type="Script" path="res://Galaxy.gd" id="1_3em77"]
+[ext_resource type="Script" uid="uid://ret5fy6jtwhg" path="res://Galaxy.gd" id="1_3em77"]
 [ext_resource type="PackedScene" uid="uid://dw740uyo1ubum" path="res://ui/join_game/join_game.tscn" id="2_saf80"]
 [ext_resource type="PackedScene" uid="uid://bslpdqhki8tdr" path="res://factions/factions.tscn" id="3_xpwin"]
-[ext_resource type="Script" path="res://players.gd" id="5_ietyw"]
-[ext_resource type="Script" path="res://systems.gd" id="6_ioa4q"]
+[ext_resource type="Script" uid="uid://dp82ma2ctoa5h" path="res://players.gd" id="5_ietyw"]
+[ext_resource type="Script" uid="uid://fjhx2xafb7eg" path="res://systems.gd" id="6_ioa4q"]
 
 [node name="Galaxy" type="Node"]
 script = ExtResource("1_3em77")
@@ -24,7 +24,7 @@ script = ExtResource("5_ietyw")
 script = ExtResource("6_ioa4q")
 
 [node name="MultiplayerSpawnerSystems" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("res://systems/test_system/test_system.tscn")
+_spawnable_scenes = PackedStringArray("uid://sl64gsa8wdih")
 spawn_path = NodePath("../Systems")
 
 [connection signal="request_faction" from="CanvasLayer/JoinGame" to="." method="_on_join_game_request_faction"]

@@ -1,50 +1,115 @@
 [gd_scene load_steps=3 format=3 uid="uid://bslpdqhki8tdr"]
 
 [ext_resource type="PackedScene" uid="uid://btaqru1ieiria" path="res://factions/faction.tscn" id="1_5i5wf"]
-[ext_resource type="Script" path="res://factions/factions.gd" id="1_823mu"]
+[ext_resource type="Script" uid="uid://dnsyee32v101" path="res://factions/factions.gd" id="1_823mu"]
 
 [node name="Factions" type="Node"]
 script = ExtResource("1_823mu")
 
 [node name="Earth Alliance" parent="." instance=ExtResource("1_5i5wf")]
+relations = {}
+accept_players = false
+accept_children = false
+is_wing = false
 
 [node name="Babylon 5" parent="Earth Alliance" instance=ExtResource("1_5i5wf")]
+relations = {}
+accept_players = false
 accept_children = true
+is_wing = false
+faction_id = 5
 
 [node name="Alpha Wing" parent="Earth Alliance/Babylon 5" instance=ExtResource("1_5i5wf")]
+relations = {}
 accept_players = true
+accept_children = false
 is_wing = true
+faction_id = 6
 
 [node name="Beta Wing" parent="Earth Alliance/Babylon 5" instance=ExtResource("1_5i5wf")]
+relations = {}
 accept_players = true
+accept_children = false
 is_wing = true
+faction_id = 7
 
 [node name="Delta Wing" parent="Earth Alliance/Babylon 5" instance=ExtResource("1_5i5wf")]
+relations = {}
 accept_players = true
+accept_children = false
 is_wing = true
+faction_id = 8
 
 [node name="Zeta Wing" parent="Earth Alliance/Babylon 5" instance=ExtResource("1_5i5wf")]
+relations = {}
 accept_players = true
+accept_children = false
 is_wing = true
+faction_id = 9
 
 [node name="Mars" parent="Earth Alliance" instance=ExtResource("1_5i5wf")]
+relations = {}
+accept_players = false
+accept_children = false
+is_wing = false
+faction_id = 4
 
 [node name="Proxima" parent="Earth Alliance" instance=ExtResource("1_5i5wf")]
+relations = {}
+accept_players = false
+accept_children = false
+is_wing = false
+faction_id = 10
 
 [node name="Psi Corps" parent="Earth Alliance" instance=ExtResource("1_5i5wf")]
+relations = {}
+accept_players = false
+accept_children = false
+is_wing = false
+faction_id = 11
 
 [node name="Minbari" parent="." instance=ExtResource("1_5i5wf")]
+relations = {}
+accept_players = false
+accept_children = false
+is_wing = false
+faction_id = 1
 
 [node name="Warrior Caste" parent="Minbari" instance=ExtResource("1_5i5wf")]
+relations = {}
+accept_players = false
+accept_children = false
+is_wing = false
+faction_id = 12
 
 [node name="Worker Caste" parent="Minbari" instance=ExtResource("1_5i5wf")]
+relations = {}
+accept_players = false
+accept_children = false
+is_wing = false
+faction_id = 13
 
 [node name="Religious Caste" parent="Minbari" instance=ExtResource("1_5i5wf")]
+relations = {}
+accept_players = false
+accept_children = false
+is_wing = false
+faction_id = 14
 
 [node name="Narn" parent="." instance=ExtResource("1_5i5wf")]
+relations = {}
+accept_players = false
+accept_children = false
+is_wing = false
+faction_id = 2
 
 [node name="Centauri" parent="." instance=ExtResource("1_5i5wf")]
+relations = {}
+accept_players = false
+accept_children = false
+is_wing = false
+faction_id = 3
 
 [node name="MultiplayerSpawnerFactions" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("res://factions/faction.tscn")
+_spawnable_scenes = PackedStringArray("uid://btaqru1ieiria")
 spawn_path = NodePath("..")

@@ -1,10 +1,10 @@
 [gd_scene load_steps=6 format=3 uid="uid://dnx0pyfaqlkqi"]
 
 [ext_resource type="PackedScene" uid="uid://1tfn6krikklo" path="res://ui/cameras/RTSCamera.tscn" id="1_iuvpb"]
-[ext_resource type="Script" path="res://systems/system_template.gd" id="1_y2tf5"]
-[ext_resource type="Script" path="res://systems/BoltSpawner.gd" id="2_05tas"]
-[ext_resource type="Script" path="res://systems/test_system/ShipSpawner.gd" id="3_hjsre"]
-[ext_resource type="Script" path="res://addons/star_field/star_field_manager.gd" id="4_swkmc"]
+[ext_resource type="Script" uid="uid://wofj1r0pk4pq" path="res://systems/system_template.gd" id="1_y2tf5"]
+[ext_resource type="Script" uid="uid://dpyq2vnf3hrj6" path="res://systems/BoltSpawner.gd" id="2_05tas"]
+[ext_resource type="Script" uid="uid://c8oy77lsvpu0a" path="res://systems/test_system/ShipSpawner.gd" id="3_hjsre"]
+[ext_resource type="Script" uid="uid://gs3lowvoy088" path="res://addons/star_field/star_field_manager.gd" id="4_swkmc"]
 
 [node name="System" type="SubViewportContainer"]
 visible = false

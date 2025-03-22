@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://bhmsxfhfk4tpu"]
 
-[ext_resource type="Script" path="res://ui/vertical_bar.gd" id="1_pm0px"]
+[ext_resource type="Script" uid="uid://t7s0vei3pivb" path="res://ui/vertical_bar.gd" id="1_pm0px"]
 
 [node name="Velocity" type="Control"]
 layout_mode = 3

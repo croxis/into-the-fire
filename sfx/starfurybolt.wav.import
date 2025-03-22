@@ -1,7 +1,7 @@
 [remap]
 
 importer="wav"
-type="AudioStreamSample"
+type="AudioStreamWAV"
 uid="uid://bk2mc4i3b3wmq"
 path="res://.godot/imported/starfurybolt.wav-4f2693821834115ec5b5dbec15155360.sample"
 

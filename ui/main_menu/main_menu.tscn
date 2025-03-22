@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://d31wy0m5b7d3b"]
 
 [ext_resource type="Theme" uid="uid://iewuun72p7uj" path="res://ui/menu_theme.tres" id="1_dnqi6"]
-[ext_resource type="Script" path="res://ui/main_menu/main_menu.gd" id="1_xocpo"]
+[ext_resource type="Script" uid="uid://krw3crs67se" path="res://ui/main_menu/main_menu.gd" id="1_xocpo"]
 [ext_resource type="PackedScene" uid="uid://dp3rgqaehb3xu" path="res://addons/maaacks_options_menus/base/scenes/Menus/OptionsMenu/Input/InputOptionsMenu.tscn" id="3_lbkvo"]
 
 [node name="MainMenu" type="Control"]

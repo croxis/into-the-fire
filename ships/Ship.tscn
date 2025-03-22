@@ -1,13 +1,13 @@
 [gd_scene load_steps=14 format=3 uid="uid://bhhs2v02syo8j"]
 
-[ext_resource type="Script" path="res://ships/Ship.gd" id="1_lh74f"]
-[ext_resource type="Script" path="res://ship_systems/weapons/Guns.gd" id="2_b1wmj"]
-[ext_resource type="Script" path="res://ships/Engines.gd" id="4_ob5l3"]
+[ext_resource type="Script" uid="uid://dbkjlelura8tm" path="res://ships/Ship.gd" id="1_lh74f"]
+[ext_resource type="Script" uid="uid://dy87skygwj8j5" path="res://ship_systems/weapons/Guns.gd" id="2_b1wmj"]
+[ext_resource type="Script" uid="uid://1ihpd5wkcfij" path="res://ships/Engines.gd" id="4_ob5l3"]
 [ext_resource type="PackedScene" uid="uid://hivg2o6wgagj" path="res://ships/PID.tscn" id="5_itaim"]
-[ext_resource type="Script" path="res://ships/crew.gd" id="5_tgeno"]
-[ext_resource type="Script" path="res://ships/crew_multiplayer_spawner.gd" id="6_1a8so"]
+[ext_resource type="Script" uid="uid://d4gd45lh7saav" path="res://ships/crew.gd" id="5_tgeno"]
+[ext_resource type="Script" uid="uid://cgo6tfowdnsli" path="res://ships/crew_multiplayer_spawner.gd" id="6_1a8so"]
 [ext_resource type="PackedScene" uid="uid://bywfmtvnxay38" path="res://ui/capital/capital_ui.tscn" id="7_dwaht"]
-[ext_resource type="Script" path="res://ships/target_recticles.gd" id="8_gl6o0"]
+[ext_resource type="Script" uid="uid://c08fcpl8wkmhf" path="res://ships/target_recticles.gd" id="8_gl6o0"]
 [ext_resource type="Texture2D" uid="uid://cx7hpfxngds3j" path="res://ui/crosshair/crosshair186.png" id="9_fnchb"]
 [ext_resource type="Texture2D" uid="uid://bmlaxe333nh4m" path="res://ui/crosshair/crosshair180.png" id="9_lqn33"]
 [ext_resource type="Texture2D" uid="uid://dumvw3t7fyxto" path="res://ui/crosshair/crosshair022.png" id="10_vyf3k"]
@@ -86,7 +86,7 @@ script = ExtResource("4_ob5l3")
 script = ExtResource("5_tgeno")
 
 [node name="CrewMultiplayerSpawner" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("res://ship_systems/pilots/Pilot.tscn")
+_spawnable_scenes = PackedStringArray("uid://c8kn4ojrwda3e")
 spawn_path = NodePath("../Crew")
 script = ExtResource("6_1a8so")
 

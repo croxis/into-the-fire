@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://dw740uyo1ubum"]
 
-[ext_resource type="Script" path="res://ui/join_game/join_game.gd" id="1_om4o2"]
+[ext_resource type="Script" uid="uid://blwggjax77ram" path="res://ui/join_game/join_game.gd" id="1_om4o2"]
 [ext_resource type="Theme" uid="uid://iewuun72p7uj" path="res://ui/menu_theme.tres" id="1_qwwcd"]
 
 [node name="JoinGame" type="VBoxContainer"]

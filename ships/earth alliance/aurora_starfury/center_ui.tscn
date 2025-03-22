@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://dsbhc5ruqypdj"]
 
-[ext_resource type="Script" path="res://ships/earth alliance/aurora_starfury/center_ui.gd" id="1_3wjce"]
+[ext_resource type="Script" uid="uid://b1v1od6bl6uao" path="res://ships/earth alliance/aurora_starfury/center_ui.gd" id="1_3wjce"]
 [ext_resource type="Theme" uid="uid://iewuun72p7uj" path="res://ui/menu_theme.tres" id="1_vo86i"]
 
 [node name="center_ui" type="Control"]

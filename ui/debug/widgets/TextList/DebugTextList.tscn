@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://dgsj2su1f5ppc"]
 
-[ext_resource type="Script" path="res://ui/debug/widgets/TextList/DebugTextList.gd" id="1_tpdpx"]
+[ext_resource type="Script" uid="uid://nano3mq0wjrf" path="res://ui/debug/widgets/TextList/DebugTextList.gd" id="1_tpdpx"]
 
 [node name="DebugTextList" type="MarginContainer"]
 offset_right = 40.0

@@ -1,14 +1,14 @@
 [gd_scene load_steps=10 format=3 uid="uid://t1o4wdeijm68"]
 
-[ext_resource type="Script" path="res://entry.gd" id="1_ox4k0"]
-[ext_resource type="Script" path="res://addons/monitor_overlay/monitor_overlay.gd" id="2_7886r"]
+[ext_resource type="Script" uid="uid://ckx0oep3e0fyi" path="res://entry.gd" id="1_ox4k0"]
+[ext_resource type="Script" uid="uid://sfh1fpx0nqjd" path="res://addons/monitor_overlay/monitor_overlay.gd" id="2_7886r"]
 [ext_resource type="PackedScene" uid="uid://cu705v7qv6lnp" path="res://network/network.tscn" id="2_phwwb"]
 [ext_resource type="PackedScene" uid="uid://deqh6h2wkuvel" path="res://ui/loadingscreen/loading.tscn" id="3_ry4g3"]
-[ext_resource type="Script" path="res://ui/debug/DebugContainer.gd" id="4_h8ft4"]
+[ext_resource type="Script" uid="uid://bnrv1k0ouvwgx" path="res://ui/debug/DebugContainer.gd" id="4_h8ft4"]
 [ext_resource type="PackedScene" uid="uid://c45aut53d0eru" path="res://Galaxy.tscn" id="4_l50de"]
 [ext_resource type="PackedScene" uid="uid://dgsj2su1f5ppc" path="res://ui/debug/widgets/TextList/DebugTextList.tscn" id="5_ro4nv"]
 [ext_resource type="PackedScene" uid="uid://d31wy0m5b7d3b" path="res://ui/main_menu/main_menu.tscn" id="7_j7gch"]
-[ext_resource type="Script" path="res://DisplayManager.gd" id="8_oa1x6"]
+[ext_resource type="Script" uid="uid://cbohph20hhrxe" path="res://DisplayManager.gd" id="8_oa1x6"]
 
 [node name="entry" type="Node"]
 script = ExtResource("1_ox4k0")
