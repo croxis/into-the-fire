@@ -1,4 +1,4 @@
-image: registry.gitlab.com/croxis/itf:4.3
+image: registry.gitlab.com/croxis/itf:4.4
 
 # NOTE: the `cd` command in each build stage is not necessary if your
 # project.godot is at the repo root
