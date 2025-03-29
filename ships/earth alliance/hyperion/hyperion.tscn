@@ -1,10 +1,18 @@
-[gd_scene load_steps=7 format=3 uid="uid://dmpj0ge68t2li"]
+[gd_scene load_steps=9 format=3 uid="uid://dmpj0ge68t2li"]
 
 [ext_resource type="PackedScene" uid="uid://bhhs2v02syo8j" path="res://ships/Ship.tscn" id="1_5mf3n"]
 [ext_resource type="PackedScene" uid="uid://bw6rueeoqv6a" path="res://ships/earth alliance/hyperion/hyperionturret.tscn" id="2_e1fw0"]
+[ext_resource type="Script" uid="uid://dd2r64u2pov0l" path="res://ship_systems/sensors/sensor.gd" id="2_h5nfj"]
 [ext_resource type="PackedScene" uid="uid://r1x0fqeuxk04" path="res://sfx/Thruster.tscn" id="3_gm65t"]
 [ext_resource type="PackedScene" uid="uid://bcyhqn6r6h3a5" path="res://ships/earth alliance/hyperion/hyperion_ship.tscn" id="4_2gmgv"]
 [ext_resource type="Script" uid="uid://cxlmehy0n2s54" path="res://ships/earth alliance/hyperion/spawner.gd" id="4_nbv42"]
+
+[sub_resource type="Resource" id="Resource_vdalf"]
+script = ExtResource("2_h5nfj")
+name = "EA Capital Suite Mk 1"
+em_sensitive = 10.0
+neutrino_sensitive = 5.0
+metadata/_custom_type_script = "uid://dd2r64u2pov0l"
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_aqub1"]
 size = Vector3(28.2473, 15.9736, 21.8272)
@@ -17,6 +25,7 @@ ship_class = "Hyperion"
 max_health = 1000
 is_capital = true
 has_spawn_points = true
+sensor = SubResource("Resource_vdalf")
 
 [node name="Hyperion Turret" parent="Guns" index="0" instance=ExtResource("2_e1fw0")]
 transform = Transform3D(0.95, 0, 0, 0, 0.95, 0, 0, 0, 0.95, 1.13347, 132.085, 70.999)

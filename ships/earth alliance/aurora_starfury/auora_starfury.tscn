@@ -1,8 +1,9 @@
-[gd_scene load_steps=60 format=4 uid="uid://bje1osdhtpqsy"]
+[gd_scene load_steps=62 format=4 uid="uid://bje1osdhtpqsy"]
 
 [ext_resource type="PackedScene" uid="uid://bhhs2v02syo8j" path="res://ships/Ship.tscn" id="1_200w0"]
 [ext_resource type="PackedScene" uid="uid://bs6kr6ux6kvrv" path="res://ship_systems/weapons/Gun.tscn" id="2_0j46h"]
 [ext_resource type="ArrayMesh" uid="uid://bca4bl76wvr7a" path="res://ships/earth alliance/aurora_starfury/auora_starfury_pod.mesh" id="2_7t1rn"]
+[ext_resource type="Script" uid="uid://dd2r64u2pov0l" path="res://ship_systems/sensors/sensor.gd" id="2_51uh1"]
 [ext_resource type="Material" uid="uid://c31rcdfbjwoyw" path="res://ships/earth alliance/aurora_starfury/main_paint.material" id="2_fnpgr"]
 [ext_resource type="PackedScene" uid="uid://yw5s3jdg5lfg" path="res://ship_systems/weapons/effects/bolt/Bolt.tscn" id="3_esua1"]
 [ext_resource type="Material" uid="uid://b4bk6n5ndkorw" path="res://ships/earth alliance/aurora_starfury/pilot_flight_suit.material" id="4_24j3n"]
@@ -18,6 +19,13 @@
 [ext_resource type="PackedScene" uid="uid://dsbhc5ruqypdj" path="res://ships/earth alliance/aurora_starfury/center_ui.tscn" id="13_frr5f"]
 [ext_resource type="PackedScene" uid="uid://r1x0fqeuxk04" path="res://sfx/Thruster.tscn" id="16_seswe"]
 [ext_resource type="VoxelGIData" uid="uid://bpbp4tpkfa0ng" path="res://ships/earth alliance/aurora_starfury/auora_starfury.VoxelGI_data.res" id="18_u5ira"]
+
+[sub_resource type="Resource" id="Resource_xh1mk"]
+script = ExtResource("2_51uh1")
+name = "EA Sensor Suite 1"
+em_sensitive = 1.0
+neutrino_sensitive = 0.5
+metadata/_custom_type_script = "uid://dd2r64u2pov0l"
 
 [sub_resource type="ViewportTexture" id="ViewportTexture_rsipm"]
 viewport_path = NodePath("SubViewportWindow")
@@ -703,6 +711,7 @@ mass = 48000.0
 camera_path = NodePath("Starfury_CPEjection_Pod/Starfury_Pilot/Camera3DPilot")
 ship_class = "Auora"
 autobreak = true
+sensor = SubResource("Resource_xh1mk")
 
 [node name="Guns" parent="." index="1"]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 8.02169e-05, 0, -0.0104009)

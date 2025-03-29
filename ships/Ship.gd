@@ -54,6 +54,8 @@ var multiplayer_pilot_id: int:
 		return is_in_group("capital")
 @export var has_spawn_points := false
 
+@export var sensor: Sensor
+
 var galaxy: Galaxy
 
 var health := max_health:
