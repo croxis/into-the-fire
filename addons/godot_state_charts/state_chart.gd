@@ -57,6 +57,10 @@ var _queued_events:Array[StringName] = []
 ## Whether or not a property change is pending.
 var _property_change_pending:bool = false
 
+## Whether or not a state change occured during processing and we need to re-run 
+## automatic transitions that may have been triggered by the state change.
+var _state_change_pending:bool = false
+
 ## Flag indicating if the state chart is currently processing. 
 ## Until a change is fully processed, no further changes can
 ## be introduced from the outside.
@@ -68,6 +72,19 @@ var _transitions_processing_active:bool = false
 var _debugger_remote:DebuggerRemote = null
 var _valid_event_names:Array[StringName] = []
 
+## A trigger type that defines events that can trigger a transition.
+enum TriggerType {
+	## No trigger type. This usually should not happen and is used as a default value.
+	NONE = 0,
+	## The transition will be triggered by an event.
+	EVENT = 1,
+	## The transition is automatic and thus will be triggered when the state is entered.
+	STATE_ENTER = 2,
+	## The transition is automatic and will be triggered by a property change.
+	PROPERTY_CHANGE = 4,
+	## The transition is automatic and will be triggered by a state change.
+	STATE_CHANGE = 8,
+}
 
 func _ready() -> void:
 	if Engine.is_editor_hint():
@@ -102,13 +119,36 @@ func _ready() -> void:
 	_state = child as StateChartState
 	_state._state_init()
 
-	# enter the state
-	_state._state_enter.call_deferred()
+	# We wait one frame before entering initial state, so
+	# parents of the state chart have a chance to run their
+	# _ready methods first and not get events from the state
+	# chart while they have not yet been initialized
+	_enter_initial_state.call_deferred()
 
 	# if we are in an editor build and this chart should be tracked 
 	# by the debugger, create a debugger remote
-	if track_in_editor and OS.has_feature("editor"):
+	if track_in_editor and OS.has_feature("editor") and not Engine.is_editor_hint():
 		_debugger_remote = DebuggerRemote.new(self)
+		# add the remote as a child, so it gets cleaned up when the state
+		# chart is deleted
+		add_child(_debugger_remote)
+
+
+func _enter_initial_state():
+	# https://github.com/derkork/godot-statecharts/issues/143
+	# make sure that transitions resulting from state_enter handlers still 
+	# adhere our transactional processing
+	_transitions_processing_active = true
+	_locked_down = true
+
+	# enter the state
+	_state._state_enter(null)
+	
+	# run any queued transitions that may have come up during the enter
+	_run_queued_transitions()
+	
+	# run any queued external events that may have come up during the enter
+	_run_changes()
 
 
 ## Sends an event to this state chart. The event will be passed to the innermost active state first and
@@ -129,6 +169,9 @@ func send_event(event:StringName) -> void:
 		push_warning("State chart does not have an event '", event , "' defined. Sending this event will do nothing.")
 	
 	_queued_events.append(event)
+	if _locked_down:
+		return
+		
 	_run_changes()
 		
 		
@@ -146,7 +189,9 @@ func set_expression_property(name:StringName, value) -> void:
 	
 	_expression_properties[name] = value
 	_property_change_pending = true
-	_run_changes()
+	
+	if not _locked_down:
+		_run_changes()
 		
 
 ## Returns the value of a previously set expression property. If the property does not exist, the default value
@@ -156,24 +201,27 @@ func get_expression_property(name:StringName, default:Variant = null) -> Variant
 
 
 func _run_changes() -> void:
-	if _locked_down:
-		return
-		
 	# enable the reentrance lock
 	_locked_down = true
 	
-	while (not _queued_events.is_empty()) or _property_change_pending:
-		# first run any pending property changes, so that we keep the order
-		# in which stuff is processed
+	while (not _queued_events.is_empty()) or _property_change_pending or _state_change_pending:
+		# We process stuff in this order:
+		# 1. State changes
+		if _state_change_pending:		
+			_state_change_pending = false
+			_state._process_transitions(TriggerType.STATE_CHANGE)
+
+		# 2. Property changes
 		if _property_change_pending:
 			_property_change_pending = false
-			_state._process_transitions(&"", true)
-	
+			_state._process_transitions(TriggerType.PROPERTY_CHANGE)
+
+		# 3. Events
 		if not _queued_events.is_empty():
 			# process the next event	
 			var next_event = _queued_events.pop_front()
 			event_received.emit(next_event)
-			_state._process_transitions(next_event, false)
+			_state._process_transitions(TriggerType.EVENT, next_event)
 	
 	_locked_down = false
 
@@ -182,19 +230,26 @@ func _run_changes() -> void:
 ## once all currently running transitions have finished. States should call this method
 ## when they want to transition away from themselves. 
 func _run_transition(transition:Transition, source:StateChartState) -> void:
-	# if we are currently inside of a transition, queue it up. This can happen
-	# if a state has an automatic transition on enter, in which case we want to
-	# finish the current transition before starting a new one.
+	
+	# Queue up the transition for running
+	_queued_transitions.append({transition : source})
+	
+	# if we are currently inside of a transition, finish processing the queue so we 
+	# get a predictable order. Queing can happen a state has an automatic transition on enter, 
+	# or when a transition is triggered as part of a signal handler. In these cases, we want to
+	# finish the current transition before starting a new one because otherwise the transitions
+	# see really unpredictable state changes. In a sense, every transition is also a
+	# transaction that needs to be fully processed before the next one can start.
 	if _transitions_processing_active:
-		_queued_transitions.append({transition : source})
 		return
 		
+	_run_queued_transitions()
+	
+## Runs all queued transitions until none are left. This also checks for infinite loops in transitions and 
+## ensures triggering guards on state changes.
+func _run_queued_transitions() -> void:
 	_transitions_processing_active = true
 
-	# we can only transition away from a currently active state
-	# if for some reason the state no longer is active, ignore the transition	
-	_do_run_transition(transition, source)
-	
 	var execution_count := 1
 	
 	# if we still have transitions
@@ -210,6 +265,11 @@ func _run_transition(transition:Transition, source:StateChartState) -> void:
 			break
 	
 	_transitions_processing_active = false
+	
+	# transitions trigger a state change which can in turn activate
+	# other transitions, so we need to handle these
+	if not _locked_down:
+		_run_changes()
 
 ## Runs the transition. Used internally by the state chart, do not call this directly.	
 func _do_run_transition(transition:Transition, source:StateChartState):
@@ -217,6 +277,7 @@ func _do_run_transition(transition:Transition, source:StateChartState):
 		# Notify interested parties that the transition is about to be taken
 		transition.taken.emit()
 		source._handle_transition(transition, source)
+		_state_change_pending = true
 	else:
 		_warn_not_active(transition, source)	
 
@@ -247,5 +308,3 @@ func _get_configuration_warnings() -> PackedStringArray:
 		if not child is StateChartState:
 			warnings.append("StateChart's child must be a State")
 	return warnings
-
-

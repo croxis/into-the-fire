@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://3wqyduuj0fq"
-path="res://.godot/imported/animation_tree_state.svg-b99077fc178cfa1e23b2c854c7735c4a.ctex"
+uid="uid://hupxr7umhvwh"
+path="res://.godot/imported/guard.svg-d0ead7a3baf32c0a7719fb3b73645353.ctex"
 metadata={
 "has_editor_variant": true,
 "vram_texture": false
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://addons/godot_state_charts/animation_tree_state.svg"
-dest_files=["res://.godot/imported/animation_tree_state.svg-b99077fc178cfa1e23b2c854c7735c4a.ctex"]
+source_file="res://addons/godot_state_charts/guard.svg"
+dest_files=["res://.godot/imported/guard.svg-d0ead7a3baf32c0a7719fb3b73645353.ctex"]
 
 [params]
 
