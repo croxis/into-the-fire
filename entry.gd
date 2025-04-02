@@ -41,6 +41,20 @@ func _ready():
 		_dedicated_server = true
 		$Galaxy.setup_new_galaxy(true)
 	else:
+		# Discord!
+		DiscordRPC.app_id = 1356458511122567168 # Application ID
+		DiscordRPC.details = "An open source Babylon 5 game made in Godot"
+		DiscordRPC.state = "Checkpoint 23/23"
+		DiscordRPC.large_image = "b5poster" # Image key from "Art Assets"
+		DiscordRPC.large_image_text = "Try it now!"
+		DiscordRPC.small_image = "boss" # Image key from "Art Assets"
+		DiscordRPC.small_image_text = "Fighting the end boss! D:"
+
+		DiscordRPC.start_timestamp = int(Time.get_unix_time_from_system()) # "02:46 elapsed"
+		# DiscordRPC.end_timestamp = int(Time.get_unix_time_from_system()) + 3600 # +1 hour in unix time / "01:00:00 remaining"
+
+		DiscordRPC.refresh() # Always refresh after changing the values!
+		
 		if "xr_mode" in arguments or VR_DEBUG:
 			interface = XRServer.find_interface("OpenXR")
 			print_debug(interface)
@@ -77,5 +91,4 @@ func _on_main_menu_new_game(game_name, player_name, port, server_password, playe
 	if not $network.host_server(game_name, player_name, port, server_password, player_password):
 		return
 	end_title_sequence()
-	
 	

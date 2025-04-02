@@ -22,6 +22,7 @@ Debug="*res://ui/debug/debug_layer.tscn"
 AppConfig="*res://app_config.gd"
 SaveManager="*res://save_manager.gd"
 Logger="*res://logger.gd"
+DiscordRPCLoader="*res://addons/discord-rpc-gd/nodes/discord_autoload.gd"
 
 [display]
 
@@ -39,7 +40,7 @@ version_control/autoload_on_startup=true
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/Todo_Manager/plugin.cfg", "res://addons/anthonyec.camera_preview/plugin.cfg", "res://addons/godot_state_charts/plugin.cfg", "res://addons/maaacks_options_menus/plugin.cfg", "res://addons/monitor_overlay/plugin.cfg", "res://addons/star_field/plugin.cfg")
+enabled=PackedStringArray("res://addons/Todo_Manager/plugin.cfg", "res://addons/anthonyec.camera_preview/plugin.cfg", "res://addons/discord-rpc-gd/plugin.cfg", "res://addons/godot_state_charts/plugin.cfg", "res://addons/maaacks_options_menus/plugin.cfg", "res://addons/monitor_overlay/plugin.cfg", "res://addons/star_field/plugin.cfg")
 
 [global_group]
 
