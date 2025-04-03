@@ -29,3 +29,6 @@ func set_speed(speed):
 
 func _physics_process(delta: float) -> void:
 	set_speed($"../..".linear_velocity.length())
+	set_autospin($"../..".autospin)
+	set_autobreak($"../..".autobreak)
+	set_acceleration($"../..".acceleraction.length())

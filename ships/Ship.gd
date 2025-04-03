@@ -68,9 +68,10 @@ var health := max_health:
 var engine_length = 7.5
 var thruster_force: Vector3 = Vector3(0, 0, 0)
 var thruster_torque: Vector3 = Vector3(0, 0, 0)
+var acceleraction: Vector3 = Vector3(0, 0, 0)
 var _debug_all_stop := false
 
-var start_speed = 0
+var start_velocity := Vector3(0, 0, 0)
 
 var is_spawning := false			
 
@@ -85,9 +86,6 @@ func _ready():
 		set_physics_process(false)	
 	can_sleep = false
 	target_rot = rotation
-	if has_node("$SubViewportCenter"):
-		$SubViewportCenter/center_ui.set_autobreak(autobreak)
-		$SubViewportCenter/center_ui.set_autospin(autospin)
 	galaxy = get_tree().root.get_node("entry/Galaxy")
 	Logger.log(["Ship created: ", ship_id], Logger.MessageType.SUCCESS)
 
@@ -162,16 +160,13 @@ func _physics_process(dt: float) -> void:
 	
 	if inputs.autobreak_toggle:
 		autobreak = !autobreak
-		if has_node("$SubViewportCenter"):
-			$SubViewportCenter/center_ui.set_autobreak(autobreak)
+		Logger.log(["Requesting autobreak_toggle set to ", autobreak, " for ", self], Logger.MessageType.QUESTION)
 
 
 	if inputs.autospin_toggle:
 		autospin = !autospin
 		target_rot = rotation
 		Logger.log(["Requesting autospin set to ", autospin, " for ", self], Logger.MessageType.QUESTION)
-		if has_node("$SubViewportCenter"):
-			$SubViewportCenter/center_ui.set_autospin(autospin)
 		
 	# Start of PID code
 	# https://raw.githubusercontent.com/itspacchu/GodotRocket/master/scripts/rocket.gd
@@ -235,9 +230,8 @@ func _physics_process(dt: float) -> void:
 	if inputs.debug_all_stop:
 		_debug_all_stop = true
 	
-	if has_node("$SubViewportCenter"):
-		$SubViewportCenter/center_ui.set_acceleration((linear_velocity.length() - start_speed)/dt)	
-	start_speed = linear_velocity.length()
+	acceleraction = (linear_velocity - start_velocity) / dt
+	start_velocity = linear_velocity
 	return
 	
 	"""# Code below this was an attempt to make a realistic controler for thrusters
