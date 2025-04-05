@@ -27,7 +27,7 @@ func set_speed(speed):
 	$VBoxContainer/Speed.text = "SPEED: %.1f m/s" % speed
 
 
-func _physics_process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	set_speed($"../..".linear_velocity.length())
 	set_autospin($"../..".autospin)
 	set_autobreak($"../..".autobreak)
