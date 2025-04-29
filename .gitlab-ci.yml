@@ -30,6 +30,7 @@ linux:
   script:
     - mkdir -v -p export/linux
     - EXPORT_DIR="$(readlink -f build)"
+    - ls -lah .
     - cd $PROJECT_PATH
     - godot -v --headless --export-debug "Linux/X11" export/linux/$EXPORT_NAME.x86_64
   artifacts:
