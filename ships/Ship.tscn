@@ -82,6 +82,12 @@ script = ExtResource("4_ob5l3")
 
 [node name="PID_Z" parent="PIDS" instance=ExtResource("5_itaim")]
 
+[node name="PID_rotate_break_X" parent="PIDS" instance=ExtResource("5_itaim")]
+
+[node name="PID_rotate_break_Y" parent="PIDS" instance=ExtResource("5_itaim")]
+
+[node name="PID_rotate_break_Z" parent="PIDS" instance=ExtResource("5_itaim")]
+
 [node name="Crew" type="Node" parent="."]
 script = ExtResource("5_tgeno")
 
@@ -98,15 +104,18 @@ script = ExtResource("6_1a8so")
 visible = false
 
 [node name="TargetRecticles" type="Node3D" parent="."]
+visible = false
 script = ExtResource("8_gl6o0")
 
 [node name="TargetReticle" type="TextureRect" parent="TargetRecticles"]
+visible = false
 modulate = Color(1, 1, 1, 0.168627)
 offset_right = 40.0
 offset_bottom = 40.0
 texture = ExtResource("9_fnchb")
 
 [node name="OffscreenReticle" type="TextureRect" parent="TargetRecticles"]
+visible = false
 modulate = Color(1, 1, 1, 0.560784)
 offset_right = 40.0
 offset_bottom = 40.0
@@ -114,6 +123,7 @@ pivot_offset = Vector2(64, 64)
 texture = ExtResource("10_vyf3k")
 
 [node name="DistantReticle" type="TextureRect" parent="TargetRecticles"]
+visible = false
 modulate = Color(1, 1, 1, 0.560784)
 offset_right = 40.0
 offset_bottom = 40.0
@@ -121,11 +131,21 @@ pivot_offset = Vector2(64, 64)
 texture = ExtResource("9_lqn33")
 
 [node name="TargetedReticle" type="TextureRect" parent="TargetRecticles"]
+visible = false
 modulate = Color(1, 1, 1, 0.560784)
 offset_right = 40.0
 offset_bottom = 40.0
 pivot_offset = Vector2(64, 64)
 texture = ExtResource("12_u4481")
+
+[node name="DebugUI" type="Control" parent="."]
+visible = false
+layout_mode = 3
+anchors_preset = 0
+offset_left = 284.0
+offset_top = 140.0
+offset_right = 628.0
+offset_bottom = 393.0
 
 [connection signal="child_exiting_tree" from="Crew" to="." method="_on_crew_child_exiting_tree"]
 [connection signal="child_exiting_tree" from="Crew" to="Crew" method="_on_child_exiting_tree"]

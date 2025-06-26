@@ -32,6 +32,7 @@ var multiplayer_pilot_id: int:
 
 @export var target_rot = Vector3(0,0,0)
 @export var target_pos = Vector3(0,0,0)
+@export var target_global_transform := Transform3D()
 @export var autospin := false
 @export var autobreak := false
 
@@ -56,6 +57,11 @@ var multiplayer_pilot_id: int:
 
 @export var sensor: Sensor
 
+@export var em_output_base: float = 1.0
+@export var neutron_output_base: float = 1.0
+var em_output := 1.0
+var neutron_output := 1.0
+
 var galaxy: Galaxy
 
 var health := max_health:
@@ -73,6 +79,10 @@ var _debug_all_stop := false
 
 var start_velocity := Vector3(0, 0, 0)
 
+@export var local_angular_velocity: Vector3:
+	get:
+		return angular_velocity * global_basis
+
 var is_spawning := false			
 
 signal destroyed(ship_id)
@@ -85,9 +95,11 @@ func _ready():
 	if (Engine.is_editor_hint()):
 		set_physics_process(false)	
 	can_sleep = false
-	target_rot = rotation
+	#target_rot = rotation_degrees
+	target_global_transform = global_transform
 	galaxy = get_tree().root.get_node("entry/Galaxy")
 	Logger.log(["Ship created: ", ship_id], Logger.MessageType.SUCCESS)
+	DebugDraw3D.scoped_config().set_viewport(get_viewport())
 
 
 func add_captain(pilot: Pilot):
@@ -162,47 +174,75 @@ func _physics_process(dt: float) -> void:
 		autobreak = !autobreak
 		Logger.log(["Requesting autobreak_toggle set to ", autobreak, " for ", self], Logger.MessageType.QUESTION)
 
-
 	if inputs.autospin_toggle:
 		autospin = !autospin
-		target_rot = rotation
+		if autospin:
+			target_global_transform = global_transform
+		#target_rot = rotation
 		Logger.log(["Requesting autospin set to ", autospin, " for ", self], Logger.MessageType.QUESTION)
-		
-	# Start of PID code
-	# https://raw.githubusercontent.com/itspacchu/GodotRocket/master/scripts/rocket.gd
+
 	var rotation_throttle = inputs.rotation_throttle
 	var throttle = inputs.throttle
 	
 	if autospin:
-		target_rot.x += inputs.rotation_throttle.x * dt
-		target_rot.y += inputs.rotation_throttle.y * dt
-		target_rot.z += inputs.rotation_throttle.z * dt
-			
-		var rx = rotation.x
-		var ry = rotation.y
-		var rz = rotation.z
-		
-		var err_rot_x := 0.0
-		var err_rot_y := 0.0
-		var err_rot_z := 0.0
-		
-		# Correct for wraparound at 180/-180 or pi/-pi
-		if target_rot.x - rx > 3.14159: target_rot.x -= 2*3.14159
-		elif target_rot.x - rx < -3.14159: target_rot.x += 2*3.14159
-		if target_rot.y - ry > 3.14159: target_rot.y -= 2*3.14159
-		elif target_rot.y - ry < -3.14159: target_rot.y += 2*3.14159
-		if target_rot.z - rz > 3.14159: target_rot.z -= 2*3.14159
-		elif target_rot.z - rz < -3.14159: target_rot.z += 2*3.14159
-		
-		err_rot_x = target_rot.x - rx
-		err_rot_y = target_rot.y - ry
-		err_rot_z = target_rot.z - rz		
+		# We can just assume local space
+		# If there is no input on an axis, we want to stop motion on it
+		# If we are spinning left, then a right input would be the same as neutral, until the rotation stops.
+		# This is not the same as an "arcade mode". The ship will continue to spin ever faster
+		# An arcade mode wouldn't be a bad idea to implement. Still newtonian, but the flight model
+		# would act more like X or Wing Commander
+		var deadzone := 0.001
+		# The X axis of the joystick manipulates the y axis of the ship. Godot accounts for this
+		if abs(inputs.rotation_throttle.y) <= deadzone:
+			var ry := local_angular_velocity.y
+			var err_rot_y := 0.0 - ry
+			rotation_throttle.y = $PIDS/PID_rotate_break_Y._update(err_rot_y, dt)		
+		if abs(inputs.rotation_throttle.x) <= deadzone:
+			var rx := local_angular_velocity.x
+			var err_rot_x := 0.0 - rx
+			rotation_throttle.x = $PIDS/PID_rotate_break_X._update(err_rot_x, dt)
+		if abs(inputs.rotation_throttle.z) <= deadzone:
+			var rz := local_angular_velocity.z
+			var err_rot_z := 0.0 - rz
+			rotation_throttle.z = $PIDS/PID_rotate_break_Z._update(err_rot_z, dt)
 	
-		var pidrx = $PIDS/PID_rotate_X._update(err_rot_x,dt)
-		var pidry = $PIDS/PID_rotate_Y._update(err_rot_y,dt)
-		var pidrz = $PIDS/PID_rotate_Z._update(err_rot_z,dt)
-
-		rotation_throttle = Vector3(pidrx, pidry, pidrz)
+	# Start of PID code
+	# https://raw.githubusercontent.com/itspacchu/GodotRocket/master/scripts/rocket.gd
+	#if false:
+	##if autospin:
+		##This needs to be replaced with the steering behavior that I've been reading about
+		## However! What we really want is just stopping the rotation
+		#target_rot.x += inputs.rotation_throttle.x * dt
+		#target_rot.y += inputs.rotation_throttle.y * dt
+		#target_rot.z += inputs.rotation_throttle.z * dt
+			#
+		#var rx = rotation.x
+		#var ry = rotation.y
+		#var rz = rotation.z
+		#
+		#var err_rot_x := 0.0
+		#var err_rot_y := 0.0
+		#var err_rot_z := 0.0
+		#
+		## Correct for wraparound at 180/-180 or pi/-pi
+		#if target_rot.x - rx > 3.14159: target_rot.x -= 2*3.14159
+		#elif target_rot.x - rx < -3.14159: target_rot.x += 2*3.14159
+		#if target_rot.y - ry > 3.14159: target_rot.y -= 2*3.14159
+		#elif target_rot.y - ry < -3.14159: target_rot.y += 2*3.14159
+		#if target_rot.z - rz > 3.14159: target_rot.z -= 2*3.14159
+		#elif target_rot.z - rz < -3.14159: target_rot.z += 2*3.14159
+		#
+		#err_rot_x = target_rot.x - rx
+		#err_rot_y = target_rot.y - ry
+		#err_rot_z = target_rot.z - rz
+		#
+		#target_global_transform = target_global_transform.orthonormalized()
+	#
+		#var pidrx = $PIDS/PID_rotate_X._update(err_rot_x,dt)
+		#var pidry = $PIDS/PID_rotate_Y._update(err_rot_y,dt)
+		#var pidrz = $PIDS/PID_rotate_Z._update(err_rot_z,dt)
+#
+		#rotation_throttle = Vector3(pidrx, pidry, pidrz)
 				
 	if autobreak:
 		var local_velocity := global_transform.basis.transposed() * linear_velocity
@@ -266,6 +306,14 @@ func _physics_process(dt: float) -> void:
 	
 	for i in range($Engines.thrusters.size()):
 		$Engines.thrusters[i].power = thruster_control_vector[i]"""
+
+
+func _process(_delta: float) -> void:
+	pass
+	#DebugDraw3D.draw_arrow_ray(global_position, target_rot, 32.0, Color.LAVENDER, 0.5)
+	#DebugDraw3D.draw_arrow(global_position, global_position+Vector3(0,0,-2050), Color.MAGENTA, 32, false)
+	#DebugDraw3D.draw_arrow(position, position+Vector3(0,2000,-2050), Color.MAGENTA, 32, false)
+	#DebugDraw2D.set_text("Frames drawn", Engine.get_frames_drawn())
 
 
 func bullet_hit(damage, bullet_global_trans):

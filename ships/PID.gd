@@ -29,5 +29,5 @@ func _update(err, dt):
 	self.prev = err
 	if(inte_d > self.maximum_clamp or inte_d < self.minimum_clamp):
 		self._reset_integral()
-	#return clamp(self.kp*prop_d + self.ki*inte_d + self.kd*diff_d,minimum_clamp,maximum_clamp);
-	return clamp(prop_d + self.ki*inte_d + self.kd*diff_d,minimum_clamp,maximum_clamp);
+	return clamp(self.kp*prop_d + self.ki*inte_d + self.kd*diff_d, minimum_clamp, maximum_clamp);
+	#return clamp(prop_d + self.ki*inte_d + self.kd*diff_d,minimum_clamp,maximum_clamp);

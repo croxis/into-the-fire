@@ -1,30 +1,35 @@
 # Godot Options Menus
-For Godot 4.2
+For Godot 4.4 (4.2+ compatible)
 
 This plugin has options menus that aim to be easy to customize and persist settings in a user's config file.
 
 [Example on itch.io](https://maaack.itch.io/godot-game-template)  
 _Example is of [Maaack's Game Template](https://github.com/Maaack/Godot-Game-Template), which includes additional features._
 
+[Featured Games](#featured-games)  
 
 #### Videos
 
 [![Quick Intro Video](https://img.youtube.com/vi/U9CB3vKINVw/hqdefault.jpg)](https://youtu.be/U9CB3vKINVw)  
 [![Installation Video](https://img.youtube.com/vi/-QWJnZ8bVdk/hqdefault.jpg)](https://youtu.be/-QWJnZ8bVdk)  
-[All videos](/addons/maaacks_options_menus/docs/Videos.md)
+[More Videos](/addons/maaacks_options_menus/docs/Videos.md)
 
 #### Screenshots
 
-![Key Rebinding](/addons/maaacks_options_menus/media/Screenshot-3-2.png)  
-![Key Rebinding Confirmation](/addons/maaacks_options_menus/media/Screenshot-4-2.png) 
-![Audio Controls](/addons/maaacks_options_menus/media/Screenshot-3-4.png)  
-![Video Controls](/addons/maaacks_options_menus/media/Screenshot-4-3.png) 
-[All screenshots](/addons/maaacks_options_menus/docs/Screenshots.md)
+![Key Rebinding](/addons/maaacks_options_menus/media/screenshot-6-input-list-3.png)  
+![Key Rebinding Icons](/addons/maaacks_options_menus/media/screenshot-6-input-list-1.png)  
+![Key Rebinding Themed](/addons/maaacks_options_menus/media/screenshot-6-input-list-8.png)  
+![Audio Controls](/addons/maaacks_options_menus/media/screenshot-6-audio-options-2.png)  
+![Video Controls](/addons/maaacks_options_menus/media/screenshot-6-video-options-5.png)  
+[More Screenshots](/addons/maaacks_options_menus/docs/Screenshots.md)  
 
-## Use Case
+## Objective
+
 Setup options menus and accessibility features in about 15 minutes.
 
-The core components can support a larger project, but the template was originally built to support smaller projects and game jams.
+This addon plugs into an existing project. It is game agnostic (2D or 3D) and can work with multiple target resolutions, up to 4k and down to 640x360. It's meant to cover the needs for a typical game jam, while remaining scalable and extensible enough to support commercial games.
+
+[Maaack's Game Template](https://github.com/Maaack/Godot-Game-Template) is recommended for first time users, especially those new to Godot.  
 
 ## Features
 
@@ -38,17 +43,17 @@ The `base/` folder holds the core components of the menus application.
 -   Keyboard/Mouse Support
 -   Gamepad Support
 
+### Extras or Components
 
-### How it Works
-- `AppConfig.tscn` is set as the first autoload. It calls `AppSettings.gd` to load all the configuration settings from the config file (if it exists) through `Config.gd`.
-- `OptionControl.tscn` and its inherited scenes are used for most configurable options in the menus. They work with `Config.gd` to keep settings persistent between runs.
-  
+Users that want additional features can try [Maaack's Game Template](https://github.com/Maaack/Godot-Game-Template) or other options from the [plugin suite](/addons/maaacks_options_menus/docs/PluginSuite.md).  
+
+
 ## Installation
 
 ### Godot Asset Library
 This package is available as a plugin, meaning it can be added to an existing project. 
 
-![Package Icon](/addons/maaacks_options_menus/media/Options-Icon-black-transparent-256x256.png)  
+![Package Icon](/addons/maaacks_options_menus/media/options-icon-black-transparent-256x256.png)  
 
 When editing an existing project:
 
@@ -68,7 +73,7 @@ When editing an existing project:
 ### GitHub
 
 
-1.  Download the latest release version from [GitHub](https://github.com/Maaack/Godot-Menus-Template/releases/latest).  
+1.  Download the latest release version from [GitHub](https://github.com/Maaack/Godot-Options-Menus/releases/latest).  
 2.  Extract the contents of the archive.
 3.  Move the `addons/maaacks_options_menus` folder into your project's `addons/` folder.  
 4.  Open/Reload the project.  
@@ -77,20 +82,36 @@ When editing an existing project:
     1.  A dialogue window will appear asking to copy the example scenes out of `addons/`.
 6.  Continue with the [Existing Project Instructions](/addons/maaacks_options_menus/docs/ExistingProject.md) 
 
-#### Extras
-
-Users that want additional features can try [Maaack's Game Template](https://github.com/Maaack/Godot-Game-Template).  
 
 ## Usage
-
-Changes can be made directly to scenes and scripts outside of `addons/`. 
-
-A copy of the `examples/` directory is made outside of `addons/` when the plugin is enabled for the first time. However, if this is skipped, it is recommended developers inherit from scenes they want to use, and save the inherited scene outside of `addons/`. This avoids changes getting lost either from the package updating, or because of a `.gitignore`.
 
 ### Existing Project
 
 [Existing Project Instructions](/addons/maaacks_options_menus/docs/ExistingProject.md)  
+   
+### More Documentation
 
+[Input Icon Mapping](/addons/maaacks_options_menus/docs/InputIconMapping.md)  
+[Joypad Inputs](/addons/maaacks_options_menus/docs/JoypadInputs.md)  
+[How Parts Work](/addons/maaacks_options_menus/docs/HowPartsWork.md)  
+
+---
+
+## Featured Games
+
+| Spud Customs | Rent Seek Kill  | A Darkness Like Gravity  |  
+| :-------:| :-------: | :-------: |
+![Spud Customs](/addons/maaacks_options_menus/media/screenshot-game-spud-customs.png)  |  ![Rent-Seek-Kill](/addons/maaacks_options_menus/media/screenshot-game-rent-seek-kill.png)  |  ![A Darkness Like Gravity](/addons/maaacks_options_menus/media/screenshot-game-a-darkness-like-gravity.png)  |
+[Find on Steam](https://store.steampowered.com/app/3291880/Spud_Customs/) | [Play on itch.io](https://xandruher.itch.io/rent-seek-kill)  |  [Play on itch.io](https://maaack.itch.io/a-darkness-like-gravity)  |
+
+
+[All Shared Games](/addons/maaacks_options_menus/docs/GamesMade.md)  
+
+
+## Community
+
+Join the [Discord server](https://discord.gg/AyZrJh5AMp ) and share your work with others. It's also a space for getting or giving feedback, and asking for help. 
+ 
 
 ## Links
 [Attribution](/addons/maaacks_options_menus/ATTRIBUTION.md)  

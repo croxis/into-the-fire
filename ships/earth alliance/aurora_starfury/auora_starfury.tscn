@@ -1,4 +1,4 @@
-[gd_scene load_steps=62 format=4 uid="uid://bje1osdhtpqsy"]
+[gd_scene load_steps=63 format=4 uid="uid://bje1osdhtpqsy"]
 
 [ext_resource type="PackedScene" uid="uid://bhhs2v02syo8j" path="res://ships/Ship.tscn" id="1_200w0"]
 [ext_resource type="PackedScene" uid="uid://bs6kr6ux6kvrv" path="res://ship_systems/weapons/Gun.tscn" id="2_0j46h"]
@@ -18,6 +18,7 @@
 [ext_resource type="Script" uid="uid://jvojh7marsi8" path="res://ships/earth alliance/aurora_starfury/Starfury_Pilot.gd" id="13_84h4w"]
 [ext_resource type="PackedScene" uid="uid://dsbhc5ruqypdj" path="res://ships/earth alliance/aurora_starfury/center_ui.tscn" id="13_frr5f"]
 [ext_resource type="PackedScene" uid="uid://r1x0fqeuxk04" path="res://sfx/Thruster.tscn" id="16_seswe"]
+[ext_resource type="Script" uid="uid://bmdrp7dyrynmh" path="res://addons/orbit_camera/orbit_camera.gd" id="16_xh1mk"]
 [ext_resource type="VoxelGIData" uid="uid://bpbp4tpkfa0ng" path="res://ships/earth alliance/aurora_starfury/auora_starfury.VoxelGI_data.res" id="18_u5ira"]
 
 [sub_resource type="Resource" id="Resource_xh1mk"]
@@ -710,8 +711,11 @@ size = Vector3(17.2803, 9.06311, 9.61979)
 mass = 48000.0
 camera_path = NodePath("Starfury_CPEjection_Pod/Starfury_Pilot/Camera3DPilot")
 ship_class = "Auora"
+autospin = true
 autobreak = true
 sensor = SubResource("Resource_xh1mk")
+em_output_base = 2.0
+neutron_output_base = 0.1
 
 [node name="Guns" parent="." index="1"]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 8.02169e-05, 0, -0.0104009)
@@ -879,6 +883,14 @@ transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 0.0032
 near = 0.5
 far = 30000.0
 
+[node name="Node3D" type="Node3D" parent="Starfury_CPEjection_Pod/Starfury_Pilot" index="2"]
+
+[node name="OrbitCamera" type="Camera3D" parent="Starfury_CPEjection_Pod/Starfury_Pilot/Node3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.29966e-06, 0, 14.8698)
+script = ExtResource("16_xh1mk")
+ANCHOR_NODE_PATH = NodePath("..")
+metadata/_custom_type_script = "uid://bmdrp7dyrynmh"
+
 [node name="Grappler" type="Node3D" parent="." index="7"]
 
 [node name="Grappler_Door_Stbd" type="MeshInstance3D" parent="Grappler" index="0"]
@@ -1010,6 +1022,21 @@ kp = 0.1
 
 [node name="PID_Z" parent="PIDS" index="5"]
 kp = 0.1
+
+[node name="PID_rotate_break_X" parent="PIDS" index="6"]
+kp = 1.0
+ki = 0.01
+kd = 0.1
+
+[node name="PID_rotate_break_Y" parent="PIDS" index="7"]
+kp = 1.0
+ki = 0.01
+kd = 0.1
+
+[node name="PID_rotate_break_Z" parent="PIDS" index="8"]
+kp = 1.0
+ki = 0.01
+kd = 0.1
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." index="12"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.3)

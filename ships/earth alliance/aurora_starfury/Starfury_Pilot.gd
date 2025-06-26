@@ -11,5 +11,7 @@ func _process(_delta):
 	if Input.is_action_just_released("camera_change"):
 		if $Camera3DPilot.current:
 			$Camera3DChase.current = true
-		else:
+		elif $Node3D/OrbitCamera.current:
 			$Camera3DPilot.current = true
+		else:
+			$Node3D/OrbitCamera.current = true
