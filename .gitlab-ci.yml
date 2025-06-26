@@ -31,7 +31,6 @@ linux:
     - mkdir -v -p export/linux
     - EXPORT_DIR="$(readlink -f build)"
     - ls -lah .
-    - cd $PROJECT_PATH
     - godot -v --headless --export-debug "Linux/X11" export/linux/$EXPORT_NAME.x86_64
   artifacts:
     name: $EXPORT_NAME-$CI_JOB_NAME
@@ -42,7 +41,6 @@ windows:
   stage: export
   script:
     - mkdir -v -p export/windows
-    - cd $PROJECT_PATH
     - godot -v --headless --export-debug "Windows Desktop" export/windows/$EXPORT_NAME.exe
   artifacts:
     name: $EXPORT_NAME-$CI_JOB_NAME
