@@ -7,24 +7,25 @@ signal request_faction(faction_name: String)
 @onready var spawn_tree := $HBoxContainer/SpawnVBoxContainer/SpawnTree
 
 
-func build_faction_menu(factions: Node) -> void:
+func build_faction_menu() -> void:
 	faction_tree.clear()
 	faction_tree.set_column_title(0, "Factions")
 	var root = faction_tree.create_item()
 	root.set_text(0, "ROOT")
-	build_faction_tree(root, factions)
+	for faction: Faction in Faction.factions.values():
+		if not faction.parent_faction:
+			build_faction_tree(root, faction)
 	visible = true
 	queue_sort()
 
 
-func build_faction_tree(parent_node, parent_faction):
-	for faction in parent_faction.get_children():
-		if faction is Faction:
-			var faction_child = faction_tree.create_item(parent_node)
-			faction_child.set_text(0, faction.name)
-			if not faction.accept_players:
-				faction_child.set_selectable(0, false)
-			build_faction_tree(faction_child, faction)
+func build_faction_tree(parent_node, faction):
+	var faction_child = faction_tree.create_item(parent_node)
+	faction_child.set_text(0, faction.resource_name)
+	if not faction.accept_players:
+		faction_child.set_selectable(0, false)
+	for child in faction.get_children():
+		build_faction_tree(faction_child, child)
 			
 
 func show_spawn(spawn_points: Dictionary) -> void:

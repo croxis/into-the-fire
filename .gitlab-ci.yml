@@ -18,6 +18,7 @@ stages:
 variables:
   EXPORT_NAME: itf
   PROJECT_PATH: itf
+  LINK_ARTIFACT: 'true'
 
 # Open the editor to import assets in case the cache was empty or outdated
 import-assets:

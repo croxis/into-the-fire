@@ -1,115 +1,59 @@
-[gd_scene load_steps=3 format=3 uid="uid://bslpdqhki8tdr"]
+[gd_scene load_steps=3 format=3 uid="uid://b3ynhg1atk1ip"]
 
-[ext_resource type="PackedScene" uid="uid://btaqru1ieiria" path="res://factions/faction.tscn" id="1_5i5wf"]
-[ext_resource type="Script" uid="uid://dnsyee32v101" path="res://factions/factions.gd" id="1_823mu"]
+[sub_resource type="GDScript" id="GDScript_blide"]
+script/source = "extends Node
+
+@export var faction_id_counter := 1
+var factions := {} # {id: Faction}
+
+#TODO: Move this all into a static function inside faction?
+
+func _ready() -> void:
+	#TODO: When loading from a save, the counter should update to n+1 of the highest id in the save
+	# OR what would be smarter is also saving the id counter
+	var ea := create_faction(\"Earth Alliance\", false, false, false)
+	var b5 := create_faction(\"Babylon 5\", false, false, false)
+	b5.parent_faction = ea
+	var wing := create_faction(\"Alpha Wing\", true, true, false)
+	wing.parent_faction = b5
+	wing = create_faction(\"Beta Wing\", true, true, false)
+	wing.parent_faction = b5
+	wing = create_faction(\"Gamma Wing\", true, true, false)
+	wing.parent_faction = b5
+	wing = create_faction(\"Delta Wing\", true, true, false)
+	wing.parent_faction = b5
+
+
+@rpc(\"authority\", \"call_local\", \"reliable\")
+func create_faction(name: String, is_wing: bool, accept_players: bool, accept_children: bool) -> Faction:
+	var new_faction = Faction.new()
+	new_faction.resource_name = name
+	new_faction.is_wing = is_wing
+	new_faction.accept_players = accept_players
+	new_faction.accept_children = accept_children
+	new_faction.faction_id = faction_id_counter
+	new_faction.active = true
+	factions[new_faction.faction_id] = new_faction
+	faction_id_counter += 1
+	return new_faction
+
+
+func get_faction(faction_name: String) -> Faction:
+	for faction in factions.values():
+		if faction.resource_name == faction_name:
+			return faction
+	Logger.log([\"Faction not found:\", faction_name], Logger.MessageType.WARNING)
+	return null
+		
+"
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_kn7xy"]
+properties/0/path = NodePath(".:faction_id_counter")
+properties/0/spawn = true
+properties/0/replication_mode = 2
 
 [node name="Factions" type="Node"]
-script = ExtResource("1_823mu")
+script = SubResource("GDScript_blide")
 
-[node name="Earth Alliance" parent="." instance=ExtResource("1_5i5wf")]
-relations = {}
-accept_players = false
-accept_children = false
-is_wing = false
-
-[node name="Babylon 5" parent="Earth Alliance" instance=ExtResource("1_5i5wf")]
-relations = {}
-accept_players = false
-accept_children = true
-is_wing = false
-faction_id = 5
-
-[node name="Alpha Wing" parent="Earth Alliance/Babylon 5" instance=ExtResource("1_5i5wf")]
-relations = {}
-accept_players = true
-accept_children = false
-is_wing = true
-faction_id = 6
-
-[node name="Beta Wing" parent="Earth Alliance/Babylon 5" instance=ExtResource("1_5i5wf")]
-relations = {}
-accept_players = true
-accept_children = false
-is_wing = true
-faction_id = 7
-
-[node name="Delta Wing" parent="Earth Alliance/Babylon 5" instance=ExtResource("1_5i5wf")]
-relations = {}
-accept_players = true
-accept_children = false
-is_wing = true
-faction_id = 8
-
-[node name="Zeta Wing" parent="Earth Alliance/Babylon 5" instance=ExtResource("1_5i5wf")]
-relations = {}
-accept_players = true
-accept_children = false
-is_wing = true
-faction_id = 9
-
-[node name="Mars" parent="Earth Alliance" instance=ExtResource("1_5i5wf")]
-relations = {}
-accept_players = false
-accept_children = false
-is_wing = false
-faction_id = 4
-
-[node name="Proxima" parent="Earth Alliance" instance=ExtResource("1_5i5wf")]
-relations = {}
-accept_players = false
-accept_children = false
-is_wing = false
-faction_id = 10
-
-[node name="Psi Corps" parent="Earth Alliance" instance=ExtResource("1_5i5wf")]
-relations = {}
-accept_players = false
-accept_children = false
-is_wing = false
-faction_id = 11
-
-[node name="Minbari" parent="." instance=ExtResource("1_5i5wf")]
-relations = {}
-accept_players = false
-accept_children = false
-is_wing = false
-faction_id = 1
-
-[node name="Warrior Caste" parent="Minbari" instance=ExtResource("1_5i5wf")]
-relations = {}
-accept_players = false
-accept_children = false
-is_wing = false
-faction_id = 12
-
-[node name="Worker Caste" parent="Minbari" instance=ExtResource("1_5i5wf")]
-relations = {}
-accept_players = false
-accept_children = false
-is_wing = false
-faction_id = 13
-
-[node name="Religious Caste" parent="Minbari" instance=ExtResource("1_5i5wf")]
-relations = {}
-accept_players = false
-accept_children = false
-is_wing = false
-faction_id = 14
-
-[node name="Narn" parent="." instance=ExtResource("1_5i5wf")]
-relations = {}
-accept_players = false
-accept_children = false
-is_wing = false
-faction_id = 2
-
-[node name="Centauri" parent="." instance=ExtResource("1_5i5wf")]
-relations = {}
-accept_players = false
-accept_children = false
-is_wing = false
-faction_id = 3
-
-[node name="MultiplayerSpawnerFactions" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("uid://btaqru1ieiria")
-spawn_path = NodePath("..")
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_kn7xy")

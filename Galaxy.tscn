@@ -1,8 +1,7 @@
-[gd_scene load_steps=6 format=3 uid="uid://c45aut53d0eru"]
+[gd_scene load_steps=5 format=3 uid="uid://c45aut53d0eru"]
 
 [ext_resource type="Script" uid="uid://ret5fy6jtwhg" path="res://Galaxy.gd" id="1_3em77"]
 [ext_resource type="PackedScene" uid="uid://dw740uyo1ubum" path="res://ui/join_game/join_game.tscn" id="2_saf80"]
-[ext_resource type="PackedScene" uid="uid://bslpdqhki8tdr" path="res://factions/factions.tscn" id="3_xpwin"]
 [ext_resource type="Script" uid="uid://dp82ma2ctoa5h" path="res://players.gd" id="5_ietyw"]
 [ext_resource type="Script" uid="uid://fjhx2xafb7eg" path="res://systems.gd" id="6_ioa4q"]
 
@@ -14,8 +13,6 @@ layer = 2
 
 [node name="JoinGame" parent="CanvasLayer" instance=ExtResource("2_saf80")]
 visible = false
-
-[node name="Factions" parent="." instance=ExtResource("3_xpwin")]
 
 [node name="Players" type="Node" parent="."]
 script = ExtResource("5_ietyw")

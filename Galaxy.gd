@@ -78,12 +78,26 @@ func update_graphics():
 				subviewportcontainer.get_node("SubViewport").use_taa = taa
 
 
+func _ready():
+	#TODO: Not in ready! Better way to load faction from disk, or stream from server on join
+	# IF we do streaming, then move to galaxy setup function
+	var ea := Faction.new_faction("Earth Alliance", false, false, false)
+	var b5 := Faction.new_faction("Babylon 5", false, false, false)
+	b5.parent_faction = ea
+	var wing := Faction.new_faction("Alpha Wing", true, true, false)
+	wing.parent_faction = b5
+	wing = Faction.new_faction("Beta Wing", true, true, false)
+	wing.parent_faction = b5
+	wing = Faction.new_faction("Delta Wing", true, true, false)
+	wing.parent_faction = b5
+	wing = Faction.new_faction("Zeta Wing", true, true, false)
+	wing.parent_faction = b5
+
+
 func setup_new_galaxy(dedicated=false, callback = null):
 	if dedicated:
 		callback = Callable(self, "finish_setup_galaxy_all")
-	#if not active_galaxy and multiplayer.is_server():
 	if not active_galaxy and get_tree().root.get_node("entry").is_server:
-		#print(active_galaxy, " ", multiplayer.is_server())
 		emit_signal("load_scene", "res://systems/test_system/test_system.tscn", $Systems, false, true, callback)
 		active_galaxy = true
 	else:
@@ -106,13 +120,13 @@ func finish_setup_galaxy_all() -> void:
 		var babylon5 := preload("res://ships/earth alliance/babylon 5/babylon_5.tscn").instantiate()
 		$Systems.add_station(babylon5, "test_system")
 		var b5commander: Pilot = Pilot.new_pilot("Commendar Eclair")
-		var b5_faction: Faction = $Factions.get_faction("Babylon 5")
+		var b5_faction: Faction = Faction.get_faction("Babylon 5")
 		b5_faction.add_member(b5commander)
 		$"Systems/test_system/SubViewport/ships/Babylon 5".add_captain(b5commander)
 		b5commander.multiplayer_id = multiplayer.get_unique_id()
 		
 		var b5botpilot: Pilot = Pilot.new_pilot("Karren Waffer")
-		var zeta_wing: Faction = $Factions.get_faction("Zeta Wing")
+		var zeta_wing: Faction = Faction.get_faction("Zeta Wing")
 		zeta_wing.add_member(b5botpilot)
 		$"Systems/test_system/SubViewport/ships/Babylon 5".add_passenger(b5botpilot)
 		b5botpilot.multiplayer_id = multiplayer.get_unique_id()
@@ -125,22 +139,24 @@ func finish_setup_galaxy_all() -> void:
 
 func finish_setup_galaxy_client():
 	update_graphics()
-	$CanvasLayer/JoinGame.build_faction_menu($Factions)
+	$CanvasLayer/JoinGame.build_faction_menu()
 	$CanvasLayer/JoinGame.visible = true
 	finish_setup_galaxy_all()
 
 
 @rpc("any_peer", "call_local")
-func first_spawn_player(faction: Faction, system_name: String, spawner_name: String) -> void:
+func first_spawn_player(faction_id: int, system_name: String, spawner_name: String, next_faction_id: int) -> void:
 	if not multiplayer.is_server():
 		return
 	var remote_id := multiplayer.get_remote_sender_id()
 	# If the host is calling this function, remote id is 0, change to its actual id
 	if remote_id == 0:
 		remote_id = multiplayer.get_unique_id()
-	
+	Logger.log(["Attemping Created player pilot: in faction ", faction_id, " with mpid: ", remote_id], Logger.MessageType.QUESTION)
+	Faction._next_id = next_faction_id
 	var player: Player = $Players.find_player_by_netid(remote_id)
 	var player_pilot: Pilot = Pilot.new_pilot(player.name)
+	var faction: Faction = Faction.factions[faction_id]
 	faction.add_member(player_pilot)
 	player_pilot._player_pilot_id = player.player_id
 	player_pilot.set_multiplayer_id(remote_id)
@@ -148,7 +164,7 @@ func first_spawn_player(faction: Faction, system_name: String, spawner_name: Str
 	#TODO: Change this to be via system_name and spawner_name
 	player_enter_system(system_name)
 	$"Systems/test_system/SubViewport/ships/Babylon 5".add_passenger(player_pilot)
-	Logger.log(["Created pilot: ", player_pilot, " in faction ", faction.name, " with mpid: ", player_pilot.multiplayer_id], Logger.MessageType.SUCCESS)
+	Logger.log(["Created pilot: ", player_pilot, " in faction ", faction.resource_name, " with mpid: ", player_pilot.multiplayer_id], Logger.MessageType.SUCCESS)
 
 
 func _on_network_connection_succeeded() -> void:
@@ -156,9 +172,9 @@ func _on_network_connection_succeeded() -> void:
 
 
 func _on_join_game_request_spawn(faction_name: String, system_name: String, spawner_name: String) -> void:
-	rpc("first_spawn_player", $Factions.get_faction(faction_name), system_name, spawner_name)
+	rpc("first_spawn_player", Faction.get_faction(faction_name).faction_id, system_name, spawner_name, Faction._next_id)
 	$CanvasLayer/JoinGame.visible = false
 
 
 func _on_join_game_request_faction(faction_name: String) -> void:
-	$CanvasLayer/JoinGame.show_spawn(get_spawn_points($Factions.get_faction(faction_name)))
+	$CanvasLayer/JoinGame.show_spawn(get_spawn_points(Faction.get_faction(faction_name)))

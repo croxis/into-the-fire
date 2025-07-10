@@ -14,10 +14,10 @@ properties/0/replication_mode = 2
 properties/1/path = NodePath(".:multiplayer_id")
 properties/1/spawn = true
 properties/1/replication_mode = 2
-properties/2/path = NodePath(".:_faction_id")
+properties/2/path = NodePath(".:pilot_id")
 properties/2/spawn = true
 properties/2/replication_mode = 2
-properties/3/path = NodePath(".:pilot_id")
+properties/3/path = NodePath(".:_faction_id")
 properties/3/spawn = true
 properties/3/replication_mode = 2
 

@@ -29,12 +29,12 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 100, 0)
 [node name="ships" type="Node3D" parent="SubViewport"]
 
 [node name="BoltSpawner" type="MultiplayerSpawner" parent="SubViewport"]
-_spawnable_scenes = PackedStringArray("res://ship_systems/weapons/effects/bolt/Bolt.tscn")
+_spawnable_scenes = PackedStringArray("uid://yw5s3jdg5lfg")
 spawn_path = NodePath("../bolts")
 script = ExtResource("2_05tas")
 
 [node name="ShipSpawner" type="MultiplayerSpawner" parent="SubViewport"]
-_spawnable_scenes = PackedStringArray("res://ships/earth alliance/aurora_starfury/auora_starfury.tscn", "res://ship_systems/pilots/Pilot.tscn")
+_spawnable_scenes = PackedStringArray("uid://bje1osdhtpqsy", "uid://c8kn4ojrwda3e", "uid://bx03e1mn48l58", "uid://bcyhqn6r6h3a5", "uid://dmpj0ge68t2li")
 spawn_path = NodePath("../ships")
 script = ExtResource("3_hjsre")
 
