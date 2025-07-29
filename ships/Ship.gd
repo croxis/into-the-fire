@@ -62,14 +62,15 @@ var multiplayer_pilot_id: int:
 var em_output := 1.0
 var neutron_output := 1.0
 
+var detected_ships: Array[Ship] = []
+
 @export var faction: Faction:
 	set(new_faction):
 		if faction:
-			ship_detected.disconnect(faction._on_fleet_ship_detected)
-			ship_detection_lost.disconnect(faction._on_fleet_ship_sensor_lost)
+			faction.owned_ships.erase(self)
 		faction = new_faction
-		ship_detected.connect(faction._on_fleet_ship_detected)
-		ship_detection_lost.connect(faction._on_fleet_ship_sensor_lost)
+		if self not in faction.owned_ships:
+			faction.owned_ships.append(self)
 
 var galaxy: Galaxy
 
@@ -95,8 +96,6 @@ var start_velocity := Vector3(0, 0, 0)
 var is_spawning := false			
 
 signal destroyed(ship_id)
-signal ship_detected(detected_ship_id)
-signal ship_detection_lost(detected_ship_id)
 
 
 # Called when the node enters the scene tree for the first time.
@@ -185,7 +184,7 @@ func _physics_process(dt: float) -> void:
 		return
 	if not $Crew.pilot_name:
 		return
-	# For now throttle is capped at  1. In the future we can boost power to engines.
+	# For now throttle is capped at 1. In the future we can boost power to engines.
 	# In Godot 3.2 add_force is cleared every physics frame
 	if multiplayer.multiplayer_peer == null or multiplayer.get_unique_id() == multiplayer_pilot_id:
 		# The client which this player represent will update the controls state, and notify it to everyone.
@@ -346,6 +345,7 @@ func bullet_hit(damage, bullet_global_trans):
 
 func destroy() -> void:
 	emit_signal("destroyed", ship_id)
+	faction.owned_ships.erase(self)
 	queue_free()
 
 
@@ -433,3 +433,18 @@ func get_current_system() -> System:
 
 func is_player_pilot() -> bool:
 	return multiplayer.multiplayer_peer == null or multiplayer.get_unique_id() == multiplayer_pilot_id
+
+
+func sensor_check(other_ship: Ship) -> bool:
+	var detected := false
+	var distance := global_position.distance_to(other_ship.global_position)
+	#TODO: Calculate angular size of other ship. IF bigger than 1 degree, it is detected.
+	var em_signal := other_ship.em_output / pow(distance/1000.0, 2) # Convert to km. Signal strength of 1.0 can be detected by a sensor of 1.0 at 1 km
+	var neuteno_signal := other_ship.neutron_output / pow(distance/1000.0, 2)
+	if em_signal > sensor.em_sensitive or neuteno_signal > sensor.neutrino_sensitive:
+		detected = true
+	if detected:
+		detected_ships.append(other_ship)
+	else:
+		detected_ships.erase(other_ship)
+	return detected

@@ -1,6 +1,7 @@
 extends SubViewportContainer
 class_name System
 
+var ship_scan_timer := Timer.new()
 
 func _ready():
 	var ran = $SubViewport/StarField.get_star_proper("Ran")
@@ -9,6 +10,11 @@ func _ready():
 	$SubViewport/StarField.celestial_coords = ran_position
 	$SubViewport/StarField.mag_ref = 7.0
 	$SubViewport/StarField.mag_limit = 7.0
+	
+	if multiplayer.is_server():
+		ship_scan_timer.wait_time = 0.5
+		ship_scan_timer.autostart = true
+		ship_scan_timer.timeout.connect(ship_scanner_check)
 
 
 func add_station(station: Ship):
@@ -23,6 +29,10 @@ func add_ship(ship: Ship):
 	Logger.log(["Added ship ", ship, " to system ", name], Logger.MessageType.SUCCESS)
 
 
-#func get_ship_or_station(craft_name: String): -> Ship:
-#	pass
-	
+func ship_scanner_check():
+	for ship: Ship in $SubViewport/ships.get_children():
+		for other_ship: Ship in $SubViewport/ships.get_children():
+			if ship != other_ship:
+				ship.sensor_check(other_ship)
+			
+			

@@ -13,12 +13,31 @@ class_name Faction
 
 # Reference to a parent guild resource to represent hierarchy (can be null)
 @export var parent_faction: Faction = null
+var top_faction: Faction:
+	get:
+		if parent_faction:
+			return parent_faction.top_faction
+		return self
 
 static var _next_id := 0
 static var factions := {}
 
 # Variables only needed by the server
-var detected_ships := []  # Make sure to include ships owned by the faction
+var detected_ships: Array[Ship] = []:   # Make sure to include ships owned by the faction
+	get:
+		if parent_faction:
+			return parent_faction.detected_ships
+		else:
+			return detected_ships
+
+# For now just hold owned ships in the top level faction
+# TODO: Have better ownership tracking
+var owned_ships: Array[Ship] = []:
+	get:
+		if parent_faction:
+			return parent_faction.owned_ships
+		return owned_ships
+
 
 @rpc("authority", "call_local", "reliable")
 static func new_faction(name: String, is_wing: bool, accept_players: bool, accept_children: bool) -> Faction:
@@ -87,7 +106,9 @@ func remove_member(pilot: Pilot) -> bool:
 
 
 func _on_fleet_ship_detected(ship: Ship):
-	if ship not in detected_ships:
+	if parent_faction:
+		parent_faction._on_fleet_ship_detected(ship)
+	elif ship not in detected_ships:
 		detected_ships.append(ship)
 
 
