@@ -62,6 +62,8 @@ var multiplayer_pilot_id: int:
 var em_output := 1.0
 var neutron_output := 1.0
 
+@export var faction: Faction
+
 var galaxy: Galaxy
 
 var health := max_health:
@@ -104,6 +106,16 @@ func _ready():
 
 func add_captain(pilot: Pilot):
 	Logger.log(["Adding captain: ", pilot.multiplayer_id, " on ", self], Logger.MessageType.INFO)
+	#TODO: Need to give the ship faction ownership. There needs to be rules on this.
+	# Option 1: Ships are owned at the top level faction. Simple.
+	# Option 2: Fancy permission system...
+	# 1) Factions need some sort of permission control. If B5 owns a ship, can any earthforce fly it?
+	# 2) If alpha wing member flies the B5 ship, the ownership should stay b5
+	# 3) A ship can be gifted by the faction owner.
+	# 4) A transfer can happen by parent faction commanders
+	# For now....
+	if not faction:
+		faction = pilot.faction
 	if $Crew.set_captain(pilot) and pilot.multiplayer_id:
 		# This does not work as the pilot does not have a multiplayer_id when it is added.
 		# This is because the multiplayerspawner only seems to work when multiplayer 
