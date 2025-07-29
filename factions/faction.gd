@@ -17,6 +17,9 @@ class_name Faction
 static var _next_id := 0
 static var factions := {}
 
+# Variables only needed by the server
+var detected_ships := []  # Make sure to include ships owned by the faction
+
 @rpc("authority", "call_local", "reliable")
 static func new_faction(name: String, is_wing: bool, accept_players: bool, accept_children: bool) -> Faction:
 	var new_faction = Faction.new()
@@ -81,3 +84,11 @@ func remove_member(pilot: Pilot) -> bool:
 	pilot.faction = null
 	pilot._faction_id = 0
 	return true
+
+
+func _on_fleet_ship_detected(ship: Ship):
+	return
+
+
+func _on_fleet_ship_sensor_lost(ship: Ship):
+	return
