@@ -62,7 +62,14 @@ var multiplayer_pilot_id: int:
 var em_output := 1.0
 var neutron_output := 1.0
 
-@export var faction: Faction
+@export var faction: Faction:
+	set(new_faction):
+		if faction:
+			ship_detected.disconnect(faction._on_fleet_ship_detected)
+			ship_detection_lost.disconnect(faction._on_fleet_ship_sensor_lost)
+		faction = new_faction
+		ship_detected.connect(faction._on_fleet_ship_detected)
+		ship_detection_lost.connect(faction._on_fleet_ship_sensor_lost)
 
 var galaxy: Galaxy
 
@@ -88,6 +95,8 @@ var start_velocity := Vector3(0, 0, 0)
 var is_spawning := false			
 
 signal destroyed(ship_id)
+signal ship_detected(detected_ship_id)
+signal ship_detection_lost(detected_ship_id)
 
 
 # Called when the node enters the scene tree for the first time.

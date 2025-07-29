@@ -87,8 +87,9 @@ func remove_member(pilot: Pilot) -> bool:
 
 
 func _on_fleet_ship_detected(ship: Ship):
-	return
+	if ship not in detected_ships:
+		detected_ships.append(ship)
 
 
 func _on_fleet_ship_sensor_lost(ship: Ship):
-	return
+	detected_ships.erase(ship)

@@ -54,7 +54,7 @@ properties/12/path = NodePath("Crew:pilot_name")
 properties/12/spawn = true
 properties/12/replication_mode = 2
 
-[node name="Ship" type="RigidBody3D"]
+[node name="Ship" type="RigidBody3D" groups=["ship"]]
 can_sleep = false
 continuous_cd = true
 script = ExtResource("1_lh74f")

@@ -50,6 +50,7 @@ enabled=PackedStringArray("res://addons/Todo_Manager/plugin.cfg", "res://addons/
 
 station="space stations"
 capital="capital ship"
+ship=""
 
 [input]
 
