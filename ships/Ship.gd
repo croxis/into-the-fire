@@ -378,6 +378,7 @@ func _on_button_launch_pressed() -> void:
 
 
 func _on_capital_ui_request_launch() -> void:
+	print_debug(multiplayer.get_unique_id())
 	var player: Player = galaxy.get_node('Players').find_player_by_netid(multiplayer.get_unique_id())	
 	rpc("request_launch", 0, player.player_id)
 

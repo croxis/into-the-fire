@@ -38,6 +38,7 @@ func player_died(player_id: int) -> void:
 	rpc_id(player_id, "show_spawn")
 
 
+@rpc("any_peer", "call_local") ##
 func player_enter_system(system_name) -> void:
 	var system: SubViewportContainer = get_node("Systems/" + system_name)
 	system.get_node("SubViewport").size = DisplayServer.window_get_size()
@@ -162,7 +163,9 @@ func first_spawn_player(faction_id: int, system_name: String, spawner_name: Stri
 	player_pilot.set_multiplayer_id(remote_id)
 	
 	#TODO: Change this to be via system_name and spawner_name
-	player_enter_system(system_name)
+	
+	#player_enter_system(system_name)
+	player_enter_system.rpc_id(player_pilot.multiplayer_id, system_name)
 	$"Systems/test_system/SubViewport/ships/Babylon 5".add_passenger(player_pilot)
 	Logger.log(["Created pilot: ", player_pilot, " in faction ", faction.resource_name, " with mpid: ", player_pilot.multiplayer_id], Logger.MessageType.SUCCESS)
 

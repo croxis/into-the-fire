@@ -1,10 +1,7 @@
-[gd_scene load_steps=9 format=3 uid="uid://c8kn4ojrwda3e"]
+[gd_scene load_steps=6 format=3 uid="uid://c8kn4ojrwda3e"]
 
 [ext_resource type="Script" uid="uid://cwrw4m3xxrbq7" path="res://ship_systems/pilots/Pilot.gd" id="1_gf7ba"]
 [ext_resource type="Script" uid="uid://c0xi03f7y32xl" path="res://ships/Inputs.gd" id="2_uhore"]
-[ext_resource type="Script" uid="uid://2k4exo0th0xi" path="res://addons/godot_state_charts/state_chart.gd" id="4_146dj"]
-[ext_resource type="Script" uid="uid://crrdxaarat2ps" path="res://addons/godot_state_charts/parallel_state.gd" id="5_nml72"]
-[ext_resource type="Script" uid="uid://k5l8ee2sowoe" path="res://addons/godot_state_charts/atomic_state.gd" id="6_2htpx"]
 [ext_resource type="Script" uid="uid://baleoyb76kk5t" path="res://ship_systems/pilots/game_state.gd" id="9_07umr"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_38dqk"]
@@ -60,19 +57,3 @@ script = ExtResource("2_uhore")
 
 [node name="GameState" type="Node" parent="."]
 script = ExtResource("9_07umr")
-
-[node name="StateChart" type="Node" parent="."]
-script = ExtResource("4_146dj")
-metadata/_custom_type_script = "uid://2k4exo0th0xi"
-
-[node name="ParallelState" type="Node" parent="StateChart"]
-script = ExtResource("5_nml72")
-metadata/_custom_type_script = "uid://crrdxaarat2ps"
-
-[node name="AtomicState" type="Node" parent="StateChart/ParallelState"]
-script = ExtResource("6_2htpx")
-metadata/_custom_type_script = "uid://k5l8ee2sowoe"
-
-[node name="AtomicState2" type="Node" parent="StateChart/ParallelState"]
-script = ExtResource("6_2htpx")
-metadata/_custom_type_script = "uid://k5l8ee2sowoe"
