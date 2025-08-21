@@ -1,8 +1,8 @@
 class_name Player
 extends Node
 
-var network_id: int
-var player_id: int
+@export var network_id: int
+@export var player_id: int
 var password: String:
 	set(pswrd):
 		password = pswrd.sha256_text()

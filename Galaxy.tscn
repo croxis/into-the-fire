@@ -24,5 +24,9 @@ script = ExtResource("6_ioa4q")
 _spawnable_scenes = PackedStringArray("uid://sl64gsa8wdih")
 spawn_path = NodePath("../Systems")
 
+[node name="MultiplayerSpawnerPlayers" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("uid://bx2a0jhx14dnd")
+spawn_path = NodePath("../Players")
+
 [connection signal="request_faction" from="CanvasLayer/JoinGame" to="." method="_on_join_game_request_faction"]
 [connection signal="request_spawn" from="CanvasLayer/JoinGame" to="." method="_on_join_game_request_spawn"]
