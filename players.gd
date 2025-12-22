@@ -26,7 +26,7 @@ func register_player(player_name: String, player_password: String, peer_id: int)
 	player.network_id = peer_id
 	add_child(player)
 	playerid_counter += 1
-	Logger.log(["Registered player: " + player_name], Logger.MessageType.INFO)
+	Log.log(["Registered player: " + player_name], Log.MessageType.INFO)
 	save_players()
 
 

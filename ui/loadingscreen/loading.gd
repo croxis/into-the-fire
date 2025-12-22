@@ -23,18 +23,18 @@ func _process(_delta):
 			loadpath = null  
 			visible = false
 			Debug.update_widget('LoaderDebugContainer:TextListLoad.remove_label', {'name': 'load_counter'})
-			Logger.log(["Scene loaded"], Logger.MessageType.INFO)
+			Log.log(["Scene loaded"], Log.MessageType.INFO)
 			if callback:
 				callback.call()
 				callback = null
 		elif status == ResourceLoader.THREAD_LOAD_FAILED:
-			Logger.log(["Scene load failed"], Logger.MessageType.ERROR)
+			Log.log(["Scene load failed"], Log.MessageType.ERROR)
 		elif status == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
-			Logger.log(["Scene invalid"], Logger.MessageType.ERROR)
+			Log.log(["Scene invalid"], Log.MessageType.ERROR)
 	
 
 func load_scene(path, node: Node, make_active_scene: bool, show_load_screen = false, cback = null):
-	Logger.log(["Loading scene: ", path, " ", "make_active: ", make_active_scene, " show_load_screen: ", show_load_screen], Logger.MessageType.INFO)
+	Log.log(["Loading scene: ", path, " ", "make_active: ", make_active_scene, " show_load_screen: ", show_load_screen], Log.MessageType.INFO)
 	ResourceLoader.load_threaded_request(path)
 	loadpath = path
 	parent_node = node

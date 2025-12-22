@@ -48,24 +48,24 @@ func start_server(new_game_name, s_password:="", port: int=DEFAULT_PORT) -> bool
 	multiplayer.set_auth_callback(_authenticate_callback)
 	multiplayer.peer_connected.connect(on_client_connected)
 	multiplayer.peer_disconnected.connect(_player_disconnected)
-	Logger.log(["Server hosted on port: " + str(port)], Logger.MessageType.INFO)
-	Logger.log(["Server MP ID: ", multiplayer.get_unique_id()], Logger.MessageType.INFO)
+	Log.log(["Server hosted on port: " + str(port)], Log.MessageType.INFO)
+	Log.log(["Server MP ID: ", multiplayer.get_unique_id()], Log.MessageType.INFO)
 	server_password = s_password
 	get_tree().root.get_node("entry").is_server = true
 	return true
 
 
 func _player_disconnected(client_id):
-	Logger.log(["Client %d disconnected!" % [client_id]], Logger.MessageType.INFO)
+	Log.log(["Client %d disconnected!" % [client_id]], Log.MessageType.INFO)
 	players.player_disconnect(client_id)
 
 
 func on_client_connected(client_id : int):
-	Logger.log(["Client %d connected!" % [client_id]], Logger.MessageType.SUCCESS)
+	Log.log(["Client %d connected!" % [client_id]], Log.MessageType.SUCCESS)
 
 
 func _authenticating(peer_id):
-	Logger.log(["Client %d authenticating!" % [peer_id]], Logger.MessageType.QUESTION)
+	Log.log(["Client %d authenticating!" % [peer_id]], Log.MessageType.QUESTION)
 
 	var dict : Dictionary = {
 		&'protocol' : PROTOCOL,
@@ -80,27 +80,27 @@ func _authenticating(peer_id):
 
 func _authenticate_callback(peer_id: int, data: PackedByteArray):
 	var dict:Dictionary = bytes_to_var(data)
-	Logger.log(["_auth_callback recieved data ", str(dict), "from PID", peer_id, "or", multiplayer.get_remote_sender_id()], Logger.MessageType.QUESTION)
+	Log.log(["_auth_callback recieved data ", str(dict), "from PID", peer_id, "or", multiplayer.get_remote_sender_id()], Log.MessageType.QUESTION)
 	if dict.client_token != "me2":
-		Logger.log(["Client untrustworthy"], Logger.MessageType.ERROR)
+		Log.log(["Client untrustworthy"], Log.MessageType.ERROR)
 		peer.disconnect_peer(peer_id)
 		return
 	if dict.server_password != server_password:
-		Logger.log(["Wrong server password"], Logger.MessageType.ERROR)
+		Log.log(["Wrong server password"], Log.MessageType.ERROR)
 		peer.disconnect_peer(peer_id)
 		return
 	if players.is_logged_in_id(peer_id):
-		Logger.log(["Player is logged in"], Logger.MessageType.ERROR)
-		print(players.get_children())
+		Log.log(["Player is logged in"], Log.MessageType.ERROR)
+		#print(players.get_children())
 		peer.disconnect_peer(peer_id)
 		return
 	if !players.check_player(dict.player_name, dict.player_password, peer_id):
-		Logger.log(["Wrong player password"], Logger.MessageType.ERROR)
+		Log.log(["Wrong player password"], Log.MessageType.ERROR)
 		peer.disconnect_peer(peer_id)
 		return
 	var client := peer.get_peer(peer_id)
 	client.set_timeout(1000, 4000, 6000)
-	Logger.log(["Client ", dict.player_name, "authenticated"], Logger.MessageType.SUCCESS)
+	Log.log(["Client ", dict.player_name, "authenticated"], Log.MessageType.SUCCESS)
 	multiplayer.complete_auth(peer_id)
 
 
@@ -111,7 +111,7 @@ func _auth_failed(client_peer):
 # Client
 func join_game(ip, port, new_player_name, s_password, p_password):
 	# Client Only
-	Logger.log(["Joining Game: ", ip, ":", port, " as " , new_player_name, " with id: ", multiplayer.get_unique_id()], Logger.MessageType.INFO)
+	Log.log(["Joining Game: ", ip, ":", port, " as " , new_player_name, " with id: ", multiplayer.get_unique_id()], Log.MessageType.INFO)
 	player_name = new_player_name
 	peer = ENetMultiplayerPeer.new()
 	server_password = s_password
@@ -143,22 +143,22 @@ func on_server_disconnected():
 ## CLIENT GETS SERVER's QUERY and SENDS REPLY
 func _client_auth_callback(client_id: int, buf : PackedByteArray):
 	var dict:Dictionary = bytes_to_var(buf)
-	Logger.log(["_auth_callback recieved data ", str(dict), "from PID", client_id, "or", multiplayer.get_remote_sender_id()], Logger.MessageType.QUESTION)
+	Log.log(["_auth_callback recieved data ", str(dict), "from PID", client_id, "or", multiplayer.get_remote_sender_id()], Log.MessageType.QUESTION)
 
 	if dict.protocol != PROTOCOL:
-		Logger.log(["Server protocol mismatch"], Logger.MessageType.ERROR)
+		Log.log(["Server protocol mismatch"], Log.MessageType.ERROR)
 		peer.disconnect_peer(1)
 
 	if dict.protocol_version > SUPPORTED_PROTOCOL_VERSION:
-		Logger.log(["Server protocol version too new"], Logger.MessageType.ERROR)
+		Log.log(["Server protocol version too new"], Log.MessageType.ERROR)
 		peer.disconnect_peer(1)
 
 	if dict.protocol_version < SUPPORTED_PROTOCOL_VERSION:
-		Logger.log(["Server protocol version too old"], Logger.MessageType.ERROR)
+		Log.log(["Server protocol version too old"], Log.MessageType.ERROR)
 		peer.disconnect_peer(1)
 
 	if dict.host_token != 'bruh im legit':
-		Logger.log(["Server untrustworthy"], Logger.MessageType.PANIC)
+		Log.log(["Server untrustworthy"], Log.MessageType.PANIC)
 		peer.disconnect_peer(1)
 
 	dict = {

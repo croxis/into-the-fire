@@ -39,6 +39,6 @@ func get_faction(faction_name: String) -> Faction:
 	for faction in factions.values():
 		if faction.resource_name == faction_name:
 			return faction
-	Logger.log(["Faction not found:", faction_name], Logger.MessageType.WARNING)
+	Log.log(["Faction not found:", faction_name], Log.MessageType.WARNING)
 	return null
 		

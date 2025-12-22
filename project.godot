@@ -12,17 +12,21 @@ config_version=5
 
 config/name="Babylon 5: Into The Fire"
 run/main_scene="res://entry.tscn"
-config/features=PackedStringArray("4.4")
+config/features=PackedStringArray("4.5")
 boot_splash/bg_color=Color(0, 0, 0, 1)
 config/icon="res://icon.png"
 
 [autoload]
 
+Log="*res://logger.gd"
 Debug="*res://ui/debug/debug_layer.tscn"
 SaveManager="*res://save_manager.gd"
-Logger="*res://logger.gd"
 DiscordRPCLoader="*res://addons/discord-rpc-gd/nodes/discord_autoload.gd"
 AppConfig="*res://app_config.gd"
+
+[debug]
+
+settings/gdscript/always_track_call_stacks=true
 
 [debug_draw_3d]
 

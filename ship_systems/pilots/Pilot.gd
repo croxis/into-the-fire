@@ -18,7 +18,7 @@ extends Node
 			faction.remove_member(self)
 		faction = new_faction
 		_faction_id = faction.faction_id
-		Logger.log(["Player gets new faction:", name, faction.resource_name], Logger.MessageType.INFO)
+		Log.log(["Player gets new faction:", name, faction.resource_name], Log.MessageType.INFO)
 # If this is the player, set the id to 1 or more
 @export var _player_pilot_id: int
 @export var multiplayer_id: int
@@ -26,12 +26,12 @@ extends Node
 static var next_id := 0
 static var pilot_scene: PackedScene = load("res://ship_systems/pilots/Pilot.tscn")
 
-static func new_pilot(name: String) -> Pilot:
-	var new_pilot = pilot_scene.instantiate()
-	new_pilot.name = name
-	new_pilot.pilot_id = next_id
+static func new_pilot(new_name: String) -> Pilot:
+	var new_pilot_instance = pilot_scene.instantiate()
+	new_pilot_instance.name = new_name
+	new_pilot_instance.pilot_id = next_id
 	next_id += 1
-	return new_pilot
+	return new_pilot_instance
 
 
 func set_multiplayer_id(id):

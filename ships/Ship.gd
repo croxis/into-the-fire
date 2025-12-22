@@ -101,19 +101,19 @@ signal destroyed(ship_id)
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	# If in editor simply disable processing as it's not needed here
-	Logger.log(["Creating ship with id: ", ship_id, ". Name: ", name], Logger.MessageType.QUESTION)
+	Log.log(["Creating ship with id: ", ship_id, ". Name: ", name], Log.MessageType.QUESTION)
 	if (Engine.is_editor_hint()):
 		set_physics_process(false)	
 	can_sleep = false
 	#target_rot = rotation_degrees
 	target_global_transform = global_transform
 	galaxy = get_tree().root.get_node("entry/Galaxy")
-	Logger.log(["Ship created: ", ship_id], Logger.MessageType.SUCCESS)
+	Log.log(["Ship created: ", ship_id], Log.MessageType.SUCCESS)
 	DebugDraw3D.scoped_config().set_viewport(get_viewport())
 
 
 func add_captain(pilot: Pilot):
-	Logger.log(["Adding captain: ", pilot.multiplayer_id, " on ", self], Logger.MessageType.INFO)
+	Log.log(["Adding captain: ", pilot.multiplayer_id, " on ", self], Log.MessageType.INFO)
 	#TODO: Need to give the ship faction ownership. There needs to be rules on this.
 	# Option 1: Ships are owned at the top level faction. Simple.
 	# Option 2: Fancy permission system...
@@ -145,15 +145,15 @@ func get_crew() -> Array[Pilot]:
 
 
 func add_pilot(pilot: Pilot):
-	Logger.log(["Adding pilot: ", pilot.multiplayer_id, " on ", self], Logger.MessageType.INFO)
+	Log.log(["Adding pilot: ", pilot.multiplayer_id, " on ", self], Log.MessageType.INFO)
 	if $Crew.set_pilot(pilot) and pilot.multiplayer_id:
-		Logger.log(["Requesting camera rpc"], Logger.MessageType.QUESTION)
+		Log.log(["Requesting camera rpc"], Log.MessageType.QUESTION)
 		set_camera.rpc_id(pilot.multiplayer_id)
 
 
 @rpc("call_local")
 func set_camera():
-	Logger.log(["Setting Camera"], Logger.MessageType.QUESTION)
+	Log.log(["Setting Camera"], Log.MessageType.QUESTION)
 	camera.far = 30000
 	camera.near = 0.3
 	camera.current = true
@@ -192,14 +192,14 @@ func _physics_process(dt: float) -> void:
 	
 	if inputs.autobreak_toggle:
 		autobreak = !autobreak
-		Logger.log(["Requesting autobreak_toggle set to ", autobreak, " for ", self], Logger.MessageType.QUESTION)
+		Log.log(["Requesting autobreak_toggle set to ", autobreak, " for ", self], Log.MessageType.QUESTION)
 
 	if inputs.autospin_toggle:
 		autospin = !autospin
 		if autospin:
 			target_global_transform = global_transform
 		#target_rot = rotation
-		Logger.log(["Requesting autospin set to ", autospin, " for ", self], Logger.MessageType.QUESTION)
+		Log.log(["Requesting autospin set to ", autospin, " for ", self], Log.MessageType.QUESTION)
 
 	var rotation_throttle = inputs.rotation_throttle
 	var throttle = inputs.throttle
@@ -359,7 +359,7 @@ func _on_area_3d_dock_body_entered(body: Ship) -> void:
 		return
 	if body.is_spawning:
 		return
-	Logger.log([body, " ship entered dock on ", name], Logger.MessageType.INFO)
+	Log.log([body, " ship entered dock on ", name], Log.MessageType.INFO)
 	body.get_node("Crew").captain_name = ""
 	body.get_node("Crew").pilot_name = ""
 	for c in body.get_crew():
@@ -391,7 +391,7 @@ func request_launch(ship_id: int, pilot_id: int):
 	if remote_id == 0:
 		remote_id = multiplayer.get_unique_id()
 	
-	Logger.log(["Spawn requested in ", get_current_system().name, " ", name, " by ", remote_id], Logger.MessageType.QUESTION)
+	Log.log(["Spawn requested in ", get_current_system().name, " ", name, " by ", remote_id], Log.MessageType.QUESTION)
 	var top_system := get_current_system()
 	var system := top_system.get_node("SubViewport")
 
@@ -424,7 +424,7 @@ func request_launch(ship_id: int, pilot_id: int):
 	new_ship.set_camera.rpc_id(pilot.multiplayer_id)
 	await get_tree().create_timer(1.0).timeout
 	new_ship.is_spawning = false
-	Logger.log(["Spawn complete for ", pilot], Logger.MessageType.SUCCESS)
+	Log.log(["Spawn complete for ", pilot], Log.MessageType.SUCCESS)
 
 
 func get_current_system() -> System:

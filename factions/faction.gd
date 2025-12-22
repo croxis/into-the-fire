@@ -40,25 +40,25 @@ var owned_ships: Array[Ship] = []:
 
 
 @rpc("authority", "call_local", "reliable")
-static func new_faction(name: String, is_wing: bool, accept_players: bool, accept_children: bool) -> Faction:
-	var new_faction = Faction.new()
-	new_faction.resource_name = name
-	new_faction.is_wing = is_wing
-	new_faction.accept_players = accept_players
-	new_faction.accept_children = accept_children
-	new_faction.faction_id = _next_id
-	new_faction.active = true
-	factions[new_faction.faction_id] = new_faction
+static func new_faction(name: String, new_is_wing: bool, new_accept_players: bool, new_accept_children: bool) -> Faction:
+	var new_faction_instance = Faction.new()
+	new_faction_instance.resource_name = name
+	new_faction_instance.is_wing = new_is_wing
+	new_faction_instance.accept_players = new_accept_players
+	new_faction_instance.accept_children = new_accept_children
+	new_faction_instance.faction_id = _next_id
+	new_faction_instance.active = true
+	factions[new_faction_instance.faction_id] = new_faction_instance
 	_next_id += 1
-	Logger.log(["Faction created:", new_faction.faction_id, new_faction.resource_name], Logger.MessageType.INFO)
-	return new_faction
+	Log.log(["Faction created:", new_faction_instance.faction_id, new_faction_instance.resource_name], Log.MessageType.INFO)
+	return new_faction_instance
 
 
 static func get_faction(faction_name: String) -> Faction:
 	for faction in factions.values():
 		if faction.resource_name == faction_name:
 			return faction
-	Logger.log(["Faction not found:", faction_name], Logger.MessageType.WARNING)
+	Log.log(["Faction not found:", faction_name], Log.MessageType.WARNING)
 	return null
 
 

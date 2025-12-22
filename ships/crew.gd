@@ -42,7 +42,7 @@ func add_passenger(passenger: Pilot) -> bool:
 		return true
 	var max_capacity: int = max_passengers
 	if get_child_count() >= max_capacity:
-		Logger.log(["Too many passengers."], Logger.MessageType.WARNING)
+		Log.log(["Too many passengers."], Log.MessageType.WARNING)
 		return false
 	if passenger.get_parent():
 		passenger.reparent(self)

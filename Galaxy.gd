@@ -96,11 +96,13 @@ func _ready():
 
 
 func setup_new_galaxy(dedicated=false, callback = null):
+	Log.log(["Setting up galaxy."], Log.MessageType.QUESTION)
 	if dedicated:
 		callback = Callable(self, "finish_setup_galaxy_all")
 	if not active_galaxy and get_tree().root.get_node("entry").is_server:
 		emit_signal("load_scene", "res://systems/test_system/test_system.tscn", $Systems, false, true, callback)
 		active_galaxy = true
+		Log.log(["Galaxy setup complete."], Log.MessageType.INFO)
 	else:
 		print("Galaxy already initalized")
 
@@ -153,7 +155,7 @@ func first_spawn_player(faction_id: int, system_name: String, spawner_name: Stri
 	# If the host is calling this function, remote id is 0, change to its actual id
 	if remote_id == 0:
 		remote_id = multiplayer.get_unique_id()
-	Logger.log(["Attemping Created player pilot: in faction ", faction_id, " with mpid: ", remote_id], Logger.MessageType.QUESTION)
+	Log.log(["Attemping Created player pilot: in faction ", faction_id, " with mpid: ", remote_id], Log.MessageType.QUESTION)
 	Faction._next_id = next_faction_id
 	var player: Player = $Players.find_player_by_netid(remote_id)
 	var player_pilot: Pilot = Pilot.new_pilot(player.name)
@@ -167,7 +169,7 @@ func first_spawn_player(faction_id: int, system_name: String, spawner_name: Stri
 	#player_enter_system(system_name)
 	player_enter_system.rpc_id(player_pilot.multiplayer_id, system_name)
 	$"Systems/test_system/SubViewport/ships/Babylon 5".add_passenger(player_pilot)
-	Logger.log(["Created pilot: ", player_pilot, " in faction ", faction.resource_name, " with mpid: ", player_pilot.multiplayer_id], Logger.MessageType.SUCCESS)
+	Log.log(["Created pilot: ", player_pilot, " in faction ", faction.resource_name, " with mpid: ", player_pilot.multiplayer_id], Log.MessageType.SUCCESS)
 
 
 func _on_network_connection_succeeded() -> void:
