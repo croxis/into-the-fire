@@ -24,7 +24,6 @@
 [sub_resource type="Resource" id="Resource_xh1mk"]
 script = ExtResource("2_51uh1")
 name = "EA Sensor Suite 1"
-em_sensitive = 1.0
 neutrino_sensitive = 0.5
 metadata/_custom_type_script = "uid://dd2r64u2pov0l"
 
@@ -769,67 +768,67 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.28609)
 
 [node name="Thruster" parent="Engines" index="0" instance=ExtResource("16_seswe")]
 transform = Transform3D(0.34, 0, 0, 0, 0.34, 0, 0, 0, 0.34, 6.65545, 2.9809, -0.55274)
-max_force = 475000.0
+max_force = 500000.0
 
 [node name="Thruster2" parent="Engines" index="1" instance=ExtResource("16_seswe")]
 transform = Transform3D(0.34, 0, 0, 0, 0.34, 0, 0, 0, 0.34, -6.655, 2.981, -0.553)
-max_force = 475000.0
+max_force = 500000.0
 
 [node name="Thruster3" parent="Engines" index="2" instance=ExtResource("16_seswe")]
 transform = Transform3D(0.34, 0, 0, 0, 0.34, 0, 0, 0, 0.34, 6.655, -2.981, -0.553)
-max_force = 475000.0
+max_force = 500000.0
 
 [node name="Thruster4" parent="Engines" index="3" instance=ExtResource("16_seswe")]
 transform = Transform3D(0.34, 0, 0, 0, 0.34, 0, 0, 0, 0.34, -6.655, -2.981, -0.553)
-max_force = 475000.0
+max_force = 500000.0
 
 [node name="Thruster5" parent="Engines" index="4" instance=ExtResource("16_seswe")]
 transform = Transform3D(-0.45, 0, -6.79481e-08, 0, 0.45, 0, 6.79481e-08, 0, -0.45, -6.65654, 2.97751, 5.10017)
-max_force = 950000.0
+max_force = 1000000.0
 
 [node name="Thruster6" parent="Engines" index="5" instance=ExtResource("16_seswe")]
 transform = Transform3D(-0.45, 0, -6.79481e-08, 0, 0.45, 0, 6.79481e-08, 0, -0.45, 6.657, 2.978, 5.1)
-max_force = 950000.0
+max_force = 1000000.0
 
 [node name="Thruster7" parent="Engines" index="6" instance=ExtResource("16_seswe")]
 transform = Transform3D(-0.45, 0, -6.79481e-08, 0, 0.45, 0, 6.79481e-08, 0, -0.45, -6.65654, -2.978, 5.10017)
-max_force = 950000.0
+max_force = 1000000.0
 
 [node name="Thruster8" parent="Engines" index="7" instance=ExtResource("16_seswe")]
 transform = Transform3D(-0.45, 0, -6.79481e-08, 0, 0.45, 0, 6.79481e-08, 0, -0.45, 6.657, -2.978, 5.1)
-max_force = 950000.0
+max_force = 1000000.0
 
 [node name="Thruster9" parent="Engines" index="8" instance=ExtResource("16_seswe")]
 transform = Transform3D(-7.16998e-09, 0.0717029, 0.186705, 3.22304e-09, 0.186705, -0.0717029, -0.2, 4.38242e-10, -7.84886e-09, -8.10488, 3.48002, 1.29475)
-max_force = 237500.0
+max_force = 537500.0
 
 [node name="Thruster10" parent="Engines" index="9" instance=ExtResource("16_seswe")]
 transform = Transform3D(-8.74228e-09, -0.0716736, 0.186716, 0, 0.186716, 0.0716736, -0.2, 3.13295e-09, -8.16162e-09, -8.105, -3.48, 1.295)
-max_force = 237500.0
+max_force = 537500.0
 
 [node name="Thruster11" parent="Engines" index="10" instance=ExtResource("16_seswe")]
 transform = Transform3D(2.46545e-08, -0.0717029, -0.186705, 3.22304e-09, 0.186705, -0.0717029, 0.2, 5.83023e-09, 2.41711e-08, 8.105, 3.48002, 1.295)
-max_force = 237500.0
+max_force = 537500.0
 
 [node name="Thruster12" parent="Engines" index="11" instance=ExtResource("16_seswe")]
 transform = Transform3D(2.62268e-08, 0.0716736, -0.186716, 1.77636e-16, 0.186716, 0.0716736, 0.2, -9.39886e-09, 2.44849e-08, 8.105, -3.48, 1.29475)
-max_force = 237500.0
+max_force = 537500.0
 
 [node name="Thruster13" parent="Engines" index="12" instance=ExtResource("16_seswe")]
 transform = Transform3D(2.50655e-08, 0.186716, -0.0716736, -6.2659e-09, -0.0716736, -0.186716, -0.2, 2.56462e-08, -3.13295e-09, -6.13666, 4.28789, 1.29475)
-max_force = 237500.0
+max_force = 537500.0
 
 [node name="Thruster14" parent="Engines" index="13" instance=ExtResource("16_seswe")]
 transform = Transform3D(2.50655e-08, -0.186716, -0.0716736, 6.2659e-09, -0.0716736, 0.186716, -0.2, -2.56462e-08, -3.13295e-09, -6.137, -4.288, 1.295)
-max_force = 237500.0
+max_force = 537500.0
 
 [node name="Thruster15" parent="Engines" index="14" instance=ExtResource("16_seswe")]
 transform = Transform3D(-1.94511e-08, -0.186716, 0.0716736, -1.08224e-08, -0.0716736, -0.186716, 0.2, -2.20375e-08, -3.13295e-09, 6.137, 4.28789, 1.29475)
-max_force = 237500.0
+max_force = 537500.0
 
 [node name="Thruster16" parent="Engines" index="15" instance=ExtResource("16_seswe")]
 transform = Transform3D(-1.94511e-08, 0.186716, 0.0716736, 1.08224e-08, -0.0716736, 0.186716, 0.2, 2.20375e-08, -3.13295e-09, 6.137, -4.288, 1.295)
-max_force = 237500.0
+max_force = 537500.0
 
 [node name="SubViewportWindow" type="SubViewport" parent="." index="3"]
 transparent_bg = true
