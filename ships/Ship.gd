@@ -383,7 +383,7 @@ func _on_capital_ui_request_launch() -> void:
 
 
 @rpc("any_peer", "call_local")
-func request_launch(ship_id: int, pilot_id: int):
+func request_launch(p_ship_id: int, pilot_id: int):
 	if not multiplayer.is_server():
 		return
 	var remote_id := multiplayer.get_remote_sender_id()
@@ -415,7 +415,6 @@ func request_launch(ship_id: int, pilot_id: int):
 		old_pilot = $Crew.remove_passenger_by_id(pilot_id)
 	else:		
 		old_pilot = $Crew.remove_passenger_by_multiplayerid(remote_id)
-	print_debug(old_pilot, pilot_id)
 	var pilot: Pilot = new_ship.get_node("CrewMultiplayerSpawner").spawn({"name": old_pilot.name, "multiplayer_id": old_pilot.multiplayer_id})
 	pilot._faction_id = old_pilot._faction_id
 	pilot._player_pilot_id = old_pilot._player_pilot_id
