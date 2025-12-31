@@ -23,6 +23,7 @@ extends Node
 @export var _player_pilot_id: int
 @export var multiplayer_id: int
 @export var pilot_id: int
+@export var is_captain: bool = false
 static var next_id := 0
 static var pilot_scene: PackedScene = load("res://ship_systems/pilots/Pilot.tscn")
 

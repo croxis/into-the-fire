@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="GdPAIAgentConfig" load_steps=5 format=3 uid="uid://b1pyhpd20a4d7"]
+
+[ext_resource type="Script" uid="uid://bprnw0w0wdswr" path="res://addons/GdPlanningAI/scripts/resources/gdpai_behavior_config.gd" id="1_31om5"]
+[ext_resource type="Script" uid="uid://eamjhjw7c10n" path="res://ship_systems/pilots/fleet_behavior_config.gd" id="2_adqbb"]
+[ext_resource type="Script" uid="uid://b8bjqnbsl1gr7" path="res://addons/GdPlanningAI/scripts/resources/gdpai_agent_config.gd" id="3_dwjv0"]
+
+[sub_resource type="Resource" id="Resource_ed4k1"]
+script = ExtResource("2_adqbb")
+metadata/_custom_type_script = "uid://eamjhjw7c10n"
+
+[resource]
+script = ExtResource("3_dwjv0")
+planning_strategy = 1
+planning_interval = 5.0
+behavior_configs = Array[ExtResource("1_31om5")]([SubResource("Resource_ed4k1")])
+metadata/_custom_type_script = "uid://b8bjqnbsl1gr7"

@@ -1,13 +1,9 @@
-[gd_scene load_steps=14 format=3 uid="uid://c8kn4ojrwda3e"]
+[gd_scene load_steps=7 format=3 uid="uid://c8kn4ojrwda3e"]
 
 [ext_resource type="Script" uid="uid://cwrw4m3xxrbq7" path="res://ship_systems/pilots/Pilot.gd" id="1_gf7ba"]
 [ext_resource type="Script" uid="uid://c0xi03f7y32xl" path="res://ships/Inputs.gd" id="2_uhore"]
 [ext_resource type="Script" uid="uid://dadt3s5cpl0e5" path="res://addons/GdPlanningAI/scripts/nodes/gdpai_agent.gd" id="4_146dj"]
-[ext_resource type="Script" uid="uid://bprnw0w0wdswr" path="res://addons/GdPlanningAI/scripts/resources/gdpai_behavior_config.gd" id="5_n23k8"]
-[ext_resource type="Script" uid="uid://cvie3m6t7c0hd" path="res://addons/GdPlanningAI/scripts/gdpai_blackboard_plan.gd" id="6_ed4k1"]
-[ext_resource type="Script" uid="uid://eamjhjw7c10n" path="res://ship_systems/pilots/fleet_behavior_config.gd" id="6_sj3xk"]
-[ext_resource type="Script" uid="uid://b8bjqnbsl1gr7" path="res://addons/GdPlanningAI/scripts/resources/gdpai_agent_config.gd" id="7_sj3xk"]
-[ext_resource type="Script" uid="uid://baleoyb76kk5t" path="res://ship_systems/pilots/game_state.gd" id="9_07umr"]
+[ext_resource type="Resource" uid="uid://b1pyhpd20a4d7" path="res://ship_systems/pilots/PilotAIConfig.tres" id="4_nml72"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_38dqk"]
 properties/0/path = NodePath(".:_player_pilot_id")
@@ -49,22 +45,6 @@ properties/7/path = NodePath(".:debug_kill_ship")
 properties/7/spawn = true
 properties/7/replication_mode = 2
 
-[sub_resource type="Resource" id="Resource_d4apv"]
-script = ExtResource("6_sj3xk")
-metadata/_custom_type_script = "uid://eamjhjw7c10n"
-
-[sub_resource type="Resource" id="Resource_6igcs"]
-script = ExtResource("6_ed4k1")
-metadata/_custom_type_script = "uid://cvie3m6t7c0hd"
-
-[sub_resource type="Resource" id="Resource_vg4ts"]
-script = ExtResource("7_sj3xk")
-planning_strategy = 1
-planning_interval = 5.0
-blackboard_plan = SubResource("Resource_6igcs")
-behavior_configs = Array[ExtResource("5_n23k8")]([SubResource("Resource_d4apv")])
-metadata/_custom_type_script = "uid://b8bjqnbsl1gr7"
-
 [node name="Pilot" type="Node"]
 script = ExtResource("1_gf7ba")
 
@@ -76,11 +56,8 @@ root_path = NodePath(".")
 replication_config = SubResource("SceneReplicationConfig_hiqvf")
 script = ExtResource("2_uhore")
 
-[node name="GameState" type="Node" parent="."]
-script = ExtResource("9_07umr")
-
 [node name="GdPAIAgent" type="Node" parent="." node_paths=PackedStringArray("entity")]
 script = ExtResource("4_146dj")
 entity = NodePath("..")
-config = SubResource("Resource_vg4ts")
+config = ExtResource("4_nml72")
 metadata/_custom_type_script = "uid://dadt3s5cpl0e5"

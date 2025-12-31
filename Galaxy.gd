@@ -128,8 +128,23 @@ func finish_setup_galaxy_all() -> void:
 		$"Systems/test_system/SubViewport/ships/Babylon 5".add_captain(b5commander)
 		b5commander.multiplayer_id = multiplayer.get_unique_id()
 		
+		var b5ltcommander: Pilot = Pilot.new_pilot("Lt Commendar Eekvonova")
+		b5_faction.add_member(b5ltcommander)
+		$"Systems/test_system/SubViewport/ships/Babylon 5".add_passenger(b5ltcommander)
+		b5ltcommander.multiplayer_id = multiplayer.get_unique_id()
+		
 		var b5botpilot: Pilot = Pilot.new_pilot("Karren Waffer")
 		var zeta_wing: Faction = Faction.get_faction("Zeta Wing")
+		zeta_wing.add_member(b5botpilot)
+		$"Systems/test_system/SubViewport/ships/Babylon 5".add_passenger(b5botpilot)
+		b5botpilot.multiplayer_id = multiplayer.get_unique_id()
+		
+		b5botpilot = Pilot.new_pilot("Doe John")
+		zeta_wing.add_member(b5botpilot)
+		$"Systems/test_system/SubViewport/ships/Babylon 5".add_passenger(b5botpilot)
+		b5botpilot.multiplayer_id = multiplayer.get_unique_id()
+		
+		b5botpilot = Pilot.new_pilot("Susan B. Anntonny")
 		zeta_wing.add_member(b5botpilot)
 		$"Systems/test_system/SubViewport/ships/Babylon 5".add_passenger(b5botpilot)
 		b5botpilot.multiplayer_id = multiplayer.get_unique_id()
