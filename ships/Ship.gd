@@ -353,9 +353,12 @@ func find_free_spawner() -> Node3D:
 	return $Spawner.find_free_spawner()
 
 
-func _on_area_3d_dock_body_entered(body: Ship) -> void:
+func _on_area_3d_dock_body_entered(body) -> void:
+	print_debug(body.name)
 	if body == self:
 		#can't dock with self, silly
+		return
+	if body is not Ship:
 		return
 	if body.is_spawning:
 		return

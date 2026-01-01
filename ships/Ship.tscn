@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://bhhs2v02syo8j"]
+[gd_scene load_steps=17 format=3 uid="uid://bhhs2v02syo8j"]
 
 [ext_resource type="Script" uid="uid://dbkjlelura8tm" path="res://ships/Ship.gd" id="1_lh74f"]
 [ext_resource type="Script" uid="uid://dy87skygwj8j5" path="res://ship_systems/weapons/Guns.gd" id="2_b1wmj"]
@@ -14,6 +14,7 @@
 [ext_resource type="Texture2D" uid="uid://be5rv4gtrnibx" path="res://ui/crosshair/crosshair081.png" id="12_u4481"]
 [ext_resource type="Script" uid="uid://cx3yeep8xgrdg" path="res://ships/hanger_object_data.gd" id="13_5fldc"]
 [ext_resource type="Script" uid="uid://buur1dj8yvfc1" path="res://addons/GdPlanningAI/scripts/nodes/gdpai_interactable.gd" id="14_2mb3d"]
+[ext_resource type="Script" uid="uid://b4nu0eehv0waq" path="res://addons/GdPlanningAI/scripts/nodes/gdpai_location_data.gd" id="15_cn4wq"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_2c0xb"]
 properties/0/path = NodePath(".:linear_velocity")
@@ -149,9 +150,10 @@ offset_top = 140.0
 offset_right = 628.0
 offset_bottom = 393.0
 
-[node name="HangerObjectData" type="Node" parent="." node_paths=PackedStringArray("interactable_attribs", "entity")]
+[node name="HangerObjectData" type="Node" parent="." node_paths=PackedStringArray("interactable_attribs", "location_data", "entity")]
 script = ExtResource("13_5fldc")
 interactable_attribs = NodePath("../GdPAIInteractable")
+location_data = NodePath("../GdPAILocationData")
 entity = NodePath("..")
 metadata/_custom_type_script = "uid://6p4h6as3qbo1"
 
@@ -160,6 +162,11 @@ script = ExtResource("14_2mb3d")
 max_interaction_distance = -1.0
 entity = NodePath("..")
 metadata/_custom_type_script = "uid://buur1dj8yvfc1"
+
+[node name="GdPAILocationData" type="Node" parent="." node_paths=PackedStringArray("entity")]
+script = ExtResource("15_cn4wq")
+entity = NodePath("..")
+metadata/_custom_type_script = "uid://b4nu0eehv0waq"
 
 [connection signal="child_exiting_tree" from="Crew" to="." method="_on_crew_child_exiting_tree"]
 [connection signal="child_exiting_tree" from="Crew" to="Crew" method="_on_child_exiting_tree"]
