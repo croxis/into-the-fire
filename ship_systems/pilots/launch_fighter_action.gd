@@ -1,5 +1,5 @@
 class_name LaunchFighterAction
-extends SpatialAction
+extends Action
 ## Simple GdPAI spatial action to shake the tree (in 2D) for the GdPAI usage demo.
 
 ## While not necessary, I'm encoding a duration into shaking the tree here, just to make the
@@ -14,19 +14,16 @@ var free_pilots: int
 
 # Override
 func _init(
-		p_object_location: GdPAILocationData,
-		p_interactable_attribs: GdPAIInteractable,
-		p_parent_ship: Ship,
 ) -> void:
 	# If extending _init(), make sure to call super() so references are assigned.
-	super(p_object_location, p_interactable_attribs)
-	self.parent_ship = p_parent_ship
+	#self.parent_ship = p_parent_ship
 
 	# I am faking that the agent will restore hunger by shaking the tree.  It doesn't
 	# actually do that; it drops fruit.  Faking it makes it easier to hook preconditions, rather
 	# than trying to simulate the creation of new objects.
 
-	free_pilots = parent_ship.get_crew().size() - 1
+	#free_pilots = parent_ship.get_crew().size() - 1
+	pass
 
 
 # Override

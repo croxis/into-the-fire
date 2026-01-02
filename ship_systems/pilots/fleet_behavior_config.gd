@@ -10,6 +10,7 @@ func _self_init() -> void:
 	super()
 	# Configure goals, self_actions, and property_updaters here.
 	# You can pass @export properties to your custom classes.
+	
 	goals.append(PatrolGoal.new())
-	#self_actions.append(Action.new())
+	self_actions.append(LaunchFighterAction.new())
 	property_updaters.append(FleetPropertyUpdater.new(desired_launched_fighters))

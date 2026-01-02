@@ -120,7 +120,8 @@ func _on_main_menu_join_game(_ip, _port, _player_name, _server_password, _player
 func finish_setup_galaxy_all() -> void:
 	# Hack until we figure out what we are doing #
 	if get_tree().root.get_node("entry").is_server:
-		var babylon5 := preload("res://ships/earth alliance/babylon 5/babylon_5.tscn").instantiate()
+		var babylon5: Ship = preload("res://ships/earth alliance/babylon 5/babylon_5.tscn").instantiate()
+		
 		$Systems.add_station(babylon5, "test_system")
 		var b5commander: Pilot = Pilot.new_pilot("Commendar Eclair")
 		var b5_faction: Faction = Faction.get_faction("Babylon 5")

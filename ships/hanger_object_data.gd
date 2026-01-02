@@ -19,15 +19,14 @@ func get_group_labels() -> Array[String]:
 
 	
 # Override
-func get_provided_actions() -> Array[Action]:
+#func get_provided_actions() -> Array[Action]:
 	# Overwrite the get_provided_actions function to serve any actions that become possible because
 	# this object exists out in the world.
-	var launch_fighters_action: LaunchFighterAction = LaunchFighterAction.new(
-		location_data,
-		interactable_attribs,
-		entity,
-	)
-	return [launch_fighters_action]
+	#var launch_fighters_action: LaunchFighterAction = LaunchFighterAction.new(
+	#	interactable_attribs,
+	#	entity,
+	#)
+	#return [launch_fighters_action]
 
 
 # Override

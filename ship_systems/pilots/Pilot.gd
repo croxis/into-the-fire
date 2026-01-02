@@ -6,7 +6,6 @@ extends Node
 @export var _faction_id: int:
 	set(new_id):
 		if faction and faction.faction_id == new_id:
-			print_debug("_faction_id error", new_id, faction, faction.faction_id)
 			return
 		_faction_id = new_id
 		# A zero value is no faction.
