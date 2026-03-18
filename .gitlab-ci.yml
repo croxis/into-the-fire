@@ -1,4 +1,4 @@
-image: registry.gitlab.com/croxis/itf:4.5.1
+image: registry.gitlab.com/croxis/itf:4.6.1
 #image: barichello/godot-ci:4.5.1
 
 # NOTE: the `cd` command in each build stage is not necessary if your
