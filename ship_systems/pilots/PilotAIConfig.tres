@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="GdPAIAgentConfig" load_steps=5 format=3 uid="uid://b1pyhpd20a4d7"]
+[gd_resource type="Resource" script_class="GdPAIAgentConfig" format=3 uid="uid://b1pyhpd20a4d7"]
 
 [ext_resource type="Script" uid="uid://bprnw0w0wdswr" path="res://addons/GdPlanningAI/scripts/resources/gdpai_behavior_config.gd" id="1_31om5"]
 [ext_resource type="Script" uid="uid://eamjhjw7c10n" path="res://ship_systems/pilots/fleet_behavior_config.gd" id="2_adqbb"]
