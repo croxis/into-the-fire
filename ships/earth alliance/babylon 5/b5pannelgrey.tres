@@ -1,0 +1,6 @@
+[gd_resource type="StandardMaterial3D" format=3 uid="uid://do0evq7w6qbqv"]
+
+[ext_resource type="Texture2D" uid="uid://s1newlivsx1m" path="res://ships/earth alliance/babylon 5/babylon_5_scale_Panel_Grey.png" id="1_wtdsb"]
+
+[resource]
+albedo_texture = ExtResource("1_wtdsb")

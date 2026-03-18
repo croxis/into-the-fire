@@ -1,0 +1,14 @@
+[gd_scene load_steps=4 format=3 uid="uid://bv8g1pq7qfsjp"]
+
+[ext_resource type="PackedScene" uid="uid://cgh77jhi6bvib" path="res://ships/earth alliance/babylon 5/loading.glb" id="1_1v30q"]
+[ext_resource type="PackedScene" uid="uid://cbdnoxybppefj" path="res://ships/earth alliance/babylon 5/loadingexternder.glb" id="2_i14tv"]
+[ext_resource type="PackedScene" uid="uid://qanj0xqgy2mk" path="res://ships/earth alliance/babylon 5/extender-rotating.glb" id="3_bvf5n"]
+
+[node name="CobraBayArm" type="Node3D"]
+
+[node name="loading" parent="." instance=ExtResource("1_1v30q")]
+
+[node name="loadingexternder" parent="loading" instance=ExtResource("2_i14tv")]
+
+[node name="extender-rotating" parent="loading/loadingexternder" instance=ExtResource("3_bvf5n")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 12.29496, 0)

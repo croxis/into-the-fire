@@ -1,0 +1,40 @@
+[gd_scene format=3 uid="uid://cwrtlfwoj7pmx"]
+
+[ext_resource type="PackedScene" uid="uid://c85xdqdikw26u" path="res://ships/earth alliance/babylon 5/cobrabaywithexterior.glb" id="1_sbfdg"]
+[ext_resource type="Material" uid="uid://c31rcdfbjwoyw" path="res://ships/earth alliance/aurora_starfury/main_paint.material" id="2_3slwb"]
+[ext_resource type="Texture2D" uid="uid://dto07n3628vdl" path="res://ships/earth alliance/babylon 5/babylon_5_scale_Panel_DarkerGrey.png" id="2_uexc8"]
+[ext_resource type="Texture2D" uid="uid://s1newlivsx1m" path="res://ships/earth alliance/babylon 5/babylon_5_scale_Panel_Grey.png" id="3_glvwp"]
+[ext_resource type="Material" uid="uid://do0evq7w6qbqv" path="res://ships/earth alliance/babylon 5/b5pannelgrey.tres" id="4_glvwp"]
+[ext_resource type="PackedScene" uid="uid://bje1osdhtpqsy" path="res://ships/earth alliance/aurora_starfury/auora_starfury.tscn" id="6_btyr1"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xavyn"]
+albedo_color = Color(0.054778896, 0.21981123, 0.2734375, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_3slwb"]
+albedo_color = Color(0, 0, 0, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_btyr1"]
+albedo_texture = ExtResource("2_uexc8")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gws0l"]
+albedo_texture = ExtResource("3_glvwp")
+
+[node name="cobrabaywithexterior" unique_id=76906776 instance=ExtResource("1_sbfdg")]
+
+[node name="Layer_0" parent="Pivot-Layer_0" index="0"]
+surface_material_override/2 = SubResource("StandardMaterial3D_xavyn")
+surface_material_override/3 = SubResource("StandardMaterial3D_3slwb")
+surface_material_override/4 = ExtResource("2_3slwb")
+surface_material_override/5 = SubResource("StandardMaterial3D_btyr1")
+surface_material_override/7 = SubResource("StandardMaterial3D_gws0l")
+surface_material_override/9 = ExtResource("4_glvwp")
+surface_material_override/10 = ExtResource("4_glvwp")
+surface_material_override/11 = ExtResource("4_glvwp")
+surface_material_override/12 = ExtResource("4_glvwp")
+surface_material_override/13 = ExtResource("4_glvwp")
+surface_material_override/15 = ExtResource("4_glvwp")
+surface_material_override/16 = ExtResource("4_glvwp")
+surface_material_override/17 = ExtResource("4_glvwp")
+
+[node name="Auora_Starfury" parent="." index="1" unique_id=982197393 instance=ExtResource("6_btyr1")]
+transform = Transform3D(1, 0, 0, 0, -4.3711385e-08, 0.99999994, 0, -0.99999994, -4.3711385e-08, 0, 0.083559036, -2.2535186)

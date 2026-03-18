@@ -1,0 +1,21 @@
+[gd_scene load_steps=6 format=3 uid="uid://4utfer1t4hto"]
+
+[ext_resource type="PackedScene" uid="uid://bnn7my1fxnp0q" path="res://ships/earth alliance/babylon 5/door1.glb" id="2_3ucy4"]
+[ext_resource type="PackedScene" uid="uid://bo8w4g2f1j8i2" path="res://ships/earth alliance/babylon 5/door2.glb" id="3_nhuvl"]
+[ext_resource type="PackedScene" uid="uid://bv8g1pq7qfsjp" path="res://ships/earth alliance/babylon 5/cobra_bay_arm.tscn" id="5_djaxd"]
+[ext_resource type="PackedScene" uid="uid://cwrtlfwoj7pmx" path="res://ships/earth alliance/babylon 5/cobrabaywithexterior.tscn" id="5_j6ubj"]
+[ext_resource type="PackedScene" uid="uid://be1bmwxofuycu" path="res://ships/earth alliance/babylon 5/exteriorbit.glb" id="7_e52of"]
+
+[node name="Cobra Bay" type="Node3D"]
+
+[node name="door1" parent="." instance=ExtResource("2_3ucy4")]
+
+[node name="door2" parent="." instance=ExtResource("3_nhuvl")]
+
+[node name="exteriorbit" parent="." instance=ExtResource("7_e52of")]
+visible = false
+
+[node name="CobraBayArm" parent="." instance=ExtResource("5_djaxd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 48.47694)
+
+[node name="cobrabaywithexterior" parent="." instance=ExtResource("5_j6ubj")]
