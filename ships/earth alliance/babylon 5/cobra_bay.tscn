@@ -1,21 +1,99 @@
-[gd_scene load_steps=6 format=3 uid="uid://4utfer1t4hto"]
+[gd_scene format=3 uid="uid://4utfer1t4hto"]
 
-[ext_resource type="PackedScene" uid="uid://bnn7my1fxnp0q" path="res://ships/earth alliance/babylon 5/door1.glb" id="2_3ucy4"]
-[ext_resource type="PackedScene" uid="uid://bo8w4g2f1j8i2" path="res://ships/earth alliance/babylon 5/door2.glb" id="3_nhuvl"]
+[ext_resource type="PackedScene" uid="uid://cj31o4emm0ebi" path="res://ships/earth alliance/babylon 5/door1.glb" id="2_3ucy4"]
+[ext_resource type="PackedScene" uid="uid://6ubfau1h0nuu" path="res://ships/earth alliance/babylon 5/door2.glb" id="3_nhuvl"]
 [ext_resource type="PackedScene" uid="uid://bv8g1pq7qfsjp" path="res://ships/earth alliance/babylon 5/cobra_bay_arm.tscn" id="5_djaxd"]
 [ext_resource type="PackedScene" uid="uid://cwrtlfwoj7pmx" path="res://ships/earth alliance/babylon 5/cobrabaywithexterior.tscn" id="5_j6ubj"]
-[ext_resource type="PackedScene" uid="uid://be1bmwxofuycu" path="res://ships/earth alliance/babylon 5/exteriorbit.glb" id="7_e52of"]
+[ext_resource type="PackedScene" uid="uid://ql61nuiw18o1" path="res://ships/earth alliance/babylon 5/exteriorbit.glb" id="7_e52of"]
 
-[node name="Cobra Bay" type="Node3D"]
+[node name="Cobra Bay" type="Node3D" unique_id=1313980386]
 
-[node name="door1" parent="." instance=ExtResource("2_3ucy4")]
-
-[node name="door2" parent="." instance=ExtResource("3_nhuvl")]
-
-[node name="exteriorbit" parent="." instance=ExtResource("7_e52of")]
+[node name="door1" parent="." unique_id=506117255 instance=ExtResource("2_3ucy4")]
 visible = false
 
-[node name="CobraBayArm" parent="." instance=ExtResource("5_djaxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 48.47694)
+[node name="door2" parent="." unique_id=1664815047 instance=ExtResource("3_nhuvl")]
+visible = false
 
-[node name="cobrabaywithexterior" parent="." instance=ExtResource("5_j6ubj")]
+[node name="exteriorbit" parent="." unique_id=998546519 instance=ExtResource("7_e52of")]
+visible = false
+
+[node name="cobrabaywithexterior" parent="." unique_id=1080412508 instance=ExtResource("5_j6ubj")]
+
+[node name="spawn_arms" type="Node3D" parent="." unique_id=2055725519]
+
+[node name="CobraBayArm1" parent="spawn_arms" unique_id=1683524214 instance=ExtResource("5_djaxd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -53.038864)
+
+[node name="CobraBayArm2" parent="spawn_arms" unique_id=1818726303 instance=ExtResource("5_djaxd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -36.19084)
+
+[node name="CobraBayArm3" parent="spawn_arms" unique_id=1389050009 instance=ExtResource("5_djaxd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -19.268934)
+
+[node name="CobraBayArm4" parent="spawn_arms" unique_id=327393210 instance=ExtResource("5_djaxd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.3237038)
+
+[node name="CobraBayArm5" parent="spawn_arms" unique_id=1002077548 instance=ExtResource("5_djaxd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 14.628962)
+
+[node name="CobraBayArm6" parent="spawn_arms" unique_id=680776952 instance=ExtResource("5_djaxd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 31.668451)
+
+[node name="CobraBayArm7" parent="spawn_arms" unique_id=34731977 instance=ExtResource("5_djaxd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 48.765747)
+
+[node name="OmniLight3D" type="OmniLight3D" parent="." unique_id=311784329]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 12.255602, 6.12545)
+light_color = Color(1, 0, 0, 1)
+light_energy = 2.0
+shadow_enabled = true
+distance_fade_enabled = true
+
+[node name="OmniLight3D2" type="OmniLight3D" parent="." unique_id=2046503884]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 11.4527645, -10.292656)
+light_color = Color(1, 0, 0, 1)
+light_energy = 2.0
+shadow_enabled = true
+distance_fade_enabled = true
+
+[node name="OmniLight3D3" type="OmniLight3D" parent="." unique_id=1828890026]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 12.950045, -27.89679)
+light_color = Color(1, 0, 0.047058824, 1)
+light_energy = 2.0
+shadow_enabled = true
+distance_fade_enabled = true
+
+[node name="OmniLight3D4" type="OmniLight3D" parent="." unique_id=2070682106]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 12.255625, -44.330093)
+light_color = Color(1, 0, 0, 1)
+light_energy = 2.0
+shadow_enabled = true
+distance_fade_enabled = true
+
+[node name="OmniLight3D5" type="OmniLight3D" parent="." unique_id=1561089121]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 12.555788, -61.418518)
+light_color = Color(1, 0, 0, 1)
+light_energy = 2.0
+shadow_enabled = true
+distance_fade_enabled = true
+
+[node name="OmniLight3D6" type="OmniLight3D" parent="." unique_id=254208864]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 12.555788, 22.850657)
+light_color = Color(1, 0, 0, 1)
+light_energy = 2.0
+shadow_enabled = true
+distance_fade_enabled = true
+
+[node name="OmniLight3D7" type="OmniLight3D" parent="." unique_id=21852904]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 12.555788, 40.29516)
+light_color = Color(1, 0, 0, 1)
+light_energy = 2.0
+shadow_enabled = true
+distance_fade_enabled = true
+
+[node name="OmniLight3D8" type="OmniLight3D" parent="." unique_id=1717536376]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 12.555788, 56.757755)
+light_color = Color(1, 0, 0, 1)
+light_energy = 2.0
+shadow_enabled = true
+distance_fade_enabled = true

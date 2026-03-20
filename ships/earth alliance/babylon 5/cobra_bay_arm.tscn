@@ -1,14 +1,202 @@
-[gd_scene load_steps=4 format=3 uid="uid://bv8g1pq7qfsjp"]
+[gd_scene format=3 uid="uid://bv8g1pq7qfsjp"]
 
-[ext_resource type="PackedScene" uid="uid://cgh77jhi6bvib" path="res://ships/earth alliance/babylon 5/loading.glb" id="1_1v30q"]
-[ext_resource type="PackedScene" uid="uid://cbdnoxybppefj" path="res://ships/earth alliance/babylon 5/loadingexternder.glb" id="2_i14tv"]
-[ext_resource type="PackedScene" uid="uid://qanj0xqgy2mk" path="res://ships/earth alliance/babylon 5/extender-rotating.glb" id="3_bvf5n"]
+[ext_resource type="PackedScene" uid="uid://dvqghwy2o36vq" path="res://ships/earth alliance/babylon 5/loading.glb" id="1_1v30q"]
+[ext_resource type="Script" uid="uid://di16g8umxx2rd" path="res://ships/earth alliance/babylon 5/cobra_bay_arm.gd" id="1_bvf5n"]
+[ext_resource type="PackedScene" uid="uid://bchuhil07ok0t" path="res://ships/earth alliance/babylon 5/loadingexternder.glb" id="2_i14tv"]
+[ext_resource type="PackedScene" uid="uid://bksopgslfdj6u" path="res://ships/earth alliance/babylon 5/extender-rotating.glb" id="3_bvf5n"]
 
-[node name="CobraBayArm" type="Node3D"]
+[sub_resource type="Animation" id="Animation_kn0as"]
+length = 0.001
+tracks/0/type = "bezier"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("loading/loadingexternder/extender-rotating:rotation:x")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"handle_modes": PackedInt32Array(0),
+"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0)
+}
+tracks/1/type = "bezier"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("loading/loadingexternder/extender-rotating:rotation:y")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"handle_modes": PackedInt32Array(0),
+"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0)
+}
+tracks/2/type = "bezier"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("loading/loadingexternder/extender-rotating:rotation:z")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"handle_modes": PackedInt32Array(0),
+"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0)
+}
+tracks/3/type = "bezier"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("loading/loadingexternder:position:x")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"handle_modes": PackedInt32Array(0),
+"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0)
+}
+tracks/4/type = "bezier"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("loading/loadingexternder:position:y")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"handle_modes": PackedInt32Array(0),
+"points": PackedFloat32Array(-0.291, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0)
+}
+tracks/5/type = "bezier"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("loading/loadingexternder:position:z")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"handle_modes": PackedInt32Array(0),
+"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0)
+}
 
-[node name="loading" parent="." instance=ExtResource("1_1v30q")]
+[sub_resource type="Animation" id="Animation_bvf5n"]
+resource_name = "deploy"
+tracks/0/type = "bezier"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("loading/loadingexternder/extender-rotating:rotation:x")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"handle_modes": PackedInt32Array(0, 2),
+"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0, -1.5707964, -0.19999999, 0.0053248405, 0, 0),
+"times": PackedFloat32Array(0, 1)
+}
+tracks/1/type = "bezier"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("loading/loadingexternder:position:y")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"handle_modes": PackedInt32Array(0, 2),
+"points": PackedFloat32Array(-0.2913828, -0.25, 0, 0.25, 0, -7.334793, -0.16666669, 0.106398106, 0, 0),
+"times": PackedFloat32Array(0, 1)
+}
 
-[node name="loadingexternder" parent="loading" instance=ExtResource("2_i14tv")]
+[sub_resource type="Animation" id="Animation_pa4im"]
+resource_name = "return"
+tracks/0/type = "bezier"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("loading/loadingexternder/extender-rotating:rotation:x")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"handle_modes": PackedInt32Array(0, 2),
+"points": PackedFloat32Array(-1.5707964, -0.25, 0, 0.25, 0, 0, -0.16666667, -0.2617994, 0, 0),
+"times": PackedFloat32Array(0, 1)
+}
+tracks/1/type = "bezier"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("loading/loadingexternder/extender-rotating:rotation:y")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"handle_modes": PackedInt32Array(0, 2),
+"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0, 0, -0.16666667, 0, 0, 0),
+"times": PackedFloat32Array(0, 1)
+}
+tracks/2/type = "bezier"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("loading/loadingexternder/extender-rotating:rotation:z")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"handle_modes": PackedInt32Array(0, 2),
+"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0, 0, -0.16666667, 0, 0, 0),
+"times": PackedFloat32Array(0, 1)
+}
+tracks/3/type = "bezier"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("loading/loadingexternder:position:x")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"handle_modes": PackedInt32Array(0, 2),
+"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0, 0, -0.16666667, 0, 0, 0),
+"times": PackedFloat32Array(0, 1)
+}
+tracks/4/type = "bezier"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("loading/loadingexternder:position:y")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"handle_modes": PackedInt32Array(0, 2),
+"points": PackedFloat32Array(-7.334793, -0.25, 0, 0.25, 0, -0.291, -0.16666667, -1.1739656, 0, 0),
+"times": PackedFloat32Array(0, 1)
+}
+tracks/5/type = "bezier"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("loading/loadingexternder:position:z")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"handle_modes": PackedInt32Array(0, 2),
+"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0, 0, -0.16666667, 0, 0, 0),
+"times": PackedFloat32Array(0, 1)
+}
 
-[node name="extender-rotating" parent="loading/loadingexternder" instance=ExtResource("3_bvf5n")]
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_kn0as"]
+_data = {
+&"RESET": SubResource("Animation_kn0as"),
+&"deploy": SubResource("Animation_bvf5n"),
+&"return": SubResource("Animation_pa4im")
+}
+
+[node name="CobraBayArm" type="Node3D" unique_id=1818726303]
+script = ExtResource("1_bvf5n")
+
+[node name="loading" parent="." unique_id=1571229628 instance=ExtResource("1_1v30q")]
+
+[node name="loadingexternder" parent="loading" unique_id=1081536571 instance=ExtResource("2_i14tv")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.291, 0)
+
+[node name="extender-rotating" parent="loading/loadingexternder" unique_id=1987407247 instance=ExtResource("3_bvf5n")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 12.29496, 0)
+
+[node name="spawn_point" type="Node3D" parent="loading/loadingexternder/extender-rotating" unique_id=161815576]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.266, -0.897)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=329100576]
+libraries/ = SubResource("AnimationLibrary_kn0as")
+
+[node name="Timer" type="Timer" parent="." unique_id=1211707570]
+one_shot = true
+
+[node name="Timer Launch" type="Timer" parent="." unique_id=1312982840]
+
+[connection signal="animation_finished" from="AnimationPlayer" to="." method="_on_animation_player_animation_finished"]
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
+[connection signal="timeout" from="Timer Launch" to="." method="_on_timer_launch_timeout"]

@@ -349,7 +349,7 @@ func destroy() -> void:
 	queue_free()
 
 
-func find_free_spawner() -> Node3D:
+func find_free_spawner() -> Array:
 	return $Spawner.find_free_spawner()
 
 
@@ -398,8 +398,9 @@ func request_launch(p_ship_id: int, pilot_id: int):
 	var top_system := get_current_system()
 	var system := top_system.get_node("SubViewport")
 
-	var spawn_point = find_free_spawner()
-	var spawn_position = spawn_point.global_transform.origin
+	var spawn := find_free_spawner()
+	var spawn_point = spawn[0]
+	var spawn_position = spawn[1]
 	#TODO: Keep an inventory of docked ships
 	
 	var PlayerScene := load("res://ships/earth alliance/aurora_starfury/auora_starfury.tscn")
@@ -410,8 +411,8 @@ func request_launch(p_ship_id: int, pilot_id: int):
 	new_ship.ship_id = galaxy.ship_id_counter
 	galaxy.ship_id_counter += 1
 	top_system.add_ship(new_ship)
-	
 	new_ship.global_transform.origin = spawn_position
+	spawn_point.spawn_ship(new_ship)
 	
 	var old_pilot: Pilot
 	if pilot_id:

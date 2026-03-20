@@ -6,12 +6,11 @@
 [ext_resource type="PackedScene" uid="uid://fus8koboot88" path="res://ships/earth alliance/babylon 5/base_assembly.scn" id="4_axirj"]
 [ext_resource type="PackedScene" uid="uid://x8mh8rpmsm4n" path="res://ships/earth alliance/babylon 5/solar_panel_array.scn" id="5_0rulg"]
 [ext_resource type="PackedScene" uid="uid://6veawot461bc" path="res://ships/earth alliance/babylon 5/upper_frame.scn" id="6_0rulg"]
-[ext_resource type="PackedScene" uid="uid://cgnbom6d80weg" path="res://ships/earth alliance/babylon 5/cobra_bays.scn" id="8_hnt2v"]
 [ext_resource type="PackedScene" uid="uid://4m4y043kimmi" path="res://ships/earth alliance/babylon 5/main_cylinder.scn" id="9_vqaen"]
+[ext_resource type="PackedScene" uid="uid://plbif2bjdaj1" path="res://ships/earth alliance/babylon 5/cobra_bays.tscn" id="10_6fysb"]
 [ext_resource type="PackedScene" uid="uid://4xphnpmnqtfs" path="res://ships/earth alliance/babylon 5/neck_section.scn" id="10_7kgi2"]
 [ext_resource type="Script" uid="uid://bmf6p1656luf0" path="res://ships/earth alliance/babylon 5/rotation.gd" id="18_kr61b"]
 [ext_resource type="Script" uid="uid://dwdl2krk70wrg" path="res://ships/earth alliance/babylon 5/spawner.gd" id="24_empfd"]
-[ext_resource type="PackedScene" uid="uid://cwrtlfwoj7pmx" path="res://ships/earth alliance/babylon 5/cobrabaywithexterior.tscn" id="25_y8ph0"]
 
 [sub_resource type="Resource" id="Resource_y8ph0"]
 script = ExtResource("2_p4y7d")
@@ -91,35 +90,31 @@ mesh = SubResource("ArrayMesh_wdiy4")
 skeleton = NodePath("")
 script = ExtResource("18_kr61b")
 
-[node name="Cobra_Bays" parent="rotation" index="0" unique_id=311426081 instance=ExtResource("8_hnt2v")]
-transform = Transform3D(233.275, 0, 0, 0, 233.275, 0, 0, 0, 233.275, 3529.62, 0.0350407, 0.0873657)
-
-[node name="Main_Cylinder" parent="rotation" index="1" unique_id=1298707876 instance=ExtResource("9_vqaen")]
+[node name="Main_Cylinder" parent="rotation" index="0" unique_id=1298707876 instance=ExtResource("9_vqaen")]
 transform = Transform3D(233.275, 0, 0, 0, 233.275, 0, 0, 0, 233.275, 1185.27, 0.0349295, 0.0495383)
 
-[node name="Neck_Section" parent="rotation" index="2" unique_id=796459047 instance=ExtResource("10_7kgi2")]
+[node name="Neck_Section" parent="rotation" index="1" unique_id=796459047 instance=ExtResource("10_7kgi2")]
 transform = Transform3D(233.275, 0, 0, 0, 233.275, 0, 0, 0, 233.275, 3206.65, -0.0296975, 0.0227595)
 
-[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="rotation" index="3" unique_id=2138162428]
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="rotation" index="2" unique_id=2138162428]
 replication_interval = 1.0
 replication_config = SubResource("SceneReplicationConfig_rbc1i")
 
-[node name="CnC" type="Node3D" parent="rotation" index="4" unique_id=1999903140]
+[node name="CnC" type="Node3D" parent="rotation" index="3" unique_id=1999903140]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3916.83, -35.6664, -35.5712)
 
 [node name="Camera3D" type="Camera3D" parent="rotation/CnC" index="0" unique_id=868744533]
 transform = Transform3D(0, 0, -1, -0.707107, 0.707107, 0, 0.707107, 0.707107, 0, 0, 0, 0)
 current = true
 
-[node name="Area3DDockRotate" type="Area3D" parent="rotation" index="5" unique_id=28789335]
+[node name="Area3DDockRotate" type="Area3D" parent="rotation" index="4" unique_id=28789335]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="rotation/Area3DDockRotate" index="0" unique_id=2099955525]
 transform = Transform3D(1, 0, 0, 0, 0.707108, -0.707108, 0, 0.707108, 0.707108, 3910.17, 0.699404, -0.363874)
 shape = SubResource("BoxShape3D_v4i4k")
 
-[node name="cobrabaywithexterior1" parent="rotation" index="6" unique_id=76906776 instance=ExtResource("25_y8ph0")]
-transform = Transform3D(-3.4969112e-08, 0, 0.8, 0, 0.8, 0, -0.8, 0, -3.4969112e-08, 3248.822, -270.69318, 0.08736552)
-top_level = true
+[node name="Cobra_Bays" parent="rotation" index="5" unique_id=628257355 instance=ExtResource("10_6fysb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3529.62, 0, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Area3DDock" index="0" unique_id=998985838]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4017.94, 339.964, 0)
