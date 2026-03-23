@@ -21,25 +21,25 @@ visible = false
 
 [node name="spawn_arms" type="Node3D" parent="." unique_id=2055725519]
 
-[node name="CobraBayArm1" parent="spawn_arms" unique_id=1683524214 instance=ExtResource("5_djaxd")]
+[node name="CobraBayArm7" parent="spawn_arms" unique_id=1683524214 instance=ExtResource("5_djaxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -53.038864)
 
-[node name="CobraBayArm2" parent="spawn_arms" unique_id=1818726303 instance=ExtResource("5_djaxd")]
+[node name="CobraBayArm6" parent="spawn_arms" unique_id=1818726303 instance=ExtResource("5_djaxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -36.19084)
 
-[node name="CobraBayArm3" parent="spawn_arms" unique_id=1389050009 instance=ExtResource("5_djaxd")]
+[node name="CobraBayArm5" parent="spawn_arms" unique_id=1389050009 instance=ExtResource("5_djaxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -19.268934)
 
 [node name="CobraBayArm4" parent="spawn_arms" unique_id=327393210 instance=ExtResource("5_djaxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.3237038)
 
-[node name="CobraBayArm5" parent="spawn_arms" unique_id=1002077548 instance=ExtResource("5_djaxd")]
+[node name="CobraBayArm3" parent="spawn_arms" unique_id=1002077548 instance=ExtResource("5_djaxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 14.628962)
 
-[node name="CobraBayArm6" parent="spawn_arms" unique_id=680776952 instance=ExtResource("5_djaxd")]
+[node name="CobraBayArm2" parent="spawn_arms" unique_id=680776952 instance=ExtResource("5_djaxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 31.668451)
 
-[node name="CobraBayArm7" parent="spawn_arms" unique_id=34731977 instance=ExtResource("5_djaxd")]
+[node name="CobraBayArm1" parent="spawn_arms" unique_id=34731977 instance=ExtResource("5_djaxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 48.765747)
 
 [node name="OmniLight3D" type="OmniLight3D" parent="." unique_id=311784329]
