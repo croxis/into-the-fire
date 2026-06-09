@@ -47,8 +47,8 @@ windows:
     - mkdir -v -p export/windows
     - godot -v --headless --export-debug "Windows Desktop" export/windows/$EXPORT_NAME.exe
     - ls -lah
-    - cp README.md export/linux/
-    - cp CREDITS.md export/linux/
+    - cp README.md export/windows/
+    - cp CREDITS.md export/windows/
   artifacts:
     name: $EXPORT_NAME-$CI_JOB_NAME
     paths:

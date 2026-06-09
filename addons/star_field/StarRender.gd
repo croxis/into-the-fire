@@ -134,6 +134,6 @@ func generate_stars():
 			else:
 				blue = tmp_blue
 		multimesh.set_instance_color(i, Color(red/255.0 , green/255.0, blue/255.0))
-		# X is abs magnitude, y relative
-		multimesh.set_instance_custom_data(i, Color(data[i]["absmag"].to_float(), float(data[i]["lum"].to_float()), mag_ref, mag_limit))
-
+		# X is abs magnitude, 
+		#multimesh.set_instance_custom_data(i, Color(data[i]["absmag"].to_float(), float(data[i]["lum"].to_float()), mag_ref, mag_limit))
+		multimesh.set_instance_custom_data(i, Color(data[i]["absmag"].to_float(), 0, mag_ref, mag_limit))

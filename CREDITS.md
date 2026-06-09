@@ -25,3 +25,4 @@ Crosshair textures by Kenney.nl CC0
 Reticle tutorial by Legion Games: https://www.youtube.com/watch?v=EKVYfF8oG0s
 
 
+Star Data from: https://codeberg.org/astronexus/athyg/src/branch/main/

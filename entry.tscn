@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://t1o4wdeijm68"]
+[gd_scene format=3 uid="uid://t1o4wdeijm68"]
 
 [ext_resource type="Script" uid="uid://ckx0oep3e0fyi" path="res://entry.gd" id="1_ox4k0"]
 [ext_resource type="Script" uid="uid://sfh1fpx0nqjd" path="res://addons/monitor_overlay/monitor_overlay.gd" id="2_7886r"]
@@ -10,23 +10,23 @@
 [ext_resource type="PackedScene" uid="uid://d31wy0m5b7d3b" path="res://ui/main_menu/main_menu.tscn" id="7_j7gch"]
 [ext_resource type="Script" uid="uid://cbohph20hhrxe" path="res://DisplayManager.gd" id="8_oa1x6"]
 
-[node name="entry" type="Node"]
+[node name="entry" type="Node" unique_id=1561976683]
 script = ExtResource("1_ox4k0")
 
-[node name="loading" parent="." instance=ExtResource("3_ry4g3")]
+[node name="loading" parent="." unique_id=1451102659 instance=ExtResource("3_ry4g3")]
 z_index = 10
 
-[node name="Galaxy" parent="." instance=ExtResource("4_l50de")]
+[node name="Galaxy" parent="." unique_id=1784109363 instance=ExtResource("4_l50de")]
 
-[node name="network" parent="." instance=ExtResource("2_phwwb")]
+[node name="network" parent="." unique_id=232941933 instance=ExtResource("2_phwwb")]
 
-[node name="MainMenu" parent="." instance=ExtResource("7_j7gch")]
+[node name="MainMenu" parent="." unique_id=1482145882 instance=ExtResource("7_j7gch")]
 visible = false
 
-[node name="DisplayManager" type="Node" parent="."]
+[node name="DisplayManager" type="Node" parent="." unique_id=566521343]
 script = ExtResource("8_oa1x6")
 
-[node name="MonitorOverlay" type="VBoxContainer" parent="."]
+[node name="MonitorOverlay" type="VBoxContainer" parent="." unique_id=337356818]
 visible = false
 custom_minimum_size = Vector2(300, 0)
 offset_right = 300.0
@@ -48,7 +48,7 @@ collision_pairs_3d = true
 islands_3d = true
 audio_output_latency = true
 
-[node name="DebugBenchmark" type="MarginContainer" parent="."]
+[node name="DebugBenchmark" type="MarginContainer" parent="." unique_id=485592101]
 visible = false
 offset_left = 221.0
 offset_top = 2.0
@@ -56,7 +56,7 @@ offset_right = 694.0
 offset_bottom = 290.0
 script = ExtResource("4_h8ft4")
 
-[node name="TextListBenchmark" parent="DebugBenchmark" instance=ExtResource("5_ro4nv")]
+[node name="TextListBenchmark" parent="DebugBenchmark" unique_id=1705418483 instance=ExtResource("5_ro4nv")]
 layout_mode = 2
 
 [connection signal="load_scene" from="Galaxy" to="loading" method="_on_galaxy_load_scene"]
