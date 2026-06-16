@@ -9,6 +9,10 @@ var active_galaxy := false
 
 var ship_id_counter := 0
 
+var _play_time: float = 0
+var _sync_interval: float = 10
+var _sync_timer: float = _sync_interval  # Countown in seconds for syncing network time
+
 signal enter_system(system_name)
 signal load_scene(path, node: Node, make_active_scene: bool, show_load_screen: bool, callback)
 
@@ -93,6 +97,9 @@ func _ready():
 	wing.parent_faction = b5
 	wing = Faction.new_faction("Zeta Wing", true, true, false)
 	wing.parent_faction = b5
+	
+	#TODO: Serialize from save
+	_play_time = 0
 
 
 func setup_new_galaxy(dedicated=false, callback = null):
@@ -187,6 +194,13 @@ func first_spawn_player(faction_id: int, system_name: String, spawner_name: Stri
 	$"Systems/test_system/SubViewport/ships/Babylon 5".add_passenger(player_pilot)
 	Log.log(["Created pilot: ", player_pilot, " in faction ", faction.resource_name, " with mpid: ", player_pilot.multiplayer_id], Log.MessageType.SUCCESS)
 
+
+func _process(delta: float) -> void:
+	_play_time += delta
+	_sync_timer -= delta
+	if _sync_timer <= 0:
+		pass
+		
 
 func _on_network_connection_succeeded() -> void:
 	finish_setup_galaxy_client()
