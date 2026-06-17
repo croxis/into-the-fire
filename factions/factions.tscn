@@ -1,4 +1,4 @@
-[gd_scene load_steps=3 format=3 uid="uid://b3ynhg1atk1ip"]
+[gd_scene format=3 uid="uid://b3ynhg1atk1ip"]
 
 [ext_resource type="Script" uid="uid://b30od8ll455x6" path="res://factions/factions.tres.gd" id="1_kn7xy"]
 
@@ -7,8 +7,8 @@ properties/0/path = NodePath(".:faction_id_counter")
 properties/0/spawn = true
 properties/0/replication_mode = 2
 
-[node name="Factions" type="Node"]
+[node name="Factions" type="Node" unique_id=255486613]
 script = ExtResource("1_kn7xy")
 
-[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="." unique_id=1609930529]
 replication_config = SubResource("SceneReplicationConfig_kn7xy")

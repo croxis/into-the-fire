@@ -12,10 +12,9 @@ var proper_to_index := {}
 
 func _ready():
 	var start = Time.get_ticks_msec()
-	#var stars = parse("res://addons/star_field/databases/hygdata_v3_reduced.csv")
 	var stars = parse("res://addons/star_field/databases/athyg_33_hyg_ids.reduced.csv")
-	Log.log(["Initial loading for", stars.size(), 'stars in', str(Time.get_ticks_msec() - start), "ms"], Log.MessageType.INFO)
-	#print_debug(stars)
+	if not Engine.is_editor_hint():
+		Log.log(["Initial loading for", stars.size(), 'stars in', str(Time.get_ticks_msec() - start), "ms"], Log.MessageType.INFO)
 	emit_signal("star_db_debug", "CSV parsed in " + str(Time.get_ticks_msec() - start) + " ms")
 	start = Time.get_ticks_msec()
 	var index := 0
@@ -23,13 +22,12 @@ func _ready():
 		data.append(stars[i])
 		id_to_index[i] = index
 		if stars[i]['hip']:
-			#hip_to_index[stars[i]['hip']] = stars[i]['id'].to_int()
 			hip_to_index[stars[i]['hip']] = index
 		if stars[i]['proper']:
-			#proper_to_index[stars[i]['proper']] = stars[i]['id'].to_int()
 			proper_to_index[stars[i]['proper']] = index
 		index += 1
-	Log.log(["Finished loading for", data.size(), 'stars in', str(Time.get_ticks_msec() - start), "ms"], Log.MessageType.INFO)
+	if not Engine.is_editor_hint():
+		Log.log(["Finished loading for", data.size(), 'stars in', str(Time.get_ticks_msec() - start), "ms"], Log.MessageType.INFO)
 	emit_signal("star_db_debug", "Database built in " + str(Time.get_ticks_msec() - start) + " ms")
 
 

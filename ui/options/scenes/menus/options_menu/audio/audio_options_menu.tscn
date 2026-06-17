@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://gsgws266e7ko"]
+
+[ext_resource type="PackedScene" path="res://addons/maaacks_options_menus/base/nodes/menus/options_menu/audio/audio_options_menu.tscn" id="1_cc01o"]
+[ext_resource type="PackedScene" path="res://ui/options/scenes/menus/options_menu/audio/audio_input_option_control.tscn" id="2_eaodw"]
+
+[node name="Audio" instance=ExtResource("1_cc01o")]
+
+[node name="AudioInputOptionControl" parent="VBoxContainer" index="2" instance=ExtResource("2_eaodw")]
+layout_mode = 2

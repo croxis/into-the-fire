@@ -23,6 +23,8 @@ extends Node
 @export var multiplayer_id: int
 @export var pilot_id: int
 @export var is_captain: bool = false
+var active_orders: Array[OrderData] = []
+var pending_orders: Array[OrderData] = []
 static var next_id := 0
 static var pilot_scene: PackedScene = load("res://ship_systems/pilots/Pilot.tscn")
 

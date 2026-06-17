@@ -1,5 +1,5 @@
 # Godot Options Menus
-For Godot 4.4 (4.2+ compatible)
+For Godot 4.5 (4.3+ compatible)
 
 This plugin has options menus that aim to be easy to customize and persist settings in a user's config file.
 
@@ -8,13 +8,13 @@ _Example is of [Maaack's Game Template](https://github.com/Maaack/Godot-Game-Tem
 
 [Featured Games](#featured-games)  
 
-#### Videos
+### Videos
 
 [![Quick Intro Video](https://img.youtube.com/vi/U9CB3vKINVw/hqdefault.jpg)](https://youtu.be/U9CB3vKINVw)  
 [![Installation Video](https://img.youtube.com/vi/-QWJnZ8bVdk/hqdefault.jpg)](https://youtu.be/-QWJnZ8bVdk)  
 [More Videos](/addons/maaacks_options_menus/docs/Videos.md)
 
-#### Screenshots
+### Screenshots
 
 ![Key Rebinding](/addons/maaacks_options_menus/media/screenshot-6-input-list-3.png)  
 ![Key Rebinding Icons](/addons/maaacks_options_menus/media/screenshot-6-input-list-1.png)  
@@ -93,16 +93,18 @@ When editing an existing project:
 
 [Input Icon Mapping](/addons/maaacks_options_menus/docs/InputIconMapping.md)  
 [Joypad Inputs](/addons/maaacks_options_menus/docs/JoypadInputs.md)  
+[Add Custom Options](/addons/maaacks_options_menus/docs/AddingCustomOptions.md)  
 [How Parts Work](/addons/maaacks_options_menus/docs/HowPartsWork.md)  
+[Automatic Updating](/addons/maaacks_options_menus/docs/AutomaticUpdating.md)  
 
 ---
 
 ## Featured Games
 
-| Spud Customs | Rent Seek Kill  | A Darkness Like Gravity  |  
+| Baking Godium | Spud Customs | Rent Seek Kill |  
 | :-------:| :-------: | :-------: |
-![Spud Customs](/addons/maaacks_options_menus/media/screenshot-game-spud-customs.png)  |  ![Rent-Seek-Kill](/addons/maaacks_options_menus/media/screenshot-game-rent-seek-kill.png)  |  ![A Darkness Like Gravity](/addons/maaacks_options_menus/media/screenshot-game-a-darkness-like-gravity.png)  |
-[Find on Steam](https://store.steampowered.com/app/3291880/Spud_Customs/) | [Play on itch.io](https://xandruher.itch.io/rent-seek-kill)  |  [Play on itch.io](https://maaack.itch.io/a-darkness-like-gravity)  |
+| ![Baking Godium](/addons/maaacks_options_menus/media/thumbnail-game-baking-godium.png) | ![Spud Customs](/addons/maaacks_options_menus/media/thumbnail-game-spud-customs.png) | ![Rent-Seek-Kill](/addons/maaacks_options_menus/media/thumbnail-game-rent-seek-kill.png) |
+|  [Play on itch.io](https://maaack.itch.io/baking-godium) | [Find on Steam](https://store.steampowered.com/app/3291880/Spud_Customs/) | [Play on itch.io](https://xandruher.itch.io/rent-seek-kill)  |
 
 
 [All Shared Games](/addons/maaacks_options_menus/docs/GamesMade.md)  

@@ -35,5 +35,3 @@ func ship_scanner_check():
 		for other_ship: Ship in $SubViewport/ships.get_children():
 			if ship != other_ship:
 				ship.sensor_check(other_ship)
-			
-			

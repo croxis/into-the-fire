@@ -1,0 +1,20 @@
+[gd_scene format=3 uid="uid://cqvac07aildd5"]
+
+[ext_resource type="PackedScene" path="res://addons/maaacks_options_menus/base/nodes/menus/options_menu/option_control/list_option_control.tscn" id="1_hm4hl"]
+[ext_resource type="Script" path="res://ui/options/scenes/menus/options_menu/audio/audio_input_option_control.gd" id="2_5kkn8"]
+
+[node name="AudioInputOptionControl" instance=ExtResource("1_hm4hl")]
+script = ExtResource("2_5kkn8")
+option_name = "Input Device"
+option_section = 2
+key = "InputDevice"
+section = "AudioSettings"
+property_type = 4
+
+[node name="OptionLabel" parent="." index="0"]
+text = "Input Device :"
+
+[node name="OptionButton" parent="." index="1"]
+size_flags_horizontal = 3
+text_overrun_behavior = 1
+clip_text = true

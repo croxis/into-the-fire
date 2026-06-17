@@ -99,6 +99,9 @@ func _authenticate_callback(peer_id: int, data: PackedByteArray):
 		peer.disconnect_peer(peer_id)
 		return
 	var client := peer.get_peer(peer_id)
+	if not client:
+		Log.log(["There is an error with getting peer", peer_id, peer], Log.MessageType.ERROR)
+		return
 	client.set_timeout(1000, 4000, 6000)
 	Log.log(["Client ", dict.player_name, "authenticated"], Log.MessageType.SUCCESS)
 	multiplayer.complete_auth(peer_id)

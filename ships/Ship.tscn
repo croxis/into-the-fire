@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://bhhs2v02syo8j"]
+[gd_scene format=3 uid="uid://bhhs2v02syo8j"]
 
 [ext_resource type="Script" uid="uid://dbkjlelura8tm" path="res://ships/Ship.gd" id="1_lh74f"]
 [ext_resource type="Script" uid="uid://dy87skygwj8j5" path="res://ship_systems/weapons/Guns.gd" id="2_b1wmj"]
@@ -57,67 +57,67 @@ properties/12/path = NodePath("Crew:pilot_name")
 properties/12/spawn = true
 properties/12/replication_mode = 2
 
-[node name="Ship" type="RigidBody3D" groups=["ship"]]
+[node name="Ship" type="RigidBody3D" unique_id=2038804726 groups=["ship"]]
 can_sleep = false
 continuous_cd = true
 script = ExtResource("1_lh74f")
 
-[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="." unique_id=378789863]
 replication_config = SubResource("SceneReplicationConfig_2c0xb")
 
-[node name="Guns" type="Node3D" parent="."]
+[node name="Guns" type="Node3D" parent="." unique_id=1852529481]
 script = ExtResource("2_b1wmj")
 
-[node name="Engines" type="Node3D" parent="."]
+[node name="Engines" type="Node3D" parent="." unique_id=1588031376]
 script = ExtResource("4_ob5l3")
 
-[node name="PIDS" type="Node" parent="."]
+[node name="PIDS" type="Node" parent="." unique_id=2092290159]
 
-[node name="PID_rotate_X" parent="PIDS" instance=ExtResource("5_itaim")]
+[node name="PID_rotate_X" parent="PIDS" unique_id=390415561 instance=ExtResource("5_itaim")]
 
-[node name="PID_rotate_Y" parent="PIDS" instance=ExtResource("5_itaim")]
+[node name="PID_rotate_Y" parent="PIDS" unique_id=1303478135 instance=ExtResource("5_itaim")]
 
-[node name="PID_rotate_Z" parent="PIDS" instance=ExtResource("5_itaim")]
+[node name="PID_rotate_Z" parent="PIDS" unique_id=1917655102 instance=ExtResource("5_itaim")]
 
-[node name="PID_X" parent="PIDS" instance=ExtResource("5_itaim")]
+[node name="PID_X" parent="PIDS" unique_id=297553610 instance=ExtResource("5_itaim")]
 
-[node name="PID_Y" parent="PIDS" instance=ExtResource("5_itaim")]
+[node name="PID_Y" parent="PIDS" unique_id=321041381 instance=ExtResource("5_itaim")]
 
-[node name="PID_Z" parent="PIDS" instance=ExtResource("5_itaim")]
+[node name="PID_Z" parent="PIDS" unique_id=1345575771 instance=ExtResource("5_itaim")]
 
-[node name="PID_rotate_break_X" parent="PIDS" instance=ExtResource("5_itaim")]
+[node name="PID_rotate_break_X" parent="PIDS" unique_id=2111781818 instance=ExtResource("5_itaim")]
 
-[node name="PID_rotate_break_Y" parent="PIDS" instance=ExtResource("5_itaim")]
+[node name="PID_rotate_break_Y" parent="PIDS" unique_id=1780219007 instance=ExtResource("5_itaim")]
 
-[node name="PID_rotate_break_Z" parent="PIDS" instance=ExtResource("5_itaim")]
+[node name="PID_rotate_break_Z" parent="PIDS" unique_id=1802291900 instance=ExtResource("5_itaim")]
 
-[node name="Crew" type="Node" parent="."]
+[node name="Crew" type="Node" parent="." unique_id=1064126352]
 script = ExtResource("5_tgeno")
 
-[node name="CrewMultiplayerSpawner" type="MultiplayerSpawner" parent="."]
+[node name="CrewMultiplayerSpawner" type="MultiplayerSpawner" parent="." unique_id=162340832]
 _spawnable_scenes = PackedStringArray("uid://c8kn4ojrwda3e")
 spawn_path = NodePath("../Crew")
 script = ExtResource("6_1a8so")
 
-[node name="Area3DDock" type="Area3D" parent="."]
+[node name="Area3DDock" type="Area3D" parent="." unique_id=1243728702]
 
-[node name="Spawner" type="Node3D" parent="."]
+[node name="Spawner" type="Node3D" parent="." unique_id=316759190]
 
-[node name="CapitalUI" parent="." instance=ExtResource("7_dwaht")]
+[node name="CapitalUI" parent="." unique_id=338275698 instance=ExtResource("7_dwaht")]
 visible = false
 
-[node name="TargetRecticles" type="Node3D" parent="."]
+[node name="TargetRecticles" type="Node3D" parent="." unique_id=1717048233]
 visible = false
 script = ExtResource("8_gl6o0")
 
-[node name="TargetReticle" type="TextureRect" parent="TargetRecticles"]
+[node name="TargetReticle" type="TextureRect" parent="TargetRecticles" unique_id=1466383855]
 visible = false
 modulate = Color(1, 1, 1, 0.168627)
 offset_right = 40.0
 offset_bottom = 40.0
 texture = ExtResource("9_fnchb")
 
-[node name="OffscreenReticle" type="TextureRect" parent="TargetRecticles"]
+[node name="OffscreenReticle" type="TextureRect" parent="TargetRecticles" unique_id=273490896]
 visible = false
 modulate = Color(1, 1, 1, 0.560784)
 offset_right = 40.0
@@ -125,7 +125,7 @@ offset_bottom = 40.0
 pivot_offset = Vector2(64, 64)
 texture = ExtResource("10_vyf3k")
 
-[node name="DistantReticle" type="TextureRect" parent="TargetRecticles"]
+[node name="DistantReticle" type="TextureRect" parent="TargetRecticles" unique_id=448975353]
 visible = false
 modulate = Color(1, 1, 1, 0.560784)
 offset_right = 40.0
@@ -133,7 +133,7 @@ offset_bottom = 40.0
 pivot_offset = Vector2(64, 64)
 texture = ExtResource("9_lqn33")
 
-[node name="TargetedReticle" type="TextureRect" parent="TargetRecticles"]
+[node name="TargetedReticle" type="TextureRect" parent="TargetRecticles" unique_id=815650266]
 visible = false
 modulate = Color(1, 1, 1, 0.560784)
 offset_right = 40.0
@@ -141,7 +141,7 @@ offset_bottom = 40.0
 pivot_offset = Vector2(64, 64)
 texture = ExtResource("12_u4481")
 
-[node name="DebugUI" type="Control" parent="."]
+[node name="DebugUI" type="Control" parent="." unique_id=484548019]
 visible = false
 layout_mode = 3
 anchors_preset = 0
@@ -150,20 +150,20 @@ offset_top = 140.0
 offset_right = 628.0
 offset_bottom = 393.0
 
-[node name="HangerObjectData" type="Node" parent="." node_paths=PackedStringArray("interactable_attribs", "location_data", "entity")]
+[node name="HangerObjectData" type="Node" parent="." unique_id=965646795 node_paths=PackedStringArray("interactable_attribs", "location_data", "entity")]
 script = ExtResource("13_5fldc")
 interactable_attribs = NodePath("../GdPAIInteractable")
 location_data = NodePath("../GdPAILocationData")
 entity = NodePath("..")
 metadata/_custom_type_script = "uid://6p4h6as3qbo1"
 
-[node name="GdPAIInteractable" type="Node" parent="." node_paths=PackedStringArray("entity")]
+[node name="GdPAIInteractable" type="Node" parent="." unique_id=75657460 node_paths=PackedStringArray("entity")]
 script = ExtResource("14_2mb3d")
 max_interaction_distance = -1.0
 entity = NodePath("..")
 metadata/_custom_type_script = "uid://buur1dj8yvfc1"
 
-[node name="GdPAILocationData" type="Node" parent="." node_paths=PackedStringArray("entity")]
+[node name="GdPAILocationData" type="Node" parent="." unique_id=566832770 node_paths=PackedStringArray("entity")]
 script = ExtResource("15_cn4wq")
 entity = NodePath("..")
 metadata/_custom_type_script = "uid://b4nu0eehv0waq"

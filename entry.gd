@@ -41,7 +41,7 @@ func _ready():
 		_dedicated_server = true
 		$Galaxy.setup_new_galaxy(true)
 	else:
-		# Discord!
+		"""# Discord!
 		DiscordRPC.app_id = 1356458511122567168 # Application ID
 		DiscordRPC.details = "An open source Babylon 5 game made in Godot"
 		DiscordRPC.state = "Checkpoint 23/23"
@@ -53,7 +53,7 @@ func _ready():
 		DiscordRPC.start_timestamp = int(Time.get_unix_time_from_system()) # "02:46 elapsed"
 		# DiscordRPC.end_timestamp = int(Time.get_unix_time_from_system()) + 3600 # +1 hour in unix time / "01:00:00 remaining"
 
-		DiscordRPC.refresh() # Always refresh after changing the values!
+		DiscordRPC.refresh() # Always refresh after changing the values!"""
 		
 		if "xr_mode" in arguments or VR_DEBUG:
 			interface = XRServer.find_interface("OpenXR")
@@ -68,7 +68,7 @@ func _ready():
 				print("OpenXR not initialised, please check if your headset is connected")
 				get_tree().quit()
 		else:
-			print_debug("resolution:", AppConfig.get_value("graphics", "resolution_x"))
+			print_debug("resolution:", PlayerConfig.get_config("graphics", "resolution_x"))
 		$loading.load_scene("res://title_screen.tscn", get_tree().root, true, true)
 		$MainMenu.visible = true
 		

@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://ce8eu8tmdk4lo"
+
+[deps]
+
+files=["res://addons/star_field/databases/athyg_33_hyg_ids.reduced.gaia.translation", "res://addons/star_field/databases/athyg_33_hyg_ids.reduced.hyg.translation", "res://addons/star_field/databases/athyg_33_hyg_ids.reduced.hip.translation", "res://addons/star_field/databases/athyg_33_hyg_ids.reduced.bayer.translation", "res://addons/star_field/databases/athyg_33_hyg_ids.reduced.flam.translation", "res://addons/star_field/databases/athyg_33_hyg_ids.reduced.con.translation", "res://addons/star_field/databases/athyg_33_hyg_ids.reduced.proper.translation", "res://addons/star_field/databases/athyg_33_hyg_ids.reduced.x.translation", "res://addons/star_field/databases/athyg_33_hyg_ids.reduced.y.translation", "res://addons/star_field/databases/athyg_33_hyg_ids.reduced.z.translation", "res://addons/star_field/databases/athyg_33_hyg_ids.reduced.absmag.translation", "res://addons/star_field/databases/athyg_33_hyg_ids.reduced.ci.translation", "res://addons/star_field/databases/athyg_33_hyg_ids.reduced.spect.translation"]
+
+source_file="res://addons/star_field/databases/athyg_33_hyg_ids.reduced.csv"
+dest_files=["res://addons/star_field/databases/athyg_33_hyg_ids.reduced.gaia.translation", "res://addons/star_field/databases/athyg_33_hyg_ids.reduced.hyg.translation", "res://addons/star_field/databases/athyg_33_hyg_ids.reduced.hip.translation", "res://addons/star_field/databases/athyg_33_hyg_ids.reduced.bayer.translation", "res://addons/star_field/databases/athyg_33_hyg_ids.reduced.flam.translation", "res://addons/star_field/databases/athyg_33_hyg_ids.reduced.con.translation", "res://addons/star_field/databases/athyg_33_hyg_ids.reduced.proper.translation", "res://addons/star_field/databases/athyg_33_hyg_ids.reduced.x.translation", "res://addons/star_field/databases/athyg_33_hyg_ids.reduced.y.translation", "res://addons/star_field/databases/athyg_33_hyg_ids.reduced.z.translation", "res://addons/star_field/databases/athyg_33_hyg_ids.reduced.absmag.translation", "res://addons/star_field/databases/athyg_33_hyg_ids.reduced.ci.translation", "res://addons/star_field/databases/athyg_33_hyg_ids.reduced.spect.translation"]
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true

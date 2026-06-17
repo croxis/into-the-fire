@@ -22,9 +22,9 @@ func _ready() -> void:
 
 
 @rpc("authority", "call_local", "reliable")
-func create_faction(name: String, is_wing: bool, accept_players: bool, accept_children: bool) -> Faction:
+func create_faction(faction_name: String, is_wing: bool, accept_players: bool, accept_children: bool) -> Faction:
 	var new_faction = Faction.new()
-	new_faction.resource_name = name
+	new_faction.resource_name = faction_name
 	new_faction.is_wing = is_wing
 	new_faction.accept_players = accept_players
 	new_faction.accept_children = accept_children

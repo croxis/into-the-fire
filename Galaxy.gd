@@ -3,8 +3,8 @@ extends Node
 
 var game_name := "default"
 var render_resolution := Vector2i(0, 0)
-@onready var msaa = AppConfig.get_value("graphics", "msaa")
-@onready var taa = AppConfig.get_value("graphics", "taa")
+@onready var msaa = PlayerConfig.get_config("graphics", "msaa", 0)
+@onready var taa = PlayerConfig.get_config("graphics", "taa", 0)
 var active_galaxy := false
 
 var ship_id_counter := 0
@@ -195,12 +195,27 @@ func first_spawn_player(faction_id: int, system_name: String, spawner_name: Stri
 	Log.log(["Created pilot: ", player_pilot, " in faction ", faction.resource_name, " with mpid: ", player_pilot.multiplayer_id], Log.MessageType.SUCCESS)
 
 
+func pause_game():
+	get_tree().paused = true
+
+
+func unpause_game():
+	get_tree().paused = false
+
+
 func _process(delta: float) -> void:
 	_play_time += delta
-	_sync_timer -= delta
-	if _sync_timer <= 0:
-		pass
-		
+	if get_tree().root.get_node("entry").is_server:
+		_sync_timer -= delta
+		if _sync_timer <= 0:
+			_sync_timer = _sync_interval
+			_rpc_sync_time.rpc(_play_time)
+
+
+@rpc("authority", "call_remote", "unreliable_ordered")
+func _rpc_sync_time(new_time: float) -> void:
+	_play_time = new_time
+	
 
 func _on_network_connection_succeeded() -> void:
 	finish_setup_galaxy_client()

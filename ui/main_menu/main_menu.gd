@@ -8,15 +8,22 @@ signal set_msaa(status: int)
 signal set_ssaa(status: bool)
 
 
-func _ready():	
-	$HBoxContainer/VBoxContainerOption/VBoxContainerNew/GridContainer/LineEditCallsign.text = AppConfig.get_value("player", "name")
-	$HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer/LineEditCallsign.text = AppConfig.get_value("player", "name")
+func _ready():
+	var player_name := ""
+	if OS.has_environment("USERNAME"):
+		player_name = OS.get_environment("USERNAME")
+	else:
+		var desktop_path = OS.get_system_dir(OS.SYSTEM_DIR_DESKTOP).replace("\\", "/").split("/")
+		player_name = desktop_path[desktop_path.size() - 2]
+
+	$HBoxContainer/VBoxContainerOption/VBoxContainerNew/GridContainer/LineEditCallsign.text = PlayerConfig.get_config("player", "name", player_name)
+	$HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer/LineEditCallsign.text = PlayerConfig.get_config("player", "name", player_name)
 	
-	$HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer/LineEditIP.text = AppConfig.get_value("player", "ip")
-	$HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer/LineEditPort.text = str(AppConfig.get_value("player", "port"))
-	$HBoxContainer/VBoxContainerOption/VBoxContainerNew/GridContainer/LineEditPort.text = str(AppConfig.get_value("player", "port"))
+	$HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer/LineEditIP.text = PlayerConfig.get_config("player", "ip", "127.0.0.1")
+	$HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer/LineEditPort.text = str(PlayerConfig.get_config("player", "port", 2258))
+	$HBoxContainer/VBoxContainerOption/VBoxContainerNew/GridContainer/LineEditPort.text = str(PlayerConfig.get_config("player", "port", 2258))
 	
-	var resolution := Vector2i(AppConfig.get_value("graphics", "resolution_x"), AppConfig.get_value("graphics", "resolution_y"))
+	var resolution := Vector2i(PlayerConfig.get_config("graphics", "resolution_x", 0), PlayerConfig.get_config("graphics", "resolution_y", 0))
 	set_resolution.emit(resolution)
 	for i in range(0, $HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer/OptionButton.item_count):
 		var text = $HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer/OptionButton.get_item_text(i)
@@ -26,16 +33,16 @@ func _ready():
 	
 	#Disabled due to crashes when setting before everything is ready
 	#DisplayServer.window_set_vsync_mode(config.get_value("graphics", "vsync"))
-	$HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer/OptionButtonVSync.select(AppConfig.get_value("graphics", "vsync"))
+	$HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer/OptionButtonVSync.select(PlayerConfig.get_config("graphics", "vsync", 0))
 	
-	DisplayServer.window_set_mode(AppConfig.get_value("graphics", "windowed"))
-	$HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer/OptionButtonWindowMode.select(AppConfig.get_value("graphics", "windowed"))
+	DisplayServer.window_set_mode(PlayerConfig.get_config("graphics", "windowed", 0))
+	$HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer/OptionButtonWindowMode.select(PlayerConfig.get_config("graphics", "windowed", 0))
 	
-	set_taa.emit(AppConfig.get_value("graphics", "taa"))
-	$HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer/CheckButtonTAA.button_pressed = AppConfig.get_value("graphics", "taa")
+	set_taa.emit(PlayerConfig.get_config("graphics", "taa", 0))
+	$HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer/CheckButtonTAA.button_pressed = PlayerConfig.get_config("graphics", "taa", 0)
 	
-	set_msaa.emit(AppConfig.get_value("graphics", "msaa"))
-	$HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer/OptionButtonMSAA.select(AppConfig.get_value("graphics", "msaa"))
+	set_msaa.emit(PlayerConfig.get_config("graphics", "msaa", 0))
+	$HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer/OptionButtonMSAA.select(PlayerConfig.get_config("graphics", "msaa", 0))
 
 
 func close_all() -> void:
@@ -78,8 +85,8 @@ func _on_button_new_server_pressed():
 		return
 	var server_pass = $HBoxContainer/VBoxContainerOption/VBoxContainerNew/GridContainer/LineEditServerPass.text
 	var player_pass = $HBoxContainer/VBoxContainerOption/VBoxContainerNew/GridContainer/LineEditPlayerPass.text
-	AppConfig.set_value("player", "name", new_player_name)
-	AppConfig.set_value("player", "port", port)
+	PlayerConfig.set_config("player", "name", new_player_name)
+	PlayerConfig.set_config("player", "port", port)
 	new_game.emit(game_name, new_player_name, port, server_pass, player_pass)
 
 
@@ -99,9 +106,9 @@ func _on_button_join_server_pressed():
 		return
 	var server_pass = $HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer/LineEditServerPass.text
 	var player_pass = $HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer/LineEditPlayerPass.text
-	AppConfig.set_value("player", "name", new_player_name)
-	AppConfig.set_value("player", "ip", ip)
-	AppConfig.set_value("player", "port", port)
+	PlayerConfig.set_config("player", "name", new_player_name)
+	PlayerConfig.set_config("player", "ip", ip)
+	PlayerConfig.set_config("player", "port", port)
 	join_game.emit(ip, port, new_player_name, server_pass, player_pass)
 
 
@@ -117,30 +124,30 @@ func _on_option_button_item_selected(index):
 	elif index == 3:
 		resolution = Vector2i(2560, 1440)
 	
-	AppConfig.set_value("graphics", "resolution_x", resolution.x)
-	AppConfig.set_value("graphics", "resolution_y", resolution.y)
+	PlayerConfig.set_config("graphics", "resolution_x", resolution.x)
+	PlayerConfig.set_config("graphics", "resolution_y", resolution.y)
 	set_resolution.emit(resolution)
 
 
 func _on_option_button_v_sync_item_selected(index):
 	print_debug("Setting vsync mode: ", index)
-	AppConfig.set_value("graphics", "vsync", index)
+	PlayerConfig.set_config("graphics", "vsync", index)
 	DisplayServer.window_set_vsync_mode(index)
 
 
 func _on_option_button_window_mode_item_selected(index):
 	print_debug("Setting window mode: ", index)
-	AppConfig.set_value("graphics", "windowed", index)
+	PlayerConfig.set_config("graphics", "windowed", index)
 	DisplayServer.window_set_mode(index)
 
 
 func _on_check_button_taa_toggled(button_pressed):
 	print_debug("Set tta: ", button_pressed)
-	AppConfig.set_value("graphics", "taa", button_pressed)
+	PlayerConfig.set_config("graphics", "taa", button_pressed)
 	set_taa.emit(button_pressed)
 
 
 func _on_option_button_msaa_item_selected(index):
 	print_debug("Set msaa: ", index)
-	AppConfig.set_value("graphics", "msaa", index)
+	PlayerConfig.set_config("graphics", "msaa", index)
 	set_msaa.emit(index)

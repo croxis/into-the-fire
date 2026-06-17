@@ -1,10 +1,10 @@
-[gd_scene load_steps=4 format=3 uid="uid://d31wy0m5b7d3b"]
+[gd_scene format=3 uid="uid://d31wy0m5b7d3b"]
 
 [ext_resource type="Theme" uid="uid://iewuun72p7uj" path="res://ui/menu_theme.tres" id="1_dnqi6"]
 [ext_resource type="Script" uid="uid://krw3crs67se" path="res://ui/main_menu/main_menu.gd" id="1_xocpo"]
-[ext_resource type="PackedScene" uid="uid://dp3rgqaehb3xu" path="res://addons/maaacks_options_menus/base/scenes/Menus/OptionsMenu/Input/InputOptionsMenu.tscn" id="3_lbkvo"]
+[ext_resource type="PackedScene" uid="uid://cl8hi12xu0mih" path="res://ui/options/scenes/menus/options_menu/input/input_options_menu.tscn" id="3_omy8q"]
 
-[node name="MainMenu" type="Control"]
+[node name="MainMenu" type="Control" unique_id=2042601707]
 process_priority = 1
 layout_mode = 3
 anchors_preset = 15
@@ -14,7 +14,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_xocpo")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="."]
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=134174513]
 layout_mode = 0
 anchor_top = 1.0
 anchor_bottom = 1.0
@@ -22,24 +22,24 @@ offset_top = -416.0
 offset_right = 486.0
 grow_vertical = 0
 
-[node name="VBoxContainerMain" type="VBoxContainer" parent="HBoxContainer"]
+[node name="VBoxContainerMain" type="VBoxContainer" parent="HBoxContainer" unique_id=657054967]
 layout_mode = 2
 
-[node name="ButtonNewGame" type="Button" parent="HBoxContainer/VBoxContainerMain"]
+[node name="ButtonNewGame" type="Button" parent="HBoxContainer/VBoxContainerMain" unique_id=2036774882]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_override_font_sizes/font_size = 64
 text = "New Game"
 alignment = 0
 
-[node name="ButtonJoinGame" type="Button" parent="HBoxContainer/VBoxContainerMain"]
+[node name="ButtonJoinGame" type="Button" parent="HBoxContainer/VBoxContainerMain" unique_id=1369574449]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_override_font_sizes/font_size = 64
 text = "Join Game"
 alignment = 0
 
-[node name="ButtonLoadGame" type="Button" parent="HBoxContainer/VBoxContainerMain"]
+[node name="ButtonLoadGame" type="Button" parent="HBoxContainer/VBoxContainerMain" unique_id=2090791945]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_override_font_sizes/font_size = 64
@@ -47,14 +47,14 @@ disabled = true
 text = "Load Game"
 alignment = 0
 
-[node name="ButtonOptions" type="Button" parent="HBoxContainer/VBoxContainerMain"]
+[node name="ButtonOptions" type="Button" parent="HBoxContainer/VBoxContainerMain" unique_id=844618184]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_override_font_sizes/font_size = 64
 text = "Options"
 alignment = 0
 
-[node name="ButtonExitMenu" type="Button" parent="HBoxContainer/VBoxContainerMain"]
+[node name="ButtonExitMenu" type="Button" parent="HBoxContainer/VBoxContainerMain" unique_id=146816110]
 visible = false
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
@@ -62,31 +62,31 @@ theme_override_font_sizes/font_size = 64
 text = "Exit to Title Screen"
 alignment = 0
 
-[node name="ButtonExitDesktop" type="Button" parent="HBoxContainer/VBoxContainerMain"]
+[node name="ButtonExitDesktop" type="Button" parent="HBoxContainer/VBoxContainerMain" unique_id=541732872]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_override_font_sizes/font_size = 64
 text = "Exit to Desktop"
 alignment = 0
 
-[node name="VBoxContainerOption" type="VBoxContainer" parent="HBoxContainer"]
+[node name="VBoxContainerOption" type="VBoxContainer" parent="HBoxContainer" unique_id=1820252960]
 layout_mode = 2
 
-[node name="VBoxContainerNew" type="VBoxContainer" parent="HBoxContainer/VBoxContainerOption"]
+[node name="VBoxContainerNew" type="VBoxContainer" parent="HBoxContainer/VBoxContainerOption" unique_id=406637895]
 visible = false
 layout_mode = 2
 
-[node name="GridContainer" type="GridContainer" parent="HBoxContainer/VBoxContainerOption/VBoxContainerNew"]
+[node name="GridContainer" type="GridContainer" parent="HBoxContainer/VBoxContainerOption/VBoxContainerNew" unique_id=1350721931]
 layout_mode = 2
 columns = 2
 
-[node name="Label5" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerNew/GridContainer"]
+[node name="Label5" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerNew/GridContainer" unique_id=1702140028]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_override_font_sizes/font_size = 48
 text = "Game Name"
 
-[node name="LineEditGameName" type="LineEdit" parent="HBoxContainer/VBoxContainerOption/VBoxContainerNew/GridContainer"]
+[node name="LineEditGameName" type="LineEdit" parent="HBoxContainer/VBoxContainerOption/VBoxContainerNew/GridContainer" unique_id=524674559]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_override_font_sizes/font_size = 48
@@ -94,172 +94,172 @@ text = "default"
 placeholder_text = "default"
 expand_to_text_length = true
 
-[node name="Label2" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerNew/GridContainer"]
+[node name="Label2" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerNew/GridContainer" unique_id=1954718862]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_override_font_sizes/font_size = 48
 text = "Port"
 
-[node name="LineEditPort" type="LineEdit" parent="HBoxContainer/VBoxContainerOption/VBoxContainerNew/GridContainer"]
+[node name="LineEditPort" type="LineEdit" parent="HBoxContainer/VBoxContainerOption/VBoxContainerNew/GridContainer" unique_id=626488834]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_override_font_sizes/font_size = 48
 text = "2258"
 placeholder_text = "2258"
 
-[node name="Label4" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerNew/GridContainer"]
+[node name="Label4" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerNew/GridContainer" unique_id=762011021]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_override_font_sizes/font_size = 48
 text = "Server Pass"
 
-[node name="LineEditServerPass" type="LineEdit" parent="HBoxContainer/VBoxContainerOption/VBoxContainerNew/GridContainer"]
+[node name="LineEditServerPass" type="LineEdit" parent="HBoxContainer/VBoxContainerOption/VBoxContainerNew/GridContainer" unique_id=409320811]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_override_font_sizes/font_size = 48
 
-[node name="Label3" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerNew/GridContainer"]
+[node name="Label3" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerNew/GridContainer" unique_id=584978646]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_override_font_sizes/font_size = 48
 text = "Callsign"
 
-[node name="LineEditCallsign" type="LineEdit" parent="HBoxContainer/VBoxContainerOption/VBoxContainerNew/GridContainer"]
+[node name="LineEditCallsign" type="LineEdit" parent="HBoxContainer/VBoxContainerOption/VBoxContainerNew/GridContainer" unique_id=1938716658]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_override_font_sizes/font_size = 48
 placeholder_text = "Dolphin"
 expand_to_text_length = true
 
-[node name="Label6" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerNew/GridContainer"]
+[node name="Label6" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerNew/GridContainer" unique_id=51657614]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_override_font_sizes/font_size = 48
 text = "Player Pass"
 
-[node name="LineEditPlayerPass" type="LineEdit" parent="HBoxContainer/VBoxContainerOption/VBoxContainerNew/GridContainer"]
+[node name="LineEditPlayerPass" type="LineEdit" parent="HBoxContainer/VBoxContainerOption/VBoxContainerNew/GridContainer" unique_id=45933818]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_override_font_sizes/font_size = 48
 expand_to_text_length = true
 
-[node name="ButtonNewServer" type="Button" parent="HBoxContainer/VBoxContainerOption/VBoxContainerNew"]
+[node name="ButtonNewServer" type="Button" parent="HBoxContainer/VBoxContainerOption/VBoxContainerNew" unique_id=936098986]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_override_font_sizes/font_size = 48
 text = "New Server"
 
-[node name="VBoxContainerJoin" type="VBoxContainer" parent="HBoxContainer/VBoxContainerOption"]
+[node name="VBoxContainerJoin" type="VBoxContainer" parent="HBoxContainer/VBoxContainerOption" unique_id=202697913]
 visible = false
 layout_mode = 2
 
-[node name="GridContainer" type="GridContainer" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin"]
+[node name="GridContainer" type="GridContainer" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin" unique_id=148105412]
 layout_mode = 2
 columns = 2
 
-[node name="Label" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer"]
+[node name="Label" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer" unique_id=1286048276]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_override_font_sizes/font_size = 48
 text = "IP"
 
-[node name="LineEditIP" type="LineEdit" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer"]
+[node name="LineEditIP" type="LineEdit" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer" unique_id=1389404100]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_override_font_sizes/font_size = 48
 text = "127.0.0.1"
 expand_to_text_length = true
 
-[node name="Label2" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer"]
+[node name="Label2" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer" unique_id=1891997650]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_override_font_sizes/font_size = 48
 text = "Port"
 
-[node name="LineEditPort" type="LineEdit" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer"]
+[node name="LineEditPort" type="LineEdit" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer" unique_id=471988315]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_override_font_sizes/font_size = 48
 text = "2258"
 placeholder_text = "2258"
 
-[node name="Label3" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer"]
+[node name="Label3" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer" unique_id=2082105160]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_override_font_sizes/font_size = 48
 text = "Callsign"
 
-[node name="LineEditCallsign" type="LineEdit" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer"]
+[node name="LineEditCallsign" type="LineEdit" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer" unique_id=941728961]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_override_font_sizes/font_size = 48
 placeholder_text = "Dolphin"
 expand_to_text_length = true
 
-[node name="Label4" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer"]
+[node name="Label4" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer" unique_id=1656029748]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_override_font_sizes/font_size = 48
 text = "Server Pass"
 
-[node name="LineEditServerPass" type="LineEdit" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer"]
+[node name="LineEditServerPass" type="LineEdit" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer" unique_id=1437770871]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_override_font_sizes/font_size = 48
 expand_to_text_length = true
 
-[node name="Label6" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer"]
+[node name="Label6" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer" unique_id=374910369]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_override_font_sizes/font_size = 48
 text = "Player Pass"
 
-[node name="LineEditPlayerPass" type="LineEdit" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer"]
+[node name="LineEditPlayerPass" type="LineEdit" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin/GridContainer" unique_id=515594867]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_override_font_sizes/font_size = 48
 expand_to_text_length = true
 
-[node name="ButtonJoinServer" type="Button" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin"]
+[node name="ButtonJoinServer" type="Button" parent="HBoxContainer/VBoxContainerOption/VBoxContainerJoin" unique_id=2006693146]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_override_font_sizes/font_size = 48
 text = "Join Server"
 
-[node name="VBoxContainerOption" type="VBoxContainer" parent="HBoxContainer/VBoxContainerOption"]
+[node name="VBoxContainerOption" type="VBoxContainer" parent="HBoxContainer/VBoxContainerOption" unique_id=991453027]
 visible = false
 layout_mode = 2
 
-[node name="GridContainer" type="GridContainer" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption"]
+[node name="GridContainer" type="GridContainer" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption" unique_id=1192924066]
 layout_mode = 2
 columns = 2
 
-[node name="LabelControls" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer"]
+[node name="LabelControls" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer" unique_id=1935327838]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_type_variation = &"HeaderLarge"
 theme_override_font_sizes/font_size = 48
 text = "Controls"
 
-[node name="Set Keybindings" type="Button" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer"]
+[node name="Set Keybindings" type="Button" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer" unique_id=231152894]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_override_font_sizes/font_size = 48
 text = "Set Keybindings"
 
-[node name="LabelResolution" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer"]
+[node name="LabelResolution" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer" unique_id=1016212680]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_type_variation = &"HeaderLarge"
 theme_override_font_sizes/font_size = 48
 text = "Resolution"
 
-[node name="OptionButton" type="OptionButton" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer"]
+[node name="OptionButton" type="OptionButton" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer" unique_id=1747000116]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_override_font_sizes/font_size = 42
-item_count = 4
 selected = 0
+item_count = 4
 popup/item_0/text = "Native"
 popup/item_0/id = 0
 popup/item_1/text = "1280x800 (SteamDeck)"
@@ -269,19 +269,19 @@ popup/item_2/id = 2
 popup/item_3/text = "2560x1440"
 popup/item_3/id = 3
 
-[node name="LabelVsync" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer"]
+[node name="LabelVsync" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer" unique_id=900864848]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_type_variation = &"HeaderLarge"
 theme_override_font_sizes/font_size = 48
 text = "VSYNC"
 
-[node name="OptionButtonVSync" type="OptionButton" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer"]
+[node name="OptionButtonVSync" type="OptionButton" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer" unique_id=1385671432]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_override_font_sizes/font_size = 48
-item_count = 4
 selected = 0
+item_count = 4
 popup/item_0/text = "Disabled"
 popup/item_0/id = 0
 popup/item_1/text = "Enabled"
@@ -291,19 +291,19 @@ popup/item_2/id = 2
 popup/item_3/text = "Mailbox"
 popup/item_3/id = 3
 
-[node name="LabelFullScreen" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer"]
+[node name="LabelFullScreen" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer" unique_id=469076148]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_type_variation = &"HeaderLarge"
 theme_override_font_sizes/font_size = 48
 text = "Full Screen"
 
-[node name="OptionButtonWindowMode" type="OptionButton" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer"]
+[node name="OptionButtonWindowMode" type="OptionButton" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer" unique_id=109807743]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_override_font_sizes/font_size = 48
-item_count = 3
 selected = 1
+item_count = 3
 popup/item_0/text = "Windowed"
 popup/item_0/id = 0
 popup/item_1/text = "Boarderless Fullscreen"
@@ -311,28 +311,28 @@ popup/item_1/id = 3
 popup/item_2/text = "Exclusive Fullscreen"
 popup/item_2/id = 4
 
-[node name="Label" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer"]
+[node name="Label" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer" unique_id=340338890]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_override_font_sizes/font_size = 48
 text = "TAA"
 
-[node name="CheckButtonTAA" type="CheckButton" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer"]
+[node name="CheckButtonTAA" type="CheckButton" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer" unique_id=556845532]
 layout_mode = 2
 
-[node name="LabelMSAA" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer"]
+[node name="LabelMSAA" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer" unique_id=1882551573]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_type_variation = &"HeaderLarge"
 theme_override_font_sizes/font_size = 48
 text = "MSAA"
 
-[node name="OptionButtonMSAA" type="OptionButton" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer"]
+[node name="OptionButtonMSAA" type="OptionButton" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer" unique_id=2096523318]
 layout_mode = 2
 theme = ExtResource("1_dnqi6")
 theme_override_font_sizes/font_size = 42
-item_count = 4
 selected = 0
+item_count = 4
 popup/item_0/text = "None"
 popup/item_0/id = 0
 popup/item_1/text = "2x"
@@ -342,14 +342,10 @@ popup/item_2/id = 2
 popup/item_3/text = "8x"
 popup/item_3/id = 3
 
-[node name="Controls" parent="." instance=ExtResource("3_lbkvo")]
+[node name="Controls" parent="." unique_id=1576990386 instance=ExtResource("3_omy8q")]
 visible = false
 layout_mode = 0
 anchors_preset = 0
-anchor_right = 0.0
-anchor_bottom = 0.0
-grow_horizontal = 1
-grow_vertical = 1
 
 [connection signal="pressed" from="HBoxContainer/VBoxContainerMain/ButtonNewGame" to="." method="_on_button_new_game_pressed"]
 [connection signal="pressed" from="HBoxContainer/VBoxContainerMain/ButtonJoinGame" to="." method="_on_button_join_game_pressed"]
@@ -357,7 +353,6 @@ grow_vertical = 1
 [connection signal="pressed" from="HBoxContainer/VBoxContainerMain/ButtonExitDesktop" to="." method="_on_button_exit_desktop_pressed"]
 [connection signal="pressed" from="HBoxContainer/VBoxContainerOption/VBoxContainerNew/ButtonNewServer" to="." method="_on_button_new_server_pressed"]
 [connection signal="pressed" from="HBoxContainer/VBoxContainerOption/VBoxContainerJoin/ButtonJoinServer" to="." method="_on_button_join_server_pressed"]
-[connection signal="pressed" from="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer/Set Keybindings" to="Controls" method="_on_set_keybindings_pressed"]
 [connection signal="item_selected" from="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer/OptionButton" to="." method="_on_option_button_item_selected"]
 [connection signal="item_selected" from="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer/OptionButtonVSync" to="." method="_on_option_button_v_sync_item_selected"]
 [connection signal="item_selected" from="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer/OptionButtonWindowMode" to="." method="_on_option_button_window_mode_item_selected"]
