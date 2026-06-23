@@ -1047,9 +1047,6 @@ size = Vector3(19.0546, 10.6794, 11.8522)
 camera_attributes = SubResource("CameraAttributesPractical_44gd8")
 data = ExtResource("18_u5ira")
 
-[node name="Crew" parent="." index="14" unique_id=1064126352]
-max_passengers = 1
-
 [editable path="Guns/Gun"]
 [editable path="Guns/Gun2"]
 [editable path="Guns/Gun3"]

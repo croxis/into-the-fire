@@ -3,7 +3,6 @@
 [ext_resource type="Script" uid="uid://cwrw4m3xxrbq7" path="res://ship_systems/pilots/Pilot.gd" id="1_gf7ba"]
 [ext_resource type="Script" uid="uid://c0xi03f7y32xl" path="res://ships/Inputs.gd" id="2_uhore"]
 [ext_resource type="Script" uid="uid://cm45rxf3jbxss" path="res://ship_systems/pilots/player_input.gd" id="3_m4282"]
-[ext_resource type="Script" uid="uid://d350u8evihs1u" path="res://addons/netfox/rollback/rollback-synchronizer.gd" id="4_146dj"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_38dqk"]
 properties/0/path = NodePath(".:_player_pilot_id")
@@ -51,18 +50,11 @@ script = ExtResource("1_gf7ba")
 [node name="PilotSync" type="MultiplayerSynchronizer" parent="." unique_id=1031767373]
 replication_config = SubResource("SceneReplicationConfig_38dqk")
 
-[node name="InputsSyncOld" type="MultiplayerSynchronizer" parent="." unique_id=1920384969]
+[node name="InputsSync" type="MultiplayerSynchronizer" parent="." unique_id=1920384969]
 root_path = NodePath(".")
 replication_config = SubResource("SceneReplicationConfig_hiqvf")
 script = ExtResource("2_uhore")
 
-[node name="InputsSync" type="Node" parent="." unique_id=1660951907]
+[node name="InputsSyncTest" type="Node" parent="." unique_id=1660951907]
 script = ExtResource("3_m4282")
 metadata/_custom_type_script = "uid://cpiuf65vuu0oa"
-
-[node name="RollbackSynchronizer" type="Node" parent="." unique_id=2073508661 node_paths=PackedStringArray("root")]
-script = ExtResource("4_146dj")
-root = NodePath("..")
-enable_prediction = true
-input_properties = Array[String](["InputsSync:throttle", "InputsSync:rotation_throttle", "InputsSync:debug_all_stop", "InputsSync:fire_primary", "InputsSync:fire_secondary", "InputsSync:autospin_toggle", "InputsSync:autobreak_toggle", "InputsSync:debug_kill_ship"])
-metadata/_custom_type_script = "uid://d350u8evihs1u"

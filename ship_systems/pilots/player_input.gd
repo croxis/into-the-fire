@@ -1,4 +1,5 @@
-extends BaseNetInput
+#extends BaseNetInput
+extends Node
 class_name PlayerInput
 
 # For now throttle is capped at  1. In the future we can boost power to engines.

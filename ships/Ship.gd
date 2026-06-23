@@ -23,7 +23,20 @@ var multiplayer_pilot_id: int:
 		else:
 			return -1
 
-@export var faction_name: String
+#TODO: Is this even needed? Should it be directly pulled from the captain? Does it even need to be synced?
+@export var faction_name: String:
+	get:
+		if faction:
+			return faction.resource_name
+		return ""
+
+@export var faction: Faction:
+	set(new_faction):
+		if faction:
+			faction.remove_ship(self)
+		faction = new_faction
+		print_debug("NF: ", new_faction)
+		faction.add_ship(self)
 
 @export_node_path("Camera3D") var camera_path: NodePath
 @onready var camera: Camera3D = get_node_or_null(camera_path)
@@ -63,14 +76,6 @@ var em_output := 1.0
 var neutron_output := 1.0
 
 var detected_ships: Array[Ship] = []
-
-@export var faction: Faction:
-	set(new_faction):
-		if faction:
-			faction.owned_ships.erase(self)
-		faction = new_faction
-		if self not in faction.owned_ships:
-			faction.owned_ships.append(self)
 
 var galaxy: Galaxy
 
@@ -255,6 +260,9 @@ func _rollback_tick(dt, _tick, _is_fresh):
 
 
 func _physics_process(dt: float) -> void:
+	if multiplayer.multiplayer_peer == null or multiplayer.get_unique_id() == multiplayer_pilot_id:
+		# The client which this player represent will update the controls state, and notify it to everyone.
+		inputs.update()
 	_rollback_tick(dt, 0, 0)
 	return
 
@@ -355,9 +363,10 @@ func request_launch(p_ship_id: int, pilot_id: int):
 	else:		
 		old_pilot = $Crew.remove_passenger_by_multiplayerid(remote_id)
 	var pilot: Pilot = new_ship.get_node("CrewMultiplayerSpawner").spawn({"name": old_pilot.name, "multiplayer_id": old_pilot.multiplayer_id})
-	pilot._faction_id = old_pilot._faction_id
+	pilot.faction = old_pilot.faction
 	pilot._player_pilot_id = old_pilot._player_pilot_id
-	new_ship.add_pilot(pilot)
+	#TODO: Genealize this to a multicrew craft
+	new_ship.add_captain(pilot)
 	old_pilot.queue_free()
 	new_ship.set_camera.rpc_id(pilot.multiplayer_id)
 	disable_capital_ui.rpc_id(pilot.multiplayer_id)

@@ -47,15 +47,15 @@ properties/8/replication_mode = 2
 properties/9/path = NodePath(".:ship_id")
 properties/9/spawn = true
 properties/9/replication_mode = 2
-properties/10/path = NodePath(".:faction_name")
+properties/10/path = NodePath("Crew:captain_name")
 properties/10/spawn = true
 properties/10/replication_mode = 2
-properties/11/path = NodePath("Crew:captain_name")
+properties/11/path = NodePath("Crew:pilot_name")
 properties/11/spawn = true
 properties/11/replication_mode = 2
-properties/12/path = NodePath("Crew:pilot_name")
+properties/12/path = NodePath(".:faction_name")
 properties/12/spawn = true
-properties/12/replication_mode = 2
+properties/12/replication_mode = 1
 
 [node name="Ship" type="RigidBody3D" unique_id=2038804726 groups=["ship"]]
 can_sleep = false

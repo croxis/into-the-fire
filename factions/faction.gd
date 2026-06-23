@@ -114,3 +114,15 @@ func _on_fleet_ship_detected(ship: Ship):
 
 func _on_fleet_ship_sensor_lost(ship: Ship):
 	detected_ships.erase(ship)
+
+func add_ship(ship: Ship) -> bool:
+	if ship not in owned_ships:
+		owned_ships.append(ship)
+		return true
+	return false
+
+func remove_ship(ship: Ship) -> bool:
+	if ship in owned_ships:
+		owned_ships.erase(ship)
+		return true
+	return false

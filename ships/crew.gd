@@ -3,7 +3,7 @@ extends Node
 @export var captain_name: String
 @export var pilot_name: String
 @export var max_gunners := 0
-@export var max_passengers := 0
+@export var max_passengers := 1
 var captain: Pilot:
 	get:
 		if captain_name:
@@ -27,6 +27,8 @@ func set_captain(new_captain: Pilot) -> bool:
 	if add_passenger(new_captain):
 		captain_name = new_captain.name
 		new_captain.is_captain = true
+		if max_passengers == 1:
+			pilot_name = new_captain.name
 		return true
 	return false
 
