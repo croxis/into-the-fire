@@ -63,6 +63,7 @@ metadata/_custom_type_script = "uid://cpiuf65vuu0oa"
 [node name="RollbackSynchronizer" type="Node" parent="." unique_id=2073508661 node_paths=PackedStringArray("root")]
 script = ExtResource("4_146dj")
 root = NodePath("..")
+enable_prediction = true
 input_properties = Array[String](["InputsSync:throttle", "InputsSync:rotation_throttle", "InputsSync:debug_all_stop", "InputsSync:fire_primary", "InputsSync:fire_secondary", "InputsSync:autospin_toggle", "InputsSync:autobreak_toggle", "InputsSync:debug_kill_ship"])
 metadata/_custom_type_script = "uid://d350u8evihs1u"
 

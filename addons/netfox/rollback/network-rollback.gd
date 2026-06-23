@@ -182,6 +182,7 @@ static var _logger: NetfoxLogger = NetfoxLogger._for_netfox("NetworkRollback")
 ##
 ## This is used to determine the resimulation range during each loop.
 func notify_resimulation_start(tick: int) -> void:
+	print_debug("Notify: ", _resim_from, " ", tick)
 	_resim_from = min(_resim_from, tick)
 
 ## Submit node for simulation.
@@ -310,6 +311,7 @@ func _rollback() -> void:
 		return
 
 	# Ask all rewindables to submit their earliest inputs
+	print_debug("0: ", NetworkTime.tick, " | ", _resim_from)
 	_resim_from = NetworkTime.tick
 	before_loop.emit()
 
@@ -322,6 +324,8 @@ func _rollback() -> void:
 
 	# to = Current tick
 	var to := NetworkTime.tick
+	
+	print_debug("1: ", NetworkTime.tick, " | ", _resim_from, " | ", from, " | ", to)
 
 	# Limit number of rollback ticks
 	if to - from > history_limit:

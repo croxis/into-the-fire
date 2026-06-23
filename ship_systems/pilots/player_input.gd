@@ -64,3 +64,8 @@ func _gather():
 	autobreak_toggle = Input.is_action_just_pressed("autobreak_toggle")
 	autospin_toggle = Input.is_action_just_pressed("autospin_toggle")
 	debug_kill_ship = Input.is_action_just_pressed("debug_kill")
+
+
+# Ghost functions from old system
+func update():
+	pass

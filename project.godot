@@ -16,7 +16,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 config/name="Babylon 5: Into The Fire"
 run/main_scene="res://entry.tscn"
-config/features=PackedStringArray("4.6")
+config/features=PackedStringArray("4.7", "Double Precision")
 boot_splash/bg_color=Color(0, 0, 0, 1)
 config/icon="res://icon.png"
 
@@ -33,7 +33,7 @@ NetworkEvents="*uid://bdmobxxptryj0"
 NetworkPerformance="*uid://cqgf7aqmjfoa3"
 WindowTiler="*uid://cmqjajhjgffm1"
 NetworkSimulator="*uid://1y2ey1e6qjwr"
-AppConfig="uid://cjke6crjg14a0"
+AppConfig="*uid://cjke6crjg14a0"
 
 [debug]
 
@@ -59,7 +59,7 @@ version_control/autoload_on_startup=true
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/Todo_Manager/plugin.cfg", "res://addons/anthonyec.camera_preview/plugin.cfg", "res://addons/discord-rpc-gd/plugin.cfg", "res://addons/maaacks_options_menus/plugin.cfg", "res://addons/monitor_overlay/plugin.cfg", "res://addons/netfox.extras/plugin.cfg", "res://addons/netfox.internals/plugin.cfg", "res://addons/netfox/plugin.cfg", "res://addons/orbit_camera/plugin.cfg", "res://addons/star_field/plugin.cfg")
+enabled=PackedStringArray("res://addons/Todo_Manager/plugin.cfg", "res://addons/anthonyec.camera_preview/plugin.cfg", "res://addons/maaacks_options_menus/plugin.cfg", "res://addons/monitor_overlay/plugin.cfg", "res://addons/netfox.extras/plugin.cfg", "res://addons/netfox.internals/plugin.cfg", "res://addons/netfox/plugin.cfg", "res://addons/orbit_camera/plugin.cfg", "res://addons/star_field/plugin.cfg")
 
 [global_group]
 
@@ -293,6 +293,7 @@ copy_path="res://ui/options/"
 rollback/enabled=false
 autoconnect/port=2258
 autoconnect/simulated_latency_ms=100
+autoconnect/enabled=false
 
 [physics]
 

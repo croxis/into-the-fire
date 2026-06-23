@@ -344,9 +344,11 @@ func _exit_tree() -> void:
 func _notify_resim() -> void:
 	if _get_owned_input_props().is_empty():
 		# We don't have any inputs we own, simulate from earliest we've received
+		print_debug("_get_owned input props is empty")
 		NetworkRollback.notify_resimulation_start(_history_transmitter.get_earliest_input_tick())
 	else:
 		# We own inputs, simulate from latest authorative state
+		print_debug("_get_owned input props NOT empty: ", _history_transmitter.get_latest_state_tick())
 		NetworkRollback.notify_resimulation_start(_history_transmitter.get_latest_state_tick())
 
 func _prepare_tick_process(tick: int) -> void:

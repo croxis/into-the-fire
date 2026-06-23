@@ -109,7 +109,6 @@ func _ready():
 	target_global_transform = global_transform
 	galaxy = get_tree().root.get_node("entry/Galaxy")
 	Log.log(["Ship created: ", ship_id], Log.MessageType.SUCCESS)
-	DebugDraw3D.scoped_config().set_viewport(get_viewport())
 
 
 func add_captain(pilot: Pilot):
@@ -217,45 +216,7 @@ func _rollback_tick(dt, tick, is_fresh):
 			var rz := local_angular_velocity.z
 			var err_rot_z := 0.0 - rz
 			rotation_throttle.z = $PIDS/PID_rotate_break_Z._update(err_rot_z, dt)
-	
-	# Start of PID code
-	# https://raw.githubusercontent.com/itspacchu/GodotRocket/master/scripts/rocket.gd
-	#if false:
-	##if autospin:
-		##This needs to be replaced with the steering behavior that I've been reading about
-		## However! What we really want is just stopping the rotation
-		#target_rot.x += inputs.rotation_throttle.x * dt
-		#target_rot.y += inputs.rotation_throttle.y * dt
-		#target_rot.z += inputs.rotation_throttle.z * dt
-			#
-		#var rx = rotation.x
-		#var ry = rotation.y
-		#var rz = rotation.z
-		#
-		#var err_rot_x := 0.0
-		#var err_rot_y := 0.0
-		#var err_rot_z := 0.0
-		#
-		## Correct for wraparound at 180/-180 or pi/-pi
-		#if target_rot.x - rx > 3.14159: target_rot.x -= 2*3.14159
-		#elif target_rot.x - rx < -3.14159: target_rot.x += 2*3.14159
-		#if target_rot.y - ry > 3.14159: target_rot.y -= 2*3.14159
-		#elif target_rot.y - ry < -3.14159: target_rot.y += 2*3.14159
-		#if target_rot.z - rz > 3.14159: target_rot.z -= 2*3.14159
-		#elif target_rot.z - rz < -3.14159: target_rot.z += 2*3.14159
-		#
-		#err_rot_x = target_rot.x - rx
-		#err_rot_y = target_rot.y - ry
-		#err_rot_z = target_rot.z - rz
-		#
-		#target_global_transform = target_global_transform.orthonormalized()
-	#
-		#var pidrx = $PIDS/PID_rotate_X._update(err_rot_x,dt)
-		#var pidry = $PIDS/PID_rotate_Y._update(err_rot_y,dt)
-		#var pidrz = $PIDS/PID_rotate_Z._update(err_rot_z,dt)
-#
-		#rotation_throttle = Vector3(pidrx, pidry, pidrz)
-				
+
 	if autobreak:
 		var local_velocity := global_transform.basis.transposed() * linear_velocity
 		if throttle.x == 0:
@@ -289,152 +250,6 @@ func _rollback_tick(dt, tick, is_fresh):
 func _physics_process(dt: float) -> void:
 	_rollback_tick(dt, 0, 0)
 	return
-	if is_station:
-		return
-	if not $Crew.pilot_name:
-		return
-	# For now throttle is capped at 1. In the future we can boost power to engines.
-	# In Godot 3.2 add_force is cleared every physics frame
-	if multiplayer.multiplayer_peer == null or multiplayer.get_unique_id() == multiplayer_pilot_id:
-		# The client which this player represent will update the controls state, and notify it to everyone.
-		inputs.update()
-	
-	if inputs.autobreak_toggle:
-		autobreak = !autobreak
-		Log.log(["Requesting autobreak_toggle set to ", autobreak, " for ", self], Log.MessageType.QUESTION)
-
-	if inputs.autospin_toggle:
-		autospin = !autospin
-		if autospin:
-			target_global_transform = global_transform
-		#target_rot = rotation
-		Log.log(["Requesting autospin set to ", autospin, " for ", self], Log.MessageType.QUESTION)
-
-	var rotation_throttle = inputs.rotation_throttle
-	var throttle = inputs.throttle
-	
-	if autospin:
-		# We can just assume local space
-		# If there is no input on an axis, we want to stop motion on it
-		# If we are spinning left, then a right input would be the same as neutral, until the rotation stops.
-		# This is not the same as an "arcade mode". The ship will continue to spin ever faster
-		# An arcade mode wouldn't be a bad idea to implement. Still newtonian, but the flight model
-		# would act more like X or Wing Commander
-		var deadzone := 0.001
-		# The X axis of the joystick manipulates the y axis of the ship. Godot accounts for this
-		if abs(inputs.rotation_throttle.y) <= deadzone:
-			var ry := local_angular_velocity.y
-			var err_rot_y := 0.0 - ry
-			rotation_throttle.y = $PIDS/PID_rotate_break_Y._update(err_rot_y, dt)		
-		if abs(inputs.rotation_throttle.x) <= deadzone:
-			var rx := local_angular_velocity.x
-			var err_rot_x := 0.0 - rx
-			rotation_throttle.x = $PIDS/PID_rotate_break_X._update(err_rot_x, dt)
-		if abs(inputs.rotation_throttle.z) <= deadzone:
-			var rz := local_angular_velocity.z
-			var err_rot_z := 0.0 - rz
-			rotation_throttle.z = $PIDS/PID_rotate_break_Z._update(err_rot_z, dt)
-	
-	# Start of PID code
-	# https://raw.githubusercontent.com/itspacchu/GodotRocket/master/scripts/rocket.gd
-	#if false:
-	##if autospin:
-		##This needs to be replaced with the steering behavior that I've been reading about
-		## However! What we really want is just stopping the rotation
-		#target_rot.x += inputs.rotation_throttle.x * dt
-		#target_rot.y += inputs.rotation_throttle.y * dt
-		#target_rot.z += inputs.rotation_throttle.z * dt
-			#
-		#var rx = rotation.x
-		#var ry = rotation.y
-		#var rz = rotation.z
-		#
-		#var err_rot_x := 0.0
-		#var err_rot_y := 0.0
-		#var err_rot_z := 0.0
-		#
-		## Correct for wraparound at 180/-180 or pi/-pi
-		#if target_rot.x - rx > 3.14159: target_rot.x -= 2*3.14159
-		#elif target_rot.x - rx < -3.14159: target_rot.x += 2*3.14159
-		#if target_rot.y - ry > 3.14159: target_rot.y -= 2*3.14159
-		#elif target_rot.y - ry < -3.14159: target_rot.y += 2*3.14159
-		#if target_rot.z - rz > 3.14159: target_rot.z -= 2*3.14159
-		#elif target_rot.z - rz < -3.14159: target_rot.z += 2*3.14159
-		#
-		#err_rot_x = target_rot.x - rx
-		#err_rot_y = target_rot.y - ry
-		#err_rot_z = target_rot.z - rz
-		#
-		#target_global_transform = target_global_transform.orthonormalized()
-	#
-		#var pidrx = $PIDS/PID_rotate_X._update(err_rot_x,dt)
-		#var pidry = $PIDS/PID_rotate_Y._update(err_rot_y,dt)
-		#var pidrz = $PIDS/PID_rotate_Z._update(err_rot_z,dt)
-#
-		#rotation_throttle = Vector3(pidrx, pidry, pidrz)
-				
-	if autobreak:
-		var local_velocity := global_transform.basis.transposed() * linear_velocity
-		if throttle.x == 0:
-			var err_x := 0.0 - local_velocity.x
-			throttle.x = $PIDS/PID_X._update(err_x, dt)
-			if abs(throttle.x) < 0.02:
-				throttle.x = 0.0
-		if throttle.y == 0:
-			var err_y := 0.0 - local_velocity.y
-			throttle.y = $PIDS/PID_X._update(err_y, dt)
-			if abs(throttle.y) < 0.02:
-				throttle.y = 0.0
-		if throttle.z == 0:
-			var err_z := 0.0 - local_velocity.z
-			throttle.z = $PIDS/PID_X._update(err_z, dt)
-			if abs(throttle.z) < 0.02:
-				throttle.z = 0.0
-	
-	$Engines.request_thrust(throttle, rotation_throttle)
-	
-	for thruster in $Engines.thrusters:
-		apply_force(global_transform.basis * thruster.force_vector, global_transform.basis * thruster.position)
-	
-	if inputs.debug_all_stop:
-		_debug_all_stop = true
-	
-	acceleraction = (linear_velocity - start_velocity) / dt
-	start_velocity = linear_velocity
-	return
-	
-	"""# Code below this was an attempt to make a realistic controler for thrusters
-	var stableize := false
-	
-	if stableize:
-		# Code here to reduce motion by requesting the opposite thrust
-		pass
-	
-	var thruster_control_vector := []
-	thruster_control_vector.resize($Engines.thrusters.size())
-	
-	var user_input_vector := [inputs.rotation_throttle.x, inputs.rotation_throttle.y, inputs.rotation_throttle.z, inputs.throttle.x, inputs.throttle.y, inputs.throttle.z]  #6 Components (Tx,Ty,Tz,Fx,Fy,Fz)
-	for i in range(user_input_vector.size()):
-		if user_input_vector[i] >= 0:
-			# Use positive Torque or Force ControlVector
-			#thruster_control_vector += $Engines.twelve_control_vectors[2 * i] * user_input_vector[i]
-			var tcv = $Engines.twelve_control_vectors[2 * i]
-			var uiv = user_input_vector[i]
-			thruster_control_vector += tcv * uiv
-		else:
-			# Use negative Torque or Force ControlVector, also negate component since its negative
-			thruster_control_vector += ($Engines.twelve_control_vectors[2 * i] + 1) * -user_input_vector[i]
-	
-	var absolute_maximum := 0.0
-	for item in thruster_control_vector:
-		if abs(item) > absolute_maximum:
-			absolute_maximum = abs(item)
-	if absolute_maximum > 1:
-		for i in thruster_control_vector.size():
-			thruster_control_vector[i] = thruster_control_vector[i] / absolute_maximum
-	
-	for i in range($Engines.thrusters.size()):
-		$Engines.thrusters[i].power = thruster_control_vector[i]"""
 
 
 func _process(_delta: float) -> void:

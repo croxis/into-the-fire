@@ -162,6 +162,7 @@ func _before_rollback_loop() -> void:
 	if not _queued_changes.is_empty():
 		# Resimulate from earliest change
 		var earliest_change = _queued_changes.keys().min()
+		print_debug("_queued_changes")
 		NetworkRollback.notify_resimulation_start(earliest_change)
 		_logger.trace("Submitted earliest tick %d from %s", [earliest_change, _queued_changes])
 
