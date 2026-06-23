@@ -101,14 +101,12 @@ signal destroyed(ship_id)
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	# If in editor simply disable processing as it's not needed here
-	Log.log(["Creating ship with id: ", ship_id, ". Name: ", name], Log.MessageType.QUESTION)
 	if (Engine.is_editor_hint()):
 		set_physics_process(false)	
 	can_sleep = false
 	#target_rot = rotation_degrees
 	target_global_transform = global_transform
 	galaxy = get_tree().root.get_node("entry/Galaxy")
-	Log.log(["Ship created: ", ship_id], Log.MessageType.SUCCESS)
 
 
 func add_captain(pilot: Pilot):

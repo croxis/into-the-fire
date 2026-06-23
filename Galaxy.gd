@@ -7,7 +7,7 @@ var render_resolution := Vector2i(0, 0)
 @onready var taa = PlayerConfig.get_config("graphics", "taa", 0)
 var active_galaxy := false
 
-var ship_id_counter := 0
+@export var ship_id_counter := 0
 
 var _play_time: float = 0
 var _sync_interval: float = 10

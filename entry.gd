@@ -22,7 +22,7 @@ func _ready():
 			arguments[key_value[0].lstrip("--")] = key_value[1]
 		else:
 			arguments[argument.lstrip("--")] = 1
-	print("Arguments: ", arguments)
+	Log.log(["Arguments: ", arguments], Log.MessageType.INFO)
 	if ("server" in arguments || OS.has_feature("dedicated_server")):
 		var success := false
 		var game_name := "default"
@@ -40,6 +40,15 @@ func _ready():
 			get_tree().quit()
 		_dedicated_server = true
 		$Galaxy.setup_new_galaxy(true)
+	elif ("testserver" in arguments):
+		$network.players = $Galaxy/Players
+		if not $network.host_server("Test Server", "Test Player", 2258):
+			print("Failure to activate network. Is port in use?")
+			get_tree().quit()
+		var callback := Callable($Galaxy, "finish_setup_galaxy_client")
+		$Galaxy.game_name = "Test Server"
+		$Galaxy.setup_new_galaxy(false, callback)
+		#$Galaxy.finish_setup_galaxy_client()
 	else:
 		"""# Discord!
 		DiscordRPC.app_id = 1356458511122567168 # Application ID
