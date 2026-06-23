@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://c45aut53d0eru"]
+[gd_scene format=3 uid="uid://c45aut53d0eru"]
 
 [ext_resource type="Script" uid="uid://ret5fy6jtwhg" path="res://Galaxy.gd" id="1_3em77"]
 [ext_resource type="PackedScene" uid="uid://dw740uyo1ubum" path="res://ui/join_game/join_game.tscn" id="2_saf80"]
@@ -11,30 +11,30 @@
 script = ExtResource("6_dffle")
 metadata/_custom_type_script = "uid://cvie3m6t7c0hd"
 
-[node name="Galaxy" type="Node"]
+[node name="Galaxy" type="Node" unique_id=96378411]
 script = ExtResource("1_3em77")
 
-[node name="CanvasLayer" type="CanvasLayer" parent="."]
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=2014020571]
 layer = 2
 
-[node name="JoinGame" parent="CanvasLayer" instance=ExtResource("2_saf80")]
+[node name="JoinGame" parent="CanvasLayer" unique_id=780425880 instance=ExtResource("2_saf80")]
 visible = false
 
-[node name="Players" type="Node" parent="."]
+[node name="Players" type="Node" parent="." unique_id=1619813716]
 script = ExtResource("5_ietyw")
 
-[node name="Systems" type="Node" parent="."]
+[node name="Systems" type="Node" parent="." unique_id=59206667]
 script = ExtResource("6_ioa4q")
 
-[node name="MultiplayerSpawnerSystems" type="MultiplayerSpawner" parent="."]
+[node name="MultiplayerSpawnerSystems" type="MultiplayerSpawner" parent="." unique_id=2137815148]
 _spawnable_scenes = PackedStringArray("uid://sl64gsa8wdih")
 spawn_path = NodePath("../Systems")
 
-[node name="MultiplayerSpawnerPlayers" type="MultiplayerSpawner" parent="."]
+[node name="MultiplayerSpawnerPlayers" type="MultiplayerSpawner" parent="." unique_id=391701485]
 _spawnable_scenes = PackedStringArray("uid://bx2a0jhx14dnd")
 spawn_path = NodePath("../Players")
 
-[node name="GdPAIWorldNode" type="Node" parent="."]
+[node name="GdPAIWorldNode" type="Node" parent="." unique_id=104240355]
 script = ExtResource("5_pvman")
 blackboard_plan = SubResource("Resource_a3s87")
 metadata/_custom_type_script = "uid://cu134mwsik6n5"

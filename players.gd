@@ -1,4 +1,5 @@
 extends Node
+class_name Players
 var playerid_counter := 1
 
 # 0 is reserved for npc
@@ -46,7 +47,7 @@ func is_logged_in_id(peer_id: int) -> bool:
 
 func is_logged_in_name(player_name: String) -> bool:
 	if has_node(player_name):
-		if get_node(player_name).network_id > 0:
+		if get_node(player_name).network_id >= 0:
 			return true
 	return false
 

@@ -13,6 +13,9 @@
 [node name="entry" type="Node" unique_id=1561976683]
 script = ExtResource("1_ox4k0")
 
+[node name="AcceptDialog" type="AcceptDialog" parent="." unique_id=739536070]
+oversampling_override = 1.0
+
 [node name="loading" parent="." unique_id=1451102659 instance=ExtResource("3_ry4g3")]
 z_index = 10
 
@@ -60,6 +63,7 @@ script = ExtResource("4_h8ft4")
 layout_mode = 2
 
 [connection signal="load_scene" from="Galaxy" to="loading" method="_on_galaxy_load_scene"]
+[connection signal="auth_failed" from="network" to="." method="_on_network_auth_failed"]
 [connection signal="connection_succeeded" from="network" to="." method="_on_network_connection_succeeded"]
 [connection signal="connection_succeeded" from="network" to="Galaxy" method="_on_network_connection_succeeded"]
 [connection signal="join_game" from="MainMenu" to="Galaxy" method="_on_main_menu_join_game"]

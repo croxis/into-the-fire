@@ -94,3 +94,8 @@ func _on_main_menu_new_game(game_name, player_name, port, server_password, playe
 		return
 	end_title_sequence()
 	
+
+
+func _on_network_auth_failed(peer: Variant, reason: String) -> void:
+	$AcceptDialog.dialog_text = reason
+	$AcceptDialog.popup_centered()

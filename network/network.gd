@@ -15,7 +15,7 @@ const MAX_PEERS = 12
 
 var peer: ENetMultiplayerPeer = null
 
-var players: Node
+var players: Players
 var player_name := ""
 var player_password := ""
 var pending := {}
@@ -80,23 +80,23 @@ func _authenticating(peer_id):
 
 func _authenticate_callback(peer_id: int, data: PackedByteArray):
 	var dict:Dictionary = bytes_to_var(data)
+	var message:= ""
 	Log.log(["_auth_callback recieved data ", str(dict), "from PID", peer_id, "or", multiplayer.get_remote_sender_id()], Log.MessageType.QUESTION)
 	if dict.client_token != "me2":
-		Log.log(["Client untrustworthy"], Log.MessageType.ERROR)
-		peer.disconnect_peer(peer_id)
-		return
-	if dict.server_password != server_password:
-		Log.log(["Wrong server password"], Log.MessageType.ERROR)
-		peer.disconnect_peer(peer_id)
-		return
-	if players.is_logged_in_id(peer_id):
-		Log.log(["Player is logged in"], Log.MessageType.ERROR)
-		#print(players.get_children())
-		peer.disconnect_peer(peer_id)
-		return
-	if !players.check_player(dict.player_name, dict.player_password, peer_id):
-		Log.log(["Wrong player password"], Log.MessageType.ERROR)
-		peer.disconnect_peer(peer_id)
+		message = "Client untrustworthy"
+	elif dict.server_password != server_password:
+		message = "Wrong server password"
+	elif players.is_logged_in_id(peer_id):
+		message = "Player is logged in"
+	elif players.is_logged_in_name(dict.player_name):
+		message = "Player is logged in with this name"
+	elif !players.check_player(dict.player_name, dict.player_password, peer_id):
+		message = "Wrong player password"
+	if message.length() > 0:
+		multiplayer.send_auth(peer_id, var_to_bytes({'error': message}))
+		Log.log([message], Log.MessageType.ERROR)
+		await get_tree().create_timer(0.1).timeout
+		multiplayer.disconnect_peer(peer_id)
 		return
 	var client := peer.get_peer(peer_id)
 	if not client:
@@ -108,7 +108,9 @@ func _authenticate_callback(peer_id: int, data: PackedByteArray):
 
 
 func _auth_failed(client_peer):
-	auth_failed.emit(client_peer, "")
+	# Server doesn't need a popup. Logging and messaging done in respective functions.
+	#auth_failed.emit(client_peer, "")
+	pass
 
 
 # Client
@@ -128,7 +130,6 @@ func join_game(ip, port, new_player_name, s_password, p_password):
 		print("Failed to join Game: ", ip, ":", port, " as " , new_player_name)
 		return
 	multiplayer.multiplayer_peer = peer
-	Log.log(["Joining Game Complete: ", multiplayer.multiplayer_peer], Log.MessageType.INFO)
 
 
 func on_connected():
@@ -149,22 +150,23 @@ func on_server_disconnected():
 func _client_auth_callback(client_id: int, buf : PackedByteArray):
 	var dict:Dictionary = bytes_to_var(buf)
 	Log.log(["_auth_callback recieved data ", str(dict), "from PID", client_id, "or", multiplayer.get_remote_sender_id()], Log.MessageType.QUESTION)
-
-	if dict.protocol != PROTOCOL:
-		Log.log(["Server protocol mismatch"], Log.MessageType.ERROR)
+	var error_msg:= ""
+	if dict.has('error'):
+		error_msg = dict['error']
+	elif dict.protocol != PROTOCOL:
+		error_msg = "Server protocol mismatch"
+	elif dict.protocol_version > SUPPORTED_PROTOCOL_VERSION:
+		error_msg = "Server protocol version too new"
+	elif dict.protocol_version < SUPPORTED_PROTOCOL_VERSION:
+		error_msg = "Server protocol version too old"
+	elif dict.host_token != 'bruh im legit':
+		error_msg = "Server untrustworthy"
+	
+	if error_msg.length() > 0:
+		Log.log(error_msg, Log.MessageType.PANIC)
 		peer.disconnect_peer(1)
-
-	if dict.protocol_version > SUPPORTED_PROTOCOL_VERSION:
-		Log.log(["Server protocol version too new"], Log.MessageType.ERROR)
-		peer.disconnect_peer(1)
-
-	if dict.protocol_version < SUPPORTED_PROTOCOL_VERSION:
-		Log.log(["Server protocol version too old"], Log.MessageType.ERROR)
-		peer.disconnect_peer(1)
-
-	if dict.host_token != 'bruh im legit':
-		Log.log(["Server untrustworthy"], Log.MessageType.PANIC)
-		peer.disconnect_peer(1)
+		auth_failed.emit(1, error_msg)
+		return
 
 	dict = {
 			'client_token' : "me2",
@@ -175,7 +177,7 @@ func _client_auth_callback(client_id: int, buf : PackedByteArray):
 
 	buf = var_to_bytes(dict)
 	multiplayer.send_auth(1, buf)
-	multiplayer.complete_auth(1)
+	#multiplayer.complete_auth(1)
 
 
 func _refuse(server_peer, p_msg:=""):
