@@ -42,13 +42,17 @@ func _ready():
 		$Galaxy.setup_new_galaxy(true)
 	elif ("testserver" in arguments):
 		$network.players = $Galaxy/Players
-		if not $network.host_server("Test Server", "Test Player", 2258):
+		if not $network.host_server("Test Server", "Test Host", 2258):
 			print("Failure to activate network. Is port in use?")
 			get_tree().quit()
 		var callback := Callable($Galaxy, "finish_setup_galaxy_client")
 		$Galaxy.game_name = "Test Server"
 		$Galaxy.setup_new_galaxy(false, callback)
-		#$Galaxy.finish_setup_galaxy_client()
+	elif ("testplayer" in arguments):
+		$network.players = $Galaxy/Players
+		await get_tree().create_timer(5.0).timeout
+		$network.join_game("127.0.0.1", 2258, "Test Player", "", "")
+		$loading.visible = false
 	else:
 		"""# Discord!
 		DiscordRPC.app_id = 1356458511122567168 # Application ID
