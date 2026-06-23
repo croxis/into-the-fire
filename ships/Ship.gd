@@ -133,6 +133,7 @@ func add_captain(pilot: Pilot):
 func add_passenger(pilot: Pilot):
 	if $Crew.add_passenger(pilot) and pilot.multiplayer_id:
 		set_camera.rpc_id(pilot.multiplayer_id)
+		print_debug("Passenger added to ", name, " ", ship_id, " id ", pilot.multiplayer_id)
 		set_capital_ui.rpc_id(pilot.multiplayer_id)
 
 
@@ -160,8 +161,16 @@ func set_camera():
 
 @rpc("call_local")
 func set_capital_ui():
+	Log.log(["Is capital or station?", is_capital, ", ", is_station], Log.MessageType.INFO)
 	if is_capital or is_station:
 		$CapitalUI.visible = true
+	else:
+		$CapitalUI.visible = false
+
+
+@rpc("call_local")
+func disable_capital_ui():
+	$CapitalUI.visible = false
 
 
 func debug_set_health(new_health):
@@ -178,7 +187,7 @@ func _integrate_forces(state: PhysicsDirectBodyState3D):
 		_debug_all_stop = false
 
 
-func _rollback_tick(dt, tick, is_fresh):
+func _rollback_tick(dt, _tick, _is_fresh):
 	if is_station or not $Crew.pilot_name:
 		return
 	if inputs.autobreak_toggle:
@@ -274,11 +283,12 @@ func destroy() -> void:
 
 
 func find_free_spawner() -> Array:
-	return $Spawner.find_free_spawner()
+	var s = $Spawner.find_free_spawner()
+	print_debug(s)
+	return s
 
 
 func _on_area_3d_dock_body_entered(body) -> void:
-	print_debug(body.name)
 	if body == self:
 		#can't dock with self, silly
 		return
@@ -294,7 +304,9 @@ func _on_area_3d_dock_body_entered(body) -> void:
 	body.queue_free()
 
 
-func _on_crew_child_exiting_tree(node: Node) -> void:
+func _on_crew_child_exiting_tree(_node: Node) -> void:
+	return
+	Log.log(["_on_crew_child_exiting_tree"], Log.MessageType.INFO)
 	$CapitalUI.visible = false
 
 
@@ -306,7 +318,8 @@ func _on_button_launch_pressed() -> void:
 
 func _on_capital_ui_request_launch() -> void:
 	var player: Player = galaxy.get_node('Players').find_player_by_netid(multiplayer.get_unique_id())	
-	rpc("request_launch", 0, player.player_id)
+	Log.log(["_on_capital_ui_request_launch ship_id:", ship_id, player.name, multiplayer.get_unique_id()], Log.MessageType.INFO)
+	rpc("request_launch", ship_id, player.player_id)
 
 
 @rpc("any_peer", "call_local")
@@ -320,7 +333,7 @@ func request_launch(p_ship_id: int, pilot_id: int):
 	
 	Log.log(["Spawn requested in ", get_current_system().name, " ", name, " by ", remote_id], Log.MessageType.QUESTION)
 	var top_system := get_current_system()
-	var system := top_system.get_node("SubViewport")
+	#var system := top_system.get_node("SubViewport")
 
 	var spawn := find_free_spawner()
 	var spawn_point = spawn[0]
@@ -349,6 +362,7 @@ func request_launch(p_ship_id: int, pilot_id: int):
 	new_ship.add_pilot(pilot)
 	old_pilot.queue_free()
 	new_ship.set_camera.rpc_id(pilot.multiplayer_id)
+	disable_capital_ui.rpc_id(pilot.multiplayer_id)
 	await get_tree().create_timer(1.0).timeout
 	new_ship.is_spawning = false
 	Log.log(["Spawn complete for ", pilot], Log.MessageType.SUCCESS)

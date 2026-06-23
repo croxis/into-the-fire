@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://dmpj0ge68t2li"]
+[gd_scene format=3 uid="uid://dmpj0ge68t2li"]
 
 [ext_resource type="PackedScene" uid="uid://bhhs2v02syo8j" path="res://ships/Ship.tscn" id="1_5mf3n"]
 [ext_resource type="PackedScene" uid="uid://bw6rueeoqv6a" path="res://ships/earth alliance/hyperion/hyperionturret.tscn" id="2_e1fw0"]
@@ -17,8 +17,8 @@ metadata/_custom_type_script = "uid://dd2r64u2pov0l"
 [sub_resource type="BoxShape3D" id="BoxShape3D_aqub1"]
 size = Vector3(28.2473, 15.9736, 21.8272)
 
-[node name="Ship" groups=["capital"] instance=ExtResource("1_5mf3n")]
-mass = 8.4e+09
+[node name="Ship" unique_id=689458804 groups=["capital"] instance=ExtResource("1_5mf3n")]
+mass = 8400000000.0
 gravity_scale = 0.0
 camera_path = NodePath("Camera3D")
 ship_class = "Hyperion"
@@ -27,103 +27,103 @@ is_capital = true
 has_spawn_points = true
 sensor = SubResource("Resource_vdalf")
 
-[node name="Hyperion Turret" parent="Guns" index="0" instance=ExtResource("2_e1fw0")]
+[node name="Hyperion Turret" parent="Guns" parent_id_path=PackedInt32Array(1852529481) index="0" unique_id=1522148336 instance=ExtResource("2_e1fw0")]
 transform = Transform3D(0.95, 0, 0, 0, 0.95, 0, 0, 0, 0.95, 1.13347, 132.085, 70.999)
 
-[node name="Hyperion Turret9" parent="Guns" index="1" instance=ExtResource("2_e1fw0")]
+[node name="Hyperion Turret9" parent="Guns" parent_id_path=PackedInt32Array(1852529481) index="1" unique_id=654908699 instance=ExtResource("2_e1fw0")]
 transform = Transform3D(-4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0, 1, 72.7733, -14.3058, 244.336)
 
-[node name="Hyperion Turret10" parent="Guns" index="2" instance=ExtResource("2_e1fw0")]
+[node name="Hyperion Turret10" parent="Guns" parent_id_path=PackedInt32Array(1852529481) index="2" unique_id=1487873184 instance=ExtResource("2_e1fw0")]
 transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, -72.773, -14.306, 244.336)
 
-[node name="Hyperion Turret2" parent="Guns" index="3" instance=ExtResource("2_e1fw0")]
+[node name="Hyperion Turret2" parent="Guns" parent_id_path=PackedInt32Array(1852529481) index="3" unique_id=628941054 instance=ExtResource("2_e1fw0")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 60.7536, 244.389)
 
-[node name="Hyperion Turret3" parent="Guns" index="4" instance=ExtResource("2_e1fw0")]
+[node name="Hyperion Turret3" parent="Guns" parent_id_path=PackedInt32Array(1852529481) index="4" unique_id=1588153865 instance=ExtResource("2_e1fw0")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 64.3715, -174.829)
 
-[node name="Hyperion Turret4" parent="Guns" index="5" instance=ExtResource("2_e1fw0")]
+[node name="Hyperion Turret4" parent="Guns" parent_id_path=PackedInt32Array(1852529481) index="5" unique_id=1673083278 instance=ExtResource("2_e1fw0")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.20923, 67.7246, -392.399)
 
-[node name="Hyperion Turret5" parent="Guns" index="6" instance=ExtResource("2_e1fw0")]
+[node name="Hyperion Turret5" parent="Guns" parent_id_path=PackedInt32Array(1852529481) index="6" unique_id=1925871143 instance=ExtResource("2_e1fw0")]
 transform = Transform3D(-1, 7.64274e-15, 8.74228e-08, 0, -1, 8.74228e-08, 8.74228e-08, 8.74228e-08, 1, -1.50009, -68.6809, -392.399)
 
-[node name="Hyperion Turret6" parent="Guns" index="7" instance=ExtResource("2_e1fw0")]
+[node name="Hyperion Turret6" parent="Guns" parent_id_path=PackedInt32Array(1852529481) index="7" unique_id=951372049 instance=ExtResource("2_e1fw0")]
 transform = Transform3D(-1, 7.64274e-15, 8.74228e-08, 0, -1, 8.74228e-08, 8.74228e-08, 8.74228e-08, 1, -1.50009, -19.5501, -174.589)
 
-[node name="Hyperion Turret7" parent="Guns" index="8" instance=ExtResource("2_e1fw0")]
+[node name="Hyperion Turret7" parent="Guns" parent_id_path=PackedInt32Array(1852529481) index="8" unique_id=1982284123 instance=ExtResource("2_e1fw0")]
 transform = Transform3D(-0.95, 1.43446e-07, 8.30516e-08, -1.43446e-07, -0.95, 8.30516e-08, 8.30516e-08, 8.30516e-08, 0.95, 0.867165, -132.247, 104.847)
 
-[node name="Hyperion Turret8" parent="Guns" index="9" instance=ExtResource("2_e1fw0")]
+[node name="Hyperion Turret8" parent="Guns" parent_id_path=PackedInt32Array(1852529481) index="9" unique_id=2045171460 instance=ExtResource("2_e1fw0")]
 transform = Transform3D(0.95, -1.43446e-07, -1.43446e-07, -1.43446e-07, -0.95, -1.78818e-21, -1.43446e-07, 2.16597e-14, -0.95, 1.16637, -132.143, 70.6877)
 
-[node name="Thruster" parent="Engines" index="0" instance=ExtResource("3_gm65t")]
+[node name="Thruster" parent="Engines" parent_id_path=PackedInt32Array(1588031376) index="0" unique_id=1261964367 instance=ExtResource("3_gm65t")]
 transform = Transform3D(20, 0, 0, 0, 20, 0, 0, 0, 20, 0, -2.03283, -456.706)
 
-[node name="Thruster2" parent="Engines" index="1" instance=ExtResource("3_gm65t")]
+[node name="Thruster2" parent="Engines" parent_id_path=PackedInt32Array(1588031376) index="1" unique_id=1937290545 instance=ExtResource("3_gm65t")]
 transform = Transform3D(20, 0, 0, 0, 20, 0, 0, 0, 20, 72.8579, 4.89849, -456.706)
 
-[node name="Thruster3" parent="Engines" index="2" instance=ExtResource("3_gm65t")]
+[node name="Thruster3" parent="Engines" parent_id_path=PackedInt32Array(1588031376) index="2" unique_id=1264559809 instance=ExtResource("3_gm65t")]
 transform = Transform3D(20, 0, 0, 0, 20, 0, 0, 0, 20, -72.858, 4.898, -456.706)
 
-[node name="Thruster4" parent="Engines" index="3" instance=ExtResource("3_gm65t")]
+[node name="Thruster4" parent="Engines" parent_id_path=PackedInt32Array(1588031376) index="3" unique_id=1319138669 instance=ExtResource("3_gm65t")]
 transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, 76.7509, -32.3958, 83.3093)
 
-[node name="Thruster5" parent="Engines" index="4" instance=ExtResource("3_gm65t")]
+[node name="Thruster5" parent="Engines" parent_id_path=PackedInt32Array(1588031376) index="4" unique_id=1126020942 instance=ExtResource("3_gm65t")]
 transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, 76.5397, -50.2495, 83.3093)
 
-[node name="Thruster6" parent="Engines" index="5" instance=ExtResource("3_gm65t")]
+[node name="Thruster6" parent="Engines" parent_id_path=PackedInt32Array(1588031376) index="5" unique_id=2135841167 instance=ExtResource("3_gm65t")]
 transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, -76.751, -32.3958, 83.3093)
 
-[node name="Thruster7" parent="Engines" index="6" instance=ExtResource("3_gm65t")]
+[node name="Thruster7" parent="Engines" parent_id_path=PackedInt32Array(1588031376) index="6" unique_id=2074384926 instance=ExtResource("3_gm65t")]
 transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, -76.751, -50.2495, 83.3093)
 
-[node name="Crew" parent="." index="4"]
+[node name="Crew" parent="." index="4" unique_id=1064126352]
 max_gunners = 10
 max_passengers = 500
 
-[node name="Area3DDock" parent="." index="6"]
+[node name="Area3DDock" parent="." index="6" unique_id=1243728702]
 monitorable = false
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3DDock" index="0"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3DDock" index="0" unique_id=962956675]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 39.7158, -29.9651)
 shape = SubResource("BoxShape3D_aqub1")
 
-[node name="CollisionShape3D2" type="CollisionShape3D" parent="Area3DDock" index="1"]
+[node name="CollisionShape3D2" type="CollisionShape3D" parent="Area3DDock" index="1" unique_id=1194424625]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 39.7158, -60.7971)
 shape = SubResource("BoxShape3D_aqub1")
 
-[node name="CollisionShape3D3" type="CollisionShape3D" parent="Area3DDock" index="2"]
+[node name="CollisionShape3D3" type="CollisionShape3D" parent="Area3DDock" index="2" unique_id=1620687598]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 39.7158, -91.0883)
 shape = SubResource("BoxShape3D_aqub1")
 
-[node name="Spawner" parent="." index="7"]
+[node name="Spawner" parent="." index="7" unique_id=316759190]
 script = ExtResource("4_nbv42")
 
-[node name="Bay1" type="Area3D" parent="Spawner" index="0"]
+[node name="Bay1" type="Area3D" parent="Spawner" index="0" unique_id=289351936]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 39.034, -91.98)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Spawner/Bay1" index="0"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Spawner/Bay1" index="0" unique_id=80515442]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.77002, 0.866997)
 shape = SubResource("BoxShape3D_aqub1")
 
-[node name="Bay2" type="Area3D" parent="Spawner" index="1"]
+[node name="Bay2" type="Area3D" parent="Spawner" index="1" unique_id=2020165356]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 39.034, -61.4097)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Spawner/Bay2" index="0"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Spawner/Bay2" index="0" unique_id=1985342202]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.77002, 0.866997)
 shape = SubResource("BoxShape3D_aqub1")
 
-[node name="Bay3" type="Area3D" parent="Spawner" index="2"]
+[node name="Bay3" type="Area3D" parent="Spawner" index="2" unique_id=1004227530]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 39.034, -30.9941)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Spawner/Bay3" index="0"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Spawner/Bay3" index="0" unique_id=1820052761]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.77002, 0.866997)
 shape = SubResource("BoxShape3D_aqub1")
 
-[node name="Hyperion" parent="." index="9" instance=ExtResource("4_2gmgv")]
+[node name="Hyperion" parent="." index="9" unique_id=842105098 instance=ExtResource("4_2gmgv")]
 
-[node name="Camera3D" type="Camera3D" parent="." index="10"]
+[node name="Camera3D" type="Camera3D" parent="." index="10" unique_id=332382720]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 118.699, 179.595)
 near = 0.1
 far = 50000.0

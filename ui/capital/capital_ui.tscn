@@ -1,9 +1,9 @@
-[gd_scene load_steps=3 format=3 uid="uid://bywfmtvnxay38"]
+[gd_scene format=3 uid="uid://bywfmtvnxay38"]
 
 [ext_resource type="Theme" uid="uid://iewuun72p7uj" path="res://ui/menu_theme.tres" id="1_1bkl4"]
 [ext_resource type="Script" uid="uid://c6m0rqspdxqfn" path="res://ui/capital/capital_ui.gd" id="1_h8xvm"]
 
-[node name="CapitalUI" type="HBoxContainer"]
+[node name="CapitalUI" type="HBoxContainer" unique_id=2017818990]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -12,7 +12,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_h8xvm")
 
-[node name="Launch" type="Button" parent="."]
+[node name="Launch" type="Button" parent="." unique_id=1040114034]
 layout_mode = 2
 theme = ExtResource("1_1bkl4")
 theme_override_font_sizes/font_size = 72

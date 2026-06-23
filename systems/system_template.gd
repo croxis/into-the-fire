@@ -18,16 +18,16 @@ func _ready():
 
 
 func add_station(station: Ship):
-	Log.log(["Adding station ", station, " to system ", name], Log.MessageType.QUESTION)
+	Log.log(["Adding station ", station, station.ship_id, " to system ", name], Log.MessageType.QUESTION)
 	$SubViewport/ships.add_child(station, true)
-	Log.log(["Added station ", station, " to system ", name], Log.MessageType.SUCCESS)
+	Log.log(["Added station ", station, station.ship_id, " to system ", name], Log.MessageType.SUCCESS)
 	
 
 func add_ship(ship: Ship):
-	Log.log(["Adding ship ", ship, " to system ", name], Log.MessageType.QUESTION)
+	Log.log(["Adding ship ", ship, ship.ship_id, " to system ", name], Log.MessageType.QUESTION)
 	$SubViewport/ships.add_child(ship, true)
 	ship.owner = $SubViewport/ships
-	Log.log(["Added ship ", ship, " to system ", name], Log.MessageType.SUCCESS)
+	Log.log(["Added ship ", ship, ship.ship_id, " to system ", name], Log.MessageType.SUCCESS)
 
 
 func ship_scanner_check():

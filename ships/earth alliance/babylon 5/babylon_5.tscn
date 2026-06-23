@@ -69,7 +69,7 @@ is_station = true
 has_spawn_points = true
 sensor = SubResource("Resource_y8ph0")
 
-[node name="Crew" parent="." index="4"]
+[node name="Crew" parent="." index="4" unique_id=1064126352]
 max_passengers = 250000
 
 [node name="Reactor_Section" parent="." index="6" unique_id=1233224168 instance=ExtResource("3_y8ph0")]
@@ -116,11 +116,11 @@ shape = SubResource("BoxShape3D_v4i4k")
 [node name="Cobra_Bays" parent="rotation" index="5" unique_id=628257355 instance=ExtResource("10_6fysb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3529.62, 0, 0)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3DDock" index="0" unique_id=998985838]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3DDock" parent_id_path=PackedInt32Array(1243728702) index="0" unique_id=998985838]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4017.94, 339.964, 0)
 shape = SubResource("BoxShape3D_v4i4k")
 
-[node name="Spawner" parent="." index="12"]
+[node name="Spawner" parent="." index="12" unique_id=316759190]
 script = ExtResource("24_empfd")
 
 [connection signal="body_entered" from="rotation/Area3DDockRotate" to="." method="_on_area_3d_dock_body_entered"]

@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://fog63swldmub"]
+[gd_scene format=3 uid="uid://fog63swldmub"]
 
 [ext_resource type="Script" uid="uid://byqhx4358bnfk" path="res://title_screen.gd" id="1_v3ado"]
 [ext_resource type="PackedScene" uid="uid://bx03e1mn48l58" path="res://ships/earth alliance/babylon 5/babylon_5.tscn" id="2_a5wwe"]
@@ -24,7 +24,7 @@ tracks/0/keys = {
 "start_offset": 0.0,
 "stream": ExtResource("4_jke73")
 }],
-"times": PackedFloat32Array(0.7)
+"times": PackedFloat64Array(0.7)
 }
 tracks/0/use_blend = true
 tracks/1/type = "bezier"
@@ -35,8 +35,8 @@ tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
 "handle_modes": PackedInt32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-"points": PackedFloat32Array(-3987.15, -0.25, 0, 0.25, 0, -4432.19, -0.25, 0, 0.25, 0, -3543.35, -0.1, -39.645, 0.1, 41.355, -513.008, -0.0981445, -31.9918, 0.101854, 28.0082, 1045.76, -0.200804, -39.761, 0.199196, 46.239, 2565.29, -0.0994453, -26.2922, 0.200554, 46.7078, 3619.12, -0.699444, -191.118, 0.700554, 171.882, 4637.29, -1.09945, -0.294922, 1.20055, 0.705078, 4057.45, -0.537941, 80.552, 0.66206, -100.448, 3776.51, -0.25, 0, 0.25, 0),
-"times": PackedFloat32Array(0, 8.0001, 9.5, 19, 25.1, 31, 34, 39, 43, 45)
+"points": PackedFloat64Array(-3987.15, -0.25, 0, 0.25, 0, -4432.19, -0.25, 0, 0.25, 0, -3543.35, -0.1, -39.645, 0.1, 41.355, -513.008, -0.0981445, -31.9918, 0.101854, 28.0082, 1045.76, -0.200804, -39.761, 0.199196, 46.239, 2565.29, -0.0994453, -26.2922, 0.200554, 46.7078, 3619.12, -0.699444, -191.118, 0.700554, 171.882, 4637.29, -1.09945, -0.294922, 1.20055, 0.705078, 4057.45, -0.537941, 80.552, 0.66206, -100.448, 3776.51, -0.25, 0, 0.25, 0),
+"times": PackedFloat64Array(0, 8.0001, 9.5, 19, 25.1, 31, 34, 39, 43, 45)
 }
 tracks/2/type = "bezier"
 tracks/2/imported = false
@@ -46,8 +46,8 @@ tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = {
 "handle_modes": PackedInt32Array(0, 0, 0, 0, 0, 0, 0, 0, 0),
-"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.25, 0, 1013.83, -2.68791, -1.83215, 2.61917, 0.167847, 0, -1.09549, 56, 0.25, 0, -32.8547, -0.25, 0, 0.96508, 1.85467, -488.793, -0.724369, 2.79321, 1.27563, -1.20679, -77.6547, -0.454662, -39.3453, 0.945335, 54.6547, 0, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.25, 0),
-"times": PackedFloat32Array(0, 8, 19, 25.1, 31, 34, 39, 43, 45)
+"points": PackedFloat64Array(0, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.25, 0, 1013.83, -2.68791, -1.83215, 2.61917, 0.167847, 0, -1.09549, 56, 0.25, 0, -32.8547, -0.25, 0, 0.96508, 1.85467, -488.793, -0.724369, 2.79321, 1.27563, -1.20679, -77.6547, -0.454662, -39.3453, 0.945335, 54.6547, 0, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.25, 0),
+"times": PackedFloat64Array(0, 8, 19, 25.1, 31, 34, 39, 43, 45)
 }
 tracks/3/type = "bezier"
 tracks/3/imported = false
@@ -57,8 +57,8 @@ tracks/3/interp = 1
 tracks/3/loop_wrap = true
 tracks/3/keys = {
 "handle_modes": PackedInt32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.707116, 6, 511.338, -0.577645, -12.3385, 0.922355, 29.6615, 0, -0.861385, 44, 0.838614, -34, -837.242, -0.917133, -7.75842, 0.482868, -14.7584, -703.016, -0.768482, -67.9844, 0.331518, 37.0156, -266.97, -0.605614, -72.0296, 0.794388, 56.9704, 0, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.25, 0),
-"times": PackedFloat32Array(0, 8, 9.5, 19, 25.1, 31, 34, 39, 43, 45)
+"points": PackedFloat64Array(0, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.707116, 6, 511.338, -0.577645, -12.3385, 0.922355, 29.6615, 0, -0.861385, 44, 0.838614, -34, -837.242, -0.917133, -7.75842, 0.482868, -14.7584, -703.016, -0.768482, -67.9844, 0.331518, 37.0156, -266.97, -0.605614, -72.0296, 0.794388, 56.9704, 0, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.25, 0),
+"times": PackedFloat64Array(0, 8, 9.5, 19, 25.1, 31, 34, 39, 43, 45)
 }
 tracks/4/type = "bezier"
 tracks/4/imported = false
@@ -68,8 +68,8 @@ tracks/4/interp = 1
 tracks/4/loop_wrap = true
 tracks/4/keys = {
 "handle_modes": PackedInt32Array(0, 0, 0, 0, 0, 0),
-"points": PackedFloat32Array(-3987.15, -0.25, 0, 0.25, 0, -4432.19, -0.25, 0, 0.25, 0, -3543.35, -0.1, -39.645, 0, 256.286, 4637.29, -2.86826, 16.0313, 1.20055, 0.705078, 4057.45, -0.537941, 80.552, 0.66206, -100.448, 3776.51, -0.25, 0, 0.25, 0),
-"times": PackedFloat32Array(0, 8, 9.5, 39, 43, 45)
+"points": PackedFloat64Array(-3987.15, -0.25, 0, 0.25, 0, -4432.19, -0.25, 0, 0.25, 0, -3543.35, -0.1, -39.645, 0, 256.286, 4637.29, -2.86826, 16.0313, 1.20055, 0.705078, 4057.45, -0.537941, 80.552, 0.66206, -100.448, 3776.51, -0.25, 0, 0.25, 0),
+"times": PackedFloat64Array(0, 8, 9.5, 39, 43, 45)
 }
 tracks/5/type = "bezier"
 tracks/5/imported = false
@@ -79,8 +79,8 @@ tracks/5/interp = 1
 tracks/5/loop_wrap = true
 tracks/5/keys = {
 "handle_modes": PackedInt32Array(0, 0, 0, 0, 0, 0, 0, 0),
-"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.756764, -0.742602, 1013.83, -3.08881, 1.82532, 3.01119, 0.725342, 1.66797, -0.964306, 78.0352, 1.00236, -59.9961, -488.793, -1.17167, 2.95148, 1.27563, -1.20679, -77.6547, -0.779804, -47.3875, 0.945335, 54.6547, 0, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.25, 0),
-"times": PackedFloat32Array(0, 8, 19, 25.5, 34, 39, 43, 45)
+"points": PackedFloat64Array(0, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.756764, -0.742602, 1013.83, -3.08881, 1.82532, 3.01119, 0.725342, 1.66797, -0.964306, 78.0352, 1.00236, -59.9961, -488.793, -1.17167, 2.95148, 1.27563, -1.20679, -77.6547, -0.779804, -47.3875, 0.945335, 54.6547, 0, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.25, 0),
+"times": PackedFloat64Array(0, 8, 19, 25.5, 34, 39, 43, 45)
 }
 tracks/6/type = "bezier"
 tracks/6/imported = false
@@ -90,8 +90,8 @@ tracks/6/interp = 1
 tracks/6/loop_wrap = true
 tracks/6/keys = {
 "handle_modes": PackedInt32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.707116, 6, 511.338, -1.14328, -21.4815, 2.35672, 24.7184, 0, -0.820457, 60.8574, 1.17954, -79.9423, -837.242, -2.0762, 21.4012, 0.923796, -2.79871, -703.016, -0.768482, -67.9844, 0.941719, 76.3748, -266.97, -0.605614, -72.0296, 1.02039, 112.228, 0, -0.879608, 0.357584, 0.25, 0, 0, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.25, 0),
-"times": PackedFloat32Array(0, 8, 9.5, 19, 25.1, 31, 34, 39, 43, 45)
+"points": PackedFloat64Array(0, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.707116, 6, 511.338, -1.14328, -21.4815, 2.35672, 24.7184, 0, -0.820457, 60.8574, 1.17954, -79.9423, -837.242, -2.0762, 21.4012, 0.923796, -2.79871, -703.016, -0.768482, -67.9844, 0.941719, 76.3748, -266.97, -0.605614, -72.0296, 1.02039, 112.228, 0, -0.879608, 0.357584, 0.25, 0, 0, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.25, 0),
+"times": PackedFloat64Array(0, 8, 9.5, 19, 25.1, 31, 34, 39, 43, 45)
 }
 tracks/7/type = "bezier"
 tracks/7/imported = false
@@ -101,8 +101,8 @@ tracks/7/interp = 1
 tracks/7/loop_wrap = true
 tracks/7/keys = {
 "handle_modes": PackedInt32Array(0, 0, 0, 0, 0, 0, 0, 0),
-"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.25, 0, -1.5708, -1.27256, 0.00306201, 1.32744, 0.00306201, 0, -0.774673, -0.140722, 0.925327, 0.155519, 0.477887, -0.25, 0, 1.12533, 0.0968267, 1.17114, -1.02956, -0.018514, 1.77044, 0.0140002, 0, -3.24348, -0.0233411, 0.25, 0, 0, -0.25, 0, 0.25, 0),
-"times": PackedFloat32Array(0, 8, 19, 25.1, 31, 34, 43, 45)
+"points": PackedFloat64Array(0, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.25, 0, -1.5708, -1.27256, 0.00306201, 1.32744, 0.00306201, 0, -0.774673, -0.140722, 0.925327, 0.155519, 0.477887, -0.25, 0, 1.12533, 0.0968267, 1.17114, -1.02956, -0.018514, 1.77044, 0.0140002, 0, -3.24348, -0.0233411, 0.25, 0, 0, -0.25, 0, 0.25, 0),
+"times": PackedFloat64Array(0, 8, 19, 25.1, 31, 34, 43, 45)
 }
 tracks/8/type = "bezier"
 tracks/8/imported = false
@@ -112,8 +112,8 @@ tracks/8/interp = 1
 tracks/8/loop_wrap = true
 tracks/8/keys = {
 "handle_modes": PackedInt32Array(0, 0, 0, 0, 0, 0, 0, 0),
-"points": PackedFloat32Array(-1.5708, -0.25, 0, 0.25, 0, -1.5708, -0.25, 0, 0.25, 0, -0.899851, -0.934795, -0.129593, 0.565205, 0.195549, 2.94287, -1.15616, -0.1537, 0.84384, 0.124477, 3.07376, -0.25, 0, 1.60411, -0.0136964, 1.5, -2.02922, 0.547507, 0.25, 0, 1.5708, -0.25, 0, 0.25, 0, 1.5708, -0.25, 0, 0.25, 0),
-"times": PackedFloat32Array(0, 8, 9.5, 25.1, 31, 39, 43, 45)
+"points": PackedFloat64Array(-1.5708, -0.25, 0, 0.25, 0, -1.5708, -0.25, 0, 0.25, 0, -0.899851, -0.934795, -0.129593, 0.565205, 0.195549, 2.94287, -1.15616, -0.1537, 0.84384, 0.124477, 3.07376, -0.25, 0, 1.60411, -0.0136964, 1.5, -2.02922, 0.547507, 0.25, 0, 1.5708, -0.25, 0, 0.25, 0, 1.5708, -0.25, 0, 0.25, 0),
+"times": PackedFloat64Array(0, 8, 9.5, 25.1, 31, 39, 43, 45)
 }
 tracks/9/type = "bezier"
 tracks/9/imported = false
@@ -123,8 +123,8 @@ tracks/9/interp = 1
 tracks/9/loop_wrap = true
 tracks/9/keys = {
 "handle_modes": PackedInt32Array(0, 0, 0, 0, 0, 0, 0, 0, 0),
-"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.870978, -0.00344021, 0.151208, -0.629022, 0.00792271, 0.25, 0, 0, -0.25, 0, 1.5, -0.0251164, -1.5708, -1.26595, -0.000551343, 1.93404, 0.0319628, -0.0426916, -0.25, 0, 0.607925, 0.118731, 0.0720897, -0.25, 0, 0.25, 0, 1.95659e-08, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.25, 0),
-"times": PackedFloat32Array(0, 8, 9.5, 19, 25.1, 31, 34, 39, 45)
+"points": PackedFloat64Array(0, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.870978, -0.00344021, 0.151208, -0.629022, 0.00792271, 0.25, 0, 0, -0.25, 0, 1.5, -0.0251164, -1.5708, -1.26595, -0.000551343, 1.93404, 0.0319628, -0.0426916, -0.25, 0, 0.607925, 0.118731, 0.0720897, -0.25, 0, 0.25, 0, 1.95659e-08, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.25, 0),
+"times": PackedFloat64Array(0, 8, 9.5, 19, 25.1, 31, 34, 39, 45)
 }
 
 [sub_resource type="Animation" id="Animation_q455p"]
@@ -136,8 +136,8 @@ tracks/0/path = NodePath("AudioStreamPlayer:playing")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
+"times": PackedFloat64Array(0),
+"transitions": PackedFloat64Array(1),
 "update": 0,
 "values": [false]
 }
@@ -149,8 +149,8 @@ tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
 "handle_modes": PackedInt32Array(0),
-"points": PackedFloat32Array(-3987.15, -0.25, 0, 0.25, 0),
-"times": PackedFloat32Array(0)
+"points": PackedFloat64Array(-3987.15, -0.25, 0, 0.25, 0),
+"times": PackedFloat64Array(0)
 }
 tracks/2/type = "bezier"
 tracks/2/imported = false
@@ -160,8 +160,8 @@ tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = {
 "handle_modes": PackedInt32Array(0),
-"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0),
-"times": PackedFloat32Array(0)
+"points": PackedFloat64Array(0, -0.25, 0, 0.25, 0),
+"times": PackedFloat64Array(0)
 }
 tracks/3/type = "bezier"
 tracks/3/imported = false
@@ -171,8 +171,8 @@ tracks/3/interp = 1
 tracks/3/loop_wrap = true
 tracks/3/keys = {
 "handle_modes": PackedInt32Array(0),
-"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0),
-"times": PackedFloat32Array(0)
+"points": PackedFloat64Array(0, -0.25, 0, 0.25, 0),
+"times": PackedFloat64Array(0)
 }
 tracks/4/type = "bezier"
 tracks/4/imported = false
@@ -182,8 +182,8 @@ tracks/4/interp = 1
 tracks/4/loop_wrap = true
 tracks/4/keys = {
 "handle_modes": PackedInt32Array(0),
-"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0),
-"times": PackedFloat32Array(0)
+"points": PackedFloat64Array(0, -0.25, 0, 0.25, 0),
+"times": PackedFloat64Array(0)
 }
 tracks/5/type = "bezier"
 tracks/5/imported = false
@@ -193,8 +193,8 @@ tracks/5/interp = 1
 tracks/5/loop_wrap = true
 tracks/5/keys = {
 "handle_modes": PackedInt32Array(0),
-"points": PackedFloat32Array(-1.5708, -0.25, 0, 0.25, 0),
-"times": PackedFloat32Array(0)
+"points": PackedFloat64Array(-1.5708, -0.25, 0, 0.25, 0),
+"times": PackedFloat64Array(0)
 }
 tracks/6/type = "bezier"
 tracks/6/imported = false
@@ -204,8 +204,8 @@ tracks/6/interp = 1
 tracks/6/loop_wrap = true
 tracks/6/keys = {
 "handle_modes": PackedInt32Array(0),
-"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0),
-"times": PackedFloat32Array(0)
+"points": PackedFloat64Array(0, -0.25, 0, 0.25, 0),
+"times": PackedFloat64Array(0)
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_epepl"]
@@ -230,43 +230,42 @@ rings = 2
 cap_top = false
 cap_bottom = false
 
-[node name="title screen" type="Node3D"]
+[node name="title screen" type="Node3D" unique_id=430916075]
 script = ExtResource("1_v3ado")
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=566917501]
 environment = ExtResource("2_xlnt3")
 
-[node name="babylon_5_scale" parent="." instance=ExtResource("2_a5wwe")]
+[node name="babylon_5_scale" parent="." unique_id=776631146 instance=ExtResource("2_a5wwe")]
+is_station = false
 
-[node name="Camera3D" type="Camera3D" parent="."]
+[node name="Camera3D" type="Camera3D" parent="." unique_id=798369475]
 transform = Transform3D(0.364068, 0, 0.931373, 0, 1, 0, -0.931373, 0, 0.364068, 5317.88, 0, 1162.54)
 current = true
 fov = 47.8125
 near = 0.1
 far = 20000.0
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=811861513]
 transform = Transform3D(0.892358, 0, 0.451329, 0, 1, 0, -0.451329, 0, 0.892358, 0, 0, 0)
 light_color = Color(1, 0.92549, 0.901961, 1)
 shadow_enabled = true
 directional_shadow_max_distance = 1000.0
 
-[node name="NebulaDirectionalLight3D" type="DirectionalLight3D" parent="."]
+[node name="NebulaDirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1566134820]
 transform = Transform3D(-0.791042, 0, -0.611762, 0.383873, 0.778627, -0.496369, 0.476334, -0.627488, -0.615926, 0, 0, 0)
 light_color = Color(0.360784, 0.223529, 1, 1)
 light_energy = 0.31
 
-[node name="epsilon iii" parent="." instance=ExtResource("3_si7s7")]
+[node name="epsilon iii" parent="." unique_id=1041302980 instance=ExtResource("3_si7s7")]
 transform = Transform3D(-590.721, 0, -4964.98, 0, 5000, 0, 4964.98, 0, -590.721, -0.03125, 1380.32, -9628.14)
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
-libraries = {
-&"": SubResource("AnimationLibrary_epepl")
-}
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=105915713]
+libraries/ = SubResource("AnimationLibrary_epepl")
 
-[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=1551627962]
 
-[node name="StarField" type="Node3D" parent="."]
+[node name="StarField" type="Node3D" parent="." unique_id=2029520438]
 script = ExtResource("6_bsqdu")
 mag_ref = 7.0
 mag_limit = 7.0
@@ -274,37 +273,37 @@ star_labels_visible = false
 celestial_coords = Vector3(1.899, 2.541, -0.529)
 camera_path = NodePath("../Camera3D_Moving")
 
-[node name="DirectionalLight3D2" type="DirectionalLight3D" parent="."]
+[node name="DirectionalLight3D2" type="DirectionalLight3D" parent="." unique_id=2145149107]
 transform = Transform3D(0.997803, 0, 0.0662565, -0.025043, 0.925818, 0.37714, -0.0613414, -0.37797, 0.923783, 0, 0, 2856.64)
 sky_mode = 1
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=893652548]
 transform = Transform3D(0.983132, 0.182794, -0.0061107, 0.182771, -0.983147, -0.00420464, -0.0067763, 0.00301686, -0.999972, 0, 0, 0)
 material_override = SubResource("StandardMaterial3D_8r0lf")
 mesh = SubResource("CylinderMesh_qcncl")
 
-[node name="XROrigin3D" type="XROrigin3D" parent="."]
+[node name="XROrigin3D" type="XROrigin3D" parent="." unique_id=679883430]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 4488.07, -29.9659, 0)
 visible = false
 current = true
 
-[node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D"]
+[node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D" unique_id=793223683]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, 0)
 current = true
 
-[node name="LeftHand" type="XRController3D" parent="XROrigin3D"]
+[node name="LeftHand" type="XRController3D" parent="XROrigin3D" unique_id=1826136091]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 1, -0.5)
 tracker = &"left_hand"
 
-[node name="RightHand" type="XRController3D" parent="XROrigin3D"]
+[node name="RightHand" type="XRController3D" parent="XROrigin3D" unique_id=775991839]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 1, 0.5)
 tracker = &"right_hand"
 
-[node name="AudioStreamPlayer2" type="AudioStreamPlayer" parent="."]
+[node name="AudioStreamPlayer2" type="AudioStreamPlayer" parent="." unique_id=1483741393]
 stream = ExtResource("8_coigh")
 
-[node name="Camera3D_Moving" type="Camera3D" parent="."]
-transform = Transform3D(-3.61999e-06, 0, -1, 0, 1, 0, 1, 0, -3.61999e-06, -3987.15, 0, 0)
+[node name="Camera3D_Moving" type="Camera3D" parent="." unique_id=1502386775]
+transform = Transform3D(-3.6199900765411122e-06, 0, -0.9999999999999999, 0, 1, 0, 0.9999999999999999, 0, -3.6199900765411122e-06, -3987.15, 0, 0)
 current = true
 fov = 55.0
 near = 0.1

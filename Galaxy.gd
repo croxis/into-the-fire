@@ -128,6 +128,8 @@ func finish_setup_galaxy_all() -> void:
 	# Hack until we figure out what we are doing #
 	if get_tree().root.get_node("entry").is_server:
 		var babylon5: Ship = preload("res://ships/earth alliance/babylon 5/babylon_5.tscn").instantiate()
+		babylon5.ship_id = ship_id_counter
+		ship_id_counter += 1
 		
 		$Systems.add_station(babylon5, "test_system")
 		var b5commander: Pilot = Pilot.new_pilot("Commendar Eclair")
@@ -161,6 +163,8 @@ func finish_setup_galaxy_all() -> void:
 		hyperion.name = "EASS Hyperion"
 		hyperion.position = Vector3(5800, 0, 0)
 		$Systems.add_ship(hyperion, "test_system")
+		hyperion.ship_id = ship_id_counter
+		ship_id_counter += 1
 
 
 func finish_setup_galaxy_client():
