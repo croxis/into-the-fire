@@ -77,13 +77,15 @@ func _ready():
 
 
 func end_title_sequence() -> void:
+	Log.log(["Trying to end title"], Log.MessageType.INFO)
 	if get_parent().has_node("title screen"):
-		print_debug("ending title")
+		Log.log(["Ending Title"], Log.MessageType.INFO)
 		get_parent().get_node("title screen").queue_free()
 	$MainMenu.visible = false
 	
 
 func _on_network_connection_succeeded():
+	Log.log(["Connection Succeded"], Log.MessageType.INFO)
 	end_title_sequence()
 
 

@@ -128,10 +128,12 @@ func join_game(ip, port, new_player_name, s_password, p_password):
 		print("Failed to join Game: ", ip, ":", port, " as " , new_player_name)
 		return
 	multiplayer.multiplayer_peer = peer
+	Log.log(["Joining Game Complete: ", multiplayer.multiplayer_peer], Log.MessageType.INFO)
 
 
 func on_connected():
 	# We just connected to a server
+	Log.log(["Emit connection_succeeded"], Log.MessageType.INFO)
 	connection_succeeded.emit()
 
 

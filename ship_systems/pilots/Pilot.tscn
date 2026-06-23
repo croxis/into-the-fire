@@ -66,11 +66,3 @@ root = NodePath("..")
 enable_prediction = true
 input_properties = Array[String](["InputsSync:throttle", "InputsSync:rotation_throttle", "InputsSync:debug_all_stop", "InputsSync:fire_primary", "InputsSync:fire_secondary", "InputsSync:autospin_toggle", "InputsSync:autobreak_toggle", "InputsSync:debug_kill_ship"])
 metadata/_custom_type_script = "uid://d350u8evihs1u"
-
-[node name="UtilityAIAgentFleetCommander" type="UtilityAIAgent" parent="." unique_id=2118486680]
-thinking_delay_in_seconds = 0.0
-
-[node name="UtilityAISensor" type="UtilityAISensor" parent="UtilityAIAgentFleetCommander" unique_id=812814810]
-sensor_value = 0.043
-
-[node name="UtilityAIBehaviourLaunchShips" type="UtilityAIBehaviour" parent="UtilityAIAgentFleetCommander" unique_id=925145175]

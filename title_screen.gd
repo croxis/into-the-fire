@@ -2,8 +2,8 @@ extends Node3D
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	DiscordRPC.state = "Main menu"
-	DiscordRPC.refresh()
+	#DiscordRPC.state = "Main menu"
+	#DiscordRPC.refresh()
 	get_tree().get_root().get_node("entry").get_node("MainMenu").visible = true
 	var ran = $StarField.get_star_proper("Ran")
 	var ran_position = Vector3(ran['x'].to_float(), ran['y'].to_float(), ran['z'].to_float())
