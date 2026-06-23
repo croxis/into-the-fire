@@ -177,7 +177,7 @@ func _client_auth_callback(client_id: int, buf : PackedByteArray):
 
 	buf = var_to_bytes(dict)
 	multiplayer.send_auth(1, buf)
-	#multiplayer.complete_auth(1)
+	multiplayer.complete_auth(1)
 
 
 func _refuse(server_peer, p_msg:=""):
