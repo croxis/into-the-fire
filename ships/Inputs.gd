@@ -36,7 +36,6 @@ func update():
 	rotation_throttle.z = Input.get_axis("clock_rotation", "counter_rotation")
 	
 	if (Input.is_action_pressed("forward_full_thrust")):
-		Log.log(["FULL THRUST"], Log.MessageType.INFO)
 		throttle.z = -1
 	if (Input.is_action_pressed("backward_full_thrust")):
 		throttle.z = 1

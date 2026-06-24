@@ -30,6 +30,13 @@ func add_ship(ship: Ship):
 	Log.log(["Added ship ", ship, ship.ship_id, " to system ", name], Log.MessageType.SUCCESS)
 
 
+func get_ships() -> Array[Ship]:
+	var ships: Array[Ship] = []
+	for ship: Ship in $SubViewport/ships.get_children():
+		ships.append(ship)
+	return ships
+
+
 func ship_scanner_check():
 	for ship: Ship in $SubViewport/ships.get_children():
 		for other_ship: Ship in $SubViewport/ships.get_children():

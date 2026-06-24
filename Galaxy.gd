@@ -56,7 +56,7 @@ func find_pilot_by_network_id(id: int) -> Pilot:
 		if pilot.multiplayer_id == id:
 			return pilot
 	return null
-	
+
 
 func set_render_resolution(resolution: Vector2i) -> void:
 	print_debug("Galaxy: Setting render resolution: ", resolution)
@@ -232,3 +232,31 @@ func _on_join_game_request_spawn(faction_name: String, system_name: String, spaw
 
 func _on_join_game_request_faction(faction_name: String) -> void:
 	$CanvasLayer/JoinGame.show_spawn(get_spawn_points(Faction.get_faction(faction_name)))
+
+
+func _on_ship_destroyed(ship: Ship):
+	## This is ONLY for respawning characters. The destruction of the ship itself
+	## is handled elsewhere.
+	#TODO: Find closest faction capital or station with capacity and the player respawns there
+	#This has to be done at the galaxy level, for now, incase we have to hop to other systems
+	#Depending on gamemode we might want something like allegiance with lifepods,
+	#X4 with spacesuits (or starfury escape pods), or insta-respawn
+	
+	# This will also respawn npcs for now
+	var system: System = ship.get_current_system()
+	var ships:= system.get_ships()
+	for old_pilot: Pilot in ship.get_crew():
+		var distance: float = -1
+		var proposed_ship: Ship
+		for target_ship in ships:
+			if (target_ship.is_capital or target_ship.is_station) and (old_pilot.faction.is_a_parent(target_ship.faction)):
+				var d = abs(target_ship.global_position.distance_to(ship.global_position))
+				if distance == -1 or d < distance:
+					distance = d
+					proposed_ship = target_ship
+		if proposed_ship:
+			var new_pilot: Pilot = proposed_ship.get_node("CrewMultiplayerSpawner").spawn({"name": old_pilot.name, "multiplayer_id": old_pilot.multiplayer_id})
+			new_pilot.faction = old_pilot.faction
+			new_pilot._player_pilot_id = old_pilot._player_pilot_id
+			#TODO: Genealize this to a multicrew craft
+			proposed_ship.add_passenger(new_pilot)

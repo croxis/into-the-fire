@@ -62,6 +62,19 @@ static func get_faction(faction_name: String) -> Faction:
 	return null
 
 
+func is_a_parent(possible_parent_faction: Faction) -> bool:
+	var current_parent: Faction = parent_faction
+	if parent_faction == possible_parent_faction:
+		return true
+	while current_parent != possible_parent_faction:
+		if not current_parent:  # Top of the tree!
+			return false
+		if current_parent == possible_parent_faction:
+			return true
+		current_parent = current_parent.parent_faction
+	return false
+
+
 func get_children() -> Array[Faction]:
 	var children: Array[Faction] = []
 	for faction in factions.values():

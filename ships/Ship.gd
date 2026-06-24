@@ -100,7 +100,7 @@ var start_velocity := Vector3(0, 0, 0)
 
 var is_spawning := false			
 
-signal destroyed(ship_id)
+signal destroyed(ship: Ship)
 
 
 # Called when the node enters the scene tree for the first time.
@@ -112,6 +112,7 @@ func _ready():
 	#target_rot = rotation_degrees
 	target_global_transform = global_transform
 	galaxy = get_tree().root.get_node("entry/Galaxy")
+	destroyed.connect(galaxy._on_ship_destroyed)
 
 
 func add_captain(pilot: Pilot):
@@ -136,7 +137,7 @@ func add_captain(pilot: Pilot):
 func add_passenger(pilot: Pilot):
 	if $Crew.add_passenger(pilot) and pilot.multiplayer_id:
 		set_camera.rpc_id(pilot.multiplayer_id)
-		print_debug("Passenger added to ", name, " ", ship_id, " id ", pilot.multiplayer_id)
+		Log.log(["Passenger added to ", name, " ", ship_id, " id ", pilot.multiplayer_id], Log.MessageType.INFO)
 		set_capital_ui.rpc_id(pilot.multiplayer_id)
 
 
@@ -283,8 +284,8 @@ func bullet_hit(damage, bullet_global_trans):
 
 
 func destroy() -> void:
-	emit_signal("destroyed", ship_id)
-	faction.owned_ships.erase(self)
+	emit_signal("destroyed", self)
+	faction.remove_ship(self)
 	queue_free()
 
 
