@@ -1,6 +1,6 @@
 extends MultiplayerSpawner
 
-const CREW_SCENE = preload("res://ship_systems/pilots/Pilot.tscn")
+const CREW_SCENE = preload("res://characters/character.tscn")
 
 func _init() -> void:
 	spawn_function = _spawn_crew

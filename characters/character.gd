@@ -26,7 +26,7 @@ extends Node
 var active_orders: Array[OrderData] = []
 var pending_orders: Array[OrderData] = []
 static var next_id := 0
-static var pilot_scene: PackedScene = load("res://ship_systems/pilots/Pilot.tscn")
+static var pilot_scene: PackedScene = load("res://characters/character.tscn")
 
 static func new_pilot(new_name: String) -> Pilot:
 	var new_pilot_instance = pilot_scene.instantiate()
