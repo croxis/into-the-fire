@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://dgsj2su1f5ppc" path="res://ui/debug/widgets/TextList/DebugTextList.tscn" id="5_ro4nv"]
 [ext_resource type="PackedScene" uid="uid://d31wy0m5b7d3b" path="res://ui/main_menu/main_menu.tscn" id="7_j7gch"]
 [ext_resource type="Script" uid="uid://cbohph20hhrxe" path="res://DisplayManager.gd" id="8_oa1x6"]
+[ext_resource type="Script" uid="uid://rcvihc1jdyuo" path="res://discord.gd" id="10_sdusq"]
 
 [node name="entry" type="Node" unique_id=1561976683]
 script = ExtResource("1_ox4k0")
@@ -61,6 +62,13 @@ script = ExtResource("4_h8ft4")
 
 [node name="TextListBenchmark" parent="DebugBenchmark" unique_id=1705418483 instance=ExtResource("5_ro4nv")]
 layout_mode = 2
+
+[node name="Discord" type="Control" parent="." unique_id=341019856]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("10_sdusq")
 
 [connection signal="load_scene" from="Galaxy" to="loading" method="_on_galaxy_load_scene"]
 [connection signal="auth_failed" from="network" to="." method="_on_network_auth_failed"]
