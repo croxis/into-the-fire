@@ -19,6 +19,7 @@ func _ready() -> void:
 	args.set_client_id(APPLICATION_ID)
 	args.set_scopes(DiscordClient.get_default_presence_scopes())
 	args.set_code_challenge(code_verifier.challenge())
+	client.set_application_id(APPLICATION_ID)
 	client.authorize(args, _on_authorized)
 	
 	var activity := DiscordActivity.new()
