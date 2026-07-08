@@ -93,7 +93,6 @@ script = ExtResource("4_ob5l3")
 script = ExtResource("5_tgeno")
 
 [node name="CrewMultiplayerSpawner" type="MultiplayerSpawner" parent="." unique_id=162340832]
-_spawnable_scenes = PackedStringArray("res://ship_systems/pilots/Pilot.tscn")
 spawn_path = NodePath("../Crew")
 script = ExtResource("6_1a8so")
 

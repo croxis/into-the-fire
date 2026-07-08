@@ -8,7 +8,6 @@ func _init() -> void:
 
 func _spawn_crew(data: Dictionary) -> Pilot:
 	var crew: Pilot = CREW_SCENE.instantiate()
-	crew.multiplayer_id = data["multiplayer_id"]
-	crew.name = data["name"]
+	crew.restore(data)
 	crew.get_node("InputsSync").set_multiplayer_authority(data["multiplayer_id"])
 	return crew

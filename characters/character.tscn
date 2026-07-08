@@ -44,10 +44,10 @@ properties/7/path = NodePath(".:debug_kill_ship")
 properties/7/spawn = true
 properties/7/replication_mode = 2
 
-[node name="Pilot" type="Node" unique_id=422449946]
+[node name="Character" type="Node" unique_id=422449946]
 script = ExtResource("1_32im1")
 
-[node name="PilotSync" type="MultiplayerSynchronizer" parent="." unique_id=1031767373]
+[node name="CharacterSync" type="MultiplayerSynchronizer" parent="." unique_id=1031767373]
 replication_config = SubResource("SceneReplicationConfig_38dqk")
 
 [node name="InputsSync" type="MultiplayerSynchronizer" parent="." unique_id=1920384969]
@@ -60,3 +60,15 @@ script = ExtResource("3_7w08q")
 metadata/_custom_type_script = "uid://cpiuf65vuu0oa"
 
 [node name="LimboHSM" type="LimboHSM" parent="." unique_id=245420972]
+
+[node name="IdleState" type="LimboState" parent="LimboHSM" unique_id=2041462307]
+
+[node name="TravelState" type="LimboState" parent="LimboHSM" unique_id=952711825]
+
+[node name="CombatState" type="LimboState" parent="LimboHSM" unique_id=138048187]
+
+[node name="ApproachState" type="LimboState" parent="LimboHSM/CombatState" unique_id=117812523]
+
+[node name="EngageState" type="LimboState" parent="LimboHSM/CombatState" unique_id=1654990445]
+
+[node name="DeadState" type="LimboState" parent="LimboHSM" unique_id=1848020642]

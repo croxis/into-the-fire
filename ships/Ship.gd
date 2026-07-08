@@ -363,9 +363,7 @@ func request_launch(p_ship_id: int, pilot_id: int):
 		old_pilot = $Crew.remove_passenger_by_id(pilot_id)
 	else:		
 		old_pilot = $Crew.remove_passenger_by_multiplayerid(remote_id)
-	var pilot: Pilot = new_ship.get_node("CrewMultiplayerSpawner").spawn({"name": old_pilot.name, "multiplayer_id": old_pilot.multiplayer_id})
-	pilot.faction = old_pilot.faction
-	pilot._player_pilot_id = old_pilot._player_pilot_id
+	var pilot: Pilot = new_ship.get_node("CrewMultiplayerSpawner").spawn(old_pilot.serialize())
 	#TODO: Genealize this to a multicrew craft
 	new_ship.add_captain(pilot)
 	old_pilot.queue_free()

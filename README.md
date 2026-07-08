@@ -27,8 +27,12 @@ F5 Switch 1st and 3rd Camera
 Esc brings up the menu
 
 ## Build instructions
-Requires gd4 branch of the [Starfield addon](https://gitlab.com/croxis/starfield)
+Requires a custom build of godot: Doubles, LimboAI, and a patch for better control of the physics engine
 
 
 ## Tutorials that helped me alot
 [Make an RTS camera](https://www.youtube.com/watch?v=t-tkFxhpiCs&list=PLUzx1-8efVAoswyWSJh-du7HCCuVL3ckt)
+
+## Use of LLM AI
+No vibe coding was involved!
+However, I use LLM to assist me in learning coding practices and structure. Still ended up being a noodly mess!
