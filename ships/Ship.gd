@@ -2,52 +2,36 @@
 extends RigidBody3D
 class_name Ship
 
-@onready var inputs:
-	get:
-		if ($Crew.pilot):
-			return $Crew.pilot.get_node("InputsSync")
-
 @export var ship_id: int
 
-@export var _player_pilot_id: int:
-	get:
-		if ($Crew.pilot):
-			return $Crew.pilot._player_pilot_id
-		else:
-			return -1
-
-var multiplayer_pilot_id: int:
-	get:
-		if ($Crew.pilot):
-			return $Crew.pilot.multiplayer_id
-		else:
-			return -1
-
-#TODO: Is this even needed? Should it be directly pulled from the captain? Does it even need to be synced?
-@export var faction_name: String:
-	get:
+@export var faction_id: int:
+	#TODO: Need to give the ship faction ownership. There needs to be rules on this.
+	# Option 1: Ships are owned at the top level faction. Simple.
+	# Option 2: Fancy permission system...
+	# 1) Factions need some sort of permission control. If B5 owns a ship, can any earthforce fly it?
+	# 2) If alpha wing member flies the B5 ship, the ownership should stay b5
+	# 3) A ship can be gifted by the faction owner.
+	# 4) A transfer can happen by parent faction commanders
+	# For now....
+	set(new_id):
 		if faction:
-			return faction.resource_name
-		return ""
-
+			if faction.faction_id == new_id:
+				return
+			faction.remove_ship(self)
+		faction_id = new_id
+		faction.add_ship(self)
+		# A zero value is no faction.
+		Log.log(["Player gets new faction ID:", name, faction.resource_name, faction.faction_id, faction_id], Log.MessageType.INFO)
 @export var faction: Faction:
 	set(new_faction):
-		if faction:
-			faction.remove_ship(self)
-		faction = new_faction
-		print_debug("NF: ", new_faction)
-		faction.add_ship(self)
+		assert(false, "BOO! DO NOT SET FACTIONS DIRECTLY")
+	get:
+		return Faction.factions[faction_id]
 
 @export_node_path("Camera3D") var camera_path: NodePath
-@onready var camera: Camera3D = get_node_or_null(camera_path)
+@onready var passenger_camera: Camera3D = get_node_or_null(camera_path)
 
 @export var ship_class := ""
-
-@export var target_rot = Vector3(0,0,0)
-@export var target_pos = Vector3(0,0,0)
-@export var target_global_transform := Transform3D()
-@export var autospin := false
-@export var autobreak := false
 
 @export var max_health := 100
 @export var is_station := false:
@@ -87,8 +71,8 @@ var health := max_health:
 		if (health <= 0.0):
 			destroy()
 var engine_length = 7.5
-var thruster_force: Vector3 = Vector3(0, 0, 0)
-var thruster_torque: Vector3 = Vector3(0, 0, 0)
+#var thruster_force: Vector3 = Vector3(0, 0, 0)
+#var thruster_torque: Vector3 = Vector3(0, 0, 0)
 var acceleraction: Vector3 = Vector3(0, 0, 0)
 var _debug_all_stop := false
 
@@ -98,7 +82,7 @@ var start_velocity := Vector3(0, 0, 0)
 	get:
 		return angular_velocity * global_basis
 
-var is_spawning := false			
+var is_spawning := false
 
 signal destroyed(ship: Ship)
 
@@ -110,57 +94,32 @@ func _ready():
 		set_physics_process(false)	
 	can_sleep = false
 	#target_rot = rotation_degrees
-	target_global_transform = global_transform
+	
 	galaxy = get_tree().root.get_node("entry/Galaxy")
 	destroyed.connect(galaxy._on_ship_destroyed)
+	print_debug("Frozen: ", freeze, freeze_mode)
 
 
-func add_captain(pilot: Pilot):
-	Log.log(["Adding captain: ", pilot.multiplayer_id, " on ", self], Log.MessageType.INFO)
-	#TODO: Need to give the ship faction ownership. There needs to be rules on this.
-	# Option 1: Ships are owned at the top level faction. Simple.
-	# Option 2: Fancy permission system...
-	# 1) Factions need some sort of permission control. If B5 owns a ship, can any earthforce fly it?
-	# 2) If alpha wing member flies the B5 ship, the ownership should stay b5
-	# 3) A ship can be gifted by the faction owner.
-	# 4) A transfer can happen by parent faction commanders
-	# For now....
-	if not faction:
-		faction = pilot.faction
-	if $Crew.set_captain(pilot) and pilot.multiplayer_id:
-		# This does not work as the pilot does not have a multiplayer_id when it is added.
-		# This is because the multiplayerspawner only seems to work when multiplayer 
-		# authority is set AFTER the pilot is child to a parent.
-		set_camera.rpc_id(pilot.multiplayer_id)
-
-
-func add_passenger(pilot: Pilot):
+func add_passenger(pilot: Character):
 	if $Crew.add_passenger(pilot) and pilot.multiplayer_id:
 		set_camera.rpc_id(pilot.multiplayer_id)
 		Log.log(["Passenger added to ", name, " ", ship_id, " id ", pilot.multiplayer_id], Log.MessageType.INFO)
 		set_capital_ui.rpc_id(pilot.multiplayer_id)
 
 
-func get_crew() -> Array[Pilot]:
-	var crew: Array[Pilot] = []
+func get_crew() -> Array[Character]:
+	var crew: Array[Character] = []
 	for c in $Crew.get_children():
 		crew.append(c)
 	return crew
 
 
-func add_pilot(pilot: Pilot):
-	Log.log(["Adding pilot: ", pilot.multiplayer_id, " on ", self], Log.MessageType.INFO)
-	if $Crew.set_pilot(pilot) and pilot.multiplayer_id:
-		Log.log(["Requesting camera rpc"], Log.MessageType.QUESTION)
-		set_camera.rpc_id(pilot.multiplayer_id)
-
-
 @rpc("call_local")
 func set_camera():
 	Log.log(["Setting Camera"], Log.MessageType.QUESTION)
-	camera.far = 30000
-	camera.near = 0.3
-	camera.current = true
+	passenger_camera.far = 30000
+	passenger_camera.near = 0.3
+	passenger_camera.current = true
 
 
 @rpc("call_local")
@@ -187,85 +146,22 @@ func _integrate_forces(state: PhysicsDirectBodyState3D):
 	if _debug_all_stop:
 		state.angular_velocity = Vector3(0,0,0)
 		state.linear_velocity = Vector3(0,0,0)
-		target_rot = rotation
 		_debug_all_stop = false
 
 
 func _rollback_tick(dt, _tick, _is_fresh):
-	if is_station or not $Crew.pilot_name:
+	if is_station:
 		return
-	if inputs.autobreak_toggle:
-		autobreak = !autobreak
-		Log.log(["Requesting autobreak_toggle set to ", autobreak, " for ", self], Log.MessageType.QUESTION)
-
-	if inputs.autospin_toggle:
-		autospin = !autospin
-		if autospin:
-			target_global_transform = global_transform
-		#target_rot = rotation
-		Log.log(["Requesting autospin set to ", autospin, " for ", self], Log.MessageType.QUESTION)
-
-	var rotation_throttle = inputs.rotation_throttle
-	var throttle = inputs.throttle
-	
-	if autospin:
-		# We can just assume local space
-		# If there is no input on an axis, we want to stop motion on it
-		# If we are spinning left, then a right input would be the same as neutral, until the rotation stops.
-		# This is not the same as an "arcade mode". The ship will continue to spin ever faster
-		# An arcade mode wouldn't be a bad idea to implement. Still newtonian, but the flight model
-		# would act more like X or Wing Commander
-		var deadzone := 0.001
-		# The X axis of the joystick manipulates the y axis of the ship. Godot accounts for this
-		if abs(inputs.rotation_throttle.y) <= deadzone:
-			var ry := local_angular_velocity.y
-			var err_rot_y := 0.0 - ry
-			rotation_throttle.y = $PIDS/PID_rotate_break_Y._update(err_rot_y, dt)		
-		if abs(inputs.rotation_throttle.x) <= deadzone:
-			var rx := local_angular_velocity.x
-			var err_rot_x := 0.0 - rx
-			rotation_throttle.x = $PIDS/PID_rotate_break_X._update(err_rot_x, dt)
-		if abs(inputs.rotation_throttle.z) <= deadzone:
-			var rz := local_angular_velocity.z
-			var err_rot_z := 0.0 - rz
-			rotation_throttle.z = $PIDS/PID_rotate_break_Z._update(err_rot_z, dt)
-
-	if autobreak:
-		var local_velocity := global_transform.basis.transposed() * linear_velocity
-		if throttle.x == 0:
-			var err_x := 0.0 - local_velocity.x
-			throttle.x = $PIDS/PID_X._update(err_x, dt)
-			if abs(throttle.x) < 0.02:
-				throttle.x = 0.0
-		if throttle.y == 0:
-			var err_y := 0.0 - local_velocity.y
-			throttle.y = $PIDS/PID_X._update(err_y, dt)
-			if abs(throttle.y) < 0.02:
-				throttle.y = 0.0
-		if throttle.z == 0:
-			var err_z := 0.0 - local_velocity.z
-			throttle.z = $PIDS/PID_X._update(err_z, dt)
-			if abs(throttle.z) < 0.02:
-				throttle.z = 0.0
-	
-	$Engines.request_thrust(throttle, rotation_throttle)
 	
 	for thruster in $Engines.thrusters:
 		apply_force(global_transform.basis * thruster.force_vector, global_transform.basis * thruster.position)
-	
-	if inputs.debug_all_stop:
-		_debug_all_stop = true
 	
 	acceleraction = (linear_velocity - start_velocity) / dt
 	start_velocity = linear_velocity
 
 
 func _physics_process(dt: float) -> void:
-	if multiplayer.multiplayer_peer == null or multiplayer.get_unique_id() == multiplayer_pilot_id:
-		# The client which this player represent will update the controls state, and notify it to everyone.
-		inputs.update()
 	_rollback_tick(dt, 0, 0)
-	return
 
 
 func _process(_delta: float) -> void:
@@ -291,7 +187,6 @@ func destroy() -> void:
 
 func find_free_spawner() -> Array:
 	var s = $Spawner.find_free_spawner()
-	print_debug(s)
 	return s
 
 
@@ -304,8 +199,6 @@ func _on_area_3d_dock_body_entered(body) -> void:
 	if body.is_spawning:
 		return
 	Log.log([body, " ship entered dock on ", name], Log.MessageType.INFO)
-	body.get_node("Crew").captain_name = ""
-	body.get_node("Crew").pilot_name = ""
 	for c in body.get_crew():
 		add_passenger(c)
 	body.queue_free()
@@ -345,9 +238,10 @@ func request_launch(p_ship_id: int, pilot_id: int):
 	var spawn := find_free_spawner()
 	var spawn_point = spawn[0]
 	var spawn_position = spawn[1]
+	print_debug("Spawn: ", spawn)
 	#TODO: Keep an inventory of docked ships
 	
-	var PlayerScene := load("res://ships/earth alliance/aurora_starfury/auora_starfury.tscn")
+	var PlayerScene := load("res://ships/earth alliance/aurora_starfury/auora_starfury.scn")
 	var new_ship: Ship = PlayerScene.instantiate()
 	new_ship.is_spawning = true
 	
@@ -357,29 +251,32 @@ func request_launch(p_ship_id: int, pilot_id: int):
 	top_system.add_ship(new_ship)
 	new_ship.global_transform.origin = spawn_position
 	spawn_point.spawn_ship(new_ship)
-	
-	var old_pilot: Pilot
+	var old_pilot: Character
 	if pilot_id:
 		old_pilot = $Crew.remove_passenger_by_id(pilot_id)
-	else:		
+	else:
 		old_pilot = $Crew.remove_passenger_by_multiplayerid(remote_id)
-	var pilot: Pilot = new_ship.get_node("CrewMultiplayerSpawner").spawn(old_pilot.serialize())
+	new_ship.faction_id = old_pilot.faction_id
+	var pilot: Character = new_ship.get_node("CrewMultiplayerSpawner").spawn(old_pilot.serialize())
 	#TODO: Genealize this to a multicrew craft
-	new_ship.add_captain(pilot)
+	var cockpit: Console = new_ship.get_node("Consoles/Cockpit") as Console
+	
+	cockpit.occupy(pilot)
 	old_pilot.queue_free()
-	new_ship.set_camera.rpc_id(pilot.multiplayer_id)
+	#new_ship.set_camera.rpc_id(pilot.multiplayer_id)
 	disable_capital_ui.rpc_id(pilot.multiplayer_id)
-	await get_tree().create_timer(1.0).timeout
+	await get_tree().create_timer(2.0).timeout
 	new_ship.is_spawning = false
+	for c in $Consoles.get_children():
+		if c is Console:
+			c = c as Console
+			if c.has_capability("Helm"):
+				c.launch_completed()
 	Log.log(["Spawn complete for ", pilot], Log.MessageType.SUCCESS)
 
 
 func get_current_system() -> System:
 	return get_parent().get_parent().get_parent()
-
-
-func is_player_pilot() -> bool:
-	return multiplayer.multiplayer_peer == null or multiplayer.get_unique_id() == multiplayer_pilot_id
 
 
 func sensor_check(other_ship: Ship) -> bool:

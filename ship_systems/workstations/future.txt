@@ -1,0 +1,15 @@
+In the future tthis will define the different stations a character can station at,
+what inputs are possible, and ui elements for that station.
+
+Some stations (consols) might combo different components, for example a capital ship would 
+have several specalized stations. A fighter would only have one station that would
+have flight and weapond components combined.
+
+Crew 	Holds goals, skills, personality, and makes decisions.
+Workstation 	Defines what actions are available (a weapons console has fire control; a pilot seat has helm control).
+Ship 	Holds state (hull, shields, cargo) and executes movement/combat.
+
+"A crew member should ask: "Can I fire weapons?" by checking if they are currently occupying a weapons station with power to that system. The crew holds the intent, the workstation and ship provide the authority.
+The crew holds the intent, the workstation and ship provide the authority.
+
+This portability is key: a crew member can be ejected, captured, or walk from one station to another without losing their AI identity."

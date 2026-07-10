@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://4m4y043kimmi" path="res://ships/earth alliance/babylon 5/main_cylinder.scn" id="9_vqaen"]
 [ext_resource type="PackedScene" uid="uid://plbif2bjdaj1" path="res://ships/earth alliance/babylon 5/cobra_bays.tscn" id="10_6fysb"]
 [ext_resource type="PackedScene" uid="uid://4xphnpmnqtfs" path="res://ships/earth alliance/babylon 5/neck_section.scn" id="10_7kgi2"]
+[ext_resource type="PackedScene" uid="uid://e3r8bdttgfch" path="res://ship_systems/workstations/station_command.tscn" id="12_7kgi2"]
 [ext_resource type="Script" uid="uid://bmf6p1656luf0" path="res://ships/earth alliance/babylon 5/rotation.gd" id="18_kr61b"]
 [ext_resource type="Script" uid="uid://dwdl2krk70wrg" path="res://ships/earth alliance/babylon 5/spawner.gd" id="24_empfd"]
 
@@ -18,6 +19,9 @@ name = "EA Station Suite 1.0"
 em_sensitive = 20.0
 neutrino_sensitive = 20.0
 metadata/_custom_type_script = "uid://dd2r64u2pov0l"
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_v4i4k"]
+size = Vector3(2.78468, 17.7212, 53.8007)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_g0bhj"]
 
@@ -59,9 +63,6 @@ properties/1/path = NodePath(".:rotation")
 properties/1/spawn = false
 properties/1/replication_mode = 1
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_v4i4k"]
-size = Vector3(2.78468, 17.7212, 53.8007)
-
 [node name="Babylon 5" unique_id=1278673232 groups=["station"] instance=ExtResource("1_47i3c")]
 camera_path = NodePath("rotation/CnC/Camera3D")
 max_health = 20000
@@ -69,8 +70,12 @@ is_station = true
 has_spawn_points = true
 sensor = SubResource("Resource_y8ph0")
 
-[node name="Crew" parent="." index="4" unique_id=1064126352]
-max_passengers = 250000
+[node name="Crew" parent="." index="3" unique_id=1064126352]
+max_crew = 250000
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3DDock" parent_id_path=PackedInt32Array(1243728702) index="0" unique_id=998985838]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4017.94, 339.964, 0)
+shape = SubResource("BoxShape3D_v4i4k")
 
 [node name="Reactor_Section" parent="." index="6" unique_id=1233224168 instance=ExtResource("3_y8ph0")]
 transform = Transform3D(233.275, 0, 0, 0, 233.275, 0, 0, 0, 233.275, -2870.98, 0.0349213, -0.00405432)
@@ -116,11 +121,10 @@ shape = SubResource("BoxShape3D_v4i4k")
 [node name="Cobra_Bays" parent="rotation" index="5" unique_id=628257355 instance=ExtResource("10_6fysb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3529.62, 0, 0)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3DDock" parent_id_path=PackedInt32Array(1243728702) index="0" unique_id=998985838]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4017.94, 339.964, 0)
-shape = SubResource("BoxShape3D_v4i4k")
-
-[node name="Spawner" parent="." index="12" unique_id=316759190]
+[node name="Spawner" parent="." index="11" unique_id=316759190]
 script = ExtResource("24_empfd")
+
+[node name="StationCommand" parent="Consoles" parent_id_path=PackedInt32Array(1586202394) index="0" unique_id=1280124941 instance=ExtResource("12_7kgi2")]
+camera_path = NodePath("../../rotation/CnC/Camera3D")
 
 [connection signal="body_entered" from="rotation/Area3DDockRotate" to="." method="_on_area_3d_dock_body_entered"]

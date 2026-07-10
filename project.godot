@@ -34,6 +34,7 @@ WindowTiler="*uid://cmqjajhjgffm1"
 NetworkSimulator="*uid://1y2ey1e6qjwr"
 AppConfig="*uid://cjke6crjg14a0"
 LimboConsole="*uid://dyxornv8vwibg"
+LocalGameManager="*uid://ctjxbf1qen5du"
 
 [debug]
 

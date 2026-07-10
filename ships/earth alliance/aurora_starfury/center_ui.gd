@@ -29,6 +29,6 @@ func set_speed(speed):
 
 func _process(_delta: float) -> void:
 	set_speed($"../..".linear_velocity.length())
-	set_autospin($"../..".autospin)
-	set_autobreak($"../..".autobreak)
+	set_autospin($"../../Consoles/Cockpit/Helm".autospin)
+	set_autobreak($"../../Consoles/Cockpit/Helm".autobreak)
 	set_acceleration($"../..".acceleraction.length())

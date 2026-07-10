@@ -6,7 +6,6 @@ extends Node
 var password: String:
 	set(pswrd):
 		password = pswrd.sha256_text()
-var faction := Faction
 
 
 func password_match(check: String) -> bool:

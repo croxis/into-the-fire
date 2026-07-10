@@ -1,49 +1,14 @@
 extends Node
 
-@export var captain_name: String
-@export var pilot_name: String
-@export var max_gunners := 0
-@export var max_passengers := 1
-var captain: Pilot:
-	get:
-		if captain_name:
-			return get_node(captain_name)
-		else:
-			return null
-	set(c):
-		captain_name = c.name
-		captain = c
-var pilot: Pilot:
-	get:
-		if pilot_name:
-			return get_node(pilot_name)
-		return null
-	set(p):
-		pilot_name = p.name
-		pilot = p
+
+@export var max_crew := 1  ## It is important to include the number of stations on the ship.
+## unless you want more stations than crew.
 
 
-func set_captain(new_captain: Pilot) -> bool:
-	if add_passenger(new_captain):
-		captain_name = new_captain.name
-		new_captain.is_captain = true
-		if max_passengers == 1:
-			pilot_name = new_captain.name
-		return true
-	return false
-
-
-func set_pilot(new_pilot: Pilot) -> bool:
-	if add_passenger(new_pilot):
-		pilot_name = new_pilot.name
-		return true
-	return false
-
-
-func add_passenger(passenger: Pilot) -> bool:
+func add_passenger(passenger: Character) -> bool:
 	if passenger in get_children():
 		return true
-	var max_capacity: int = max_passengers
+	var max_capacity: int = max_crew
 	if get_child_count() >= max_capacity:
 		Log.log(["Too many passengers."], Log.MessageType.WARNING)
 		return false
@@ -54,26 +19,29 @@ func add_passenger(passenger: Pilot) -> bool:
 	return true
 
 
-func remove_passenger_by_id(pilot_id: int) -> Pilot:
+func remove_passenger_by_id(pilot_id: int) -> Character:
 	for child in get_children():
 		if child._player_pilot_id == pilot_id:
-			child.is_captain = false
-			remove_child(child)
-			return child
+			if child is Character:
+				var character: Character = child as Character
+				if character.current_console:
+					character.current_console.vacate()
+				remove_child(child)
+				return child
 	return null
 
 
-func remove_passenger_by_multiplayerid(multiplayer_id: int) -> Pilot:
+func remove_passenger_by_multiplayerid(multiplayer_id: int) -> Character:
 	for child in get_children():
 		if child.multiplayer_id == multiplayer_id:
-			remove_child(child)
-			child.is_captain = false
-			return child
+			if child is Character:
+				var character: Character = child as Character
+				if character.current_console:
+					character.current_console.vacate()
+				remove_child(child)
+				return child
 	return null
 
 
 func _on_child_exiting_tree(node: Node) -> void:
-	if node.name == captain_name:
-		captain_name = ""
-	if node.name == pilot_name:
-		pilot_name = ""
+	pass

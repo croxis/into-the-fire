@@ -3,16 +3,9 @@
 [ext_resource type="Script" uid="uid://dbkjlelura8tm" path="res://ships/Ship.gd" id="1_lh74f"]
 [ext_resource type="Script" uid="uid://dy87skygwj8j5" path="res://ship_systems/weapons/Guns.gd" id="2_b1wmj"]
 [ext_resource type="Script" uid="uid://1ihpd5wkcfij" path="res://ships/Engines.gd" id="4_ob5l3"]
-[ext_resource type="PackedScene" uid="uid://hivg2o6wgagj" path="res://ships/PID.tscn" id="5_itaim"]
 [ext_resource type="Script" uid="uid://d4gd45lh7saav" path="res://ships/crew.gd" id="5_tgeno"]
 [ext_resource type="Script" uid="uid://cgo6tfowdnsli" path="res://ships/crew_multiplayer_spawner.gd" id="6_1a8so"]
 [ext_resource type="PackedScene" uid="uid://bywfmtvnxay38" path="res://ui/capital/capital_ui.tscn" id="7_dwaht"]
-[ext_resource type="Script" uid="uid://c08fcpl8wkmhf" path="res://ships/target_recticles.gd" id="8_gl6o0"]
-[ext_resource type="Texture2D" uid="uid://cx7hpfxngds3j" path="res://ui/crosshair/crosshair186.png" id="9_fnchb"]
-[ext_resource type="Texture2D" uid="uid://bmlaxe333nh4m" path="res://ui/crosshair/crosshair180.png" id="9_lqn33"]
-[ext_resource type="Texture2D" uid="uid://dumvw3t7fyxto" path="res://ui/crosshair/crosshair022.png" id="10_vyf3k"]
-[ext_resource type="Texture2D" uid="uid://be5rv4gtrnibx" path="res://ui/crosshair/crosshair081.png" id="12_u4481"]
-[ext_resource type="PackedScene" uid="uid://conx3swfmfa04" path="res://ship_systems/workstations/cockpit.tscn" id="13_5fldc"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_2c0xb"]
 properties/0/path = NodePath(".:linear_velocity")
@@ -45,15 +38,9 @@ properties/8/replication_mode = 2
 properties/9/path = NodePath(".:ship_id")
 properties/9/spawn = true
 properties/9/replication_mode = 2
-properties/10/path = NodePath("Crew:captain_name")
+properties/10/path = NodePath(".:faction_id")
 properties/10/spawn = true
 properties/10/replication_mode = 2
-properties/11/path = NodePath("Crew:pilot_name")
-properties/11/spawn = true
-properties/11/replication_mode = 2
-properties/12/path = NodePath(".:faction_name")
-properties/12/spawn = true
-properties/12/replication_mode = 1
 
 [node name="Ship" type="RigidBody3D" unique_id=2038804726 groups=["ship"]]
 can_sleep = false
@@ -69,26 +56,6 @@ script = ExtResource("2_b1wmj")
 [node name="Engines" type="Node3D" parent="." unique_id=1588031376]
 script = ExtResource("4_ob5l3")
 
-[node name="PIDS" type="Node" parent="." unique_id=2092290159]
-
-[node name="PID_rotate_X" parent="PIDS" unique_id=390415561 instance=ExtResource("5_itaim")]
-
-[node name="PID_rotate_Y" parent="PIDS" unique_id=1303478135 instance=ExtResource("5_itaim")]
-
-[node name="PID_rotate_Z" parent="PIDS" unique_id=1917655102 instance=ExtResource("5_itaim")]
-
-[node name="PID_X" parent="PIDS" unique_id=297553610 instance=ExtResource("5_itaim")]
-
-[node name="PID_Y" parent="PIDS" unique_id=321041381 instance=ExtResource("5_itaim")]
-
-[node name="PID_Z" parent="PIDS" unique_id=1345575771 instance=ExtResource("5_itaim")]
-
-[node name="PID_rotate_break_X" parent="PIDS" unique_id=2111781818 instance=ExtResource("5_itaim")]
-
-[node name="PID_rotate_break_Y" parent="PIDS" unique_id=1780219007 instance=ExtResource("5_itaim")]
-
-[node name="PID_rotate_break_Z" parent="PIDS" unique_id=1802291900 instance=ExtResource("5_itaim")]
-
 [node name="Crew" type="Node" parent="." unique_id=1064126352]
 script = ExtResource("5_tgeno")
 
@@ -102,41 +69,13 @@ script = ExtResource("6_1a8so")
 
 [node name="CapitalUI" parent="." unique_id=338275698 instance=ExtResource("7_dwaht")]
 visible = false
-
-[node name="TargetRecticles" type="Node3D" parent="." unique_id=1717048233]
-visible = false
-script = ExtResource("8_gl6o0")
-
-[node name="TargetReticle" type="TextureRect" parent="TargetRecticles" unique_id=1466383855]
-visible = false
-modulate = Color(1, 1, 1, 0.168627)
-offset_right = 40.0
-offset_bottom = 40.0
-texture = ExtResource("9_fnchb")
-
-[node name="OffscreenReticle" type="TextureRect" parent="TargetRecticles" unique_id=273490896]
-visible = false
-modulate = Color(1, 1, 1, 0.560784)
-offset_right = 40.0
-offset_bottom = 40.0
-pivot_offset = Vector2(64, 64)
-texture = ExtResource("10_vyf3k")
-
-[node name="DistantReticle" type="TextureRect" parent="TargetRecticles" unique_id=448975353]
-visible = false
-modulate = Color(1, 1, 1, 0.560784)
-offset_right = 40.0
-offset_bottom = 40.0
-pivot_offset = Vector2(64, 64)
-texture = ExtResource("9_lqn33")
-
-[node name="TargetedReticle" type="TextureRect" parent="TargetRecticles" unique_id=815650266]
-visible = false
-modulate = Color(1, 1, 1, 0.560784)
-offset_right = 40.0
-offset_bottom = 40.0
-pivot_offset = Vector2(64, 64)
-texture = ExtResource("12_u4481")
+anchors_preset = 0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_right = 242.0
+offset_bottom = 89.0
+grow_horizontal = 1
+grow_vertical = 1
 
 [node name="DebugUI" type="Control" parent="." unique_id=484548019]
 visible = false
@@ -149,9 +88,7 @@ offset_bottom = 393.0
 
 [node name="LimboHSM" type="LimboHSM" parent="." unique_id=2106809936]
 
-[node name="Stations" type="Node" parent="." unique_id=1586202394]
-
-[node name="Cockpit" parent="Stations" unique_id=443987611 instance=ExtResource("13_5fldc")]
+[node name="Consoles" type="Node3D" parent="." unique_id=1724205824]
 
 [connection signal="child_exiting_tree" from="Crew" to="." method="_on_crew_child_exiting_tree"]
 [connection signal="child_exiting_tree" from="Crew" to="Crew" method="_on_child_exiting_tree"]

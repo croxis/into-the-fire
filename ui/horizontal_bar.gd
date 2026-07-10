@@ -15,9 +15,9 @@ var current_velocity:int = 0:
 @export var displayStepSmallLines = 20
 @export var display_color: Color = Color.GREEN
 @export var draw_outline: bool = true
-@export var font_size := 12
-@export var big_line_length := 15.0
-@export var little_line_length := 5.0
+@export var font_size := 10
+@export var big_line_length := 12.0
+@export var little_line_length := 4.0
 
 	
 func _draw():

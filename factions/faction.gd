@@ -95,26 +95,25 @@ func get_inherited_standings() -> Dictionary:
 
 
 func get_wings() -> Array[Faction]:
-	var factions: Array[Faction] = []
+	var f: Array[Faction] = []
 	for child in get_children():
 		if child.typeof(Faction):
 			if child.is_wing:
-				factions.append(child)
-	return factions
+				f.append(child)
+	return f
 
 
-func add_member(pilot: Pilot) -> void:
+func add_member(pilot: Character) -> void:
 	#TODO: Check and remove if pilot is in another faction, remove from faction and leader
 	if pilot.faction:
 		pilot.faction.remove_member(pilot)
-	pilot.faction = self
+	pilot.faction_id = faction_id
 	member_ids.append(pilot.pilot_id)
 
 
-func remove_member(pilot: Pilot) -> bool:
+func remove_member(pilot: Character) -> bool:
 	member_ids.erase(pilot.pilot_id)
-	pilot.faction = null
-	pilot._faction_id = 0
+	pilot.faction_id = 0
 	return true
 
 

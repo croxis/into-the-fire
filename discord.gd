@@ -9,6 +9,7 @@ var code_verifier: DiscordAuthorizationCodeVerifier = null
 
 
 func _ready() -> void:
+	return
 	print("🚀 Initializing Discord SDK...")
 
 	client.add_log_callback(_on_log_message, DiscordLoggingSeverity.INFO)

@@ -14,9 +14,9 @@ properties/1/replication_mode = 2
 properties/2/path = NodePath(".:pilot_id")
 properties/2/spawn = true
 properties/2/replication_mode = 2
-properties/3/path = NodePath(".:_faction_id")
+properties/3/path = NodePath(".:faction_id")
 properties/3/spawn = true
-properties/3/replication_mode = 2
+properties/3/replication_mode = 1
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_hiqvf"]
 properties/0/path = NodePath(".:throttle")
@@ -50,10 +50,11 @@ script = ExtResource("1_32im1")
 [node name="CharacterSync" type="MultiplayerSynchronizer" parent="." unique_id=1031767373]
 replication_config = SubResource("SceneReplicationConfig_38dqk")
 
-[node name="InputsSync" type="MultiplayerSynchronizer" parent="." unique_id=1920384969]
+[node name="InputsSync" type="MultiplayerSynchronizer" parent="." unique_id=1330492136]
 root_path = NodePath(".")
 replication_config = SubResource("SceneReplicationConfig_hiqvf")
 script = ExtResource("2_la1yr")
+metadata/_custom_type_script = "uid://c0xi03f7y32xl"
 
 [node name="InputsSyncTest" type="Node" parent="." unique_id=1660951907]
 script = ExtResource("3_7w08q")

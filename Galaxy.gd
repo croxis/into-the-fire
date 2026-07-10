@@ -49,9 +49,15 @@ func player_enter_system(system_name) -> void:
 	system.visible = true
 	#Music Hack
 	system.get_node("SubViewport/AudioStreamPlayer").playing = true
+	var remote_id := multiplayer.get_remote_sender_id()
+	# If the host is calling this function, remote id is 0, change to its actual id
+	if remote_id == 0:
+		remote_id = multiplayer.get_unique_id()
+	var player: Player = $Players.find_player_by_netid(remote_id)
+	LocalGameManager.player_id = player.player_id
 
 
-func find_pilot_by_network_id(id: int) -> Pilot:
+func find_pilot_by_network_id(id: int) -> Character:
 	for pilot in $Systems.find_children("*", "Pilot", true, false):
 		if pilot.multiplayer_id == id:
 			return pilot
@@ -132,29 +138,30 @@ func finish_setup_galaxy_all() -> void:
 		ship_id_counter += 1
 		
 		$Systems.add_station(babylon5, "test_system")
-		var b5commander: Pilot = Pilot.new_pilot("Commendar Eclair")
+		var b5commander: Character = Character.new_pilot("Commendar Eclair")
 		var b5_faction: Faction = Faction.get_faction("Babylon 5")
 		b5_faction.add_member(b5commander)
-		$"Systems/test_system/SubViewport/ships/Babylon 5".add_captain(b5commander)
+		$"Systems/test_system/SubViewport/ships/Babylon 5".add_passenger(b5commander)
+		$"Systems/test_system/SubViewport/ships/Babylon 5/Consoles/StationCommand".occupy(b5commander)
 		b5commander.multiplayer_id = multiplayer.get_unique_id()
 		
-		var b5ltcommander: Pilot = Pilot.new_pilot("Lt Commendar Eekvonova")
+		var b5ltcommander: Character = Character.new_pilot("Lt Commendar Eekvonova")
 		b5_faction.add_member(b5ltcommander)
 		$"Systems/test_system/SubViewport/ships/Babylon 5".add_passenger(b5ltcommander)
 		b5ltcommander.multiplayer_id = multiplayer.get_unique_id()
 		
-		var b5botpilot: Pilot = Pilot.new_pilot("Karren Waffer")
+		var b5botpilot: Character = Character.new_pilot("Karren Waffer")
 		var zeta_wing: Faction = Faction.get_faction("Zeta Wing")
 		zeta_wing.add_member(b5botpilot)
 		$"Systems/test_system/SubViewport/ships/Babylon 5".add_passenger(b5botpilot)
 		b5botpilot.multiplayer_id = multiplayer.get_unique_id()
 		
-		b5botpilot = Pilot.new_pilot("Doe John")
+		b5botpilot = Character.new_pilot("Doe John")
 		zeta_wing.add_member(b5botpilot)
 		$"Systems/test_system/SubViewport/ships/Babylon 5".add_passenger(b5botpilot)
 		b5botpilot.multiplayer_id = multiplayer.get_unique_id()
 		
-		b5botpilot = Pilot.new_pilot("Susan B. Anntonny")
+		b5botpilot = Character.new_pilot("Susan B. Anntonny")
 		zeta_wing.add_member(b5botpilot)
 		$"Systems/test_system/SubViewport/ships/Babylon 5".add_passenger(b5botpilot)
 		b5botpilot.multiplayer_id = multiplayer.get_unique_id()
@@ -185,15 +192,13 @@ func first_spawn_player(faction_id: int, system_name: String, spawner_name: Stri
 	Log.log(["Attemping Created player pilot: in faction ", faction_id, " with mpid: ", remote_id], Log.MessageType.QUESTION)
 	Faction._next_id = next_faction_id
 	var player: Player = $Players.find_player_by_netid(remote_id)
-	var player_pilot: Pilot = Pilot.new_pilot(player.name)
+	var player_pilot: Character = Character.new_pilot(player.name)
 	var faction: Faction = Faction.factions[faction_id]
 	faction.add_member(player_pilot)
 	player_pilot._player_pilot_id = player.player_id
 	player_pilot.set_multiplayer_id(remote_id)
 	
 	#TODO: Change this to be via system_name and spawner_name
-	
-	#player_enter_system(system_name)
 	player_enter_system.rpc_id(player_pilot.multiplayer_id, system_name)
 	$"Systems/test_system/SubViewport/ships/Babylon 5".add_passenger(player_pilot)
 	Log.log(["Created pilot: ", player_pilot, " in faction ", faction.resource_name, " with mpid: ", player_pilot.multiplayer_id], Log.MessageType.SUCCESS)
@@ -245,7 +250,7 @@ func _on_ship_destroyed(ship: Ship):
 	# This will also respawn npcs for now
 	var system: System = ship.get_current_system()
 	var ships:= system.get_ships()
-	for old_pilot: Pilot in ship.get_crew():
+	for old_pilot: Character in ship.get_crew():
 		var distance: float = -1
 		var proposed_ship: Ship
 		for target_ship in ships:
@@ -255,7 +260,7 @@ func _on_ship_destroyed(ship: Ship):
 					distance = d
 					proposed_ship = target_ship
 		if proposed_ship:
-			var new_pilot: Pilot = proposed_ship.get_node("CrewMultiplayerSpawner").spawn({"name": old_pilot.name, "multiplayer_id": old_pilot.multiplayer_id})
+			var new_pilot: Character = proposed_ship.get_node("CrewMultiplayerSpawner").spawn(old_pilot.serialize())
 			new_pilot.faction = old_pilot.faction
 			new_pilot._player_pilot_id = old_pilot._player_pilot_id
 			#TODO: Genealize this to a multicrew craft

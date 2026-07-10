@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://c3p7xnj0i5n30"]
+
+[ext_resource type="Script" uid="uid://dh5g65mf55qcl" path="res://ship_systems/workstations/weapons.gd" id="1_qadd5"]
+
+[node name="Weapons" type="Node" unique_id=417279561]
+script = ExtResource("1_qadd5")
+metadata/_custom_type_script = "uid://cwadxkem4hn6q"

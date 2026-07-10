@@ -24,10 +24,12 @@ func spawn_ship(_newship: Ship):
 	ship.freeze = true
 	is_ready = false
 	$Timer.start()
+	Log.log(["Spawn Ship:", _newship], Log.MessageType.INFO)
 
 
 func _on_timer_timeout() -> void:
 	$AnimationPlayer.play("deploy")
+	Log.log(["Begin deploy animation"], Log.MessageType.INFO)
 
 
 func _on_animation_player_animation_finished(anim_name: StringName) -> void:
@@ -39,5 +41,6 @@ func _on_animation_player_animation_finished(anim_name: StringName) -> void:
 		#ship.owner = target_node
 		ship = null
 		$AnimationPlayer.play("return")
+		Log.log(["Finish deploy animation"], Log.MessageType.INFO)
 	if anim_name == "return":
 		is_ready = true

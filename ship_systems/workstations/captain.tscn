@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://dkg7gtui8bx4q"]
+
+[ext_resource type="Script" uid="uid://cwadxkem4hn6q" path="res://ship_systems/workstations/console_capability.gd" id="1_c3g8h"]
+
+[node name="Captain" type="Node" unique_id=1583432735]
+script = ExtResource("1_c3g8h")
+metadata/_custom_type_script = "uid://cwadxkem4hn6q"
