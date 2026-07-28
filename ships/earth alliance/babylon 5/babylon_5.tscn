@@ -9,7 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://4m4y043kimmi" path="res://ships/earth alliance/babylon 5/main_cylinder.scn" id="9_vqaen"]
 [ext_resource type="PackedScene" uid="uid://plbif2bjdaj1" path="res://ships/earth alliance/babylon 5/cobra_bays.tscn" id="10_6fysb"]
 [ext_resource type="PackedScene" uid="uid://4xphnpmnqtfs" path="res://ships/earth alliance/babylon 5/neck_section.scn" id="10_7kgi2"]
-[ext_resource type="PackedScene" uid="uid://e3r8bdttgfch" path="res://ship_systems/workstations/station_command.tscn" id="12_7kgi2"]
+[ext_resource type="PackedScene" uid="uid://e3r8bdttgfch" path="res://ship_systems/workstations/console_command.tscn" id="12_7kgi2"]
 [ext_resource type="Script" uid="uid://bmf6p1656luf0" path="res://ships/earth alliance/babylon 5/rotation.gd" id="18_kr61b"]
 [ext_resource type="Script" uid="uid://dwdl2krk70wrg" path="res://ships/earth alliance/babylon 5/spawner.gd" id="24_empfd"]
 
@@ -62,6 +62,10 @@ properties/0/replication_mode = 1
 properties/1/path = NodePath(".:rotation")
 properties/1/spawn = false
 properties/1/replication_mode = 1
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ah7gn"]
+radius = 5000.0
+height = 20000.0
 
 [node name="Babylon 5" unique_id=1278673232 groups=["station"] instance=ExtResource("1_47i3c")]
 camera_path = NodePath("rotation/CnC/Camera3D")
@@ -124,7 +128,17 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3529.62, 0, 0)
 [node name="Spawner" parent="." index="11" unique_id=316759190]
 script = ExtResource("24_empfd")
 
-[node name="StationCommand" parent="Consoles" parent_id_path=PackedInt32Array(1586202394) index="0" unique_id=1280124941 instance=ExtResource("12_7kgi2")]
+[node name="StationCommand" parent="Consoles" parent_id_path=PackedInt32Array(1724205824) index="0" unique_id=1280124941 instance=ExtResource("12_7kgi2")]
 camera_path = NodePath("../../rotation/CnC/Camera3D")
 
+[node name="CapabilityCommand" parent="Consoles/StationCommand" index="0" unique_id=1583432735 node_paths=PackedStringArray("ship")]
+ship = NodePath("../../..")
+
+[node name="CollisionShape3D" parent="EscortRange" parent_id_path=PackedInt32Array(2057081485) index="0" unique_id=277168668]
+transform = Transform3D(6.123233995736766e-17, 1, 0, -1, 6.123233995736766e-17, 0, 0, 0, 1, 0, 0, 0)
+shape = SubResource("CapsuleShape3D_ah7gn")
+debug_fill = true
+
 [connection signal="body_entered" from="rotation/Area3DDockRotate" to="." method="_on_area_3d_dock_body_entered"]
+
+[editable path="Consoles/StationCommand"]

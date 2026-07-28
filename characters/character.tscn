@@ -3,6 +3,8 @@
 [ext_resource type="Script" uid="uid://cwrw4m3xxrbq7" path="res://characters/character.gd" id="1_32im1"]
 [ext_resource type="Script" uid="uid://c0xi03f7y32xl" path="res://ships/Inputs.gd" id="2_la1yr"]
 [ext_resource type="Script" uid="uid://cm45rxf3jbxss" path="res://characters/player_input.gd" id="3_7w08q"]
+[ext_resource type="BlackboardPlan" uid="uid://cb1bd3vcbvjxq" path="res://ai/blackboards/character_blackboard.tres" id="4_b1u1o"]
+[ext_resource type="Script" uid="uid://jt5crw72lp77" path="res://characters/operating_console_state.gd" id="4_mdkfl"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_38dqk"]
 properties/0/path = NodePath(".:_player_pilot_id")
@@ -44,8 +46,13 @@ properties/7/path = NodePath(".:debug_kill_ship")
 properties/7/spawn = true
 properties/7/replication_mode = 2
 
-[node name="Character" type="Node" unique_id=422449946]
+[sub_resource type="BlackboardPlan" id="BlackboardPlan_mdkfl"]
+
+[sub_resource type="BlackboardPlan" id="BlackboardPlan_b1u1o"]
+
+[node name="Character" type="Node" unique_id=968114435]
 script = ExtResource("1_32im1")
+metadata/_custom_type_script = "uid://cwrw4m3xxrbq7"
 
 [node name="CharacterSync" type="MultiplayerSynchronizer" parent="." unique_id=1031767373]
 replication_config = SubResource("SceneReplicationConfig_38dqk")
@@ -60,16 +67,22 @@ metadata/_custom_type_script = "uid://c0xi03f7y32xl"
 script = ExtResource("3_7w08q")
 metadata/_custom_type_script = "uid://cpiuf65vuu0oa"
 
-[node name="LimboHSM" type="LimboHSM" parent="." unique_id=245420972]
+[node name="BrainHSM" type="LimboHSM" parent="." unique_id=567098495]
+blackboard_plan = ExtResource("4_b1u1o")
 
-[node name="IdleState" type="LimboState" parent="LimboHSM" unique_id=2041462307]
+[node name="IdleState" type="LimboState" parent="BrainHSM" unique_id=872429948]
 
-[node name="TravelState" type="LimboState" parent="LimboHSM" unique_id=952711825]
+[node name="MovingToConsoleState" type="LimboState" parent="BrainHSM" unique_id=434535565]
 
-[node name="CombatState" type="LimboState" parent="LimboHSM" unique_id=138048187]
+[node name="OperatingConsoleState" type="LimboState" parent="BrainHSM" unique_id=1505564180]
+blackboard_plan = SubResource("BlackboardPlan_mdkfl")
+script = ExtResource("4_mdkfl")
 
-[node name="ApproachState" type="LimboState" parent="LimboHSM/CombatState" unique_id=117812523]
+[node name="BTPlayer" type="BTPlayer" parent="BrainHSM/OperatingConsoleState" unique_id=818906612]
+blackboard_plan = SubResource("BlackboardPlan_b1u1o")
 
-[node name="EngageState" type="LimboState" parent="LimboHSM/CombatState" unique_id=1654990445]
+[node name="MovingToShipState" type="LimboState" parent="BrainHSM" unique_id=1387934626]
 
-[node name="DeadState" type="LimboState" parent="LimboHSM" unique_id=1848020642]
+[node name="FleeState" type="LimboState" parent="BrainHSM" unique_id=1009045816]
+
+[node name="DeadState" type="LimboState" parent="BrainHSM" unique_id=842108048]

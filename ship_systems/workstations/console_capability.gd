@@ -1,6 +1,7 @@
 extends Node
 class_name ConsoleCapability
 @export var system_node_path: NodePath
+@export var behavior_tree: BehaviorTree
 
 var system: Node
 

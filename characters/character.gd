@@ -18,10 +18,13 @@ extends Node
 # If this is the player, set the id to 1 or more
 @export var _player_pilot_id: int:
 	set(new_id):
-		if new_id > -1:
-			$LimboHSM.set_active(false)
+		if multiplayer.is_server():
+			if new_id > -1:
+				$LimboHSM.set_active(false)
+			else:
+				$LimboHSM.set_active(true)
 		else:
-			$LimboHSM.set_active(true)
+			$LimboHSM.set_active(false)
 		_player_pilot_id = new_id
 @export var multiplayer_id: int
 @export var pilot_id: int
@@ -30,12 +33,17 @@ var pending_orders: Array[OrderData] = []
 var personality
 var current_console: Console
 
-@onready var hsm: LimboHSM = $LimboHSM # Later make behavior tree
-@onready var idle_state: LimboState = $LimboHSM/IdleState
+@onready var hsm: LimboHSM = $BrainHSM # Later make behavior tree
 
 @onready var inputs: InputSynchronizer:
 	get:
 		return get_node("InputsSync")
+
+var current_ship: Ship:
+	get:
+		return get_parent().get_parent()
+
+@export var doctrine_var: StringName = &"doctrine"
 
 static var next_id := 0
 static var pilot_scene: PackedScene = load("res://characters/character.tscn")
@@ -49,9 +57,25 @@ static func new_pilot(new_name: String) -> Character:
 
 
 func _ready():
-	hsm = $LimboHSM
+	_init_brain()
+
+
+func _init_brain() -> void:
+	hsm = $BrainHSM
+	var idle_state: LimboState = $BrainHSM/IdleState
+	var moving_to_state: LimboState = $BrainHSM/MovingToConsoleState
+	var operating_state: LimboState = $BrainHSM/OperatingConsoleState
+	var moving_ship_state: LimboState = $BrainHSM/MovingToShipState
+	var dead_state: LimboState = $BrainHSM/DeadState
+	hsm.add_transition(idle_state, operating_state, &"move_console")
+	hsm.add_transition(operating_state, idle_state, &"leave_console")
+	hsm.add_transition(idle_state, moving_ship_state, "leave_ship")
+	hsm.add_transition(moving_ship_state, idle_state, "enter_ship")
+	hsm.add_transition(hsm.ANYSTATE, dead_state, "died")
+	hsm.add_transition(dead_state, idle_state, "respawn")
+	hsm.initial_state = idle_state
 	hsm.initialize(self)
-	#hsm.set_active(true)
+	hsm.set_active(true)
 
 
 func set_multiplayer_id(id):
@@ -68,7 +92,7 @@ func _physics_process(_dt: float) -> void:
 		var rotation_throttle = inputs.rotation_throttle  # May be needed for turrets
 		var throttle = inputs.throttle  # May be needed for turrent zoom or engineering
 		if current_console.has_capability("Helm"):
-			var helm: HelmCapability = current_console.get_node("Helm") as HelmCapability
+			var helm: HelmCapability = current_console.get_node("CapabilityHelm") as HelmCapability
 			if inputs.autobreak_toggle:
 				helm.toggle_autobreak()
 			if inputs.autospin_toggle:
@@ -77,11 +101,20 @@ func _physics_process(_dt: float) -> void:
 			helm.throttle = inputs.throttle
 			if inputs.debug_all_stop:
 				helm._debug_all_stop()
-		if current_console.has_capability("Weapons"):
-			var weapons: WeaponsCapability = current_console.get_node("Helm") as WeaponsCapability
+		if current_console.has_capability("CapabilityWeapons"):
+			var weapons: WeaponsCapability = current_console.get_node("CapabilityWeapons") as WeaponsCapability
 		if Input.is_action_just_released("camera_change") and _player_pilot_id == LocalGameManager.player_id:
-			print_debug(current_console.name, " by ", name)
 			current_console.change_camera()
+		if current_console.has_capability("CapabilityCommand"):
+			var command: CommandCapability = current_console.get_node("CapabilityCommand") as CommandCapability
+			# AI updates server only and non players
+			if multiplayer.is_server() and _player_pilot_id < 1:
+				var threats: Array[Ship] = [] # TODO: command.get_hostiles()
+				$BrainHSM.blackboard.set_var(&"threat_picture", threats)
+				$BrainHSM.blackboard.set_var(doctrine_var, faction.doctrine)
+				$BrainHSM.blackboard.set_var(&"fighters_deployed", command.get_subordinate_ships_in_escort_range())
+				$BrainHSM.blackboard.set_var(&"current_ship", current_ship)
+				$BrainHSM.blackboard.set_var(&"faction", faction)
 
 
 func _to_string() -> String:
@@ -94,8 +127,8 @@ func serialize() -> Dictionary:
 	# payload["personality"] = personality.resource_path
 	
 	# Blackboard
-	# for key in blackboard.get_vars():
-	#	payload["bb_" + key] = blackbaord.get_var(key)
+	for key in $BrainHSM.blackboard.get_vars():
+		payload["bb_" + key] = $BrainHSM.blackbaord.get_var(key)
 	
 	# HSM
 	if hsm.get_active_state():
@@ -121,7 +154,7 @@ func restore(payload: Dictionary):
 	for key in payload.keys():
 		if key.begins_with("bb_"):
 			var bb_key = key.trim_prefix("bb_")
-			#blackboard.set_var(bb_key, payload[key])
+			$BrainHSM.blackboard.set_var(bb_key, payload[key])
 	
 	name = payload["name"]
 	faction_id = payload["faction_id"]

@@ -1,0 +1,39 @@
+[gd_resource type="BlackboardPlan" format=3 uid="uid://cb1bd3vcbvjxq"]
+
+[resource]
+var/threat_picture/name = &"threat_picture"
+var/threat_picture/type = 28
+var/threat_picture/value = []
+var/threat_picture/hint = 0
+var/threat_picture/hint_string = "Ships"
+var/docked_pilots/name = &"docked_pilots"
+var/docked_pilots/type = 28
+var/docked_pilots/value = []
+var/docked_pilots/hint = 0
+var/docked_pilots/hint_string = "Character"
+var/fighters_deployed/name = &"fighters_deployed"
+var/fighters_deployed/type = 2
+var/fighters_deployed/value = 0
+var/fighters_deployed/hint = 0
+var/fighters_deployed/hint_string = ""
+var/doctrine/name = &"doctrine"
+var/doctrine/type = 24
+var/doctrine/hint = 17
+var/doctrine/hint_string = "FactionDoctrine"
+var/fighters_needed/name = &"fighters_needed"
+var/fighters_needed/type = 2
+var/fighters_needed/value = 0
+var/fighters_needed/hint = 0
+var/fighters_needed/hint_string = ""
+var/active_orders/name = &"active_orders"
+var/active_orders/type = 24
+var/active_orders/hint = 17
+var/active_orders/hint_string = "Orders"
+var/current_ship/name = &"current_ship"
+var/current_ship/type = 24
+var/current_ship/hint = 34
+var/current_ship/hint_string = "Ship"
+var/faction/name = &"faction"
+var/faction/type = 24
+var/faction/hint = 17
+var/faction/hint_string = "Faction"

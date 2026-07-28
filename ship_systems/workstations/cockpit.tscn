@@ -3,7 +3,6 @@
 [ext_resource type="Script" uid="uid://ge70v8wdc5r4" path="res://ship_systems/workstations/console.gd" id="1_48l1g"]
 [ext_resource type="PackedScene" uid="uid://c3p7xnj0i5n30" path="res://ship_systems/workstations/weapons.tscn" id="1_cym1w"]
 [ext_resource type="PackedScene" uid="uid://6u6jlqx8yil3" path="res://ship_systems/workstations/helm.tscn" id="3_axhrr"]
-[ext_resource type="PackedScene" uid="uid://dkg7gtui8bx4q" path="res://ship_systems/workstations/captain.tscn" id="4_axhrr"]
 [ext_resource type="Script" uid="uid://c08fcpl8wkmhf" path="res://ships/target_recticles.gd" id="5_jouvq"]
 [ext_resource type="Texture2D" uid="uid://cx7hpfxngds3j" path="res://ui/crosshair/crosshair186.png" id="6_j077r"]
 [ext_resource type="Texture2D" uid="uid://dumvw3t7fyxto" path="res://ui/crosshair/crosshair022.png" id="7_tvpxx"]
@@ -17,8 +16,6 @@ metadata/_custom_type_script = "uid://ge70v8wdc5r4"
 [node name="Weapons" parent="." unique_id=417279561 instance=ExtResource("1_cym1w")]
 
 [node name="Helm" parent="." unique_id=1453107379 instance=ExtResource("3_axhrr")]
-
-[node name="Captain" parent="." unique_id=1583432735 instance=ExtResource("4_axhrr")]
 
 [node name="TargetRecticles" type="Node3D" parent="." unique_id=799110988]
 visible = false

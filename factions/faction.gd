@@ -19,6 +19,8 @@ var top_faction: Faction:
 			return parent_faction.top_faction
 		return self
 
+@export var doctrine: FactionDoctrine
+
 static var _next_id := 0
 static var factions := {}
 

@@ -42,10 +42,23 @@ properties/10/path = NodePath(".:faction_id")
 properties/10/spawn = true
 properties/10/replication_mode = 2
 
+[sub_resource type="SphereShape3D" id="SphereShape3D_5ebqf"]
+
 [node name="Ship" type="RigidBody3D" unique_id=2038804726 groups=["ship"]]
 can_sleep = false
 continuous_cd = true
 script = ExtResource("1_lh74f")
+ship_id = null
+faction_id = null
+camera_path = null
+ship_class = null
+max_health = null
+is_station = null
+is_capital = null
+has_spawn_points = null
+em_output_base = null
+neutron_output_base = null
+local_angular_velocity = null
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="." unique_id=378789863]
 replication_config = SubResource("SceneReplicationConfig_2c0xb")
@@ -89,6 +102,14 @@ offset_bottom = 393.0
 [node name="LimboHSM" type="LimboHSM" parent="." unique_id=2106809936]
 
 [node name="Consoles" type="Node3D" parent="." unique_id=1724205824]
+
+[node name="EscortRange" type="Area3D" parent="." unique_id=2057081485]
+editor_description = "Determine the range for a fighter to be considered escorting a ship or station. Fighters will use this to determine if they are in range for the escort perogative."
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="EscortRange" unique_id=277168668]
+shape = SubResource("SphereShape3D_5ebqf")
+debug_fill = false
 
 [connection signal="child_exiting_tree" from="Crew" to="." method="_on_crew_child_exiting_tree"]
 [connection signal="child_exiting_tree" from="Crew" to="Crew" method="_on_child_exiting_tree"]

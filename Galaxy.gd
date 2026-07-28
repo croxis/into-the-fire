@@ -140,6 +140,9 @@ func finish_setup_galaxy_all() -> void:
 		$Systems.add_station(babylon5, "test_system")
 		var b5commander: Character = Character.new_pilot("Commendar Eclair")
 		var b5_faction: Faction = Faction.get_faction("Babylon 5")
+		b5_faction.doctrine = FactionDoctrine.new()
+		b5_faction.doctrine.minimum_patrol_fighters = 2
+		b5_faction.doctrine.retreat_when_hull_percent = 0.25
 		b5_faction.add_member(b5commander)
 		$"Systems/test_system/SubViewport/ships/Babylon 5".add_passenger(b5commander)
 		$"Systems/test_system/SubViewport/ships/Babylon 5/Consoles/StationCommand".occupy(b5commander)

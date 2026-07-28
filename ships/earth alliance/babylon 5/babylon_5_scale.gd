@@ -27,7 +27,7 @@ func find_free_spawner() -> Node3D:
 			slot = 1
 	return spawn_joint
 
-func add_captain(pilot: Pilot):
+func add_captain(pilot: Character):
 	if $Crew.captain:
 		return
 	$Crew.captain = pilot
@@ -38,7 +38,7 @@ func add_captain(pilot: Pilot):
 	$Crew.add_child(pilot)
 
 
-func add_passenger(pilot: Pilot):
+func add_passenger(pilot: Character):
 	var max_capacity: int = $Crew.max_passengers
 	if $Crew.pilot:
 		max_capacity += 1
@@ -53,5 +53,5 @@ func add_passenger(pilot: Pilot):
 	$Crew.add_child(pilot)
 
 
-func remove_passenger() -> Pilot:
+func remove_passenger() -> Character:
 	return null

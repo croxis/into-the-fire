@@ -53,6 +53,7 @@ class_name Ship
 @export var has_spawn_points := false
 
 @export var sensor: Sensor
+@onready var crew := $Crew
 
 @export var em_output_base: float = 1.0
 @export var neutron_output_base: float = 1.0
@@ -97,7 +98,6 @@ func _ready():
 	
 	galaxy = get_tree().root.get_node("entry/Galaxy")
 	destroyed.connect(galaxy._on_ship_destroyed)
-	print_debug("Frozen: ", freeze, freeze_mode)
 
 
 func add_passenger(pilot: Character):
