@@ -91,7 +91,7 @@ func _physics_process(_dt: float) -> void:
 	if current_console:
 		var rotation_throttle = inputs.rotation_throttle  # May be needed for turrets
 		var throttle = inputs.throttle  # May be needed for turrent zoom or engineering
-		if current_console.has_capability("Helm"):
+		if current_console.has_capability("CapabilityHelm"):
 			var helm: HelmCapability = current_console.get_node("CapabilityHelm") as HelmCapability
 			if inputs.autobreak_toggle:
 				helm.toggle_autobreak()
