@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://e3r8bdttgfch"]
+
+[ext_resource type="Script" uid="uid://ge70v8wdc5r4" path="res://ship_systems/workstations/console.gd" id="1_003rq"]
+[ext_resource type="PackedScene" uid="uid://dkg7gtui8bx4q" path="res://ship_systems/workstations/command.tscn" id="2_bafst"]
+
+[node name="ConsoleCommand" type="Node3D" unique_id=1280124941]
+script = ExtResource("1_003rq")
+metadata/_custom_type_script = "uid://ge70v8wdc5r4"
+
+[node name="CapabilityCommand" parent="." unique_id=1583432735 instance=ExtResource("2_bafst")]
