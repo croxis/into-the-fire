@@ -35,12 +35,13 @@ and `patches/`. Engine changes go there, not here. This repo's `.gitlab-ci.yml` 
 
 ## Running
 
-Main scene: `res://entry.tscn`. Command-line flags are parsed in `entry.gd`:
+Main scene: `res://entry.tscn`. Command-line flags are parsed by `boot/launch_options.gd` (`LaunchOptions`)
+and dispatched in `entry.gd`. The main menu is created at runtime only when there is a UI:
 
 | Flags | Mode |
 | --- | --- |
 | (none) | Client with title screen and menu |
-| `--server [--game=NAME --password=PW --port=N]` | Dedicated server (also triggered by the `dedicated_server` feature) |
+| `--server [--game=NAME --password=PW --port=N]` | Dedicated server (also the `dedicated_server` feature, or `--headless` with no mode flag) |
 | `--testserver` | Hosts "Test Server" on port 2258 and plays |
 | `--testplayer` | Joins 127.0.0.1:2258 after 5 s as "Test Player" |
 | `--xr_mode` | OpenXR (legacy from Godot 3, being reworked) |
@@ -50,7 +51,8 @@ GPU-less machines; nothing on the server path may depend on rendering.
 
 ## Code map
 
-- `entry.gd` / `entry.tscn`: boot, flag parsing, owns `network` and `Galaxy`.
+- `entry.gd` / `entry.tscn`: boot and run-mode dispatch, owns `network` and `Galaxy`.
+- `boot/`: `LaunchOptions` (command-line parsing, no node dependencies).
 - `network/network.gd`: ENet host/join and the custom auth handshake.
 - `Galaxy.gd`: playtest world setup (hard-coded Babylon 5 station, Hyperion, NPC crew), spawning, respawn.
 - `systems/`: each star system is a `SubViewportContainer` with its own `World3D` (`system_template.*`).
@@ -86,7 +88,6 @@ integrator, interpolation for remote ships, interest management, event-based wea
   and live in static variables (tests must reset `Faction.factions` / `Faction._next_id`).
 - Ship `health` setter calls `destroy()` on clients too, and can emit `destroyed` twice.
 - `Ship._on_button_launch_pressed` calls a `request_spawn` RPC that does not exist.
-- Headless server builds Maaack's option menus ("Not supported by this display server" errors).
 - `factions/factions.tres.gd` duplicates the faction setup with different wings.
 - `Ship.tscn` syncs `autospin`/`autobreak`/`target_*` on the root, but they moved to Helm.
 - `Galaxy.gd` and `Ship.gd` load content by path; content should come from a registry.

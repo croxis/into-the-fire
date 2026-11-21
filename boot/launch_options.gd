@@ -1,0 +1,79 @@
+class_name LaunchOptions
+extends RefCounted
+## How this process was asked to run, parsed from the command line.
+##
+## Kept free of nodes and engine state so it can be unit tested: entry.gd passes
+## in the arguments and what it knows about the display server.
+
+enum Mode {
+	CLIENT,  ## Title screen and main menu. Single player and host-and-play start here.
+	DEDICATED,  ## Headless server, no local player.
+	TEST_SERVER,  ## Hosts "Test Server" and plays (developer shortcut).
+	TEST_PLAYER,  ## Joins the local test server after a delay (developer shortcut).
+}
+
+const DEFAULT_PORT := 2258
+
+var mode: Mode = Mode.CLIENT
+var game_name := "default"
+var password := ""
+var port := DEFAULT_PORT
+var xr := false
+## Arguments that were not recognised, kept for logging.
+var unknown: PackedStringArray = []
+
+
+## Parses [param args] (as from [method OS.get_cmdline_args]).
+## [param headless] is true when the display server is "headless".
+## [param dedicated_feature] is true for exports with the dedicated_server feature.
+static func parse(args: PackedStringArray, headless := false, dedicated_feature := false) -> LaunchOptions:
+	var options := LaunchOptions.new()
+	var flags := {}
+	for argument in args:
+		if not argument.begins_with("--"):
+			options.unknown.append(argument)
+			continue
+		var key := argument.substr(2)
+		var value := ""
+		var equals := key.find("=")
+		if equals > -1:
+			value = key.substr(equals + 1)
+			key = key.substr(0, equals)
+		flags[key] = value
+
+	if flags.has("server") or dedicated_feature:
+		options.mode = Mode.DEDICATED
+	elif flags.has("testserver"):
+		options.mode = Mode.TEST_SERVER
+	elif flags.has("testplayer"):
+		options.mode = Mode.TEST_PLAYER
+	elif headless:
+		# There is no screen to show a menu on, so the only useful thing to be is a server.
+		options.mode = Mode.DEDICATED
+
+	if flags.has("game") and flags["game"] != "":
+		options.game_name = flags["game"]
+	if flags.has("password"):
+		options.password = flags["password"]
+	if flags.has("port"):
+		var p: String = flags["port"]
+		if p.is_valid_int() and int(p) > 0 and int(p) < 65536:
+			options.port = int(p)
+		else:
+			options.unknown.append("--port=" + p)
+	options.xr = flags.has("xr_mode")
+
+	for key in flags:
+		if key not in ["server", "testserver", "testplayer", "game", "password", "port", "xr_mode"]:
+			options.unknown.append("--" + key)
+	return options
+
+
+## True when this process shows menus and a game view.
+func has_ui() -> bool:
+	return mode != Mode.DEDICATED
+
+
+func _to_string() -> String:
+	return "LaunchOptions(mode=%s game=%s port=%d xr=%s)" % [
+		Mode.keys()[mode], game_name, port, xr]

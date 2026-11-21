@@ -1,10 +1,6 @@
 # Errors the smoke test tolerates for now. One extended regex per line.
 # Remove a line as soon as its cause is fixed, so the smoke test guards it.
 
-# Maaack's options menu builds key labels on the headless server. Fixed when the
-# headless path stops creating menus (engine fundamentals step 2: bootstrap).
-^ERROR: Not supported by this display server\.
-
 # Leak reports printed during shutdown.
 leaked at exit
 resources still in use at exit

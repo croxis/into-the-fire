@@ -6,87 +6,103 @@ var _vr := false
 var interface : XRInterface
 var VR_DEBUG := false
 
+const MainMenuScene := preload("res://ui/main_menu/main_menu.tscn")
+
+var options: LaunchOptions
+## Only exists when this process has a UI (not on a dedicated server).
+var main_menu: Control
+
+
 func _input(event):
-	if event.is_action_pressed("ui_cancel"):
-		$MainMenu.visible = not $MainMenu.visible
+	if event.is_action_pressed("ui_cancel") and main_menu:
+		main_menu.visible = not main_menu.visible
 	if Input.is_action_pressed("ui_debug"):
 		print_debug("Debug UI")
 		$MonitorOverlay.visible = not $MonitorOverlay.visible
 
 
 func _ready():
-	var arguments = {}
-	for argument in OS.get_cmdline_args():
-		if argument.find("=") > -1:
-			var key_value = argument.split("=")
-			arguments[key_value[0].lstrip("--")] = key_value[1]
-		else:
-			arguments[argument.lstrip("--")] = 1
-	Log.log(["Arguments: ", arguments], Log.MessageType.INFO)
-	if ("server" in arguments || OS.has_feature("dedicated_server")):
-		var success := false
-		var game_name := "default"
-		var game_pass := ""
-		if "game" in arguments:
-			game_name = arguments["game"]
-		if "password" in arguments:
-			game_pass = arguments["password"]
-		if "port" in arguments:
-			success = $network.start_server(game_name, game_pass, arguments["port"])
-		else:
-			success = $network.start_server(game_name, game_pass)
-		if not success:
-			print("Failure to activate network. Is port in use?")
-			get_tree().quit()
-		_dedicated_server = true
-		$Galaxy.setup_new_galaxy(true)
-	elif ("testserver" in arguments):
-		$network.players = $Galaxy/Players
-		if not $network.host_server("Test Server", "Test Host", 2258):
-			print("Failure to activate network. Is port in use?")
-			get_tree().quit()
-		var callback := Callable($Galaxy, "finish_setup_galaxy_client")
-		$Galaxy.game_name = "Test Server"
-		$Galaxy.setup_new_galaxy(false, callback)
-	elif ("testplayer" in arguments):
-		$network.players = $Galaxy/Players
-		await get_tree().create_timer(5.0).timeout
-		$network.join_game("127.0.0.1", 2258, "Test Player", "", "")
-		$loading.visible = false
-	else:
-		"""# Discord!
-		DiscordRPC.app_id = 1356458511122567168 # Application ID
-		DiscordRPC.details = "An open source Babylon 5 game made in Godot"
-		DiscordRPC.state = "Checkpoint 23/23"
-		DiscordRPC.large_image = "b5poster" # Image key from "Art Assets"
-		DiscordRPC.large_image_text = "Try it now!"
-		DiscordRPC.small_image = "boss" # Image key from "Art Assets"
-		DiscordRPC.small_image_text = "Fighting the end boss! D:"
-
-		DiscordRPC.start_timestamp = int(Time.get_unix_time_from_system()) # "02:46 elapsed"
-		# DiscordRPC.end_timestamp = int(Time.get_unix_time_from_system()) + 3600 # +1 hour in unix time / "01:00:00 remaining"
-
-		DiscordRPC.refresh() # Always refresh after changing the values!"""
-		
-		if "xr_mode" in arguments or VR_DEBUG:
-			interface = XRServer.find_interface("OpenXR")
-			print_debug(interface)
-			interface.initialize()
-			if interface and interface.is_initialized():
-				print("OpenXR initialised successfully")
-				_vr = true
-				get_viewport().use_xr = true
-				DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
-			else:
-				print("OpenXR not initialised, please check if your headset is connected")
-				get_tree().quit()
-		else:
-			print_debug("resolution:", PlayerConfig.get_config("graphics", "resolution_x"))
-		$loading.load_scene("res://title_screen.tscn", get_tree().root, true, true)
-		$MainMenu.visible = true
-		
-	# Yes this is gross
+	options = LaunchOptions.parse(OS.get_cmdline_args(),
+			DisplayServer.get_name() == "headless", OS.has_feature("dedicated_server"))
+	Log.log(["Launch: ", options], Log.MessageType.INFO)
+	if not options.unknown.is_empty():
+		Log.log(["Ignored arguments: ", options.unknown], Log.MessageType.INFO)
 	$network.players = $Galaxy/Players
+	if options.has_ui():
+		_add_main_menu()
+
+	match options.mode:
+		LaunchOptions.Mode.DEDICATED:
+			_start_dedicated()
+		LaunchOptions.Mode.TEST_SERVER:
+			_start_test_server()
+		LaunchOptions.Mode.TEST_PLAYER:
+			_start_test_player()
+		LaunchOptions.Mode.CLIENT:
+			_start_client()
+
+
+## The menu builds option screens that need a real display server, so a
+## dedicated server never creates it.
+func _add_main_menu() -> void:
+	main_menu = MainMenuScene.instantiate()
+	main_menu.name = "MainMenu"
+	main_menu.visible = false
+	add_child(main_menu)
+	move_child(main_menu, $network.get_index() + 1)  # Same draw order as before.
+	# Order matters: entry hosts the server before Galaxy checks is_server.
+	main_menu.join_game.connect($Galaxy._on_main_menu_join_game)
+	main_menu.join_game.connect($network._on_main_menu_join_game)
+	main_menu.new_game.connect(_on_main_menu_new_game)
+	main_menu.new_game.connect($Galaxy._on_main_menu_new_game)
+	main_menu.set_msaa.connect($DisplayManager._on_main_menu_set_msaa)
+	main_menu.set_resolution.connect($DisplayManager.set_resolution)
+	# set_ssaa has no handler yet; the old scene connection pointed at a missing method.
+	main_menu.set_taa.connect($DisplayManager._on_main_menu_set_taa)
+
+
+func _start_dedicated() -> void:
+	_dedicated_server = true
+	if not $network.start_server(options.game_name, options.password, options.port):
+		print("Failure to activate network. Is port in use?")
+		get_tree().quit(1)
+		return
+	$Galaxy.setup_new_galaxy(true)
+
+
+func _start_test_server() -> void:
+	if not $network.host_server("Test Server", "Test Host", options.port):
+		print("Failure to activate network. Is port in use?")
+		get_tree().quit(1)
+		return
+	var callback := Callable($Galaxy, "finish_setup_galaxy_client")
+	$Galaxy.game_name = "Test Server"
+	$Galaxy.setup_new_galaxy(false, callback)
+
+
+func _start_test_player() -> void:
+	await get_tree().create_timer(5.0).timeout
+	$network.join_game("127.0.0.1", options.port, "Test Player", "", "")
+	$loading.visible = false
+
+
+func _start_client() -> void:
+	if options.xr or VR_DEBUG:
+		interface = XRServer.find_interface("OpenXR")
+		print_debug(interface)
+		if interface and interface.initialize():
+			print("OpenXR initialised successfully")
+			_vr = true
+			get_viewport().use_xr = true
+			DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
+		else:
+			print("OpenXR not initialised, please check if your headset is connected")
+			get_tree().quit(1)
+			return
+	else:
+		print_debug("resolution:", PlayerConfig.get_config("graphics", "resolution_x"))
+	$loading.load_scene("res://title_screen.tscn", get_tree().root, true, true)
+	main_menu.visible = true
 
 
 func end_title_sequence() -> void:
@@ -94,7 +110,8 @@ func end_title_sequence() -> void:
 	if get_parent().has_node("title screen"):
 		Log.log(["Ending Title"], Log.MessageType.INFO)
 		get_parent().get_node("title screen").queue_free()
-	$MainMenu.visible = false
+	if main_menu:
+		main_menu.visible = false
 	
 
 func _on_network_connection_succeeded():

@@ -7,7 +7,6 @@
 [ext_resource type="Script" uid="uid://bnrv1k0ouvwgx" path="res://ui/debug/DebugContainer.gd" id="4_h8ft4"]
 [ext_resource type="PackedScene" uid="uid://c45aut53d0eru" path="res://Galaxy.tscn" id="4_l50de"]
 [ext_resource type="PackedScene" uid="uid://dgsj2su1f5ppc" path="res://ui/debug/widgets/TextList/DebugTextList.tscn" id="5_ro4nv"]
-[ext_resource type="PackedScene" uid="uid://d31wy0m5b7d3b" path="res://ui/main_menu/main_menu.tscn" id="7_j7gch"]
 [ext_resource type="Script" uid="uid://cbohph20hhrxe" path="res://DisplayManager.gd" id="8_oa1x6"]
 [ext_resource type="Script" uid="uid://rcvihc1jdyuo" path="res://discord.gd" id="10_sdusq"]
 
@@ -23,9 +22,6 @@ z_index = 10
 [node name="Galaxy" parent="." unique_id=1784109363 instance=ExtResource("4_l50de")]
 
 [node name="network" parent="." unique_id=232941933 instance=ExtResource("2_phwwb")]
-
-[node name="MainMenu" parent="." unique_id=1482145882 instance=ExtResource("7_j7gch")]
-visible = false
 
 [node name="DisplayManager" type="Node" parent="." unique_id=566521343]
 script = ExtResource("8_oa1x6")
@@ -74,11 +70,3 @@ script = ExtResource("10_sdusq")
 [connection signal="auth_failed" from="network" to="." method="_on_network_auth_failed"]
 [connection signal="connection_succeeded" from="network" to="." method="_on_network_connection_succeeded"]
 [connection signal="connection_succeeded" from="network" to="Galaxy" method="_on_network_connection_succeeded"]
-[connection signal="join_game" from="MainMenu" to="Galaxy" method="_on_main_menu_join_game"]
-[connection signal="join_game" from="MainMenu" to="network" method="_on_main_menu_join_game"]
-[connection signal="new_game" from="MainMenu" to="." method="_on_main_menu_new_game"]
-[connection signal="new_game" from="MainMenu" to="Galaxy" method="_on_main_menu_new_game"]
-[connection signal="set_msaa" from="MainMenu" to="DisplayManager" method="_on_main_menu_set_msaa"]
-[connection signal="set_resolution" from="MainMenu" to="DisplayManager" method="set_resolution"]
-[connection signal="set_ssaa" from="MainMenu" to="DisplayManager" method="_on_main_menu_set_ssaa"]
-[connection signal="set_taa" from="MainMenu" to="DisplayManager" method="_on_main_menu_set_taa"]
