@@ -15,17 +15,11 @@ extends Node
 		assert(false, "BOO! DO NOT SET FACTIONS DIRECTLY")
 	get:
 		return Faction.factions[faction_id]
-# If this is the player, set the id to 1 or more
+# If this is the player, set the id to 1 or more. 0 means an NPC.
 @export var _player_pilot_id: int:
 	set(new_id):
-		if multiplayer.is_server():
-			if new_id > -1:
-				$LimboHSM.set_active(false)
-			else:
-				$LimboHSM.set_active(true)
-		else:
-			$LimboHSM.set_active(false)
 		_player_pilot_id = new_id
+		_update_brain_active()
 @export var multiplayer_id: int
 @export var pilot_id: int
 var active_orders: Array[OrderData] = []
@@ -39,14 +33,18 @@ var current_console: Console
 	get:
 		return get_node("InputsSync")
 
+## The ship whose Crew node holds this character, or null.
 var current_ship: Ship:
 	get:
-		return get_parent().get_parent()
+		var crew_node := get_parent()
+		return crew_node.get_parent() as Ship if crew_node else null
 
 @export var doctrine_var: StringName = &"doctrine"
 
 static var next_id := 0
 static var pilot_scene: PackedScene = load("res://characters/character.tscn")
+
+var _brain_initialized := false
 
 static func new_pilot(new_name: String) -> Character:
 	var new_pilot_instance = pilot_scene.instantiate()
@@ -75,7 +73,21 @@ func _init_brain() -> void:
 	hsm.add_transition(dead_state, idle_state, "respawn")
 	hsm.initial_state = idle_state
 	hsm.initialize(self)
-	hsm.set_active(true)
+	_brain_initialized = true
+	_update_brain_active()
+
+
+func is_player() -> bool:
+	return _player_pilot_id > 0
+
+
+## The brain only thinks for NPCs, and only where the simulation is authoritative.
+## Players drive their character with inputs instead.
+func _update_brain_active() -> void:
+	# restore() can set _player_pilot_id before the node enters the tree.
+	if not _brain_initialized:
+		return
+	hsm.set_active(multiplayer.is_server() and not is_player())
 
 
 func set_multiplayer_id(id):
@@ -91,8 +103,8 @@ func _physics_process(_dt: float) -> void:
 	if current_console:
 		var rotation_throttle = inputs.rotation_throttle  # May be needed for turrets
 		var throttle = inputs.throttle  # May be needed for turrent zoom or engineering
-		if current_console.has_capability("CapabilityHelm"):
-			var helm: HelmCapability = current_console.get_node("CapabilityHelm") as HelmCapability
+		var helm := current_console.get_capability(HelmCapability) as HelmCapability
+		if helm:
 			if inputs.autobreak_toggle:
 				helm.toggle_autobreak()
 			if inputs.autospin_toggle:
@@ -101,12 +113,11 @@ func _physics_process(_dt: float) -> void:
 			helm.throttle = inputs.throttle
 			if inputs.debug_all_stop:
 				helm._debug_all_stop()
-		if current_console.has_capability("CapabilityWeapons"):
-			var weapons: WeaponsCapability = current_console.get_node("CapabilityWeapons") as WeaponsCapability
+		# TODO: Weapons capability is found but firing is not wired to inputs yet.
 		if Input.is_action_just_released("camera_change") and _player_pilot_id == LocalGameManager.player_id:
 			current_console.change_camera()
-		if current_console.has_capability("CapabilityCommand"):
-			var command: CommandCapability = current_console.get_node("CapabilityCommand") as CommandCapability
+		var command := current_console.get_capability(CommandCapability) as CommandCapability
+		if command:
 			# AI updates server only and non players
 			if multiplayer.is_server() and _player_pilot_id < 1:
 				var threats: Array[Ship] = [] # TODO: command.get_hostiles()
@@ -126,9 +137,14 @@ func serialize() -> Dictionary:
 	# Personality
 	# payload["personality"] = personality.resource_path
 	
-	# Blackboard
-	for key in $BrainHSM.blackboard.get_vars():
-		payload["bb_" + key] = $BrainHSM.blackbaord.get_var(key)
+	# Blackboard. Object references (ships, factions, doctrine) are runtime
+	# context rebuilt every tick, and cannot cross the network, so skip them.
+	var blackboard: Blackboard = $BrainHSM.blackboard
+	for key in blackboard.list_vars():
+		var value = blackboard.get_var(key)
+		if value is Object:
+			continue
+		payload["bb_" + key] = value
 	
 	# HSM
 	if hsm.get_active_state():

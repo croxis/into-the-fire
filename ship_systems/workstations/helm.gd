@@ -17,6 +17,8 @@ func _physics_process(dt: float) -> void:
 
 
 func _rollback_tick(dt, _tick, _is_fresh):
+	# Pilot input drives rotation; autospin only takes over idle axes below.
+	rotation_throttle = input_rotation_throttle
 	if autospin:
 		# We can just assume local space
 		# If there is no input on an axis, we want to stop motion on it

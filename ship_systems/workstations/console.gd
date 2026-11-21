@@ -26,18 +26,20 @@ func occupy(character: Character) -> bool:
 	var bt_player: BTPlayer  = c_state.bt_player
 	var combo_tree: BehaviorTree = BehaviorTree.new()
 	var parallel: BTParallel = BTParallel.new()
+	# Consoles also hold cameras, reticles and UI, so only capabilities count.
+	var role_count := 0
+	for capability in capabilities:
+		if capability.behavior_tree:
+			var subtree: BTSubtree = BTSubtree.new()
+			subtree.set_subtree(capability.behavior_tree)
+			parallel.add_child(subtree)
+			role_count += 1
 	# The station is alive as long as at least one role is working.
 	# Only fail if EVERY role reports FAILURE.
-	parallel.num_failures_required = get_children().size()
+	parallel.num_failures_required = maxi(role_count, 1)
 	parallel.num_successes_required = 0
 	# Do not force re-enter; let continuous tasks stay RUNNING.
 	parallel.repeat = false
-	for console_capability in get_children():
-		var c_c: = console_capability as ConsoleCapability
-		if c_c.behavior_tree:
-			var subtree: BTSubtree = BTSubtree.new()
-			subtree.set_subtree(c_c.behavior_tree)
-			parallel.add_child(subtree)
 	combo_tree.set_root_task(parallel)
 	var hsm_blackboard: Blackboard = character.hsm.get_blackboard()
 	bt_player.set_blackboard(hsm_blackboard)
@@ -74,6 +76,15 @@ func change_camera():
 		$Camera3DPilot.current = true
 	else:
 		$Node3D/OrbitCamera.current = true
+
+
+## The first capability that is an instance of [param type] (a class such as
+## HelmCapability), or null. Prefer this over node names, which vary by scene.
+func get_capability(type: Script) -> ConsoleCapability:
+	for c in capabilities:
+		if is_instance_of(c, type):
+			return c
+	return null
 
 
 func has_capability(capability: String) -> bool:

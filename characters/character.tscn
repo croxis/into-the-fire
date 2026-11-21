@@ -79,6 +79,8 @@ blackboard_plan = SubResource("BlackboardPlan_mdkfl")
 script = ExtResource("4_mdkfl")
 
 [node name="BTPlayer" type="BTPlayer" parent="BrainHSM/OperatingConsoleState" unique_id=818906612]
+active = false
+update_mode = 2
 blackboard_plan = SubResource("BlackboardPlan_b1u1o")
 
 [node name="MovingToShipState" type="LimboState" parent="BrainHSM" unique_id=1387934626]

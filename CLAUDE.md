@@ -82,19 +82,32 @@ integrator, interpolation for remote ships, interest management, event-based wea
 
 ## Known issues (from review, not yet fixed)
 
-- `system_template.gd`: `ship_scan_timer` is never added to the tree, so sensor checks never run.
-- `character.gd`: `_player_pilot_id` setter references `$LimboHSM` (node is `BrainHSM`);
-  `serialize()` has a `blackbaord` typo.
-- `faction.gd`: `get_wings()` uses `child.typeof(Faction)`; `@rpc` on a static function does nothing;
-  factions are created locally on every peer.
+- `faction.gd`: `@rpc` on a static function does nothing; factions are created locally on every peer
+  and live in static variables (tests must reset `Faction.factions` / `Faction._next_id`).
+- Ship `health` setter calls `destroy()` on clients too, and can emit `destroyed` twice.
+- `Ship._on_button_launch_pressed` calls a `request_spawn` RPC that does not exist.
+- Headless server builds Maaack's option menus ("Not supported by this display server" errors).
 - `factions/factions.tres.gd` duplicates the faction setup with different wings.
 - `Ship.tscn` syncs `autospin`/`autobreak`/`target_*` on the root, but they moved to Helm.
 - `Galaxy.gd` and `Ship.gd` load content by path; content should come from a registry.
 
 ## Tests and CI
 
-- No automated tests yet. Planned: GUT, run headless in a GitLab `test` stage with JUnit reports.
-- CI (`.gitlab-ci.yml`): import assets, then export Linux and Windows debug builds with the custom image.
+Tests need the custom engine binary (`GODOT` below). Stock Godot lacks LimboAI and doubles.
+
+- Unit tests: GUT 9.7.1 in `addons/gut`, tests in `tests/unit/test_*.gd`, config `.gutconfig.json`.
+  GUT fails a test on any engine error, script error or `push_error` during it.
+  ```bash
+  $GODOT --headless --path . -s addons/gut/gut_cmdln.gd -gconfig=.gutconfig.json
+  ```
+- Smoke test: boots `--server` headless for 1800 frames, checks startup markers, and fails on any
+  error not matched by `tests/smoke/known_issues.txt`. Remove a known-issue line when its cause is fixed.
+  ```bash
+  GODOT=$GODOT tests/smoke/server_smoke.sh
+  ```
+- Write a failing test first when fixing a bug. Reset static state (factions) in `before_each`.
+- CI (`.gitlab-ci.yml`): import assets, `test` stage (`unit-tests` with JUnit report, `server-smoke`),
+  then export Linux and Windows debug builds with the custom image.
 - Planned packaging: one binary per OS, base pck plus content pcks (Babylon 5 as the default mod).
 
 ## godot-ai MCP

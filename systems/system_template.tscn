@@ -34,7 +34,7 @@ spawn_path = NodePath("../bolts")
 script = ExtResource("2_05tas")
 
 [node name="ShipSpawner" type="MultiplayerSpawner" parent="SubViewport" unique_id=231975775]
-_spawnable_scenes = PackedStringArray("uid://bje1osdhtpqsy", "uid://c8kn4ojrwda3e", "uid://bx03e1mn48l58", "uid://bcyhqn6r6h3a5", "uid://dmpj0ge68t2li")
+_spawnable_scenes = PackedStringArray("uid://cdmfpwxkn7p4l", "uid://c8kn4ojrwda3e", "uid://bx03e1mn48l58", "uid://bcyhqn6r6h3a5", "uid://dmpj0ge68t2li")
 spawn_path = NodePath("../ships")
 script = ExtResource("3_hjsre")
 

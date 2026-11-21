@@ -96,8 +96,10 @@ func _ready():
 	can_sleep = false
 	#target_rot = rotation_degrees
 	
-	galaxy = get_tree().root.get_node("entry/Galaxy")
-	destroyed.connect(galaxy._on_ship_destroyed)
+	# No Galaxy when a ship runs on its own (tests, tools).
+	galaxy = get_tree().root.get_node_or_null("entry/Galaxy")
+	if galaxy:
+		destroyed.connect(galaxy._on_ship_destroyed)
 
 
 func add_passenger(pilot: Character):
@@ -267,11 +269,11 @@ func request_launch(p_ship_id: int, pilot_id: int):
 	disable_capital_ui.rpc_id(pilot.multiplayer_id)
 	await get_tree().create_timer(2.0).timeout
 	new_ship.is_spawning = false
-	for c in $Consoles.get_children():
+	for c in new_ship.get_node("Consoles").get_children():
 		if c is Console:
-			c = c as Console
-			if c.has_capability("Helm"):
-				c.launch_completed()
+			var helm := (c as Console).get_capability(HelmCapability) as HelmCapability
+			if helm:
+				helm.launch_completed()
 	Log.log(["Spawn complete for ", pilot], Log.MessageType.SUCCESS)
 
 
@@ -288,7 +290,8 @@ func sensor_check(other_ship: Ship) -> bool:
 	if em_signal > sensor.em_sensitive or neuteno_signal > sensor.neutrino_sensitive:
 		detected = true
 	if detected:
-		detected_ships.append(other_ship)
+		if other_ship not in detected_ships:
+			detected_ships.append(other_ship)
 	else:
 		detected_ships.erase(other_ship)
 	return detected

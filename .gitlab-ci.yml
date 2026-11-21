@@ -11,6 +11,7 @@ cache:
 
 stages:
   - import-assets
+  - test
   - export
   - deploy
 
@@ -24,6 +25,31 @@ import-assets:
   stage: import-assets
   script:
     - godot --verbose --headless --import --editor --quit
+
+# GUT unit tests. Results show on merge requests via the JUnit report.
+unit-tests:
+  stage: test
+  before_script:
+    - godot --headless --import
+  script:
+    - mkdir -p test-results
+    - godot --headless -s addons/gut/gut_cmdln.gd -gconfig=.gutconfig.json -gjunit_xml_file=res://test-results/junit.xml
+  artifacts:
+    when: always
+    reports:
+      junit: test-results/junit.xml
+
+# Boots the dedicated server headless and fails on unexpected errors.
+server-smoke:
+  stage: test
+  before_script:
+    - godot --headless --import
+  script:
+    - SMOKE_LOG=smoke.log GODOT=godot tests/smoke/server_smoke.sh
+  artifacts:
+    when: always
+    paths:
+      - smoke.log
 
 linux:
   stage: export

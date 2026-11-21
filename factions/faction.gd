@@ -66,15 +66,11 @@ static func get_faction(faction_name: String) -> Faction:
 
 func is_a_parent(possible_parent_faction: Faction) -> bool:
 	var current_parent: Faction = parent_faction
-	if parent_faction == possible_parent_faction:
-		return true
-	while current_parent != possible_parent_faction:
-		if not current_parent:  # Top of the tree!
-			return false
+	while current_parent:
 		if current_parent == possible_parent_faction:
 			return true
 		current_parent = current_parent.parent_faction
-	return false
+	return false  # Reached the top of the tree.
 
 
 func get_children() -> Array[Faction]:
@@ -99,9 +95,8 @@ func get_inherited_standings() -> Dictionary:
 func get_wings() -> Array[Faction]:
 	var f: Array[Faction] = []
 	for child in get_children():
-		if child.typeof(Faction):
-			if child.is_wing:
-				f.append(child)
+		if child.is_wing:
+			f.append(child)
 	return f
 
 

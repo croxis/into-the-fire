@@ -15,6 +15,7 @@ func _ready():
 		ship_scan_timer.wait_time = 0.5
 		ship_scan_timer.autostart = true
 		ship_scan_timer.timeout.connect(ship_scanner_check)
+		add_child(ship_scan_timer)  # A Timer only runs inside the scene tree.
 
 
 func add_station(station: Ship):
