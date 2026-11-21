@@ -18,7 +18,6 @@ script = ExtResource("3_1drsh")
 
 [sub_resource type="BTAction" id="BTAction_vupts"]
 script = ExtResource("4_e0bpl")
-free_crew_var = null
 
 [sub_resource type="BTSequence" id="BTSequence_ah7gn"]
 custom_name = "Maintain Patrol"
