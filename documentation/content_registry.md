@@ -101,7 +101,7 @@ var path := Content.path_of(&"b5:test_system")
 
 # Check before using an optional ID.
 if Content.has(&"b5:omega"):
-    ...
+	...
 ```
 
 Write IDs as `StringName` literals (`&"b5:omega"`). They are compared faster than Strings, and that
