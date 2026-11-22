@@ -65,7 +65,8 @@ GPU-less machines; nothing on the server path may depend on rendering.
 - `scenario/`: `Scenario` resources (factions, systems, ships, crew) and `ScenarioLoader` (validate,
   build factions, populate). Scenarios are content, e.g. `content/scenarios/playtest.tres`.
 - `world_ids.gd`: `WorldIds`, the world's ship and pilot ID counters (start at 1; never statics).
-- `systems/`: each star system is a `SubViewportContainer` with its own `World3D` (`system_template.*`).
+- `systems/`: each star system (`System`, `system_template.*`) is a zone: a `SubViewport` root with its own
+  `World3D`, holding `ships`, `bolts` and their spawners. `System.find_for(node)` finds a node's system.
 - `zones/`: `ZoneView` (in Galaxy) draws the viewed zone in the main window: sets its `world_3d`, a camera rig
   (or XR origin) follows the zone's current camera, input is forwarded. Zone SubViewports don't render.
 - `ui/hud/`: `HudLayer` (`Galaxy.hud`), the local player's HUD in the main window. 2D UI inside a ship is never
@@ -97,8 +98,8 @@ Autoloads include netfox (`NetworkTime`, `NetworkRollback`, ...), `Log`, `LimboC
   with `ship.spawn_crew(Character.pilot_data(..., galaxy.ids.next_pilot()))`, never `add_child`.
 - Never trust IDs sent by clients: validate every `any_peer` RPC on the server.
 
-Target direction (see the design doc): data records separate from scene nodes, per-zone `SubViewport`
-worlds without containers, own-ship prediction with netfox `RollbackSynchronizer` and a custom flight
+Target direction (see the design doc): data records separate from scene nodes, per-zone physics stepping,
+own-ship prediction with netfox `RollbackSynchronizer` and a custom flight
 integrator, interpolation for remote ships, interest management, event-based weapons.
 
 ## Known issues (from review, not yet fixed)

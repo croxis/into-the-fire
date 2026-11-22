@@ -260,7 +260,7 @@ func _on_crew_child_exiting_tree(_node: Node) -> void:
 
 
 func _on_button_launch_pressed() -> void:
-	var system_name := get_parent().get_parent().get_parent().name
+	var system_name := get_current_system().name
 	galaxy.rpc("request_spawn", system_name, name)
 	$CapitalShipControl.visible = false
 
@@ -325,8 +325,9 @@ func request_launch(p_ship_id: int, pilot_id: int):
 	Log.log(["Spawn complete for ", pilot], Log.MessageType.SUCCESS)
 
 
+## The star system this ship is in, or null (not placed yet).
 func get_current_system() -> System:
-	return get_parent().get_parent().get_parent()
+	return System.find_for(self)
 
 
 func sensor_check(other_ship: Ship) -> bool:

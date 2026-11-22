@@ -44,9 +44,8 @@ func get_spawn_points(faction: Faction) -> Dictionary:
 	# on the team of
 	var spawn_points = {}
 	for system in $Systems.get_children():
-		if system.has_node("SubViewport"):
-			var viewport = system.get_node("SubViewport")
-			for ship in viewport.get_node("ships").get_children():
+		if system is System:
+			for ship in system.get_ships():
 				if ship.has_spawn_points:
 					if system not in spawn_points:
 						spawn_points[system] = []
@@ -65,10 +64,10 @@ func player_died(player_id: int) -> void:
 ## server may move a player's view to a system.
 @rpc("authority", "call_local")
 func player_enter_system(system_name) -> void:
-	var system: SubViewportContainer = get_node("Systems/" + system_name)
-	zone_view.view(system.get_node("SubViewport"))
+	var system: System = get_node("Systems/" + system_name)
+	zone_view.view(system)
 	#Music Hack
-	system.get_node("SubViewport/AudioStreamPlayer").playing = true
+	system.get_node("AudioStreamPlayer").playing = true
 	# This runs on the spawning player's own machine, so look up the local peer
 	# (the sender is always the server).
 	var player: Player = $Players.find_player_by_netid(multiplayer.get_unique_id())
@@ -275,7 +274,7 @@ func first_spawn_player(faction_id: int, system_name: String, spawner_name: Stri
 	var faction: Faction = factions.get_by_id(faction_id)
 	#TODO: Change this to be via system_name and spawner_name
 	player_enter_system.rpc_id(remote_id, system_name)
-	var player_pilot := ($"Systems/test_system/SubViewport/ships/Babylon 5" as Ship).spawn_crew(
+	var player_pilot := ($"Systems/test_system/ships/Babylon 5" as Ship).spawn_crew(
 			Character.pilot_data(player.name, faction_id, remote_id, ids.next_pilot(),
 				player.player_id))
 	if player_pilot == null:

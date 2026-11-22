@@ -72,32 +72,30 @@ cap_top = false
 cap_bottom = false
 
 [node name="test_system" instance=ExtResource("1_ctlaf")]
-
-[node name="SubViewport" parent="." index="0"]
 positional_shadow_atlas_size = 4096
 
-[node name="RtsCamera" parent="SubViewport/RTSCameras" index="0"]
+[node name="RtsCamera" parent="RTSCameras" index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3000, 1000, 2000)
 camera_move_speed = 100.0
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="SubViewport" index="1"]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." index="1"]
 environment = ExtResource("3_byhm0")
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="SubViewport" index="2"]
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." index="2"]
 transform = Transform3D(0.892358, 0, 0.451329, 0, 1, 0, -0.451329, 0, 0.892358, 0, 0, 0)
 light_color = Color(1, 0.92549, 0.901961, 1)
 shadow_enabled = true
 directional_shadow_max_distance = 2000.0
 
-[node name="NebulaDirectionalLight3D" type="DirectionalLight3D" parent="SubViewport" index="3"]
+[node name="NebulaDirectionalLight3D" type="DirectionalLight3D" parent="." index="3"]
 transform = Transform3D(-0.791042, 0, -0.611762, 0.383873, 0.778627, -0.496369, 0.476334, -0.627488, -0.615926, 0, 0, 0)
 light_color = Color(0.360784, 0.223529, 1, 1)
 light_energy = 0.1
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="SubViewport" index="4"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." index="4"]
 transform = Transform3D(0.983132, 0.182794, -0.0061107, 0.182771, -0.983147, -0.00420464, -0.0067763, 0.00301686, -0.999972, 0, 0, 0)
 mesh = SubResource("CylinderMesh_byahp")
 script = ExtResource("7_6xt1f")
 
-[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="SubViewport" index="5"]
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." index="5"]
 stream = ExtResource("8_oq5h5")

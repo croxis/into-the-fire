@@ -52,7 +52,7 @@ ship.faction_id = b5.faction_id          # ship ownership
 
 `ship.faction` and `character.faction` look for the `Galaxy` above them in the scene tree
 (`Galaxy.find_for(node)`) and use its registry. A ship sits at
-`Galaxy/Systems/<system>/SubViewport/ships/`, and a character sits in a ship's `Crew`, so both are
+`Galaxy/Systems/<system>/ships/`, and a character sits in a ship's `Crew`, so both are
 always under a Galaxy once they are in the world.
 
 Before a node is in the tree there is no Galaxy above it, so `faction` returns null. Logs show

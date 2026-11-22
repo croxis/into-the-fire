@@ -79,11 +79,11 @@ omega="uid://<the uid you copied>"
 
 ### 4. Let the ship replicate over the network
 
-Ships live under each system's `SubViewport/ships` node, and the `ShipSpawner`
+Ships live under each system's `ships` node, and the `ShipSpawner`
 (`MultiplayerSpawner`) in `systems/system_template.tscn` replicates them to clients. A spawner only
 replicates scenes in its **Auto Spawn List**.
 
-Open `systems/system_template.tscn`, select `SubViewport/ShipSpawner`, and add the new scene to
+Open `systems/system_template.tscn`, select `ShipSpawner`, and add the new scene to
 **Auto Spawn List** in the Inspector. If you skip this, the ship exists on the server but never
 appears on clients. Nothing warns you, so check it on a client.
 
