@@ -334,3 +334,7 @@ anti_aliasing/screen_space_roughness_limiter/enabled=false
 scaling_3d/mode=1
 mesh_lod/lod_change/threshold_pixels=0.5
 lights_and_shadows/positional_shadow/atlas_size=8192
+
+[xr]
+
+shaders/enabled=true

@@ -14,6 +14,9 @@ var _scenario: Scenario
 ## Ship and pilot IDs for this world.
 var ids := WorldIds.new()
 
+## Draws the zone the local player is in. Unused on a dedicated server.
+var zone_view := ZoneView.new()
+
 ## Every faction in this world. The server creates them; clients receive a copy
 ## when they join (see _rpc_receive_factions). Replaced as a whole, never patched
 ## from client data.
@@ -61,8 +64,7 @@ func player_died(player_id: int) -> void:
 @rpc("authority", "call_local")
 func player_enter_system(system_name) -> void:
 	var system: SubViewportContainer = get_node("Systems/" + system_name)
-	system.get_node("SubViewport").size = DisplayServer.window_get_size()
-	system.visible = true
+	zone_view.view(system.get_node("SubViewport"))
 	#Music Hack
 	system.get_node("SubViewport/AudioStreamPlayer").playing = true
 	# This runs on the spawning player's own machine, so look up the local peer
@@ -97,13 +99,13 @@ func set_taa(status):
 	update_graphics()
 
 
+## Graphics settings apply to the main window, which draws the viewed zone
+## (ZoneView). Zone SubViewports don't render, so they need none.
 func update_graphics():
-	if self.has_node("Systems"):
-		for subviewportcontainer in $Systems.get_children():
-			if subviewportcontainer is SubViewportContainer:
-				subviewportcontainer.get_node("SubViewport").size = render_resolution
-				subviewportcontainer.get_node("SubViewport").msaa_3d = msaa
-				subviewportcontainer.get_node("SubViewport").use_taa = taa
+	var window := get_viewport()
+	window.msaa_3d = msaa
+	window.use_taa = taa
+	window.scaling_3d_scale = ZoneView.render_scale(render_resolution, window.get_visible_rect().size)
 
 
 ## The Galaxy that [param node] lives under, or null when there is none (the
@@ -121,9 +123,10 @@ func _ready():
 	#TODO: Serialize from save
 	_play_time = 0
 	multiplayer.peer_connected.connect(_on_peer_connected)
+	zone_view.name = "ZoneView"
+	add_child(zone_view)
 
 
-## Server: playtest factions. Moves to scenario data in a later step.
 ## Server: send the faction tree to a client that just connected.
 ## (peer_connected also fires on clients when other peers join; they ignore it.)
 func _on_peer_connected(peer_id: int) -> void:

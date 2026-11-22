@@ -73,6 +73,25 @@ static func parse(args: PackedStringArray, headless := false, dedicated_feature 
 	return options
 
 
+## Arguments for restarting the game with XR on or off (the in-game VR setting).
+## OpenXR can only start with the engine, so switching means a restart.
+## [param current] is [method OS.get_cmdline_args]: the engine has already
+## removed its own flags from it (--xr-mode, --path), so they are added back.
+## [param project_path] is needed when running from source, not when exported.
+static func restart_args(current: PackedStringArray, xr_on: bool, project_path: String,
+		exported: bool) -> PackedStringArray:
+	var args := PackedStringArray()
+	if not exported:
+		args.append_array(["--path", project_path])
+	for argument in current:
+		# The old game flag would restart into the "start with --xr-mode on" hint.
+		if argument != "--xr_mode":
+			args.append(argument)
+	if xr_on:
+		args.append_array(["--xr-mode", "on"])
+	return args
+
+
 ## True when this process shows menus and a game view.
 func has_ui() -> bool:
 	return mode != Mode.DEDICATED

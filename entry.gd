@@ -92,16 +92,20 @@ func _start_test_player() -> void:
 
 
 func _start_client() -> void:
-	if options.xr or VR_DEBUG:
-		interface = XRServer.find_interface("OpenXR")
-		print_debug(interface)
-		if interface and interface.initialize():
+	# OpenXR can only start with the engine (it picks the Vulkan device), so the
+	# project leaves it off and XR runs only when the engine was started with
+	# Godot's own `--xr-mode on`. The game uses XR whenever the engine started it.
+	interface = XRServer.find_interface("OpenXR")
+	var xr_running := interface != null and interface.is_initialized()
+	if xr_running or options.xr or VR_DEBUG:
+		if xr_running or (interface and interface.initialize()):
 			print("OpenXR initialised successfully")
 			_vr = true
 			get_viewport().use_xr = true
 			DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 		else:
-			print("OpenXR not initialised, please check if your headset is connected")
+			print("OpenXR is not running. Start the game with --xr-mode on, ",
+					"with the headset connected and an OpenXR runtime (e.g. SteamVR) active.")
 			get_tree().quit(1)
 			return
 	else:

@@ -66,3 +66,27 @@ func test_test_player_can_pick_a_faction() -> void:
 	assert_eq(o.unknown.size(), 0)
 	assert_eq(LaunchOptions.parse(PackedStringArray(["--testplayer"])).faction, "",
 			"no faction: wait in the join menu")
+
+
+## restart_args: the arguments for restarting the game with XR on or off.
+
+func test_restart_into_xr_adds_the_engine_flag() -> void:
+	var args := LaunchOptions.restart_args(PackedStringArray(["--testserver"]), true, "", true)
+	assert_eq(args, PackedStringArray(["--testserver", "--xr-mode", "on"]))
+
+
+func test_restart_out_of_xr_has_no_engine_flag() -> void:
+	# The engine consumed --xr-mode, so it isn't in the current arguments.
+	var args := LaunchOptions.restart_args(PackedStringArray(["--testserver"]), false, "", true)
+	assert_eq(args, PackedStringArray(["--testserver"]))
+
+
+func test_restart_drops_the_old_game_xr_flag() -> void:
+	var args := LaunchOptions.restart_args(PackedStringArray(["--xr_mode"]), false, "", true)
+	assert_eq(args, PackedStringArray(), "otherwise it would restart into the XR hint and quit")
+
+
+func test_restart_from_source_keeps_the_project_path() -> void:
+	# The engine consumes --path too; a source run needs it to find the project again.
+	var args := LaunchOptions.restart_args(PackedStringArray(), true, "/home/me/ITF", false)
+	assert_eq(args, PackedStringArray(["--path", "/home/me/ITF", "--xr-mode", "on"]))

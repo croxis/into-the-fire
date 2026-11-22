@@ -342,10 +342,22 @@ popup/item_2/id = 2
 popup/item_3/text = "8x"
 popup/item_3/id = 3
 
+[node name="LabelVR" type="Label" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer" unique_id=1344127291]
+layout_mode = 2
+text = "VR mode (restarts)"
+
+[node name="CheckButtonVR" type="CheckButton" parent="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer" unique_id=404125110]
+layout_mode = 2
+tooltip_text = "Restarts the game in VR or flat-screen mode. Needs a headset and an OpenXR runtime such as SteamVR."
+
 [node name="Controls" parent="." unique_id=1576990386 instance=ExtResource("3_omy8q")]
 visible = false
 layout_mode = 0
 anchors_preset = 0
+anchor_right = 0.0
+anchor_bottom = 0.0
+grow_horizontal = 1
+grow_vertical = 1
 
 [connection signal="pressed" from="HBoxContainer/VBoxContainerMain/ButtonNewGame" to="." method="_on_button_new_game_pressed"]
 [connection signal="pressed" from="HBoxContainer/VBoxContainerMain/ButtonJoinGame" to="." method="_on_button_join_game_pressed"]
@@ -358,3 +370,4 @@ anchors_preset = 0
 [connection signal="item_selected" from="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer/OptionButtonWindowMode" to="." method="_on_option_button_window_mode_item_selected"]
 [connection signal="toggled" from="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer/CheckButtonTAA" to="." method="_on_check_button_taa_toggled"]
 [connection signal="item_selected" from="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer/OptionButtonMSAA" to="." method="_on_option_button_msaa_item_selected"]
+[connection signal="toggled" from="HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer/CheckButtonVR" to="." method="_on_check_button_vr_toggled"]

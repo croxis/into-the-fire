@@ -46,7 +46,7 @@ and dispatched in `entry.gd`. The main menu is created at runtime only when ther
 | `--server [--game=NAME --password=PW --port=N]` | Dedicated server (also the `dedicated_server` feature, or `--headless` with no mode flag) |
 | `--testserver` | Hosts "Test Server" on port 2258 and plays |
 | `--testplayer [--faction=NAME]` | Joins 127.0.0.1:2258 after 5 s as "Test Player"; with `--faction`, spawns in that faction without the menu |
-| `--xr_mode` | OpenXR (legacy from Godot 3, being reworked) |
+| `--xr-mode on` | OpenXR. Godot's own engine flag: OpenXR can only start with the engine, so the project keeps `xr/openxr/enabled` off. `--xr_mode` alone only prints this hint. Players switch with Options > "VR mode", which restarts the game (`LaunchOptions.restart_args`). XR is low priority for now |
 
 Default port 2258, max 12 peers (`network/network.gd`). Dedicated servers must run with `--headless` on
 GPU-less machines; nothing on the server path may depend on rendering.
@@ -66,6 +66,8 @@ GPU-less machines; nothing on the server path may depend on rendering.
   build factions, populate). Scenarios are content, e.g. `content/scenarios/playtest.tres`.
 - `world_ids.gd`: `WorldIds`, the world's ship and pilot ID counters (start at 1; never statics).
 - `systems/`: each star system is a `SubViewportContainer` with its own `World3D` (`system_template.*`).
+- `zones/`: `ZoneView` (in Galaxy) draws the viewed zone in the main window: sets its `world_3d`, a camera rig
+  (or XR origin) follows the zone's current camera, input is forwarded. Zone SubViewports don't render.
 - `ships/`: `Ship.gd` (RigidBody3D), `Engines.gd` (per-thruster forces), `crew.gd`, `PID.gd`.
 - `ship_systems/workstations/`: `Console` plus capabilities (Helm, Weapons, Command); each capability
   brings a behaviour tree that runs in the occupant's `BrainHSM`.

@@ -44,6 +44,8 @@ func _ready():
 	set_msaa.emit(PlayerConfig.get_config("graphics", "msaa", 0))
 	$HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer/OptionButtonMSAA.select(PlayerConfig.get_config("graphics", "msaa", 0))
 
+	$HBoxContainer/VBoxContainerOption/VBoxContainerOption/GridContainer/CheckButtonVR.set_pressed_no_signal(_xr_running())
+
 
 func close_all() -> void:
 	for child in get_node("HBoxContainer/VBoxContainerOption").get_children():
@@ -151,3 +153,20 @@ func _on_option_button_msaa_item_selected(index):
 	print_debug("Set msaa: ", index)
 	PlayerConfig.set_config("graphics", "msaa", index)
 	set_msaa.emit(index)
+
+
+## VR mode. OpenXR can only start with the engine, so switching restarts the
+## game with Godot's --xr-mode flag added or left out (LaunchOptions.restart_args).
+func _on_check_button_vr_toggled(button_pressed: bool) -> void:
+	if button_pressed == _xr_running():
+		return
+	var args := LaunchOptions.restart_args(OS.get_cmdline_args(), button_pressed,
+			ProjectSettings.globalize_path("res://"), not OS.has_feature("editor"))
+	Log.log(["Restarting with VR ", "on" if button_pressed else "off", ": ", args], Log.MessageType.INFO)
+	OS.set_restart_on_exit(true, args)
+	get_tree().quit()
+
+
+static func _xr_running() -> bool:
+	var xr := XRServer.find_interface("OpenXR")
+	return xr != null and xr.is_initialized()
