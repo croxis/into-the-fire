@@ -84,3 +84,16 @@ func test_serialize_payload_has_no_objects() -> void:
 	assert_eq(payload.get("bb_fighters_needed"), 2)
 	for key in payload:
 		assert_false(payload[key] is Object, "payload[%s] must not be an Object" % key)
+
+
+func test_serialize_orders_cross_the_network() -> void:
+	# OrderData are Objects, and typed arrays of them can't be decoded by the
+	# receiving peer ("Cannot assign contents of Array[Object]").
+	var c := _spawn("Ordered")
+	c.active_orders.append(OrderData.new())
+	var payload := c.serialize()
+	for key in ["active_orders", "pending_orders"]:
+		var orders: Array = payload[key]
+		assert_false(orders.is_typed(), "%s is a plain array" % key)
+		for order in orders:
+			assert_false(order is Object, "%s holds no Objects" % key)

@@ -51,18 +51,21 @@ func player_died(player_id: int) -> void:
 	rpc_id(player_id, "show_spawn")
 
 
-@rpc("any_peer", "call_local") ##
+## Sent by the server to the player who just spawned. "authority": only the
+## server may move a player's view to a system.
+@rpc("authority", "call_local")
 func player_enter_system(system_name) -> void:
 	var system: SubViewportContainer = get_node("Systems/" + system_name)
 	system.get_node("SubViewport").size = DisplayServer.window_get_size()
 	system.visible = true
 	#Music Hack
 	system.get_node("SubViewport/AudioStreamPlayer").playing = true
-	var remote_id := multiplayer.get_remote_sender_id()
-	# If the host is calling this function, remote id is 0, change to its actual id
-	if remote_id == 0:
-		remote_id = multiplayer.get_unique_id()
-	var player: Player = $Players.find_player_by_netid(remote_id)
+	# This runs on the spawning player's own machine, so look up the local peer
+	# (the sender is always the server).
+	var player: Player = $Players.find_player_by_netid(multiplayer.get_unique_id())
+	if player == null:
+		Log.log(["No Player for this peer yet; local player id not set"], Log.MessageType.WARNING)
+		return
 	LocalGameManager.player_id = player.player_id
 
 
@@ -305,6 +308,28 @@ func _on_join_game_request_faction(faction_name: String) -> void:
 	$CanvasLayer/JoinGame.show_spawn(get_spawn_points(factions.find_by_name(faction_name)))
 
 
+## The nearest capital ship or station on [param pilot]'s side (its own faction
+## or an ancestor), not counting [param destroyed], or null.
+## [param destroyed] is still in the ship list: it is only queued for freeing.
+static func pick_respawn_ship(pilot: Character, destroyed: Ship, ships: Array) -> Ship:
+	var own := pilot.faction
+	if own == null:
+		return null
+	var best: Ship = null
+	var best_distance := INF
+	for target: Ship in ships:
+		if target == destroyed or not (target.is_capital or target.is_station):
+			continue
+		var side := target.faction
+		if side == null or not (side == own or own.is_a_parent(side)):
+			continue
+		var d := target.global_position.distance_to(destroyed.global_position)
+		if d < best_distance:
+			best_distance = d
+			best = target
+	return best
+
+
 func _on_ship_destroyed(ship: Ship):
 	## This is ONLY for respawning characters. The destruction of the ship itself
 	## is handled elsewhere.
@@ -315,20 +340,9 @@ func _on_ship_destroyed(ship: Ship):
 	
 	# This will also respawn npcs for now
 	var system: System = ship.get_current_system()
-	var ships:= system.get_ships()
+	var ships := system.get_ships()
 	for old_pilot: Character in ship.get_crew():
-		var distance: float = -1
-		var proposed_ship: Ship
-		for target_ship in ships:
-			if not (target_ship.is_capital or target_ship.is_station):
-				continue
-			var own_side: bool = old_pilot.faction != null and target_ship.faction != null and (
-					old_pilot.faction == target_ship.faction or old_pilot.faction.is_a_parent(target_ship.faction))
-			if own_side:
-				var d = abs(target_ship.global_position.distance_to(ship.global_position))
-				if distance == -1 or d < distance:
-					distance = d
-					proposed_ship = target_ship
+		var proposed_ship := pick_respawn_ship(old_pilot, ship, ships)
 		if proposed_ship:
 			#TODO: Genealize this to a multicrew craft
 			proposed_ship.spawn_crew(old_pilot.serialize())

@@ -45,7 +45,7 @@ and dispatched in `entry.gd`. The main menu is created at runtime only when ther
 | (none) | Client with title screen and menu |
 | `--server [--game=NAME --password=PW --port=N]` | Dedicated server (also the `dedicated_server` feature, or `--headless` with no mode flag) |
 | `--testserver` | Hosts "Test Server" on port 2258 and plays |
-| `--testplayer` | Joins 127.0.0.1:2258 after 5 s as "Test Player" |
+| `--testplayer [--faction=NAME]` | Joins 127.0.0.1:2258 after 5 s as "Test Player"; with `--faction`, spawns in that faction without the menu |
 | `--xr_mode` | OpenXR (legacy from Godot 3, being reworked) |
 
 Default port 2258, max 12 peers (`network/network.gd`). Dedicated servers must run with `--headless` on

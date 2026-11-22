@@ -58,3 +58,11 @@ func test_unknown_flags_are_reported() -> void:
 	assert_has(o.unknown, "--bogus")
 	assert_has(o.unknown, "stray")
 	assert_eq(o.mode, Mode.CLIENT)
+
+
+func test_test_player_can_pick_a_faction() -> void:
+	var o := LaunchOptions.parse(PackedStringArray(["--testplayer", "--faction=Zeta Wing"]))
+	assert_eq(o.faction, "Zeta Wing")
+	assert_eq(o.unknown.size(), 0)
+	assert_eq(LaunchOptions.parse(PackedStringArray(["--testplayer"])).faction, "",
+			"no faction: wait in the join menu")

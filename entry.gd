@@ -81,6 +81,11 @@ func _start_test_server() -> void:
 
 
 func _start_test_player() -> void:
+	if options.faction:
+		# Spawn as soon as the server's factions arrive, as if picked in the menu.
+		$Galaxy.factions_synced.connect(func() -> void:
+				$Galaxy._on_join_game_request_spawn(options.faction, "test_system", ""),
+				CONNECT_ONE_SHOT)
 	await get_tree().create_timer(5.0).timeout
 	$network.join_game("127.0.0.1", options.port, "Test Player", "", "")
 	$loading.visible = false

@@ -185,8 +185,10 @@ func serialize() -> Dictionary:
 	payload["_player_pilot_id"] = _player_pilot_id
 	payload["multiplayer_id"] = multiplayer_id
 	payload["pilot_id"] = pilot_id
-	payload["active_orders"] = active_orders
-	payload["pending_orders"] = pending_orders
+	# Orders are OrderData Objects, which can't cross the network. They are left
+	# out until orders have a plain-data form (orders are mostly unimplemented).
+	payload["active_orders"] = []
+	payload["pending_orders"] = []
 	
 	return payload
 

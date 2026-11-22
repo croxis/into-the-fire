@@ -165,3 +165,41 @@ func test_spawn_request_unknown_system_refused() -> void:
 	assert_ne(Galaxy.check_spawn_request(registry, systems, t.zeta.faction_id, "Narn"), "")
 	assert_ne(Galaxy.check_spawn_request(registry, systems, t.zeta.faction_id, ".."), "",
 			"a path out of Systems is not a system")
+
+
+## Galaxy.pick_respawn_ship: where a destroyed ship's crew respawn.
+
+func _ship_at(faction: Faction, x: float, capital := true) -> Ship:
+	var ship: Ship = preload("res://ships/Ship.tscn").instantiate()
+	ship.faction_registry = registry
+	add_child_autofree(ship)
+	ship.is_capital = capital
+	ship.position = Vector3(x, 0, 0)
+	ship.faction_id = faction.faction_id
+	return ship
+
+
+func test_respawn_skips_the_destroyed_ship() -> void:
+	var t := _playtest_tree()
+	var pilot: Character = autofree(preload("res://characters/character.tscn").instantiate())
+	pilot.faction_registry = registry
+	t.zeta.add_member(pilot)
+	var dying := _ship_at(t.b5, 0)
+	var hyperion := _ship_at(t.ea, 5800)
+	assert_eq(Galaxy.pick_respawn_ship(pilot, dying, [dying, hyperion] as Array[Ship]), hyperion,
+			"the destroyed ship is still listed until it is freed")
+
+
+func test_respawn_picks_nearest_own_side_capital() -> void:
+	var t := _playtest_tree()
+	var narn := registry.create("Narn Regime")
+	var pilot: Character = autofree(preload("res://characters/character.tscn").instantiate())
+	pilot.faction_registry = registry
+	t.zeta.add_member(pilot)
+	var dying := _ship_at(t.zeta, 0, false)
+	var far := _ship_at(t.ea, 9000)
+	var near := _ship_at(t.b5, 1000)
+	var hostile := _ship_at(narn, 10)
+	var fighter := _ship_at(t.zeta, 5, false)
+	assert_eq(Galaxy.pick_respawn_ship(pilot, dying, [far, hostile, fighter, near] as Array[Ship]), near)
+	assert_null(Galaxy.pick_respawn_ship(pilot, dying, [hostile, fighter] as Array[Ship]))

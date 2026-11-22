@@ -19,6 +19,9 @@ var game_name := "default"
 var password := ""
 var port := DEFAULT_PORT
 var xr := false
+## --faction=NAME: a test player spawns in this faction as soon as it joins,
+## instead of waiting in the join menu (for automated two-process tests).
+var faction := ""
 ## Arguments that were not recognised, kept for logging.
 var unknown: PackedStringArray = []
 
@@ -62,9 +65,10 @@ static func parse(args: PackedStringArray, headless := false, dedicated_feature 
 		else:
 			options.unknown.append("--port=" + p)
 	options.xr = flags.has("xr_mode")
+	options.faction = flags.get("faction", "")
 
 	for key in flags:
-		if key not in ["server", "testserver", "testplayer", "game", "password", "port", "xr_mode"]:
+		if key not in ["server", "testserver", "testplayer", "game", "password", "port", "xr_mode", "faction"]:
 			options.unknown.append("--" + key)
 	return options
 
