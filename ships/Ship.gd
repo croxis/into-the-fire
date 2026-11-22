@@ -4,6 +4,7 @@ class_name Ship
 
 @export var ship_id: int
 
+## 0 (FactionRegistry.NO_FACTION) means no faction.
 @export var faction_id: int:
 	#TODO: Need to give the ship faction ownership. There needs to be rules on this.
 	# Option 1: Ships are owned at the top level faction. Simple.
@@ -14,19 +15,32 @@ class_name Ship
 	# 4) A transfer can happen by parent faction commanders
 	# For now....
 	set(new_id):
-		if faction:
-			if faction.faction_id == new_id:
-				return
-			faction.remove_ship(self)
+		if new_id == faction_id:
+			return
+		# Ownership lists live on the factions. They only matter on the server, and
+		# are only kept when the registry can be found (the ship is in the world).
+		var old := faction
+		if old:
+			old.remove_ship(self)
 		faction_id = new_id
-		faction.add_ship(self)
-		# A zero value is no faction.
-		Log.log(["Player gets new faction ID:", name, faction.resource_name, faction.faction_id, faction_id], Log.MessageType.INFO)
-@export var faction: Faction:
-	set(new_faction):
-		assert(false, "BOO! DO NOT SET FACTIONS DIRECTLY")
+		var f := faction
+		if f:
+			f.add_ship(self)
+		Log.log(["Ship ", name, " faction: ", _faction_label(f), " (", faction_id, ")"], Log.MessageType.INFO)
+## The faction for faction_id, or null (no faction, or no registry reachable yet).
+var faction: Faction:
 	get:
-		return Faction.factions[faction_id]
+		var r := factions
+		return r.get_by_id(faction_id) if r else null
+## Set this to use a registry directly (unit tests). Otherwise the Galaxy above
+## this ship is used.
+var faction_registry: FactionRegistry
+var factions: FactionRegistry:
+	get:
+		if faction_registry:
+			return faction_registry
+		var g := Galaxy.find_for(self)
+		return g.factions if g else null
 
 @export_node_path("Camera3D") var camera_path: NodePath
 @onready var passenger_camera: Camera3D = get_node_or_null(camera_path)
@@ -99,9 +113,18 @@ func _ready():
 	#target_rot = rotation_degrees
 	
 	# No Galaxy when a ship runs on its own (tests, tools).
-	galaxy = get_tree().root.get_node_or_null("entry/Galaxy")
+	galaxy = Galaxy.find_for(self)
 	if galaxy:
 		destroyed.connect(galaxy._on_ship_destroyed)
+
+
+
+## For logs: the faction name, "none" for no faction, or a note that the
+## registry isn't reachable yet (not in the world).
+func _faction_label(f: Faction) -> String:
+	if f:
+		return f.resource_name
+	return "none" if faction_id == FactionRegistry.NO_FACTION else "not in world yet"
 
 
 func add_passenger(pilot: Character):
@@ -185,7 +208,8 @@ func bullet_hit(damage, bullet_global_trans):
 
 func destroy() -> void:
 	emit_signal("destroyed", self)
-	faction.remove_ship(self)
+	if faction:
+		faction.remove_ship(self)
 	queue_free()
 
 

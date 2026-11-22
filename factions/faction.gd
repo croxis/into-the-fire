@@ -21,8 +21,10 @@ var top_faction: Faction:
 
 @export var doctrine: FactionDoctrine
 
-static var _next_id := 0
-static var factions := {}
+## The FactionRegistry this faction belongs to (set by the registry).
+## Weak because the registry already holds the faction: two strong references to
+## each other would form a cycle, and neither would ever be freed.
+var registry: WeakRef
 
 # Variables only needed by the server
 var detected_ships: Array[Ship] = []:   # Make sure to include ships owned by the faction
@@ -41,29 +43,6 @@ var owned_ships: Array[Ship] = []:
 		return owned_ships
 
 
-@rpc("authority", "call_local", "reliable")
-static func new_faction(name: String, new_is_wing: bool, new_accept_players: bool, new_accept_children: bool) -> Faction:
-	var new_faction_instance = Faction.new()
-	new_faction_instance.resource_name = name
-	new_faction_instance.is_wing = new_is_wing
-	new_faction_instance.accept_players = new_accept_players
-	new_faction_instance.accept_children = new_accept_children
-	new_faction_instance.faction_id = _next_id
-	new_faction_instance.active = true
-	factions[new_faction_instance.faction_id] = new_faction_instance
-	_next_id += 1
-	Log.log(["Faction created:", new_faction_instance.faction_id, new_faction_instance.resource_name], Log.MessageType.INFO)
-	return new_faction_instance
-
-
-static func get_faction(faction_name: String) -> Faction:
-	for faction in factions.values():
-		if faction.resource_name == faction_name:
-			return faction
-	Log.log(["Faction not found:", faction_name], Log.MessageType.WARNING)
-	return null
-
-
 func is_a_parent(possible_parent_faction: Faction) -> bool:
 	var current_parent: Faction = parent_faction
 	while current_parent:
@@ -73,12 +52,14 @@ func is_a_parent(possible_parent_faction: Faction) -> bool:
 	return false  # Reached the top of the tree.
 
 
+## Direct child factions, found through the registry. Empty if this faction
+## isn't in a registry.
 func get_children() -> Array[Faction]:
-	var children: Array[Faction] = []
-	for faction in factions.values():
-		if faction.parent_faction and faction.parent_faction.faction_id == faction_id:
-			children.append(faction)
-	return children
+	var r: FactionRegistry = registry.get_ref() if registry else null
+	if r == null:
+		var none: Array[Faction] = []
+		return none
+	return r.children_of(self)
 
 
 # Example method to calculate inherited standings from parent guild
@@ -101,16 +82,17 @@ func get_wings() -> Array[Faction]:
 
 
 func add_member(pilot: Character) -> void:
-	#TODO: Check and remove if pilot is in another faction, remove from faction and leader
-	if pilot.faction:
+	#TODO: Remove the pilot as leader of its old faction too.
+	if pilot.faction and pilot.faction != self:
 		pilot.faction.remove_member(pilot)
 	pilot.faction_id = faction_id
-	member_ids.append(pilot.pilot_id)
+	if pilot.pilot_id not in member_ids:
+		member_ids.append(pilot.pilot_id)
 
 
 func remove_member(pilot: Character) -> bool:
 	member_ids.erase(pilot.pilot_id)
-	pilot.faction_id = 0
+	pilot.faction_id = FactionRegistry.NO_FACTION
 	return true
 
 

@@ -7,14 +7,13 @@ signal request_faction(faction_name: String)
 @onready var spawn_tree := $HBoxContainer/SpawnVBoxContainer/SpawnTree
 
 
-func build_faction_menu() -> void:
+func build_faction_menu(factions: FactionRegistry) -> void:
 	faction_tree.clear()
 	faction_tree.set_column_title(0, "Factions")
 	var root = faction_tree.create_item()
 	root.set_text(0, "ROOT")
-	for faction: Faction in Faction.factions.values():
-		if not faction.parent_faction:
-			build_faction_tree(root, faction)
+	for faction: Faction in factions.top_level():
+		build_faction_tree(root, faction)
 	visible = true
 	queue_sort()
 

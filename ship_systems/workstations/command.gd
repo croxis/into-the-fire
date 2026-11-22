@@ -8,7 +8,7 @@ class_name CommandCapability
 ## Returns the ships of subordinant wings in the escort sphere
 func get_subordinate_ships_in_escort_range() -> Array[Ship]:
 	var ships: Array[Ship] = []
-	if ship:
+	if ship and ship.faction:
 		var escort: Area3D = ship.get_node("EscortRange") as Area3D
 		var objects: = escort.get_overlapping_bodies()
 		for o in objects:

@@ -4,17 +4,6 @@ extends GutTest
 const CharacterScene := preload("res://characters/character.tscn")
 
 
-func before_each() -> void:
-	Faction.factions.clear()
-	Faction._next_id = 0
-	Faction.new_faction("Test Faction", false, true, false)
-
-
-func after_all() -> void:
-	Faction.factions.clear()
-	Faction._next_id = 0
-
-
 ## A console like the Starfury cockpit: capabilities mixed with other children.
 func _console() -> Console:
 	var console := Console.new()

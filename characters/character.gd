@@ -3,18 +3,29 @@ extends Node
 
 # This getter setter chain is attempting to automagically assign the player the correct resource for
 # network clients
+## 0 (FactionRegistry.NO_FACTION) means no faction. Change membership with
+## Faction.add_member() rather than setting this directly.
 @export var faction_id: int:
 	set(new_id):
-		if faction and faction.faction_id == new_id:
+		if new_id == faction_id:
 			return
 		faction_id = new_id
-		# A zero value is no faction.
-		Log.log(["Player gets new faction ID:", name, faction.resource_name, faction.faction_id, faction_id], Log.MessageType.INFO)
-@export var faction: Faction:
-	set(new_faction):
-		assert(false, "BOO! DO NOT SET FACTIONS DIRECTLY")
+		var f := faction
+		Log.log(["Character ", name, " faction: ", _faction_label(f), " (", faction_id, ")"], Log.MessageType.INFO)
+## The faction for faction_id, or null (no faction, or no registry reachable yet).
+var faction: Faction:
 	get:
-		return Faction.factions[faction_id]
+		var r := factions
+		return r.get_by_id(faction_id) if r else null
+## Set this to use a registry directly, for example in a unit test or before the
+## character is in the tree. Otherwise the Galaxy above this node is used.
+var faction_registry: FactionRegistry
+var factions: FactionRegistry:
+	get:
+		if faction_registry:
+			return faction_registry
+		var galaxy := Galaxy.find_for(self)
+		return galaxy.factions if galaxy else null
 # If this is the player, set the id to 1 or more. 0 means an NPC.
 @export var _player_pilot_id: int:
 	set(new_id):
@@ -77,6 +88,15 @@ func _init_brain() -> void:
 	_update_brain_active()
 
 
+
+## For logs: the faction name, "none" for no faction, or a note that the
+## registry isn't reachable yet (not in the world).
+func _faction_label(f: Faction) -> String:
+	if f:
+		return f.resource_name
+	return "none" if faction_id == FactionRegistry.NO_FACTION else "not in world yet"
+
+
 func is_player() -> bool:
 	return _player_pilot_id > 0
 
@@ -122,7 +142,7 @@ func _physics_process(_dt: float) -> void:
 			if multiplayer.is_server() and _player_pilot_id < 1:
 				var threats: Array[Ship] = [] # TODO: command.get_hostiles()
 				$BrainHSM.blackboard.set_var(&"threat_picture", threats)
-				$BrainHSM.blackboard.set_var(doctrine_var, faction.doctrine)
+				$BrainHSM.blackboard.set_var(doctrine_var, faction.doctrine if faction else null)
 				$BrainHSM.blackboard.set_var(&"fighters_deployed", command.get_subordinate_ships_in_escort_range())
 				$BrainHSM.blackboard.set_var(&"current_ship", current_ship)
 				$BrainHSM.blackboard.set_var(&"faction", faction)

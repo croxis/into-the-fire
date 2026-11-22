@@ -7,18 +7,6 @@ extends GutTest
 const CharacterScene := preload("res://characters/character.tscn")
 
 
-func before_each() -> void:
-	Faction.factions.clear()
-	Faction._next_id = 0
-	# Characters default to faction_id 0, so faction 0 must exist.
-	Faction.new_faction("Test Faction", false, true, false)
-
-
-func after_all() -> void:
-	Faction.factions.clear()
-	Faction._next_id = 0
-
-
 func _spawn(character_name: String) -> Character:
 	var c: Character = CharacterScene.instantiate()
 	c.name = character_name

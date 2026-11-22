@@ -9,11 +9,20 @@ var active_galaxy := false
 
 @export var ship_id_counter := 0
 
+## Every faction in this world. The server creates them; clients receive a copy
+## when they join (see _rpc_receive_factions). Replaced as a whole, never patched
+## from client data.
+var factions := FactionRegistry.new()
+var _factions_synced := false  # Client: a faction copy has arrived from the server.
+var _join_menu_wanted := false  # Client: show the join menu once factions arrive.
+
 var _play_time: float = 0
 var _sync_interval: float = 10
 var _sync_timer: float = _sync_interval  # Countown in seconds for syncing network time
 
 signal enter_system(system_name)
+## Emitted on clients when a faction copy arrives from the server.
+signal factions_synced()
 signal load_scene(path, node: Node, make_active_scene: bool, show_load_screen: bool, callback)
 
 
@@ -89,23 +98,60 @@ func update_graphics():
 				subviewportcontainer.get_node("SubViewport").use_taa = taa
 
 
+## The Galaxy that [param node] lives under, or null when there is none (the
+## node isn't in the tree yet, or it is running alone in a unit test).
+static func find_for(node: Node) -> Galaxy:
+	var n := node
+	while n:
+		if n is Galaxy:
+			return n
+		n = n.get_parent()
+	return null
+
+
 func _ready():
-	#TODO: Not in ready! Better way to load faction from disk, or stream from server on join
-	# IF we do streaming, then move to galaxy setup function
-	var ea := Faction.new_faction("Earth Alliance", false, false, false)
-	var b5 := Faction.new_faction("Babylon 5", false, false, false)
-	b5.parent_faction = ea
-	var wing := Faction.new_faction("Alpha Wing", true, true, false)
-	wing.parent_faction = b5
-	wing = Faction.new_faction("Beta Wing", true, true, false)
-	wing.parent_faction = b5
-	wing = Faction.new_faction("Delta Wing", true, true, false)
-	wing.parent_faction = b5
-	wing = Faction.new_faction("Zeta Wing", true, true, false)
-	wing.parent_faction = b5
-	
 	#TODO: Serialize from save
 	_play_time = 0
+	multiplayer.peer_connected.connect(_on_peer_connected)
+
+
+## Server: playtest factions. Moves to scenario data in a later step.
+func _create_playtest_factions() -> void:
+	factions = FactionRegistry.new()
+	var ea := factions.create("Earth Alliance")
+	var b5 := factions.create("Babylon 5", false, false, false, ea)
+	for wing_name in ["Alpha Wing", "Beta Wing", "Delta Wing", "Zeta Wing"]:
+		factions.create(wing_name, true, true, false, b5)
+
+
+## Server: send the faction tree to a client that just connected.
+## (peer_connected also fires on clients when other peers join; they ignore it.)
+func _on_peer_connected(peer_id: int) -> void:
+	if multiplayer.is_server():
+		_rpc_receive_factions.rpc_id(peer_id, factions.to_data())
+
+
+## Client: replace the local copy with the server's.
+## "authority" means only the server may call this, so a client can't push
+## factions to other peers. The data is plain dictionaries, not objects.
+@rpc("authority", "call_remote", "reliable")
+func _rpc_receive_factions(data: Dictionary) -> void:
+	factions = FactionRegistry.from_data(data)
+	_factions_synced = true
+	Log.log(["Received ", factions.size(), " factions from server"], Log.MessageType.INFO)
+	factions_synced.emit()
+	_try_show_join_menu()
+
+
+## Shows the faction picker once it is wanted and there are factions to pick from.
+func _try_show_join_menu() -> void:
+	if not _join_menu_wanted:
+		return
+	if not multiplayer.is_server() and not _factions_synced:
+		return  # Still waiting for the server's factions.
+	_join_menu_wanted = false
+	$CanvasLayer/JoinGame.build_faction_menu(factions)
+	$CanvasLayer/JoinGame.visible = true
 
 
 func setup_new_galaxy(dedicated=false, callback = null):
@@ -113,6 +159,7 @@ func setup_new_galaxy(dedicated=false, callback = null):
 	if dedicated:
 		callback = Callable(self, "finish_setup_galaxy_all")
 	if not active_galaxy and get_tree().root.get_node("entry").is_server:
+		_create_playtest_factions()
 		emit_signal("load_scene", Content.path_of(&"b5:test_system"), $Systems, false, true, callback)
 		active_galaxy = true
 		Log.log(["Galaxy setup complete."], Log.MessageType.INFO)
@@ -138,8 +185,10 @@ func finish_setup_galaxy_all() -> void:
 		ship_id_counter += 1
 		
 		$Systems.add_station(babylon5, "test_system")
+		var b5_faction: Faction = factions.find_by_name("Babylon 5")
+		# Set after adding to the system: ships find the registry through Galaxy.
+		babylon5.faction_id = b5_faction.faction_id
 		var b5commander: Character = Character.new_pilot("Commendar Eclair")
-		var b5_faction: Faction = Faction.get_faction("Babylon 5")
 		b5_faction.doctrine = FactionDoctrine.new()
 		b5_faction.doctrine.minimum_patrol_fighters = 2
 		b5_faction.doctrine.retreat_when_hull_percent = 0.25
@@ -154,7 +203,7 @@ func finish_setup_galaxy_all() -> void:
 		b5ltcommander.multiplayer_id = multiplayer.get_unique_id()
 		
 		var b5botpilot: Character = Character.new_pilot("Karren Waffer")
-		var zeta_wing: Faction = Faction.get_faction("Zeta Wing")
+		var zeta_wing: Faction = factions.find_by_name("Zeta Wing")
 		zeta_wing.add_member(b5botpilot)
 		$"Systems/test_system/SubViewport/ships/Babylon 5".add_passenger(b5botpilot)
 		b5botpilot.multiplayer_id = multiplayer.get_unique_id()
@@ -173,19 +222,37 @@ func finish_setup_galaxy_all() -> void:
 		hyperion.name = "EASS Hyperion"
 		hyperion.position = Vector3(5800, 0, 0)
 		$Systems.add_ship(hyperion, "test_system")
+		hyperion.faction_id = factions.find_by_name("Earth Alliance").faction_id
 		hyperion.ship_id = ship_id_counter
 		ship_id_counter += 1
 
 
 func finish_setup_galaxy_client():
 	update_graphics()
-	$CanvasLayer/JoinGame.build_faction_menu()
-	$CanvasLayer/JoinGame.visible = true
+	_join_menu_wanted = true
+	_try_show_join_menu()
 	finish_setup_galaxy_all()
 
 
+## Why a spawn request is refused, or "" if it is acceptable. Everything here
+## comes from a client, so nothing is trusted: the faction must exist and take
+## players, and the system must be one of ours. A plain name check isn't enough
+## for the system, since a path such as "../.." would also resolve to a node.
+static func check_spawn_request(registry: FactionRegistry, systems: Node,
+		faction_id: int, system_name: String) -> String:
+	var faction := registry.get_by_id(faction_id)
+	if faction == null:
+		return "unknown faction %d" % faction_id
+	if not faction.accept_players:
+		return "faction %s does not accept players" % faction.resource_name
+	var system := systems.get_node_or_null(NodePath(system_name))
+	if system == null or system.get_parent() != systems:
+		return "unknown system %s" % system_name
+	return ""
+
+
 @rpc("any_peer", "call_local")
-func first_spawn_player(faction_id: int, system_name: String, spawner_name: String, next_faction_id: int) -> void:
+func first_spawn_player(faction_id: int, system_name: String, spawner_name: String) -> void:
 	if not multiplayer.is_server():
 		return
 	var remote_id := multiplayer.get_remote_sender_id()
@@ -193,10 +260,16 @@ func first_spawn_player(faction_id: int, system_name: String, spawner_name: Stri
 	if remote_id == 0:
 		remote_id = multiplayer.get_unique_id()
 	Log.log(["Attemping Created player pilot: in faction ", faction_id, " with mpid: ", remote_id], Log.MessageType.QUESTION)
-	Faction._next_id = next_faction_id
 	var player: Player = $Players.find_player_by_netid(remote_id)
+	if player == null:
+		Log.log(["Spawn refused for peer ", remote_id, ": not logged in"], Log.MessageType.WARNING)
+		return
+	var refusal := check_spawn_request(factions, $Systems, faction_id, system_name)
+	if refusal:
+		Log.log(["Spawn refused for ", player.name, ": ", refusal], Log.MessageType.WARNING)
+		return
 	var player_pilot: Character = Character.new_pilot(player.name)
-	var faction: Faction = Faction.factions[faction_id]
+	var faction: Faction = factions.get_by_id(faction_id)
 	faction.add_member(player_pilot)
 	player_pilot._player_pilot_id = player.player_id
 	player_pilot.set_multiplayer_id(remote_id)
@@ -234,12 +307,15 @@ func _on_network_connection_succeeded() -> void:
 
 
 func _on_join_game_request_spawn(faction_name: String, system_name: String, spawner_name: String) -> void:
-	rpc("first_spawn_player", Faction.get_faction(faction_name).faction_id, system_name, spawner_name, Faction._next_id)
+	var faction := factions.find_by_name(faction_name)
+	if faction == null:
+		return
+	rpc("first_spawn_player", faction.faction_id, system_name, spawner_name)
 	$CanvasLayer/JoinGame.visible = false
 
 
 func _on_join_game_request_faction(faction_name: String) -> void:
-	$CanvasLayer/JoinGame.show_spawn(get_spawn_points(Faction.get_faction(faction_name)))
+	$CanvasLayer/JoinGame.show_spawn(get_spawn_points(factions.find_by_name(faction_name)))
 
 
 func _on_ship_destroyed(ship: Ship):
@@ -257,14 +333,17 @@ func _on_ship_destroyed(ship: Ship):
 		var distance: float = -1
 		var proposed_ship: Ship
 		for target_ship in ships:
-			if (target_ship.is_capital or target_ship.is_station) and (old_pilot.faction.is_a_parent(target_ship.faction)):
+			if not (target_ship.is_capital or target_ship.is_station):
+				continue
+			var own_side: bool = old_pilot.faction != null and target_ship.faction != null and (
+					old_pilot.faction == target_ship.faction or old_pilot.faction.is_a_parent(target_ship.faction))
+			if own_side:
 				var d = abs(target_ship.global_position.distance_to(ship.global_position))
 				if distance == -1 or d < distance:
 					distance = d
 					proposed_ship = target_ship
 		if proposed_ship:
 			var new_pilot: Character = proposed_ship.get_node("CrewMultiplayerSpawner").spawn(old_pilot.serialize())
-			new_pilot.faction = old_pilot.faction
 			new_pilot._player_pilot_id = old_pilot._player_pilot_id
 			#TODO: Genealize this to a multicrew craft
 			proposed_ship.add_passenger(new_pilot)

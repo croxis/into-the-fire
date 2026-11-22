@@ -93,11 +93,12 @@ extends GutTest
 const CharacterScene := preload("res://characters/character.tscn")
 
 
+var registry: FactionRegistry
+
+
 func before_each() -> void:
 	# Runs before every test: set up a clean starting state.
-	Faction.factions.clear()
-	Faction._next_id = 0
-	Faction.new_faction("Test Faction", false, true, false)
+	registry = FactionRegistry.new()
 
 
 func test_player_brain_is_inactive() -> void:
@@ -170,15 +171,23 @@ func test_unknown_id_reports_error() -> void:
 `assert_push_error_count` counts `push_error` calls. For errors raised by the engine itself, use
 `assert_engine_error_count`.
 
-### Reset static state
+### Don't share state between tests
 
-Static variables survive between tests. Factions currently live in statics (`Faction.factions`,
-`Faction._next_id`), so any test that touches factions or characters must reset them in
-`before_each` and again in `after_all`. Otherwise tests pass or fail depending on which ran first.
-(Moving factions into a per-world registry is planned; after that this rule goes away.)
+Static variables survive between tests, so a test that changes one can make later tests pass or
+fail depending on which ran first. Avoid statics for game state. Use an object the test can create
+fresh in `before_each` instead.
 
-`Character` reads `Faction.factions[faction_id]` and defaults to faction 0, so character tests must
-also create a faction in `before_each`.
+Factions work this way: each test makes its own `FactionRegistry`. Characters and ships normally
+find the registry through the `Galaxy` above them; in a test there is no Galaxy, so hand them the
+registry directly:
+
+```gdscript
+var pilot: Character = autofree(CharacterScene.instantiate())
+pilot.faction_registry = registry
+registry.create("Zeta Wing", true, true).add_member(pilot)
+```
+
+Without a registry, `pilot.faction` is null (faction ID 0 means no faction).
 
 ### Multiplayer in tests
 
@@ -286,7 +295,7 @@ A failing test stops the pipeline before the export jobs run, so a broken build 
 ## Checklist for a change
 
 - [ ] New logic has a unit test; a bug fix has a test that failed before the fix.
-- [ ] `test_*.gd` files reset any static state they touch.
+- [ ] Tests create their own state (such as a `FactionRegistry`) instead of sharing statics.
 - [ ] The unit suite passes.
 - [ ] The smoke test passes.
 - [ ] Any `known_issues.txt` line whose cause you fixed is removed.

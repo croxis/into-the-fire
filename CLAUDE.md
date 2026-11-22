@@ -5,7 +5,7 @@ Inspired by X4 (sandbox, empire, map), Babylon 5: I Found Her (hyperspace) and S
 Babylon 5: Into the Fire (crew combat). Long term it is meant to be a general sci-fi spaceship engine with
 Babylon 5 as the default mod. Early development: many systems are partial or stubbed.
 
-Project documentation lives in `documentation/` (`testing.md`, `content_registry.md`).
+Project documentation lives in `documentation/` (`testing.md`, `content_registry.md`, `factions.md`).
 
 Design doc (target architecture, decisions, open questions):
 https://claude.ai/artifact/SbiKWXHGRsfhgvoeBBGW7J
@@ -59,13 +59,16 @@ GPU-less machines; nothing on the server path may depend on rendering.
   (`Content.instantiate(&"b5:aurora_starfury")`), never by `res://` path. IDs are listed in manifests
   such as `content/babylon5.cfg` (uid:// values; `*.cfg` there is in the export include filter).
 - `network/network.gd`: ENet host/join and the custom auth handshake.
-- `Galaxy.gd`: playtest world setup (hard-coded Babylon 5 station, Hyperion, NPC crew), spawning, respawn.
+- `Galaxy.gd`: owns the world state (factions, systems, players). Playtest setup (hard-coded Babylon 5
+  station, Hyperion, NPC crew), spawning, respawn. The server sends factions to each client on connect.
 - `systems/`: each star system is a `SubViewportContainer` with its own `World3D` (`system_template.*`).
 - `ships/`: `Ship.gd` (RigidBody3D), `Engines.gd` (per-thruster forces), `crew.gd`, `PID.gd`.
 - `ship_systems/workstations/`: `Console` plus capabilities (Helm, Weapons, Command); each capability
   brings a behaviour tree that runs in the occupant's `BrainHSM`.
 - `characters/`: `Character` (crew member, player or NPC), input sync, LimboAI state.
-- `factions/`: `Faction` resource tree with a static registry, `FactionDoctrine`.
+- `factions/`: `Faction` resource tree, `FactionRegistry` (one per world, owned by `Galaxy.factions`),
+  `FactionDoctrine`. ID 0 is "no faction". Ships and characters find the registry through the Galaxy
+  above them (`Galaxy.find_for(node)`), or use an explicitly set `faction_registry` (tests).
 - `orders/`: order data model (logic mostly not implemented).
 - `ai/`: LimboAI trees, blackboards and command tasks.
 - `demo/`: LimboAI demo content, not game code.
@@ -89,12 +92,11 @@ integrator, interpolation for remote ships, interest management, event-based wea
 
 ## Known issues (from review, not yet fixed)
 
-- `faction.gd`: `@rpc` on a static function does nothing; factions are created locally on every peer
-  and live in static variables (tests must reset `Faction.factions` / `Faction._next_id`).
 - Ship `health` setter calls `destroy()` on clients too, and can emit `destroyed` twice.
 - `Ship._on_button_launch_pressed` calls a `request_spawn` RPC that does not exist.
 - `factions/factions.tres.gd` duplicates the faction setup with different wings.
-- `Ship.tscn` syncs `autospin`/`autobreak`/`target_*` on the root, but they moved to Helm.
+- `Ship.tscn` syncs `autospin`/`autobreak`/`target_*` on the root, but they moved to Helm. The server then
+  can't build the ship spawn state, so remote clients never receive ships (hosting locally works).
 
 ## Tests and CI
 
@@ -110,7 +112,8 @@ Tests need the custom engine binary (`GODOT` below). Stock Godot lacks LimboAI a
   ```bash
   GODOT=$GODOT tests/smoke/server_smoke.sh
   ```
-- Write a failing test first when fixing a bug. Reset static state (factions) in `before_each`.
+- Write a failing test first when fixing a bug. Don't keep game state in statics; tests make their own
+  (e.g. a fresh `FactionRegistry` in `before_each`).
 - CI (`.gitlab-ci.yml`): import assets, `test` stage (`unit-tests` with JUnit report, `server-smoke`),
   then export Linux and Windows debug builds with the custom image.
 - Planned packaging: one binary per OS, base pck plus content pcks (Babylon 5 as the default mod).

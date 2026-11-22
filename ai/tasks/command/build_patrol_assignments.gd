@@ -30,6 +30,10 @@ func _tick(delta: float) -> Status:
 	var current_ship: Ship = blackboard.get_var(&"current_ship")
 	var free_crew: Array[Character] = []
 	var faction: Faction = blackboard.get_var(&"faction")
+	if faction == null:
+		var none: Array[Character] = []
+		blackboard.set_var(&"free_crew", none)
+		return FAILURE
 	var valid_factions: Array[Faction] = faction.get_wings()
 	# Append chapital/station faction last so wing members get prioritized first
 	valid_factions.append(faction)
