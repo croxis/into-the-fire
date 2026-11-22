@@ -5,7 +5,7 @@ Inspired by X4 (sandbox, empire, map), Babylon 5: I Found Her (hyperspace) and S
 Babylon 5: Into the Fire (crew combat). Long term it is meant to be a general sci-fi spaceship engine with
 Babylon 5 as the default mod. Early development: many systems are partial or stubbed.
 
-Project documentation lives in `documentation/` (start with `documentation/content_registry.md`).
+Project documentation lives in `documentation/` (`testing.md`, `content_registry.md`).
 
 Design doc (target architecture, decisions, open questions):
 https://claude.ai/artifact/SbiKWXHGRsfhgvoeBBGW7J
