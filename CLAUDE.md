@@ -95,8 +95,9 @@ integrator, interpolation for remote ships, interest management, event-based wea
 - Ship `health` setter calls `destroy()` on clients too, and can emit `destroyed` twice.
 - `Ship._on_button_launch_pressed` calls a `request_spawn` RPC that does not exist.
 - `factions/factions.tres.gd` duplicates the faction setup with different wings.
-- `Ship.tscn` syncs `autospin`/`autobreak`/`target_*` on the root, but they moved to Helm. The server then
-  can't build the ship spawn state, so remote clients never receive ships (hosting locally works).
+- Galaxy's playtest NPC crew (Babylon 5's commander and bot pilots) are added with `add_passenger` /
+  `add_child`, not through the ship's `CrewMultiplayerSpawner`, so remote clients never receive them and log
+  "Node not found: .../Crew/<name>/CharacterSync". Respawn already uses the spawner.
 
 ## Tests and CI
 

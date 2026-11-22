@@ -23,24 +23,12 @@ properties/3/replication_mode = 1
 properties/4/path = NodePath(".:health")
 properties/4/spawn = true
 properties/4/replication_mode = 2
-properties/5/path = NodePath(".:autospin")
+properties/5/path = NodePath(".:ship_id")
 properties/5/spawn = true
 properties/5/replication_mode = 2
-properties/6/path = NodePath(".:autobreak")
+properties/6/path = NodePath(".:faction_id")
 properties/6/spawn = true
 properties/6/replication_mode = 2
-properties/7/path = NodePath(".:target_rot")
-properties/7/spawn = true
-properties/7/replication_mode = 2
-properties/8/path = NodePath(".:target_pos")
-properties/8/spawn = true
-properties/8/replication_mode = 2
-properties/9/path = NodePath(".:ship_id")
-properties/9/spawn = true
-properties/9/replication_mode = 2
-properties/10/path = NodePath(".:faction_id")
-properties/10/spawn = true
-properties/10/replication_mode = 2
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_5ebqf"]
 
