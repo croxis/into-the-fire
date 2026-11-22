@@ -29,3 +29,6 @@ export/*
 #buildAutomation/bin/*
 #buildAutomation/templates/*
 #public/*
+
+# Blender backup files (previous save)
+*.blend1
