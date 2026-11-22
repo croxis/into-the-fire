@@ -234,9 +234,10 @@ func destroy() -> void:
 	queue_free()
 
 
+## [launch_point, position] for a free launch bay, or [] when none is free.
+## launch_point has spawn_ship(ship). Each carrier's Spawner node implements it.
 func find_free_spawner() -> Array:
-	var s = $Spawner.find_free_spawner()
-	return s
+	return $Spawner.find_free_spawner()
 
 
 func _on_area_3d_dock_body_entered(body) -> void:
@@ -285,6 +286,9 @@ func request_launch(p_ship_id: int, pilot_id: int):
 	#var system := top_system.get_node("SubViewport")
 
 	var spawn := find_free_spawner()
+	if spawn.is_empty():
+		Log.log(["No free launch bay on ", name], Log.MessageType.WARNING)
+		return
 	var spawn_point = spawn[0]
 	var spawn_position = spawn[1]
 	print_debug("Spawn: ", spawn)
