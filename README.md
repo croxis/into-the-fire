@@ -34,5 +34,9 @@ Requires a custom build of godot: Doubles, LimboAI, and a patch for better contr
 [Make an RTS camera](https://www.youtube.com/watch?v=t-tkFxhpiCs&list=PLUzx1-8efVAoswyWSJh-du7HCCuVL3ckt)
 
 ## Use of LLM AI
-No vibe coding was involved!
-However, I use LLM to assist me in learning coding practices and structure. Still ended up being a noodly mess!
+I've been working on a Babylon 5 game project for almost two decades now. I've 
+learned a lot despite having almost no formal programming training. Would
+I rather develop this fully with humans? Yes. Yet between parenting, my day job, and getting well into middle age
+I've decided to let claude finish this for me.
+
+If you wish I didn't slop this, where was YOUR pull requests?
