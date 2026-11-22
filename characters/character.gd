@@ -52,27 +52,25 @@ var current_ship: Ship:
 
 @export var doctrine_var: StringName = &"doctrine"
 
-static var next_id := 0
 
 var _brain_initialized := false
 
 
 ## Spawn data for a new crew member, in the format of [method serialize].
 ## Pass it to [method Ship.spawn_crew], which creates the character on the
-## server and every client.
-static func pilot_data(pilot_name: String, faction: int, peer_id: int,
+## server and every client. [param pilot_id] comes from the world
+## ([method WorldIds.next_pilot]).
+static func pilot_data(pilot_name: String, faction: int, peer_id: int, pilot_id: int,
 		player_pilot_id := 0) -> Dictionary:
-	var data := {
+	return {
 		"name": pilot_name,
 		"faction_id": faction,
 		"multiplayer_id": peer_id,
 		"_player_pilot_id": player_pilot_id,
-		"pilot_id": next_id,
+		"pilot_id": pilot_id,
 		"active_orders": [],
 		"pending_orders": [],
 	}
-	next_id += 1
-	return data
 
 
 func _ready():

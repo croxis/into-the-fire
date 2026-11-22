@@ -292,8 +292,7 @@ func request_launch(p_ship_id: int, pilot_id: int):
 	new_ship.is_spawning = true
 	
 	#TODO: Pull ship from existing invetory using the id
-	new_ship.ship_id = galaxy.ship_id_counter
-	galaxy.ship_id_counter += 1
+	new_ship.ship_id = galaxy.ids.next_ship()
 	top_system.add_ship(new_ship)
 	new_ship.global_transform.origin = spawn_position
 	spawn_point.spawn_ship(new_ship)

@@ -5,7 +5,7 @@ Inspired by X4 (sandbox, empire, map), Babylon 5: I Found Her (hyperspace) and S
 Babylon 5: Into the Fire (crew combat). Long term it is meant to be a general sci-fi spaceship engine with
 Babylon 5 as the default mod. Early development: many systems are partial or stubbed.
 
-Project documentation lives in `documentation/` (`testing.md`, `content_registry.md`, `factions.md`).
+Project documentation lives in `documentation/` (`testing.md`, `content_registry.md`, `factions.md`, `scenarios.md`).
 
 Design doc (target architecture, decisions, open questions):
 https://claude.ai/artifact/SbiKWXHGRsfhgvoeBBGW7J
@@ -59,8 +59,12 @@ GPU-less machines; nothing on the server path may depend on rendering.
   (`Content.instantiate(&"b5:aurora_starfury")`), never by `res://` path. IDs are listed in manifests
   such as `content/babylon5.cfg` (uid:// values; `*.cfg` there is in the export include filter).
 - `network/network.gd`: ENet host/join and the custom auth handshake.
-- `Galaxy.gd`: owns the world state (factions, systems, players). Playtest setup (hard-coded Babylon 5
-  station, Hyperion, NPC crew), spawning, respawn. The server sends factions to each client on connect.
+- `Galaxy.gd`: owns the world state (factions, systems, players, `ids`). Starts a new game from the
+  scenario `scenario_id` (default `b5:playtest`), player spawning, respawn. The server sends factions to
+  each client on connect.
+- `scenario/`: `Scenario` resources (factions, systems, ships, crew) and `ScenarioLoader` (validate,
+  build factions, populate). Scenarios are content, e.g. `content/scenarios/playtest.tres`.
+- `world_ids.gd`: `WorldIds`, the world's ship and pilot ID counters (start at 1; never statics).
 - `systems/`: each star system is a `SubViewportContainer` with its own `World3D` (`system_template.*`).
 - `ships/`: `Ship.gd` (RigidBody3D), `Engines.gd` (per-thruster forces), `crew.gd`, `PID.gd`.
 - `ship_systems/workstations/`: `Console` plus capabilities (Helm, Weapons, Command); each capability
@@ -84,7 +88,7 @@ Autoloads include netfox (`NetworkTime`, `NetworkRollback`, ...), `Log`, `LimboC
 - netfox 1.35 is installed; rollback is currently disabled (`netfox/rollback/enabled=false`).
 - Spawners only track nodes they spawned. Reparenting nodes across spawn paths (e.g. crew moving between
   ships) is not replicated; spawn with `spawn_function` and data dictionaries instead. Crew are created
-  with `ship.spawn_crew(Character.pilot_data(...))`, never `add_child`.
+  with `ship.spawn_crew(Character.pilot_data(..., galaxy.ids.next_pilot()))`, never `add_child`.
 - Never trust IDs sent by clients: validate every `any_peer` RPC on the server.
 
 Target direction (see the design doc): data records separate from scene nodes, per-zone `SubViewport`

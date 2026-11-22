@@ -7,7 +7,12 @@ var render_resolution := Vector2i(0, 0)
 @onready var taa = PlayerConfig.get_config("graphics", "taa", 0)
 var active_galaxy := false
 
-@export var ship_id_counter := 0
+## The scenario a new game starts from (content ID, kind "scenario").
+@export var scenario_id: StringName = &"b5:playtest"
+var _scenario: Scenario
+
+## Ship and pilot IDs for this world.
+var ids := WorldIds.new()
 
 ## Every faction in this world. The server creates them; clients receive a copy
 ## when they join (see _rpc_receive_factions). Replaced as a whole, never patched
@@ -119,14 +124,6 @@ func _ready():
 
 
 ## Server: playtest factions. Moves to scenario data in a later step.
-func _create_playtest_factions() -> void:
-	factions = FactionRegistry.new()
-	var ea := factions.create("Earth Alliance")
-	var b5 := factions.create("Babylon 5", false, false, false, ea)
-	for wing_name in ["Alpha Wing", "Beta Wing", "Delta Wing", "Zeta Wing"]:
-		factions.create(wing_name, true, true, false, b5)
-
-
 ## Server: send the faction tree to a client that just connected.
 ## (peer_connected also fires on clients when other peers join; they ignore it.)
 func _on_peer_connected(peer_id: int) -> void:
@@ -162,12 +159,50 @@ func setup_new_galaxy(dedicated=false, callback = null):
 	if dedicated:
 		callback = Callable(self, "finish_setup_galaxy_all")
 	if not active_galaxy and get_tree().root.get_node("entry").is_server:
-		_create_playtest_factions()
-		emit_signal("load_scene", Content.path_of(&"b5:test_system"), $Systems, false, true, callback)
+		if not _start_scenario(callback):
+			return
 		active_galaxy = true
 		Log.log(["Galaxy setup complete."], Log.MessageType.INFO)
 	else:
 		print("Galaxy already initalized")
+
+
+## Server: checks the scenario, creates its factions and starts loading its
+## systems. [param callback] runs once every system is in the tree.
+func _start_scenario(callback) -> bool:
+	_scenario = load(Content.path_of(scenario_id)) as Scenario
+	if _scenario == null:
+		Log.log(["Scenario ", scenario_id, " not found"], Log.MessageType.ERROR)
+		return false
+	var errors := ScenarioLoader.validate(_scenario, Content.registry)
+	if not errors.is_empty():
+		Log.log(["Scenario ", scenario_id, " is invalid: ", "; ".join(errors)], Log.MessageType.ERROR)
+		return false
+	factions = ScenarioLoader.build_factions(_scenario)
+	ids = WorldIds.new()
+	_load_scenario_systems(callback)
+	return true
+
+
+## Loads the scenario's systems one after another, then runs [param callback].
+func _load_scenario_systems(callback, index := 0) -> void:
+	if index >= _scenario.systems.size():
+		if callback:
+			callback.call()
+		return
+	var next := _load_scenario_systems.bind(callback, index + 1)
+	emit_signal("load_scene", Content.path_of(_scenario.systems[index]), $Systems, false, true, next)
+
+
+## The loaded system node for a system content ID, or null.
+func _system_node(content_id: StringName) -> Node:
+	var path := Content.path_of(content_id)
+	if path.begins_with("uid://"):
+		path = ResourceUID.uid_to_path(path)
+	for system in $Systems.get_children():
+		if system.scene_file_path == path:
+			return system
+	return null
 
 
 func _on_main_menu_new_game(g_name, _player_name, _port, _server_password, _player_password):
@@ -181,41 +216,13 @@ func _on_main_menu_join_game(_ip, _port, _player_name, _server_password, _player
 
 
 func finish_setup_galaxy_all() -> void:
-	# Hack until we figure out what we are doing #
-	if get_tree().root.get_node("entry").is_server:
-		var babylon5: Ship = Content.instantiate(&"b5:babylon_5")
-		babylon5.ship_id = ship_id_counter
-		ship_id_counter += 1
-		
-		$Systems.add_station(babylon5, "test_system")
-		var b5_faction: Faction = factions.find_by_name("Babylon 5")
-		# Set after adding to the system: ships find the registry through Galaxy.
-		babylon5.faction_id = b5_faction.faction_id
-		b5_faction.doctrine = FactionDoctrine.new()
-		b5_faction.doctrine.minimum_patrol_fighters = 2
-		b5_faction.doctrine.retreat_when_hull_percent = 0.25
-		# NPC crew go through the ship's crew spawner so clients receive them too.
-		var server_id := multiplayer.get_unique_id()
-		var b5commander := babylon5.spawn_crew(
-				Character.pilot_data("Commendar Eclair", b5_faction.faction_id, server_id))
-		b5_faction.add_member(b5commander)
-		$"Systems/test_system/SubViewport/ships/Babylon 5/Consoles/StationCommand".occupy(b5commander)
-
-		b5_faction.add_member(babylon5.spawn_crew(
-				Character.pilot_data("Lt Commendar Eekvonova", b5_faction.faction_id, server_id)))
-
-		var zeta_wing: Faction = factions.find_by_name("Zeta Wing")
-		for bot_name in ["Karren Waffer", "Doe John", "Susan B. Anntonny"]:
-			zeta_wing.add_member(babylon5.spawn_crew(
-					Character.pilot_data(bot_name, zeta_wing.faction_id, server_id)))
-
-		var hyperion: Ship = Content.instantiate(&"b5:hyperion")
-		hyperion.name = "EASS Hyperion"
-		hyperion.position = Vector3(5800, 0, 0)
-		$Systems.add_ship(hyperion, "test_system")
-		hyperion.faction_id = factions.find_by_name("Earth Alliance").faction_id
-		hyperion.ship_id = ship_id_counter
-		ship_id_counter += 1
+	if not get_tree().root.get_node("entry").is_server:
+		return
+	var systems := {}
+	for id in _scenario.systems:
+		systems[id] = _system_node(id)
+	ScenarioLoader.populate(_scenario, Content.registry, factions, systems, ids,
+			multiplayer.get_unique_id())
 
 
 func finish_setup_galaxy_client():
@@ -263,7 +270,8 @@ func first_spawn_player(faction_id: int, system_name: String, spawner_name: Stri
 	#TODO: Change this to be via system_name and spawner_name
 	player_enter_system.rpc_id(remote_id, system_name)
 	var player_pilot := ($"Systems/test_system/SubViewport/ships/Babylon 5" as Ship).spawn_crew(
-			Character.pilot_data(player.name, faction_id, remote_id, player.player_id))
+			Character.pilot_data(player.name, faction_id, remote_id, ids.next_pilot(),
+				player.player_id))
 	if player_pilot == null:
 		return
 	faction.add_member(player_pilot)

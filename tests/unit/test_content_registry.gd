@@ -83,4 +83,8 @@ func test_babylon5_manifest_resolves() -> void:
 	assert_gt(registry.load_manifest("res://content/babylon5.cfg"), 0)
 	for id in registry.ids():
 		assert_true(ResourceLoader.exists(registry.path_of(id)), "%s exists" % id)
-		assert_true(registry.load_scene(id) != null, "%s is a scene" % id)
+	for kind in [&"ship", &"system"]:
+		for id in registry.ids(kind):
+			assert_true(registry.load_scene(id) != null, "%s is a scene" % id)
+	for id in registry.ids(&"scenario"):
+		assert_true(load(registry.path_of(id)) is Scenario, "%s is a Scenario" % id)

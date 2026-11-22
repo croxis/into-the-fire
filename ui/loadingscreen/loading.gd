@@ -25,8 +25,10 @@ func _process(_delta):
 			Debug.update_widget('LoaderDebugContainer:TextListLoad.remove_label', {'name': 'load_counter'})
 			Log.log(["Scene loaded"], Log.MessageType.INFO)
 			if callback:
-				callback.call()
+				# Clear first: the callback may start the next load, with its own callback.
+				var finished = callback
 				callback = null
+				finished.call()
 		elif status == ResourceLoader.THREAD_LOAD_FAILED:
 			Log.log(["Scene load failed"], Log.MessageType.ERROR)
 		elif status == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:

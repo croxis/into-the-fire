@@ -1,0 +1,96 @@
+[gd_resource type="Resource" script_class="Scenario" format=3 uid="uid://gfmghlipe7a0"]
+
+[ext_resource type="Script" path="res://scenario/scenario_faction.gd" id="1_aa56t"]
+[ext_resource type="Script" path="res://factions/faction_doctrine.gd" id="2_4xcc8"]
+[ext_resource type="Script" path="res://scenario/scenario.gd" id="3_sol30"]
+[ext_resource type="Script" path="res://scenario/scenario_ship.gd" id="4_jdg3x"]
+[ext_resource type="Script" path="res://scenario/scenario_crew.gd" id="5_tgw0d"]
+
+[sub_resource type="Resource" id="Resource_li8ju"]
+script = ExtResource("1_aa56t")
+name = "Earth Alliance"
+
+[sub_resource type="Resource" id="Resource_4cmn0"]
+script = ExtResource("2_4xcc8")
+minimum_patrol_fighters = 2
+retreat_when_hull_percent = 0.25
+
+[sub_resource type="Resource" id="Resource_dv56f"]
+script = ExtResource("1_aa56t")
+name = "Babylon 5"
+parent = "Earth Alliance"
+doctrine = SubResource("Resource_4cmn0")
+
+[sub_resource type="Resource" id="Resource_oaji0"]
+script = ExtResource("1_aa56t")
+name = "Alpha Wing"
+parent = "Babylon 5"
+is_wing = true
+accept_players = true
+
+[sub_resource type="Resource" id="Resource_dfhoc"]
+script = ExtResource("1_aa56t")
+name = "Beta Wing"
+parent = "Babylon 5"
+is_wing = true
+accept_players = true
+
+[sub_resource type="Resource" id="Resource_63tai"]
+script = ExtResource("1_aa56t")
+name = "Delta Wing"
+parent = "Babylon 5"
+is_wing = true
+accept_players = true
+
+[sub_resource type="Resource" id="Resource_5o215"]
+script = ExtResource("1_aa56t")
+name = "Zeta Wing"
+parent = "Babylon 5"
+is_wing = true
+accept_players = true
+
+[sub_resource type="Resource" id="Resource_bbgbs"]
+script = ExtResource("5_tgw0d")
+name = "Commendar Eclair"
+console = NodePath("Consoles/StationCommand")
+
+[sub_resource type="Resource" id="Resource_8lixo"]
+script = ExtResource("5_tgw0d")
+name = "Lt Commendar Eekvonova"
+
+[sub_resource type="Resource" id="Resource_u8g8j"]
+script = ExtResource("5_tgw0d")
+name = "Karren Waffer"
+faction = "Zeta Wing"
+
+[sub_resource type="Resource" id="Resource_c4p5h"]
+script = ExtResource("5_tgw0d")
+name = "Doe John"
+faction = "Zeta Wing"
+
+[sub_resource type="Resource" id="Resource_ot0vw"]
+script = ExtResource("5_tgw0d")
+name = "Susan B. Anntonny"
+faction = "Zeta Wing"
+
+[sub_resource type="Resource" id="Resource_4jxjt"]
+script = ExtResource("4_jdg3x")
+content_id = &"b5:babylon_5"
+system = &"b5:test_system"
+faction = "Babylon 5"
+crew = Array[ExtResource("5_tgw0d")]([SubResource("Resource_bbgbs"), SubResource("Resource_8lixo"), SubResource("Resource_u8g8j"), SubResource("Resource_c4p5h"), SubResource("Resource_ot0vw")])
+
+[sub_resource type="Resource" id="Resource_7f4by"]
+script = ExtResource("4_jdg3x")
+content_id = &"b5:hyperion"
+ship_name = "EASS Hyperion"
+system = &"b5:test_system"
+position = Vector3(5800, 0, 0)
+faction = "Earth Alliance"
+
+[resource]
+script = ExtResource("3_sol30")
+title = "Babylon 5 playtest"
+factions = Array[ExtResource("1_aa56t")]([SubResource("Resource_li8ju"), SubResource("Resource_dv56f"), SubResource("Resource_oaji0"), SubResource("Resource_dfhoc"), SubResource("Resource_63tai"), SubResource("Resource_5o215")])
+systems = Array[StringName]([&"b5:test_system"])
+ships = Array[ExtResource("4_jdg3x")]([SubResource("Resource_4jxjt"), SubResource("Resource_7f4by")])
