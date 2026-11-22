@@ -5,7 +5,6 @@
 [ext_resource type="Script" uid="uid://1ihpd5wkcfij" path="res://ships/Engines.gd" id="4_ob5l3"]
 [ext_resource type="Script" uid="uid://d4gd45lh7saav" path="res://ships/crew.gd" id="5_tgeno"]
 [ext_resource type="Script" uid="uid://cgo6tfowdnsli" path="res://ships/crew_multiplayer_spawner.gd" id="6_1a8so"]
-[ext_resource type="PackedScene" uid="uid://bywfmtvnxay38" path="res://ui/capital/capital_ui.tscn" id="7_dwaht"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_2c0xb"]
 properties/0/path = NodePath(".:linear_velocity")
@@ -36,17 +35,6 @@ properties/6/replication_mode = 2
 can_sleep = false
 continuous_cd = true
 script = ExtResource("1_lh74f")
-ship_id = null
-faction_id = null
-camera_path = null
-ship_class = null
-max_health = null
-is_station = null
-is_capital = null
-has_spawn_points = null
-em_output_base = null
-neutron_output_base = null
-local_angular_velocity = null
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="." unique_id=378789863]
 replication_config = SubResource("SceneReplicationConfig_2c0xb")
@@ -68,25 +56,6 @@ script = ExtResource("6_1a8so")
 
 [node name="Spawner" type="Node3D" parent="." unique_id=316759190]
 
-[node name="CapitalUI" parent="." unique_id=338275698 instance=ExtResource("7_dwaht")]
-visible = false
-anchors_preset = 0
-anchor_right = 0.0
-anchor_bottom = 0.0
-offset_right = 242.0
-offset_bottom = 89.0
-grow_horizontal = 1
-grow_vertical = 1
-
-[node name="DebugUI" type="Control" parent="." unique_id=484548019]
-visible = false
-layout_mode = 3
-anchors_preset = 0
-offset_left = 284.0
-offset_top = 140.0
-offset_right = 628.0
-offset_bottom = 393.0
-
 [node name="LimboHSM" type="LimboHSM" parent="." unique_id=2106809936]
 
 [node name="Consoles" type="Node3D" parent="." unique_id=1724205824]
@@ -102,4 +71,3 @@ debug_fill = false
 [connection signal="child_exiting_tree" from="Crew" to="." method="_on_crew_child_exiting_tree"]
 [connection signal="child_exiting_tree" from="Crew" to="Crew" method="_on_child_exiting_tree"]
 [connection signal="body_entered" from="Area3DDock" to="." method="_on_area_3d_dock_body_entered"]
-[connection signal="request_launch" from="CapitalUI" to="." method="_on_capital_ui_request_launch"]

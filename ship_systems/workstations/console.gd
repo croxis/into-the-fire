@@ -4,6 +4,12 @@ class_name Console
 var occupant: Character
 @export_node_path("Camera3D") var camera_path: NodePath
 @onready var camera: Camera3D = get_node_or_null(camera_path)
+## Shown in the main window while a player sits here (see HudLayer). Optional:
+## a console without one shows no HUD. The scene's root may define
+## bind_console(console) to get this console.
+@export var hud_scene: PackedScene
+## Set this to use a HUD layer directly (unit tests). Otherwise Galaxy.hud.
+var hud_layer: HudLayer
 
 var capabilities: Array[ConsoleCapability]:
 	get():
@@ -20,8 +26,12 @@ func occupy(character: Character) -> bool:
 	Log.log([character.name, "trying to sit at", self.name, "on", character.current_ship], Log.MessageType.QUESTION)
 	occupant = character
 	character.current_console = self
-	set_camera.rpc_id(character.multiplayer_id)
-	
+	# Only players get a view and a HUD. NPC crew carry the server's peer id, so
+	# without this check a host-and-play server would show them on the host.
+	if character.is_player():
+		set_camera.rpc_id(character.multiplayer_id)
+		_show_hud.rpc_id(character.multiplayer_id)
+
 	var c_state: LimboState = character.get_node("BrainHSM/OperatingConsoleState")
 	var bt_player: BTPlayer  = c_state.bt_player
 	var combo_tree: BehaviorTree = BehaviorTree.new()
@@ -34,7 +44,7 @@ func occupy(character: Character) -> bool:
 			subtree.set_subtree(capability.behavior_tree)
 			parallel.add_child(subtree)
 			role_count += 1
-	# The station is alive as long as at least one role is working.
+	# The console is alive as long as at least one role is working.
 	# Only fail if EVERY role reports FAILURE.
 	parallel.num_failures_required = maxi(role_count, 1)
 	parallel.num_successes_required = 0
@@ -54,6 +64,8 @@ func occupy(character: Character) -> bool:
 
 func vacate():
 	if occupant:
+		if occupant.is_player():
+			_hide_hud.rpc_id(occupant.multiplayer_id)
 		occupant.current_console = null
 		for b_tree in occupant.get_node("BrainHSM/OperatingConsoleState").get_children():
 			b_tree.queue_free()
@@ -66,6 +78,29 @@ func set_camera():
 	camera.far = 30000
 	camera.near = 0.3
 	camera.current = true
+
+
+## Sent by the server to the player who sat down here.
+@rpc("call_local")
+func _show_hud() -> void:
+	var hud := _hud()
+	if hud:
+		hud.show_console(self, hud_scene)
+
+
+## Sent by the server to the player who left this console.
+@rpc("call_local")
+func _hide_hud() -> void:
+	var hud := _hud()
+	if hud:
+		hud.hide_console(self)
+
+
+func _hud() -> HudLayer:
+	if hud_layer:
+		return hud_layer
+	var g := Galaxy.find_for(self)
+	return g.hud if g else null
 
 
 func change_camera():

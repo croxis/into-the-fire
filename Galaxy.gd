@@ -16,6 +16,8 @@ var ids := WorldIds.new()
 
 ## Draws the zone the local player is in. Unused on a dedicated server.
 var zone_view := ZoneView.new()
+## The local player's HUD (passenger HUD for now). Empty on a dedicated server.
+var hud := HudLayer.new()
 
 ## Every faction in this world. The server creates them; clients receive a copy
 ## when they join (see _rpc_receive_factions). Replaced as a whole, never patched
@@ -125,6 +127,7 @@ func _ready():
 	multiplayer.peer_connected.connect(_on_peer_connected)
 	zone_view.name = "ZoneView"
 	add_child(zone_view)
+	add_child(hud)
 
 
 ## Server: send the faction tree to a client that just connected.

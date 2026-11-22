@@ -61,3 +61,46 @@ func test_has_capability_is_case_insensitive() -> void:
 	var console := _console()
 	assert_true(console.has_capability("helm"))
 	assert_false(console.has_capability("TargetRecticles"), "only capabilities count")
+
+
+# The occupant's HUD and camera. A HudLayer is passed in directly; in the game
+# the console finds Galaxy.hud.
+
+func _player() -> Character:
+	var c := _character()
+	c._player_pilot_id = 3
+	return c
+
+
+func _console_with_hud() -> Console:
+	var console := _console()
+	console.hud_scene = preload("res://tests/unit/fake_console_hud.gd").scene()
+	console.hud_layer = HudLayer.new()
+	add_child_autofree(console.hud_layer)
+	return console
+
+
+func test_player_at_a_console_sees_its_hud() -> void:
+	var console := _console_with_hud()
+	console.occupy(_player())
+	assert_not_null(console.hud_layer.console_hud)
+	assert_eq(console.hud_layer.console_hud.console, console)
+
+
+func test_leaving_the_console_removes_its_hud() -> void:
+	var console := _console_with_hud()
+	console.occupy(_player())
+	console.vacate()
+	assert_null(console.hud_layer.console_hud)
+
+
+func test_npc_at_a_console_leaves_the_local_screen_alone() -> void:
+	# NPC crew carry the server's peer id, so on a host-and-play server an RPC
+	# "to the occupant" would land on the host player's own screen.
+	var view := Camera3D.new()  # What the local player is looking through.
+	add_child_autofree(view)
+	view.current = true
+	var console := _console_with_hud()
+	console.occupy(_character())
+	assert_null(console.hud_layer.console_hud)
+	assert_true(view.current, "the NPC's camera must not become the view")

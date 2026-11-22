@@ -165,18 +165,23 @@ func set_camera():
 	passenger_camera.current = true
 
 
+## Sent by the server to a player who boards this ship. Passengers on a capital
+## ship or station get the passenger HUD (Launch), drawn in the main window.
 @rpc("call_local")
 func set_capital_ui():
 	Log.log(["Is capital or station?", is_capital, ", ", is_station], Log.MessageType.INFO)
+	if not galaxy:
+		return
 	if is_capital or is_station:
-		$CapitalUI.visible = true
+		galaxy.hud.show_passenger(self, _on_capital_ui_request_launch)
 	else:
-		$CapitalUI.visible = false
+		galaxy.hud.hide_passenger(self)
 
 
 @rpc("call_local")
 func disable_capital_ui():
-	$CapitalUI.visible = false
+	if galaxy:
+		galaxy.hud.hide_passenger(self)
 
 
 func debug_set_health(new_health):
@@ -251,7 +256,7 @@ func _on_area_3d_dock_body_entered(body) -> void:
 func _on_crew_child_exiting_tree(_node: Node) -> void:
 	return
 	Log.log(["_on_crew_child_exiting_tree"], Log.MessageType.INFO)
-	$CapitalUI.visible = false
+	disable_capital_ui()
 
 
 func _on_button_launch_pressed() -> void:

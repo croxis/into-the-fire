@@ -68,6 +68,10 @@ GPU-less machines; nothing on the server path may depend on rendering.
 - `systems/`: each star system is a `SubViewportContainer` with its own `World3D` (`system_template.*`).
 - `zones/`: `ZoneView` (in Galaxy) draws the viewed zone in the main window: sets its `world_3d`, a camera rig
   (or XR origin) follows the zone's current camera, input is forwarded. Zone SubViewports don't render.
+- `ui/hud/`: `HudLayer` (`Galaxy.hud`), the local player's HUD in the main window. 2D UI inside a ship is never
+  drawn, so HUDs go here, client-side only: the passenger HUD (Launch) on capital ships and space stations, and
+  the console's `hud_scene` while a player sits at it. Say "console" for a spacecraft's crew interface;
+  "station" means a space station.
 - `ships/`: `Ship.gd` (RigidBody3D), `Engines.gd` (per-thruster forces), `crew.gd`, `PID.gd`.
 - `ship_systems/workstations/`: `Console` plus capabilities (Helm, Weapons, Command); each capability
   brings a behaviour tree that runs in the occupant's `BrainHSM`.
