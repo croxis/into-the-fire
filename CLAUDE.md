@@ -5,6 +5,8 @@ Inspired by X4 (sandbox, empire, map), Babylon 5: I Found Her (hyperspace) and S
 Babylon 5: Into the Fire (crew combat). Long term it is meant to be a general sci-fi spaceship engine with
 Babylon 5 as the default mod. Early development: many systems are partial or stubbed.
 
+Project documentation lives in `documentation/` (start with `documentation/content_registry.md`).
+
 Design doc (target architecture, decisions, open questions):
 https://claude.ai/artifact/SbiKWXHGRsfhgvoeBBGW7J
 
@@ -53,6 +55,9 @@ GPU-less machines; nothing on the server path may depend on rendering.
 
 - `entry.gd` / `entry.tscn`: boot and run-mode dispatch, owns `network` and `Galaxy`.
 - `boot/`: `LaunchOptions` (command-line parsing, no node dependencies).
+- `content/`: `ContentRegistry` and the `Content` autoload. Game code asks for content by ID
+  (`Content.instantiate(&"b5:aurora_starfury")`), never by `res://` path. IDs are listed in manifests
+  such as `content/babylon5.cfg` (uid:// values; `*.cfg` there is in the export include filter).
 - `network/network.gd`: ENet host/join and the custom auth handshake.
 - `Galaxy.gd`: playtest world setup (hard-coded Babylon 5 station, Hyperion, NPC crew), spawning, respawn.
 - `systems/`: each star system is a `SubViewportContainer` with its own `World3D` (`system_template.*`).
@@ -66,7 +71,7 @@ GPU-less machines; nothing on the server path may depend on rendering.
 - `demo/`: LimboAI demo content, not game code.
 
 Autoloads include netfox (`NetworkTime`, `NetworkRollback`, ...), `Log`, `LimboConsole`,
-`LocalGameManager` (local player id), and `_mcp_game_helper` (godot-ai addon).
+`LocalGameManager` (local player id), `Content` (content registry), and `_mcp_game_helper` (godot-ai addon).
 
 ## Netcode
 
@@ -90,7 +95,6 @@ integrator, interpolation for remote ships, interest management, event-based wea
 - `Ship._on_button_launch_pressed` calls a `request_spawn` RPC that does not exist.
 - `factions/factions.tres.gd` duplicates the faction setup with different wings.
 - `Ship.tscn` syncs `autospin`/`autobreak`/`target_*` on the root, but they moved to Helm.
-- `Galaxy.gd` and `Ship.gd` load content by path; content should come from a registry.
 
 ## Tests and CI
 

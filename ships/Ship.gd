@@ -51,6 +51,8 @@ class_name Ship
 	get:
 		return is_in_group("capital")
 @export var has_spawn_points := false
+## Content ID of the craft this ship launches from its spawn points.
+@export var launch_ship_id: StringName = &"b5:aurora_starfury"
 
 @export var sensor: Sensor
 @onready var crew := $Crew
@@ -243,8 +245,10 @@ func request_launch(p_ship_id: int, pilot_id: int):
 	print_debug("Spawn: ", spawn)
 	#TODO: Keep an inventory of docked ships
 	
-	var PlayerScene := load("res://ships/earth alliance/aurora_starfury/auora_starfury.scn")
-	var new_ship: Ship = PlayerScene.instantiate()
+	var new_ship := Content.instantiate(launch_ship_id) as Ship
+	if new_ship == null:
+		Log.log(["Cannot launch ", launch_ship_id, " from ", name], Log.MessageType.ERROR)
+		return
 	new_ship.is_spawning = true
 	
 	#TODO: Pull ship from existing invetory using the id

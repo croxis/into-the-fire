@@ -113,7 +113,7 @@ func setup_new_galaxy(dedicated=false, callback = null):
 	if dedicated:
 		callback = Callable(self, "finish_setup_galaxy_all")
 	if not active_galaxy and get_tree().root.get_node("entry").is_server:
-		emit_signal("load_scene", "res://systems/test_system/test_system.tscn", $Systems, false, true, callback)
+		emit_signal("load_scene", Content.path_of(&"b5:test_system"), $Systems, false, true, callback)
 		active_galaxy = true
 		Log.log(["Galaxy setup complete."], Log.MessageType.INFO)
 	else:
@@ -133,7 +133,7 @@ func _on_main_menu_join_game(_ip, _port, _player_name, _server_password, _player
 func finish_setup_galaxy_all() -> void:
 	# Hack until we figure out what we are doing #
 	if get_tree().root.get_node("entry").is_server:
-		var babylon5: Ship = preload("res://ships/earth alliance/babylon 5/babylon_5.tscn").instantiate()
+		var babylon5: Ship = Content.instantiate(&"b5:babylon_5")
 		babylon5.ship_id = ship_id_counter
 		ship_id_counter += 1
 		
@@ -169,7 +169,7 @@ func finish_setup_galaxy_all() -> void:
 		$"Systems/test_system/SubViewport/ships/Babylon 5".add_passenger(b5botpilot)
 		b5botpilot.multiplayer_id = multiplayer.get_unique_id()
 		
-		var hyperion := preload("res://ships/earth alliance/hyperion/hyperion.tscn").instantiate()
+		var hyperion: Ship = Content.instantiate(&"b5:hyperion")
 		hyperion.name = "EASS Hyperion"
 		hyperion.position = Vector3(5800, 0, 0)
 		$Systems.add_ship(hyperion, "test_system")
