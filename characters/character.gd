@@ -53,16 +53,26 @@ var current_ship: Ship:
 @export var doctrine_var: StringName = &"doctrine"
 
 static var next_id := 0
-static var pilot_scene: PackedScene = load("res://characters/character.tscn")
 
 var _brain_initialized := false
 
-static func new_pilot(new_name: String) -> Character:
-	var new_pilot_instance = pilot_scene.instantiate()
-	new_pilot_instance.name = new_name
-	new_pilot_instance.pilot_id = next_id
+
+## Spawn data for a new crew member, in the format of [method serialize].
+## Pass it to [method Ship.spawn_crew], which creates the character on the
+## server and every client.
+static func pilot_data(pilot_name: String, faction: int, peer_id: int,
+		player_pilot_id := 0) -> Dictionary:
+	var data := {
+		"name": pilot_name,
+		"faction_id": faction,
+		"multiplayer_id": peer_id,
+		"_player_pilot_id": player_pilot_id,
+		"pilot_id": next_id,
+		"active_orders": [],
+		"pending_orders": [],
+	}
 	next_id += 1
-	return new_pilot_instance
+	return data
 
 
 func _ready():
@@ -197,8 +207,9 @@ func restore(payload: Dictionary):
 	_player_pilot_id = payload["_player_pilot_id"]
 	multiplayer_id = payload["multiplayer_id"]
 	pilot_id = payload["pilot_id"]
-	active_orders = payload["active_orders"]
-	pending_orders = payload["pending_orders"]
+	# assign(): arrays lose their element type when sent over the network.
+	active_orders.assign(payload["active_orders"])
+	pending_orders.assign(payload["pending_orders"])
 	
 	#hsm.initialize(self)
 	

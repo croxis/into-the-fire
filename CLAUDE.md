@@ -83,7 +83,8 @@ Autoloads include netfox (`NetworkTime`, `NetworkRollback`, ...), `Log`, `LimboC
   (a `MultiplayerSynchronizer` owned by that player's peer).
 - netfox 1.35 is installed; rollback is currently disabled (`netfox/rollback/enabled=false`).
 - Spawners only track nodes they spawned. Reparenting nodes across spawn paths (e.g. crew moving between
-  ships) is not replicated; spawn with `spawn_function` and data dictionaries instead.
+  ships) is not replicated; spawn with `spawn_function` and data dictionaries instead. Crew are created
+  with `ship.spawn_crew(Character.pilot_data(...))`, never `add_child`.
 - Never trust IDs sent by clients: validate every `any_peer` RPC on the server.
 
 Target direction (see the design doc): data records separate from scene nodes, per-zone `SubViewport`
@@ -95,9 +96,6 @@ integrator, interpolation for remote ships, interest management, event-based wea
 - Ship `health` setter calls `destroy()` on clients too, and can emit `destroyed` twice.
 - `Ship._on_button_launch_pressed` calls a `request_spawn` RPC that does not exist.
 - `factions/factions.tres.gd` duplicates the faction setup with different wings.
-- Galaxy's playtest NPC crew (Babylon 5's commander and bot pilots) are added with `add_passenger` /
-  `add_child`, not through the ship's `CrewMultiplayerSpawner`, so remote clients never receive them and log
-  "Node not found: .../Crew/<name>/CharacterSync". Respawn already uses the spawner.
 
 ## Tests and CI
 

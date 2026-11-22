@@ -134,6 +134,22 @@ func add_passenger(pilot: Character):
 		set_capital_ui.rpc_id(pilot.multiplayer_id)
 
 
+## Server only. Creates a crew member from [method Character.pilot_data] or
+## [method Character.serialize] data. It goes through the CrewMultiplayerSpawner
+## so every client gets the character too; a plain add_child() would exist only
+## on the server. Returns null if the ship is full.
+func spawn_crew(data: Dictionary) -> Character:
+	if $Crew.get_child_count() >= $Crew.max_crew:
+		Log.log(["No room for ", data.get("name"), " on ", name], Log.MessageType.WARNING)
+		return null
+	var pilot: Character = $CrewMultiplayerSpawner.spawn(data)
+	Log.log(["Crew ", pilot.name, " spawned on ", name], Log.MessageType.INFO)
+	if pilot.is_player():
+		set_camera.rpc_id(pilot.multiplayer_id)
+		set_capital_ui.rpc_id(pilot.multiplayer_id)
+	return pilot
+
+
 func get_crew() -> Array[Character]:
 	var crew: Array[Character] = []
 	for c in $Crew.get_children():

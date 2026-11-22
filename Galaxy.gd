@@ -188,36 +188,24 @@ func finish_setup_galaxy_all() -> void:
 		var b5_faction: Faction = factions.find_by_name("Babylon 5")
 		# Set after adding to the system: ships find the registry through Galaxy.
 		babylon5.faction_id = b5_faction.faction_id
-		var b5commander: Character = Character.new_pilot("Commendar Eclair")
 		b5_faction.doctrine = FactionDoctrine.new()
 		b5_faction.doctrine.minimum_patrol_fighters = 2
 		b5_faction.doctrine.retreat_when_hull_percent = 0.25
+		# NPC crew go through the ship's crew spawner so clients receive them too.
+		var server_id := multiplayer.get_unique_id()
+		var b5commander := babylon5.spawn_crew(
+				Character.pilot_data("Commendar Eclair", b5_faction.faction_id, server_id))
 		b5_faction.add_member(b5commander)
-		$"Systems/test_system/SubViewport/ships/Babylon 5".add_passenger(b5commander)
 		$"Systems/test_system/SubViewport/ships/Babylon 5/Consoles/StationCommand".occupy(b5commander)
-		b5commander.multiplayer_id = multiplayer.get_unique_id()
-		
-		var b5ltcommander: Character = Character.new_pilot("Lt Commendar Eekvonova")
-		b5_faction.add_member(b5ltcommander)
-		$"Systems/test_system/SubViewport/ships/Babylon 5".add_passenger(b5ltcommander)
-		b5ltcommander.multiplayer_id = multiplayer.get_unique_id()
-		
-		var b5botpilot: Character = Character.new_pilot("Karren Waffer")
+
+		b5_faction.add_member(babylon5.spawn_crew(
+				Character.pilot_data("Lt Commendar Eekvonova", b5_faction.faction_id, server_id)))
+
 		var zeta_wing: Faction = factions.find_by_name("Zeta Wing")
-		zeta_wing.add_member(b5botpilot)
-		$"Systems/test_system/SubViewport/ships/Babylon 5".add_passenger(b5botpilot)
-		b5botpilot.multiplayer_id = multiplayer.get_unique_id()
-		
-		b5botpilot = Character.new_pilot("Doe John")
-		zeta_wing.add_member(b5botpilot)
-		$"Systems/test_system/SubViewport/ships/Babylon 5".add_passenger(b5botpilot)
-		b5botpilot.multiplayer_id = multiplayer.get_unique_id()
-		
-		b5botpilot = Character.new_pilot("Susan B. Anntonny")
-		zeta_wing.add_member(b5botpilot)
-		$"Systems/test_system/SubViewport/ships/Babylon 5".add_passenger(b5botpilot)
-		b5botpilot.multiplayer_id = multiplayer.get_unique_id()
-		
+		for bot_name in ["Karren Waffer", "Doe John", "Susan B. Anntonny"]:
+			zeta_wing.add_member(babylon5.spawn_crew(
+					Character.pilot_data(bot_name, zeta_wing.faction_id, server_id)))
+
 		var hyperion: Ship = Content.instantiate(&"b5:hyperion")
 		hyperion.name = "EASS Hyperion"
 		hyperion.position = Vector3(5800, 0, 0)
@@ -268,15 +256,14 @@ func first_spawn_player(faction_id: int, system_name: String, spawner_name: Stri
 	if refusal:
 		Log.log(["Spawn refused for ", player.name, ": ", refusal], Log.MessageType.WARNING)
 		return
-	var player_pilot: Character = Character.new_pilot(player.name)
 	var faction: Faction = factions.get_by_id(faction_id)
-	faction.add_member(player_pilot)
-	player_pilot._player_pilot_id = player.player_id
-	player_pilot.set_multiplayer_id(remote_id)
-	
 	#TODO: Change this to be via system_name and spawner_name
-	player_enter_system.rpc_id(player_pilot.multiplayer_id, system_name)
-	$"Systems/test_system/SubViewport/ships/Babylon 5".add_passenger(player_pilot)
+	player_enter_system.rpc_id(remote_id, system_name)
+	var player_pilot := ($"Systems/test_system/SubViewport/ships/Babylon 5" as Ship).spawn_crew(
+			Character.pilot_data(player.name, faction_id, remote_id, player.player_id))
+	if player_pilot == null:
+		return
+	faction.add_member(player_pilot)
 	Log.log(["Created pilot: ", player_pilot, " in faction ", faction.resource_name, " with mpid: ", player_pilot.multiplayer_id], Log.MessageType.SUCCESS)
 
 
@@ -343,7 +330,5 @@ func _on_ship_destroyed(ship: Ship):
 					distance = d
 					proposed_ship = target_ship
 		if proposed_ship:
-			var new_pilot: Character = proposed_ship.get_node("CrewMultiplayerSpawner").spawn(old_pilot.serialize())
-			new_pilot._player_pilot_id = old_pilot._player_pilot_id
 			#TODO: Genealize this to a multicrew craft
-			proposed_ship.add_passenger(new_pilot)
+			proposed_ship.spawn_crew(old_pilot.serialize())
