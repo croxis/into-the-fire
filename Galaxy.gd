@@ -18,6 +18,8 @@ var ids := WorldIds.new()
 var zone_view := ZoneView.new()
 ## The local player's HUD (passenger HUD for now). Empty on a dedicated server.
 var hud := HudLayer.new()
+## Steps every system's physics space (zones), on server and clients.
+var zone_stepper := ZoneStepper.new()
 
 ## Every faction in this world. The server creates them; clients receive a copy
 ## when they join (see _rpc_receive_factions). Replaced as a whole, never patched
@@ -127,6 +129,14 @@ func _ready():
 	zone_view.name = "ZoneView"
 	add_child(zone_view)
 	add_child(hud)
+	add_child(zone_stepper)
+	# Systems arrive from setup on the server and from the spawner on clients.
+	$Systems.child_entered_tree.connect(_on_system_entered)
+
+
+func _on_system_entered(node: Node) -> void:
+	if node is System:
+		zone_stepper.add_zone(node)
 
 
 ## Server: send the faction tree to a client that just connected.

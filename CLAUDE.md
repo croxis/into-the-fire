@@ -29,6 +29,8 @@ Stock Godot will not open this project correctly. The build has:
   Jolt implements it. Kept for per-zone manual stepping, not for netfox physics rollback.
 
 Physics engine is Jolt, zero gravity and zero damping (`project.godot`).
+Zone spaces are inactive and stepped by `ZoneStepper`; a space created outside a zone is still stepped
+by the engine.
 
 Build image and export templates: the separate godot-ci repo (a fork of abarichello/godot-ci, usually
 checked out beside this repo as `../godot-ci`). Its `Dockerfile` pins `GODOT_VERSION`, the LimboAI commit
@@ -69,6 +71,8 @@ GPU-less machines; nothing on the server path may depend on rendering.
   `World3D`, holding `ships`, `bolts` and their spawners. `System.find_for(node)` finds a node's system.
 - `zones/`: `ZoneView` (in Galaxy) draws the viewed zone in the main window: sets its `world_3d`, a camera rig
   (or XR origin) follows the zone's current camera, input is forwarded. Zone SubViewports don't render.
+  `ZoneStepper` (`Galaxy.zone_stepper`) steps each system's physics space itself (`space_step`, then
+  `space_flush_queries`) instead of the engine; modes FULL and PAUSED. Every system runs FULL for now.
 - `ui/hud/`: `HudLayer` (`Galaxy.hud`), the local player's HUD in the main window. 2D UI inside a ship is never
   drawn, so HUDs go here, client-side only: the passenger HUD (Launch) on capital ships and space stations, and
   the console's `hud_scene` while a player sits at it. Say "console" for a spacecraft's crew interface;
