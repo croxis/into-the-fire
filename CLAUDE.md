@@ -95,7 +95,6 @@ integrator, interpolation for remote ships, interest management, event-based wea
 
 - Ship `health` setter calls `destroy()` on clients too, and can emit `destroyed` twice.
 - `Ship._on_button_launch_pressed` calls a `request_spawn` RPC that does not exist.
-- `factions/factions.tres.gd` duplicates the faction setup with different wings.
 
 ## Tests and CI
 
