@@ -105,7 +105,9 @@ Autoloads include netfox (`NetworkTime`, `NetworkRollback`, ...), `Log`, `LimboC
 - Spawners only track nodes they spawned. Reparenting nodes across spawn paths (e.g. crew moving between
   ships) is not replicated; spawn with `spawn_function` and data dictionaries instead. Crew are created
   with `ship.spawn_crew(Character.pilot_data(..., galaxy.ids.next_pilot()))`, never `add_child`.
-- Never trust IDs sent by clients: validate every `any_peer` RPC on the server.
+- Never trust IDs sent by clients: validate every `any_peer` RPC on the server. Work out who asked from
+  `multiplayer.get_remote_sender_id()`, not from arguments (see `Ship.request_launch`). Logins are checked by
+  `network.gd` `check_login` before anything else, and never logged (they hold passwords).
 
 Target direction (see the design doc): data records separate from scene nodes, per-zone physics stepping,
 own-ship prediction with netfox `RollbackSynchronizer` and a custom flight

@@ -139,7 +139,7 @@ func _physics_process(_dt: float) -> void:
 				helm.toggle_autospin()
 			helm.input_rotation_throttle = inputs.rotation_throttle
 			helm.throttle = inputs.throttle
-			if inputs.debug_all_stop:
+			if inputs.debug_all_stop and debug_commands_allowed():
 				helm._debug_all_stop()
 		# TODO: Weapons capability is found but firing is not wired to inputs yet.
 		if Input.is_action_just_released("camera_change") and _player_pilot_id == LocalGameManager.player_id:
@@ -154,6 +154,15 @@ func _physics_process(_dt: float) -> void:
 				$BrainHSM.blackboard.set_var(&"fighters_deployed", command.get_subordinate_ships_in_escort_range())
 				$BrainHSM.blackboard.set_var(&"current_ship", current_ship)
 				$BrainHSM.blackboard.set_var(&"faction", faction)
+
+
+## Debug inputs (all-stop) count only for the player playing on this machine:
+## the listen-server host, or anyone offline. A remote client's inputs reach the
+## server too, and must not stop ships dead there.
+func debug_commands_allowed() -> bool:
+	if multiplayer.multiplayer_peer == null:
+		return true
+	return multiplayer_id == multiplayer.get_unique_id()
 
 
 func _to_string() -> String:

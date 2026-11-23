@@ -305,59 +305,73 @@ func _on_button_launch_pressed() -> void:
 
 
 func _on_capital_ui_request_launch() -> void:
-	var player: Player = galaxy.get_node('Players').find_player_by_netid(multiplayer.get_unique_id())	
-	Log.log(["_on_capital_ui_request_launch ship_id:", ship_id, player.name, multiplayer.get_unique_id()], Log.MessageType.INFO)
-	rpc("request_launch", ship_id, player.player_id)
+	Log.log(["Asking to launch from ", name], Log.MessageType.INFO)
+	request_launch.rpc_id(1)
 
 
+## A client asks to launch from this ship. It carries no IDs on purpose: the
+## server works out who asked from the connection, so nobody can launch someone
+## else (or an NPC) by sending their ID.
 @rpc("any_peer", "call_local")
-func request_launch(p_ship_id: int, pilot_id: int):
-	if not multiplayer.is_server():
+func request_launch() -> void:
+	if not multiplayer.is_server() or galaxy == null:
 		return
-	var remote_id := multiplayer.get_remote_sender_id()
-	# If the host is calling this function, remote id is 0, change to its actual id
-	if remote_id == 0:
-		remote_id = multiplayer.get_unique_id()
-	
-	Log.log(["Spawn requested in ", get_current_system().name, " ", name, " by ", remote_id], Log.MessageType.QUESTION)
-	var top_system := get_current_system()
-	#var system := top_system.get_node("SubViewport")
+	var sender := multiplayer.get_remote_sender_id()
+	if sender == 0:
+		sender = multiplayer.get_unique_id()  # The host asking itself.
+	var player: Player = galaxy.get_node("Players").find_player_by_netid(sender)
+	if player == null:
+		Log.log(["Launch refused for peer ", sender, ": not logged in"], Log.MessageType.WARNING)
+		return
+	var refusal := launch_player(player.player_id, galaxy.ids)
+	if refusal:
+		Log.log(["Launch refused for ", player.name, " from ", name, ": ", refusal], Log.MessageType.WARNING)
 
+
+## Server only. Launches player [param player_id]'s character from this ship in
+## a new fighter. Returns why not ("" when launched). Everything is checked
+## before anything is built.
+func launch_player(player_id: int, ids: WorldIds) -> String:
+	var passenger: Character = null
+	for c in get_crew():
+		if c._player_pilot_id == player_id:
+			passenger = c
+	if passenger == null:
+		return "not aboard"
+	if not $Spawner.has_method("find_free_spawner"):
+		return "no launch bays"
 	var spawn := find_free_spawner()
 	if spawn.is_empty():
-		Log.log(["No free launch bay on ", name], Log.MessageType.WARNING)
-		return
-	var spawn_point = spawn[0]
-	var spawn_position = spawn[1]
-	print_debug("Spawn: ", spawn)
-	#TODO: Keep an inventory of docked ships
-	
+		return "no free launch bay"
 	var new_ship := Content.instantiate(launch_ship_id) as Ship
 	if new_ship == null:
 		Log.log(["Cannot launch ", launch_ship_id, " from ", name], Log.MessageType.ERROR)
-		return
+		return "no craft to launch"
+
+	Log.log(["Launching ", passenger.name, " from ", name], Log.MessageType.QUESTION)
 	new_ship.is_spawning = true
-	
 	#TODO: Pull ship from existing invetory using the id
-	new_ship.ship_id = galaxy.ids.next_ship()
-	top_system.add_ship(new_ship)
-	new_ship.global_transform.origin = spawn_position
-	spawn_point.spawn_ship(new_ship)
-	var old_pilot: Character
-	if pilot_id:
-		old_pilot = $Crew.remove_passenger_by_id(pilot_id)
-	else:
-		old_pilot = $Crew.remove_passenger_by_multiplayerid(remote_id)
+	new_ship.ship_id = ids.next_ship()
+	get_current_system().add_ship(new_ship)
+	new_ship.global_transform.origin = spawn[1]
+	spawn[0].spawn_ship(new_ship)
+	var old_pilot: Character = $Crew.remove_passenger_by_id(player_id)
 	new_ship.faction_id = old_pilot.faction_id
 	var pilot: Character = new_ship.get_node("CrewMultiplayerSpawner").spawn(old_pilot.serialize())
 	#TODO: Genealize this to a multicrew craft
 	var cockpit: Console = new_ship.get_node("Consoles/Cockpit") as Console
-	
 	cockpit.occupy(pilot)
 	old_pilot.queue_free()
-	#new_ship.set_camera.rpc_id(pilot.multiplayer_id)
 	disable_capital_ui.rpc_id(pilot.multiplayer_id)
+	_finish_launch(new_ship, pilot)
+	return ""
+
+
+## The launched craft is clear of the bay after a moment.
+func _finish_launch(new_ship: Ship, pilot: Character) -> void:
 	await get_tree().create_timer(2.0).timeout
+	if not is_instance_valid(new_ship):
+		return
 	new_ship.is_spawning = false
 	for c in new_ship.get_node("Consoles").get_children():
 		if c is Console:

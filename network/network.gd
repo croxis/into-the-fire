@@ -78,10 +78,46 @@ func _authenticating(peer_id):
 	multiplayer.send_auth(peer_id, buf)	
 
 
+## Fields a client's login must carry, all strings.
+const LOGIN_FIELDS: Array[String] = ["client_token", "server_password", "player_name", "player_password"]
+const MAX_PLAYER_NAME := 32
+
+
+## Why [param login] (decoded from a client, so anything at all) is not a usable
+## login, or "" when it is. Checks its shape only; passwords are checked later.
+static func check_login(login: Variant) -> String:
+	if not login is Dictionary:
+		return "Malformed login"
+	for field in LOGIN_FIELDS:
+		if not login.get(field) is String:
+			return "Malformed login"
+	if not valid_player_name(login.player_name):
+		return "Player names are 1 to %d characters, without . : @ / \" %% or spaces at either end" \
+				% MAX_PLAYER_NAME
+	return ""
+
+
+## Player names become node names under Players and are looked up with
+## has_node, so they must not be node paths ("..", "a/b") or contain characters
+## Godot strips from node names (. : @ / " %).
+static func valid_player_name(player_name: String) -> bool:
+	if player_name.is_empty() or player_name.length() > MAX_PLAYER_NAME:
+		return false
+	if player_name != player_name.strip_edges():
+		return false
+	return player_name.validate_node_name() == player_name
+
+
 func _authenticate_callback(peer_id: int, data: PackedByteArray):
-	var dict:Dictionary = bytes_to_var(data)
-	var message:= ""
-	Log.log(["_auth_callback recieved data ", str(dict), "from PID", peer_id, "or", multiplayer.get_remote_sender_id()], Log.MessageType.QUESTION)
+	# bytes_to_var never builds objects, but the data can still be any Variant.
+	var login: Variant = bytes_to_var(data)
+	var message := check_login(login)
+	if message:
+		_refuse_login(peer_id, message)
+		return
+	var dict: Dictionary = login
+	# Never log the dictionary: it holds passwords.
+	Log.log(["Login from peer ", peer_id, " as ", dict.player_name], Log.MessageType.QUESTION)
 	if dict.client_token != "me2":
 		message = "Client untrustworthy"
 	elif dict.server_password != server_password:
@@ -93,10 +129,7 @@ func _authenticate_callback(peer_id: int, data: PackedByteArray):
 	elif !players.check_player(dict.player_name, dict.player_password, peer_id):
 		message = "Wrong player password"
 	if message.length() > 0:
-		multiplayer.send_auth(peer_id, var_to_bytes({'error': message}))
-		Log.log([message], Log.MessageType.ERROR)
-		await get_tree().create_timer(0.1).timeout
-		multiplayer.disconnect_peer(peer_id)
+		_refuse_login(peer_id, message)
 		return
 	var client := peer.get_peer(peer_id)
 	if not client:
@@ -105,6 +138,13 @@ func _authenticate_callback(peer_id: int, data: PackedByteArray):
 	client.set_timeout(1000, 4000, 6000)
 	Log.log(["Client ", dict.player_name, "authenticated"], Log.MessageType.SUCCESS)
 	multiplayer.complete_auth(peer_id)
+
+
+func _refuse_login(peer_id: int, message: String) -> void:
+	multiplayer.send_auth(peer_id, var_to_bytes({'error': message}))
+	Log.log(["Login refused for peer ", peer_id, ": ", message], Log.MessageType.ERROR)
+	await get_tree().create_timer(0.1).timeout
+	multiplayer.disconnect_peer(peer_id)
 
 
 func _auth_failed(client_peer):

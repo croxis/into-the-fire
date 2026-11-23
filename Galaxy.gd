@@ -264,6 +264,16 @@ static func check_spawn_request(registry: FactionRegistry, systems: Node,
 	return ""
 
 
+## The living character of player [param player_id] anywhere under
+## [param systems], or null. A player has at most one.
+static func find_player_character(systems: Node, player_id: int) -> Character:
+	for node in systems.find_children("*", "", true, false):
+		var c := node as Character
+		if c and c._player_pilot_id == player_id and not c.is_queued_for_deletion():
+			return c
+	return null
+
+
 @rpc("any_peer", "call_local")
 func first_spawn_player(faction_id: int, system_name: String, spawner_name: String) -> void:
 	if not multiplayer.is_server():
@@ -278,6 +288,8 @@ func first_spawn_player(faction_id: int, system_name: String, spawner_name: Stri
 		Log.log(["Spawn refused for peer ", remote_id, ": not logged in"], Log.MessageType.WARNING)
 		return
 	var refusal := check_spawn_request(factions, $Systems, faction_id, system_name)
+	if not refusal and find_player_character($Systems, player.player_id):
+		refusal = "already in the world"
 	if refusal:
 		Log.log(["Spawn refused for ", player.name, ": ", refusal], Log.MessageType.WARNING)
 		return
