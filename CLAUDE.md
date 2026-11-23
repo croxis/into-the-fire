@@ -112,14 +112,19 @@ Autoloads include netfox (`NetworkTime`, `NetworkRollback`, ...), `Log`, `LimboC
   with `ship.spawn_crew(Character.pilot_data(..., galaxy.ids.next_pilot()))`, never `add_child`.
 - Pilots on another machine send tick-stamped input (`InputChannel`, `Character._submit_inputs`, unreliable,
   each packet repeating the last 4 inputs); the server checks it and applies one per tick, in order. The host's
-  own input and NPCs still go through `InputsSync`. The server keeps a 2-tick cushion (jitter buffer) and skips
-  a backlog back to it.
+  own input and NPCs still go through `InputsSync`. The server keeps a cushion (jitter buffer) per pilot and
+  skips a backlog back to it. The cushion adapts, 2 to 8 ticks: it grows a tick each time it runs dry and shrinks
+  after a steady spell (5 s, doubling up to 40 s if it ran dry soon after the last shrink). Every hold or skip is
+  a one-tick jump on the pilot's screen, so this trades a little delay for others against those jumps.
 - Own-ship prediction (our own reconciler, not netfox rollback): the pilot's client flies its ship at once and
   records its thrust (`ShipPrediction`); after each tick loop the server sends that client its ship's state and
   the last input tick it applied (`Ship._send_pilot_state`); the client replays its thrust since then. The
   shared ship sync goes through `sync_*` proxies that the predicting client ignores. The host never predicts.
-  Logs: server "Input from X: held, skipped, queued", client "Prediction for X: N corrections" every 5 s.
-  Not done yet: launch (frozen on the arm) still shows corrections; remote ships aren't smoothed (N4).
+  Logs: server "Input from X: held, skipped, queued, cushion", client "Prediction for X: N corrections" every 5 s.
+  Not done yet: launch (frozen on the arm) still shows corrections, and under lag a late `InputsSync` delta for
+  the pilot's freed pre-launch character logs "Node not found" on the server; corrections aren't smoothed on
+  screen, and remote ships aren't smoothed either (both N4). Test lag with `tests/lag/lag_run.sh` (a UDP delay
+  proxy between `--server` and `--testplayer`; see `documentation/testing.md`).
 - Never trust IDs sent by clients: validate every `any_peer` RPC on the server. Work out who asked from
   `multiplayer.get_remote_sender_id()`, not from arguments (see `Ship.request_launch`). Logins are checked by
   `network.gd` `check_login` before anything else, and never logged (they hold passwords).

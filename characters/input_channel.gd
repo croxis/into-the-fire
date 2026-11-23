@@ -16,12 +16,21 @@ extends RefCounted
 const REDUNDANCY := 4
 ## Queued inputs kept at most (about half a second); a flood drops the oldest.
 const MAX_QUEUE := 30
-## The cushion the server waits for before using inputs, and rebuilds after
-## running dry. Packets arrive in clumps, not one per tick; without a cushion
-## the server would often find no input and hold the last one for a step the
-## client never made, and the pilot would see a correction each time. Two
-## ticks (33 ms) the pilot doesn't feel: their client shows their input at once.
+## The smallest cushion: inputs the server waits for before using them, and
+## rebuilds after running dry. Packets arrive in clumps, not one per tick;
+## without a cushion the server would often find no input and hold the last one
+## for a step the client never made, and the pilot would see a correction each
+## time. Two ticks (33 ms) the pilot doesn't feel: their client shows their
+## input at once.
 const JITTER_BUFFER := 2
+## The largest cushion (133 ms). Past this, a link is too bad for more delay to help.
+const MAX_CUSHION := 8
+## Ticks (5 s) without running dry before the cushion may first shrink by one.
+## Running dry soon after a shrink doubles the wait, up to MAX_SHRINK_AFTER
+## (40 s): otherwise a link on the edge would bounce between two sizes, paying a
+## skip to shrink and a hold to grow back every few seconds.
+const SHRINK_AFTER := 300
+const MAX_SHRINK_AFTER := SHRINK_AFTER * 8
 ## More inputs waiting than the cushion plus this and the server skips the
 ## oldest, back to the cushion. Otherwise a burst (a client catching up after a
 ## stall) would keep the server that many ticks behind the pilot for good, and
@@ -37,6 +46,16 @@ var _recent: Array[Dictionary] = []  # Client: the latest records, oldest first.
 var _queue: Dictionary[int, Dictionary] = {}  # Server: tick -> record.
 var _last: Dictionary = make_record(-1, Vector3.ZERO, Vector3.ZERO)  # Server.
 var _buffering := true  # Server: waiting for the cushion.
+## Server: the cushion now, between JITTER_BUFFER and MAX_CUSHION. Each hold or
+## skip is a one-tick jump on the pilot's screen, so a link that runs dry gets a
+## tick more; a steady one gives it back, since every tick of cushion also shows
+## the ship that much later to everyone else.
+var cushion := JITTER_BUFFER
+var _steady_ticks := 0  # Server: ticks since the cushion last changed.
+var _fewest_queued := MAX_QUEUE  # Server: the lowest queue seen in that time.
+## Server: steady ticks needed before shrinking, from SHRINK_AFTER up.
+var shrink_after := SHRINK_AFTER
+var _ticks_since_shrink := MAX_SHRINK_AFTER  # Server: any ticks, held or not.
 ## Server: ticks next() held the last input since started (no new input ready).
 ## Each one is a step the client didn't make, so a correction on their screen.
 var held_ticks := 0
@@ -89,9 +108,14 @@ func receive(packet: Variant) -> String:
 ## still filling), the last input holds (minus one-shot toggles) and
 ## last_applied_tick stays put.
 func next() -> Dictionary:
+	_ticks_since_shrink += 1
 	if _queue.is_empty():
+		if not _buffering:  # Ran dry: too small for this link.
+			if _ticks_since_shrink < shrink_after:
+				shrink_after = mini(shrink_after * 2, MAX_SHRINK_AFTER)
+			_set_cushion(cushion + 1)
 		_buffering = true
-	elif _buffering and _queue.size() >= JITTER_BUFFER:
+	elif _buffering and _queue.size() >= cushion:
 		_buffering = false
 	if _buffering:
 		if last_applied_tick >= 0:
@@ -100,15 +124,34 @@ func next() -> Dictionary:
 		for field in _BOOL_FIELDS:
 			held[field] = false
 		return held
-	if _queue.size() > JITTER_BUFFER + BACKLOG_SLACK:
-		while _queue.size() > JITTER_BUFFER + 1:
-			_queue.erase(_queue.keys().min())
-			skipped_ticks += 1
+	_fewest_queued = mini(_fewest_queued, _queue.size())
+	_steady_ticks += 1
+	# Never below 2 in a while: one tick less cushion still wouldn't run dry.
+	if _steady_ticks >= shrink_after and cushion > JITTER_BUFFER and _fewest_queued >= 2:
+		_set_cushion(cushion - 1)
+		_skip_oldest()
+		_ticks_since_shrink = 0
+	elif _steady_ticks >= shrink_after:
+		_set_cushion(cushion)  # Start a new window.
+	if _queue.size() > cushion + BACKLOG_SLACK:
+		while _queue.size() > cushion + 1:
+			_skip_oldest()
 	var tick: int = _queue.keys().min()
 	_last = _queue[tick]
 	_queue.erase(tick)
 	last_applied_tick = tick
 	return _last
+
+
+func _set_cushion(size: int) -> void:
+	cushion = clampi(size, JITTER_BUFFER, MAX_CUSHION)
+	_steady_ticks = 0
+	_fewest_queued = MAX_QUEUE
+
+
+func _skip_oldest() -> void:
+	_queue.erase(_queue.keys().min())
+	skipped_ticks += 1
 
 
 ## Server: inputs waiting to be applied.

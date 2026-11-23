@@ -187,7 +187,8 @@ func _apply_input(_dt: float, tick: int) -> void:
 			_next_input_report_tick = tick + 300  # Every 5 s at 60 Hz.
 			Log.log(["Input from ", name, ": ", input_channel.held_ticks - _held_at_last_report,
 					" held, ", input_channel.skipped_ticks - _skipped_at_last_report, " skipped, ",
-					input_channel.queued(), " queued"], Log.MessageType.INFO)
+					input_channel.queued(), " queued, cushion ", input_channel.cushion],
+					Log.MessageType.INFO)
 			_held_at_last_report = input_channel.held_ticks
 			_skipped_at_last_report = input_channel.skipped_ticks
 	else:

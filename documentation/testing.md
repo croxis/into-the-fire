@@ -267,6 +267,29 @@ Design new code so the logic can be tested without nodes where possible. `Launch
 command line as a parameter instead of reading `OS.get_cmdline_args()` itself, which is why it can be
 tested with any arguments.
 
+## Testing under lag
+
+Own-ship prediction and the server's input cushion only show their worth on a bad connection, and
+two processes on one machine have none. `tests/lag/lag_proxy.py` is a small UDP proxy that delays
+packets both ways, and can add jitter (which reorders packets, as the internet does) and loss.
+`tests/lag/lag_run.sh` runs a dedicated server and a test player joined through it, then prints the
+netcode reports:
+
+```bash
+GODOT=$GODOT tests/lag/lag_run.sh 75 15 2 90
+```
+
+The arguments are one-way latency (so ping is twice it), jitter and loss percent, then seconds to
+run. The server's "Input from" lines count holds and skips every 5 s; each is a one-tick jump on the
+pilot's screen. The client prints "Prediction for" only for 5 s spells that had corrections. Expect a
+burst while the ship is launched; after that, a steady link should settle to none.
+
+netfox has a latency simulator too, but it only works with netfox's own autoconnect (which does the
+hosting itself, skipping our login), and only in the editor.
+
+The proxy can also go in front of a game you play in a window: run it, start `--server` (or
+`--testserver`) as usual, and join with `--testplayer --port=2259`.
+
 ## The smoke test's known-issues list
 
 `tests/smoke/known_issues.txt` holds extended regular expressions, one per line, for errors the
