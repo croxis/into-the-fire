@@ -1,4 +1,4 @@
-[gd_resource type="Environment" load_steps=4 format=3 uid="uid://d1el1icbym1qc"]
+[gd_resource type="Environment" format=3 uid="uid://d1el1icbym1qc"]
 
 [ext_resource type="Texture2D" uid="uid://roinmacqp2u" path="res://systems/ran/panorama_image.png" id="1_e15t8"]
 
