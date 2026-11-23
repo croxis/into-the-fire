@@ -16,6 +16,17 @@ extends RefCounted
 const REDUNDANCY := 4
 ## Queued inputs kept at most (about half a second); a flood drops the oldest.
 const MAX_QUEUE := 30
+## The cushion the server waits for before using inputs, and rebuilds after
+## running dry. Packets arrive in clumps, not one per tick; without a cushion
+## the server would often find no input and hold the last one for a step the
+## client never made, and the pilot would see a correction each time. Two
+## ticks (33 ms) the pilot doesn't feel: their client shows their input at once.
+const JITTER_BUFFER := 2
+## More inputs waiting than the cushion plus this and the server skips the
+## oldest, back to the cushion. Otherwise a burst (a client catching up after a
+## stall) would keep the server that many ticks behind the pilot for good, and
+## everyone else would see the ship late.
+const BACKLOG_SLACK := 3
 const _VECTOR_FIELDS: Array[String] = ["throttle", "rotation_throttle"]
 const _BOOL_FIELDS: Array[String] = ["autospin_toggle", "autobreak_toggle", "debug_all_stop"]
 
@@ -25,6 +36,12 @@ var last_applied_tick := -1
 var _recent: Array[Dictionary] = []  # Client: the latest records, oldest first.
 var _queue: Dictionary[int, Dictionary] = {}  # Server: tick -> record.
 var _last: Dictionary = make_record(-1, Vector3.ZERO, Vector3.ZERO)  # Server.
+var _buffering := true  # Server: waiting for the cushion.
+## Server: ticks next() held the last input since started (no new input ready).
+## Each one is a step the client didn't make, so a correction on their screen.
+var held_ticks := 0
+## Server: inputs skipped to catch up with a backlog. Also a correction each.
+var skipped_ticks := 0
 
 
 static func make_record(tick: int, throttle: Vector3, rotation_throttle: Vector3,
@@ -68,14 +85,25 @@ func receive(packet: Variant) -> String:
 	return ""
 
 
-## Server: the input for this tick. With nothing new queued, the last input
-## holds (minus one-shot toggles) and last_applied_tick stays put.
+## Server: the input for this tick. With nothing new queued (or the cushion
+## still filling), the last input holds (minus one-shot toggles) and
+## last_applied_tick stays put.
 func next() -> Dictionary:
 	if _queue.is_empty():
+		_buffering = true
+	elif _buffering and _queue.size() >= JITTER_BUFFER:
+		_buffering = false
+	if _buffering:
+		if last_applied_tick >= 0:
+			held_ticks += 1
 		var held := _last.duplicate()
 		for field in _BOOL_FIELDS:
 			held[field] = false
 		return held
+	if _queue.size() > JITTER_BUFFER + BACKLOG_SLACK:
+		while _queue.size() > JITTER_BUFFER + 1:
+			_queue.erase(_queue.keys().min())
+			skipped_ticks += 1
 	var tick: int = _queue.keys().min()
 	_last = _queue[tick]
 	_queue.erase(tick)

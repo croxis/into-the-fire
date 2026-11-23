@@ -160,6 +160,9 @@ func _read_input() -> void:
 ## the packets to send; on the server it queues what arrives from that client.
 var input_channel := InputChannel.new()
 var _first_remote_input_logged := false
+var _next_input_report_tick := 0
+var _held_at_last_report := 0
+var _skipped_at_last_report := 0
 
 
 ## Each tick, before ships fly (netcode slice N2): hand the input to the helm of
@@ -180,6 +183,13 @@ func _apply_input(_dt: float, tick: int) -> void:
 			_first_remote_input_logged = true
 			Log.log(["First input from ", name, " applied (client tick ",
 					input_channel.last_applied_tick, ")"], Log.MessageType.SUCCESS)
+		if tick >= _next_input_report_tick and input_channel.last_applied_tick >= 0:
+			_next_input_report_tick = tick + 300  # Every 5 s at 60 Hz.
+			Log.log(["Input from ", name, ": ", input_channel.held_ticks - _held_at_last_report,
+					" held, ", input_channel.skipped_ticks - _skipped_at_last_report, " skipped, ",
+					input_channel.queued(), " queued"], Log.MessageType.INFO)
+			_held_at_last_report = input_channel.held_ticks
+			_skipped_at_last_report = input_channel.skipped_ticks
 	else:
 		r = InputChannel.make_record(tick, inputs.throttle, inputs.rotation_throttle,
 				inputs.autospin_toggle, inputs.autobreak_toggle, inputs.debug_all_stop)

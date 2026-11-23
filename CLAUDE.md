@@ -112,7 +112,14 @@ Autoloads include netfox (`NetworkTime`, `NetworkRollback`, ...), `Log`, `LimboC
   with `ship.spawn_crew(Character.pilot_data(..., galaxy.ids.next_pilot()))`, never `add_child`.
 - Pilots on another machine send tick-stamped input (`InputChannel`, `Character._submit_inputs`, unreliable,
   each packet repeating the last 4 inputs); the server checks it and applies one per tick, in order. The host's
-  own input and NPCs still go through `InputsSync`. This is step one of own-ship prediction (design doc).
+  own input and NPCs still go through `InputsSync`. The server keeps a 2-tick cushion (jitter buffer) and skips
+  a backlog back to it.
+- Own-ship prediction (our own reconciler, not netfox rollback): the pilot's client flies its ship at once and
+  records its thrust (`ShipPrediction`); after each tick loop the server sends that client its ship's state and
+  the last input tick it applied (`Ship._send_pilot_state`); the client replays its thrust since then. The
+  shared ship sync goes through `sync_*` proxies that the predicting client ignores. The host never predicts.
+  Logs: server "Input from X: held, skipped, queued", client "Prediction for X: N corrections" every 5 s.
+  Not done yet: launch (frozen on the arm) still shows corrections; remote ships aren't smoothed (N4).
 - Never trust IDs sent by clients: validate every `any_peer` RPC on the server. Work out who asked from
   `multiplayer.get_remote_sender_id()`, not from arguments (see `Ship.request_launch`). Logins are checked by
   `network.gd` `check_login` before anything else, and never logged (they hold passwords).

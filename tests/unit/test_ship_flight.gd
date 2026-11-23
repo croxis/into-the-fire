@@ -147,7 +147,8 @@ func test_the_server_flies_a_remote_pilot_from_their_input_channel() -> void:
 	var ship := _ship(&"b5:aurora_starfury", Vector3.ZERO)
 	var pilot := _remote_player_at_cockpit(ship)
 	pilot.inputs.throttle = Vector3(0, 0, 1)  # The old synced value: must not be used.
-	assert_eq(pilot.receive_inputs_from(99, [InputChannel.make_record(7, Vector3(0, 0, -1), Vector3.ZERO)]), "")
+	assert_eq(pilot.receive_inputs_from(99, [InputChannel.make_record(7, Vector3(0, 0, -1), Vector3.ZERO),
+			InputChannel.make_record(8, Vector3(0, 0, -1), Vector3.ZERO)]), "")
 	await Ticks.run(1)
 	assert_eq(_helm(ship).throttle, Vector3(0, 0, -1), "from the channel")
 	assert_eq(pilot.input_channel.last_applied_tick, 7)

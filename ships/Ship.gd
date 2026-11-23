@@ -101,6 +101,70 @@ var start_velocity := Vector3(0, 0, 0)
 
 var is_spawning := false
 
+## Motion as the MultiplayerSynchronizer sends it, server to clients. On the
+## pilot's own client this ship is predicted (ShipPrediction), so incoming
+## values are ignored there; the server sends that client its own state instead.
+var sync_position: Vector3:
+	get:
+		return position
+	set(value):
+		if not is_predicted_here():
+			position = value
+var sync_rotation: Vector3:
+	get:
+		return rotation
+	set(value):
+		if not is_predicted_here():
+			rotation = value
+var sync_linear_velocity: Vector3:
+	get:
+		return linear_velocity
+	set(value):
+		if not is_predicted_here():
+			linear_velocity = value
+var sync_angular_velocity: Vector3:
+	get:
+		return angular_velocity
+	set(value):
+		if not is_predicted_here():
+			angular_velocity = value
+## Set to treat this ship as predicted on this machine (unit tests).
+var prediction_forced := false
+
+
+## True on the pilot's own client: a client, not the server, where the player
+## at this ship's helm plays. The host never predicts (it has no latency).
+func is_predicted_here() -> bool:
+	if prediction_forced:
+		return true
+	if multiplayer.is_server():
+		return false
+	return local_pilot() != null
+
+
+## The player on another machine who sits at one of this ship's helms, or null.
+## The server sends them their ship's state (own-ship prediction).
+func remote_pilot() -> Character:
+	return _helm_player(false)
+
+
+## The player at this machine who sits at one of this ship's helms, or null.
+func local_pilot() -> Character:
+	return _helm_player(true)
+
+
+func _helm_player(here: bool) -> Character:
+	if not has_node("Crew"):
+		return null
+	for c in $Crew.get_children():
+		var character := c as Character
+		if character and character.is_player() and character._plays_here() == here \
+				and character.current_console \
+				and character.current_console.get_capability(HelmCapability) \
+				and is_ancestor_of(character.current_console):
+			return character
+	return null
+
 signal destroyed(ship: Ship)
 
 
@@ -202,10 +266,69 @@ func _integrate_forces(state: PhysicsDirectBodyState3D):
 
 func _enter_tree() -> void:
 	NetworkTime.on_tick.connect(_on_tick)
+	NetworkTime.after_tick_loop.connect(_after_tick_loop)
 
 
 func _exit_tree() -> void:
 	NetworkTime.on_tick.disconnect(_on_tick)
+	NetworkTime.after_tick_loop.disconnect(_after_tick_loop)
+
+
+## Own-ship prediction (netcode N3b/N3c): the pilot's client records its thrust
+## here and replays it when the server's state arrives.
+var prediction := ShipPrediction.new()
+var _corrections := 0  # Since the last prediction report.
+var _largest_correction := 0.0
+var _next_report_tick := 0
+const PREDICTION_REPORT_TICKS := 300  # Every 5 s at 60 Hz.
+
+
+func _after_tick_loop() -> void:
+	if multiplayer.is_server():
+		_send_pilot_state()
+	elif is_predicted_here() and NetworkTime.tick >= _next_report_tick:
+		_next_report_tick = NetworkTime.tick + PREDICTION_REPORT_TICKS
+		if _corrections:
+			Log.log(["Prediction for ", name, ": ", _corrections, " corrections, largest ",
+					"%.3f m" % _largest_correction], Log.MessageType.INFO)
+		_corrections = 0
+		_largest_correction = 0.0
+
+
+## Server: tell the remote pilot where their ship is after the ticks just run,
+## and which of their inputs that includes.
+func _send_pilot_state() -> void:
+	var pilot := remote_pilot()
+	if pilot == null or pilot.input_channel.last_applied_tick < 0:
+		return
+	_receive_state.rpc_id(pilot.multiplayer_id, pilot.input_channel.last_applied_tick,
+			global_transform, linear_velocity, angular_velocity)
+
+
+## The pilot's client: the server's state after applying input [param ack].
+## Start again from it and replay our own thrust since. Unreliable but ordered:
+## a lost state is made up for by the next one.
+@rpc("authority", "call_remote", "unreliable_ordered")
+func _receive_state(ack: int, server_transform: Transform3D, server_velocity: Vector3,
+		server_spin: Vector3) -> void:
+	if not is_predicted_here():
+		return
+	if flight == null:
+		flight = FlightIntegrator.from_body(PhysicsServer3D.body_get_direct_state(get_rid()))
+	var server := FlightIntegrator.FlightState.new()
+	server.transform = server_transform
+	server.linear_velocity = server_velocity
+	server.angular_velocity = server_spin
+	var now := prediction.reconcile(server, ack, NetworkTime.tick - 1, flight, NetworkTime.ticktime)
+	if now == null:
+		return  # Older than a state already used.
+	var error := now.transform.origin.distance_to(global_position)
+	if error > 0.001:
+		_corrections += 1
+		_largest_correction = maxf(_largest_correction, error)
+	global_transform = now.transform
+	linear_velocity = now.linear_velocity
+	angular_velocity = now.angular_velocity
 
 
 ## One netfox tick (netcode slice N2), in on_tick: characters have already
@@ -225,7 +348,7 @@ func _rollback_tick(dt, tick, is_fresh):
 	if is_station:
 		return
 	if custom_integrator and not freeze:  # Frozen: held by a launch arm.
-		_fly(dt)
+		_fly(dt, tick)
 	acceleraction = (linear_velocity - start_velocity) / dt
 	start_velocity = linear_velocity
 
@@ -239,11 +362,14 @@ var flight: FlightIntegrator
 ## Sets this tick's velocities from the thrusters, before the physics step.
 ## Not in _integrate_forces: Godot calls that after the step, which would make
 ## thrust a tick late. Jolt then moves the ship and resolves contacts.
-func _fly(dt: float) -> void:
+func _fly(dt: float, tick := 0) -> void:
 	var state := PhysicsServer3D.body_get_direct_state(get_rid())
 	if flight == null:
 		flight = FlightIntegrator.from_body(state)
 	var push := thrust(state.center_of_mass)
+	if is_predicted_here():
+		var to_ship := global_basis.orthonormalized().inverse()
+		prediction.record(tick, to_ship * push[0], to_ship * push[1])
 	var now := FlightIntegrator.FlightState.new()
 	now.transform = global_transform
 	now.linear_velocity = linear_velocity

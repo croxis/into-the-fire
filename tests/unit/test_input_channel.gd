@@ -27,6 +27,7 @@ func test_packets_carry_the_latest_inputs_newest_last() -> void:
 func test_the_server_applies_inputs_in_tick_order() -> void:
 	server.receive(client.record(_rec(10, -0.1)))
 	server.receive(client.record(_rec(11, -0.2)))
+	server.receive(client.record(_rec(12, -0.3)))
 	assert_eq(server.next().throttle, Vector3(0, 0, -0.1))
 	assert_eq(server.last_applied_tick, 10)
 	assert_eq(server.next().throttle, Vector3(0, 0, -0.2))
@@ -41,10 +42,12 @@ func test_a_lost_packet_is_covered_by_the_next_one() -> void:
 
 
 func test_repeated_and_old_inputs_are_ignored() -> void:
-	var packet := client.record(_rec(10))
+	client.record(_rec(10))
+	var packet := client.record(_rec(11))
 	server.receive(packet)
 	server.receive(packet)  # Same packet twice.
 	assert_eq(server.next().tick, 10)
+	assert_eq(server.next().tick, 11)
 	server.receive([_rec(9)])  # Older than what was applied.
 	assert_eq(server.queued(), 0)
 
@@ -53,13 +56,14 @@ func test_with_no_new_input_the_last_one_holds() -> void:
 	# A late packet must not cut the engines: keep the last throttle, but don't
 	# repeat one-shot toggles or claim the tick was acknowledged.
 	var toggled := InputChannel.make_record(10, Vector3(0, 0, -1), Vector3.ZERO, true, true)
-	server.receive([toggled])
+	server.receive([toggled, _rec(11, -1.0)])
+	server.next()
 	server.next()
 	var held := server.next()
 	assert_eq(held.throttle, Vector3(0, 0, -1))
 	assert_false(held.autospin_toggle)
 	assert_false(held.autobreak_toggle)
-	assert_eq(server.last_applied_tick, 10)
+	assert_eq(server.last_applied_tick, 11)
 
 
 func test_before_any_input_the_pilot_holds_still() -> void:
@@ -88,11 +92,11 @@ func test_too_many_inputs_in_one_packet_are_refused() -> void:
 
 
 func test_out_of_range_input_is_clamped_and_nan_refused() -> void:
-	server.receive([InputChannel.make_record(1, Vector3(0, 0, -50), Vector3(9, 0, 0))])
+	server.receive([InputChannel.make_record(1, Vector3(0, 0, -50), Vector3(9, 0, 0)), _rec(2)])
 	var applied := server.next()
 	assert_eq(applied.throttle, Vector3(0, 0, -1))
 	assert_eq(applied.rotation_throttle, Vector3(1, 0, 0))
-	assert_ne(server.receive([InputChannel.make_record(2, Vector3(NAN, 0, 0), Vector3.ZERO)]), "")
+	assert_ne(server.receive([InputChannel.make_record(3, Vector3(NAN, 0, 0), Vector3.ZERO)]), "")
 
 
 func test_the_queue_has_a_limit() -> void:
@@ -114,3 +118,43 @@ func test_input_source_for_every_case() -> void:
 	assert_eq(Character.input_source(true, false, false), S.LOCAL)
 	assert_eq(Character.input_source(false, false, false), S.LOCAL)
 	assert_eq(Character.input_source(false, true, false), S.LOCAL)
+
+
+# Jitter buffer ----------------------------------------------------------------
+# Packets arrive in clumps, not one per tick. If the server used inputs the
+# moment they came, it would often find none and hold the last one for a step
+# the client never made: a correction each time. It keeps a small cushion.
+
+func test_the_server_waits_for_a_cushion_before_starting() -> void:
+	server.receive([_rec(10)])
+	assert_eq(server.last_applied_tick, -1, "one input isn't a cushion yet")
+	server.next()
+	assert_eq(server.last_applied_tick, -1)
+	server.receive([_rec(10), _rec(11)])
+	assert_eq(server.next().tick, 10)
+
+
+func test_running_dry_rebuilds_the_cushion() -> void:
+	server.receive([_rec(10), _rec(11)])
+	server.next()
+	server.next()
+	server.next()  # Dry: hold.
+	server.receive([_rec(12)])
+	server.next()
+	assert_eq(server.last_applied_tick, 11, "waits again rather than using 12 alone")
+	server.receive([_rec(13)])
+	assert_eq(server.next().tick, 12)
+
+
+func test_a_backlog_is_skipped_down_to_the_cushion() -> void:
+	# A burst (say the client caught up after a stall) leaves inputs waiting;
+	# applying one per tick would keep the server that far behind for good.
+	var burst := []
+	for tick in range(10, 20):
+		burst.append(_rec(tick))
+	for i in range(0, burst.size(), InputChannel.REDUNDANCY):
+		server.receive(burst.slice(i, i + InputChannel.REDUNDANCY))
+	server.next()
+	assert_eq(server.queued(), InputChannel.JITTER_BUFFER, "back to the cushion")
+	assert_gt(server.skipped_ticks, 0, "counted, since each skip is a correction")
+	assert_eq(server.last_applied_tick, 19 - InputChannel.JITTER_BUFFER)
