@@ -148,3 +148,14 @@ func test_npcs_are_nobodys_pilot() -> void:
 	npc._player_pilot_id = 0
 	assert_null(ship.remote_pilot())
 	assert_null(ship.local_pilot())
+
+
+func test_no_state_is_sent_to_a_pilot_who_left() -> void:
+	# A disconnected player's character can stay seated on the server; sending
+	# to their peer would fail every tick ("unknown peer ID").
+	var ship := _starfury()
+	var pilot := _seated(ship, 99, 5)  # Peer 99 isn't connected.
+	pilot.input_channel.receive([InputChannel.make_record(1, Vector3.ZERO, Vector3.ZERO),
+			InputChannel.make_record(2, Vector3.ZERO, Vector3.ZERO)])
+	pilot.input_channel.next()
+	assert_false(ship._send_pilot_state(), "nothing sent")

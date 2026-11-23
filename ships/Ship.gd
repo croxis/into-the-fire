@@ -296,13 +296,17 @@ func _after_tick_loop() -> void:
 
 
 ## Server: tell the remote pilot where their ship is after the ticks just run,
-## and which of their inputs that includes.
-func _send_pilot_state() -> void:
+## and which of their inputs that includes. Returns true when sent. A player who
+## disconnected can still be seated here, so only connected peers are sent to.
+func _send_pilot_state() -> bool:
 	var pilot := remote_pilot()
 	if pilot == null or pilot.input_channel.last_applied_tick < 0:
-		return
+		return false
+	if not pilot.multiplayer_id in multiplayer.get_peers():
+		return false
 	_receive_state.rpc_id(pilot.multiplayer_id, pilot.input_channel.last_applied_tick,
 			global_transform, linear_velocity, angular_velocity)
+	return true
 
 
 ## The pilot's client: the server's state after applying input [param ack].
