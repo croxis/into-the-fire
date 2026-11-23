@@ -78,6 +78,10 @@ GPU-less machines; nothing on the server path may depend on rendering.
   the console's `hud_scene` while a player sits at it. Say "console" for a spacecraft's crew interface;
   "station" means a space station.
 - `ships/`: `Ship.gd` (RigidBody3D), `Engines.gd` (per-thruster forces), `crew.gd`, `PID.gd`.
+  `FlightIntegrator` (`flight_integrator.gd`) is ship motion without nodes: ships set `custom_integrator` and
+  take their velocities from it each tick (`Ship._fly`), using Jolt's mass and inertia; Jolt still moves them and
+  handles contacts. Stations keep Jolt's own integration. It clamps to Jolt's speed limits
+  (`physics/jolt_physics_3d/limits/*`), so replays match Jolt.
 - `ship_systems/workstations/`: `Console` plus capabilities (Helm, Weapons, Command); each capability
   brings a behaviour tree that runs in the occupant's `BrainHSM`.
 - `characters/`: `Character` (crew member, player or NPC), input sync, LimboAI state.

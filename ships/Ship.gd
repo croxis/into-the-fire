@@ -110,6 +110,9 @@ func _ready():
 	if (Engine.is_editor_hint()):
 		set_physics_process(false)	
 	can_sleep = false
+	# Ships move by FlightIntegrator, not Jolt's force integration (see _fly).
+	# Stations don't fly; Jolt keeps them as they are.
+	custom_integrator = not is_station
 	#target_rot = rotation_degrees
 	
 	# No Galaxy when a ship runs on its own (tests, tools).
@@ -200,16 +203,51 @@ func _integrate_forces(state: PhysicsDirectBodyState3D):
 func _rollback_tick(dt, _tick, _is_fresh):
 	if is_station:
 		return
-	
-	for thruster in $Engines.thrusters:
-		apply_force(global_transform.basis * thruster.force_vector, global_transform.basis * thruster.position)
-	
+	if custom_integrator and not freeze:  # Frozen: held by a launch arm.
+		_fly(dt)
 	acceleraction = (linear_velocity - start_velocity) / dt
 	start_velocity = linear_velocity
 
 
 func _physics_process(dt: float) -> void:
 	_rollback_tick(dt, 0, 0)
+
+
+## Mass, inertia and centre of mass come from Jolt (worked out from the
+## collision shapes). Made on first flight; set to null to re-read them after
+## the shapes or mass change.
+var flight: FlightIntegrator
+
+
+## Sets this tick's velocities from the thrusters, before the physics step.
+## Not in _integrate_forces: Godot calls that after the step, which would make
+## thrust a tick late. Jolt then moves the ship and resolves contacts.
+func _fly(dt: float) -> void:
+	var state := PhysicsServer3D.body_get_direct_state(get_rid())
+	if flight == null:
+		flight = FlightIntegrator.from_body(state)
+	var push := thrust(state.center_of_mass)
+	var now := FlightIntegrator.FlightState.new()
+	now.transform = global_transform
+	now.linear_velocity = linear_velocity
+	now.angular_velocity = angular_velocity
+	var next := flight.step_velocity(now, push[0], push[1], dt)
+	linear_velocity = next.linear_velocity
+	angular_velocity = next.angular_velocity
+
+
+## [force, torque] from all thrusters this tick, in world space; torque is about
+## the centre of mass ([param center_of_mass]: offset from the ship's origin, in
+## world axes). The same sums Jolt made from apply_force at each thruster.
+func thrust(center_of_mass: Vector3) -> Array[Vector3]:
+	var force := Vector3.ZERO
+	var torque := Vector3.ZERO
+	var basis := global_transform.basis
+	for thruster in $Engines.thrusters:
+		var f: Vector3 = basis * thruster.force_vector
+		force += f
+		torque += (basis * thruster.position - center_of_mass).cross(f)
+	return [force, torque]
 
 
 func _process(_delta: float) -> void:
