@@ -1,0 +1,14 @@
+[gd_resource type="ShaderMaterial" format=3 uid="uid://bt4kpvp0o2fhh"]
+
+[ext_resource type="Shader" uid="uid://f775jthne5lk" path="res://addons/star_field/star.gdshader" id="1_0awl8"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_0awl8")
+shader_parameter/albedo = Color(0, 0, 0, 1)
+shader_parameter/specular = 0.0
+shader_parameter/metallic = 0.0
+shader_parameter/roughness = 0.0
+shader_parameter/point_size = 0.0
+shader_parameter/uv1_scale = Vector3(0, 0, 0)
+shader_parameter/uv1_offset = Vector3(0, 0, 0)

@@ -1,0 +1,9 @@
+[gd_resource type="StandardMaterial3D" format=3 uid="uid://g5jd2kfcyppy"]
+
+[ext_resource type="Texture2D" uid="uid://dto07n3628vdl" path="res://ships/earth alliance/babylon 5/babylon_5_scale_Panel_DarkerGrey.png" id="1_scbry"]
+
+[resource]
+resource_name = "Dark_Grey_Panel"
+albedo_texture = ExtResource("1_scbry")
+metallic = 1.0
+roughness = 0.552786

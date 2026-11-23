@@ -1,0 +1,9 @@
+[gd_resource type="StandardMaterial3D" format=3 uid="uid://bhd2polq4bjm0"]
+
+[ext_resource type="Texture2D" uid="uid://bbnb0u28wog8k" path="res://ships/earth alliance/babylon 5/babylon_5_scale_Panel_LightBrown.png" id="1_vyex5"]
+
+[resource]
+resource_name = "Light_Brown_Panel"
+albedo_texture = ExtResource("1_vyex5")
+metallic = 1.0
+roughness = 0.552786

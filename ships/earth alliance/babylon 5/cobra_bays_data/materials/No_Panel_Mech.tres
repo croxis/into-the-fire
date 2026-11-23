@@ -1,0 +1,9 @@
+[gd_resource type="StandardMaterial3D" format=3 uid="uid://q13ahke2uvlf"]
+
+[ext_resource type="Texture2D" uid="uid://c86535pqapqg1" path="res://ships/earth alliance/babylon 5/babylon_5_scale_MechGreyNoPanelColor.jpg" id="1_5hosp"]
+
+[resource]
+resource_name = "No_Panel_Mech"
+albedo_texture = ExtResource("1_5hosp")
+metallic = 1.0
+roughness = 0.552786
