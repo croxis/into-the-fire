@@ -5,7 +5,7 @@ Inspired by X4 (sandbox, empire, map), Babylon 5: I Found Her (hyperspace) and S
 Babylon 5: Into the Fire (crew combat). Long term it is meant to be a general sci-fi spaceship engine with
 Babylon 5 as the default mod. Early development: many systems are partial or stubbed.
 
-Project documentation lives in `documentation/` (`testing.md`, `content_registry.md`, `factions.md`, `scenarios.md`).
+Project documentation lives in `documentation/` (`testing.md`, `content_registry.md`, `factions.md`, `scenarios.md`, `command_line.md`).
 
 Design doc (target architecture, decisions, open questions):
 https://claude.ai/artifact/SbiKWXHGRsfhgvoeBBGW7J
@@ -41,7 +41,7 @@ and `patches/`. Engine changes go there, not here. This repo's `.gitlab-ci.yml` 
 ## Running
 
 Main scene: `res://entry.tscn`. Command-line flags are parsed by `boot/launch_options.gd` (`LaunchOptions`)
-and dispatched in `entry.gd`. The main menu is created at runtime only when there is a UI:
+and dispatched in `entry.gd`; full reference in `documentation/command_line.md`. The main menu is created at runtime only when there is a UI:
 
 | Flags | Mode |
 | --- | --- |
