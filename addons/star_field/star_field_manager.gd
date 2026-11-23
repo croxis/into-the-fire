@@ -1,94 +1,97 @@
 @tool
 extends Node
+## Background stars of the real sky (or a modded one), seen from
+## [member celestial_coords]. Set [member anchor_star] to put the viewer near a
+## named star; the position is filled in once the catalogue has loaded.
+##
+## Stars come from the [code]StarCatalogs[/code] autoload (StarCatalogService),
+## loaded in the background. Where there is no autoload, such as in the editor,
+## the star field loads its own.
 
 signal star_debug(message)
+## Emitted each time a catalogue is shown: after the first load, and again when
+## the sources change.
+signal catalog_applied(catalog: StarCatalog)
 
-var star_db : Node
-var camera : Camera3D
-var star_render
-
-@export var use_active_camera := false
+const StarRenderScene := preload("res://addons/star_field/StarRender.tscn")
 
 const AU_IN_PARSEC := 0.000004848
 const LY_IN_PARSEC := 0.3066
 const PARSEC_IN_AU := 206265
 const PARSEC_IN_LY := 3.262
 
+@export var use_active_camera := false
 
-@export var mag_ref : float:
-	get:
-		return mag_ref
-	set(mag):
-		# What is the approx screen size of the sun in px at 1 unit distance
-		mag_ref = mag
-		if is_inside_tree():
-			star_render.mag_ref = mag
+## Apparent magnitude drawn at intensity 1; brighter stars get bigger points.
+@export var mag_ref: float:
+	set(value):
+		mag_ref = value
+		star_render.mag_ref = value
 
-@export var mag_limit : float:
-	get:
-		return mag_limit
-	set(new_limit):
-		if not is_inside_tree():
-			await ready
-		mag_limit = new_limit
-		star_render.mag_limit = mag_limit
+## Stars fainter than this apparent magnitude are not drawn.
+@export var mag_limit: float:
+	set(value):
+		mag_limit = value
+		star_render.mag_limit = value
 
-@export var star_labels_visible : bool = true:
-	get:
-		return star_labels_visible
-	set(visible):
-		star_labels_visible = visible
-		if not is_inside_tree():
-			await ready
-		star_render.star_labels_visible = visible
+@export var star_labels_visible: bool = true:
+	set(value):
+		star_labels_visible = value
+		star_render.star_labels_visible = value
 
-
+## Where the viewer is among the stars, in parsecs. Overwritten from
+## [member anchor_star] when that is set.
 @export var celestial_coords: Vector3
 
-@export var camera_path : NodePath:
-	get:
-		return camera_path
-	set(cam_path):
-		if not is_inside_tree():
-			await ready
-		camera_path = cam_path
-		camera = get_node(cam_path)
+@export var camera_path: NodePath
+
+## Proper name of the star the viewer is near, e.g. "Sol". Empty to use
+## [member celestial_coords] as set.
+@export var anchor_star := "":
+	set(value):
+		anchor_star = value
+		_place_on_anchor()
+
+## The viewer's offset from [member anchor_star], in AU.
+@export var anchor_offset_au := Vector3.ZERO:
+	set(value):
+		anchor_offset_au = value
+		_place_on_anchor()
+
+## Where the stars come from. Defaults to the StarCatalogs autoload; set it
+## before the node enters the tree to use another one (tests do).
+var catalog_service: StarCatalogService
+## The catalogue shown, or null until it has loaded.
+var catalog: StarCatalog
+var star_render: MultiMeshInstance3D
+var camera: Camera3D
 
 
-func _init():
-	star_db = preload("res://addons/star_field/StarDB.tscn").instantiate()
-	star_render = preload("res://addons/star_field/StarRender.tscn").instantiate()
-	star_db.connect("star_db_debug", Callable(self, "debug"))
-	star_render.connect("star_render_debug", Callable(self, "debug"))
+func _init() -> void:
+	star_render = StarRenderScene.instantiate()
+	star_render.star_render_debug.connect(debug)
 
 
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	var start = Time.get_ticks_msec()
-	emit_signal("star_debug", "Initalizing Star Field")
-	
-	# Create Database
-	add_child(star_db)
-	emit_signal("star_debug", "Initalized Star DB")
-
-	# Construct Stars	
+func _ready() -> void:
 	add_child(star_render)
-	emit_signal("star_debug", "Loaded Star Render")
-	
-	emit_signal("star_debug", "Star Field initalized in " + str(Time.get_ticks_msec() - start) + " ms")
+	if not camera_path.is_empty():
+		camera = get_node(camera_path)
+	if catalog_service == null:
+		catalog_service = _find_service()
+	catalog_service.catalog_ready.connect(_apply)
+	if catalog_service.catalog:
+		_apply(catalog_service.catalog)
+	else:
+		catalog_service.request()
 
 
-func get_star_hip(hip: String):
-	# Return null if not in db
-	return star_db.get_star_hip(hip)
+## Position of the named star in parsecs, or null (also before the catalogue
+## has loaded; see [signal catalog_applied]).
+func get_star_position(proper_name: String) -> Variant:
+	return catalog.get_star_position(proper_name) if catalog else null
 
 
-func get_star_proper(name: String):
-	# Return null if not in db
-	return star_db.get_star_proper(name)
-
-
-func _process(delta):
+func _process(_delta: float) -> void:
 	if use_active_camera:
 		var active_camera := get_viewport().get_camera_3d()
 		if active_camera:
@@ -97,5 +100,30 @@ func _process(delta):
 		star_render.position = camera.global_position - celestial_coords
 
 
-func debug(msg):
-	emit_signal("star_debug", msg)
+func debug(msg) -> void:
+	star_debug.emit(msg)
+
+
+func _find_service() -> StarCatalogService:
+	var service := get_node_or_null(^"/root/StarCatalogs") as StarCatalogService
+	if service == null:
+		service = StarCatalogService.new()
+		add_child(service, false, INTERNAL_MODE_BACK)
+	return service
+
+
+func _apply(new_catalog: StarCatalog) -> void:
+	catalog = new_catalog
+	star_render.apply_catalog(catalog)
+	_place_on_anchor()
+	catalog_applied.emit(catalog)
+
+
+func _place_on_anchor() -> void:
+	if anchor_star.is_empty() or catalog == null:
+		return
+	var position: Variant = catalog.get_star_position(anchor_star)
+	if position == null:
+		push_warning("Star field: no star named \"%s\" in the catalogue" % anchor_star)
+		return
+	celestial_coords = position + anchor_offset_au * AU_IN_PARSEC

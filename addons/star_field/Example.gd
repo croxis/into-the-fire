@@ -5,9 +5,10 @@ var speed = 0.307
 
 
 func _ready():
-	print("Example of search for star by hip id: ", $StarField.get_star_hip("1"))
-	print("Example of search for star by proper name: ", $StarField.get_star_proper("Sol"))
-	print("Example of search for star by proper name: ", $StarField.get_star_proper("Betelgeuse"))
+	# The catalogue loads in the background; look stars up once it is shown.
+	await $StarField.catalog_applied
+	print("Example of search for star by proper name: ", $StarField.get_star_position("Sol"))
+	print("Example of search for star by proper name: ", $StarField.get_star_position("Betelgeuse"))
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.

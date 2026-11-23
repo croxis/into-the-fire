@@ -37,6 +37,7 @@ LimboConsole="*uid://dyxornv8vwibg"
 LocalGameManager="*uid://ctjxbf1qen5du"
 _mcp_game_helper="*res://addons/godot_ai/runtime/game_helper.gd"
 Content="*res://content/content.gd"
+StarCatalogs="*res://addons/star_field/star_catalog_service.gd"
 
 [debug]
 

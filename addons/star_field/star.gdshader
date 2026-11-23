@@ -11,10 +11,11 @@ uniform vec3 uv1_offset;
 
 varying float apparent_magnitude;
 varying float intensity;
-varying float mag_limit;
+varying float star_mag_limit;
 
-//uniform float mag_ref = 3.0; // Reference magnitude of intensity of 1: 1 = brightness before expanding the point size
-//uniform float mag_limit = 6.0; // When we can't see stars anymore
+// Per star field (StarRender.mag_ref / mag_limit), so the shared star buffer never changes.
+instance uniform float mag_ref = 4.0; // Reference magnitude of intensity of 1: 1 = brightness before expanding the point size
+instance uniform float mag_limit = 8.0; // When we can't see stars anymore
 const float e = 2.7182818284590452353602;
 
 
@@ -51,8 +52,7 @@ void vertex() {
 	// 2022.07.31 Method https://erwanleroy.com/rendering-a-plausible-night-sky-making-stars-gizmo-part-2-2/
 	float base_point_size = sqrt(2);  // The minimum size needed to prevent aliasing issues
 	float intensity_ref = 1.0;
-	float mag_ref = INSTANCE_CUSTOM.z;
-	mag_limit = INSTANCE_CUSTOM.w;
+	star_mag_limit = mag_limit;
 	intensity = intensity_ref * pow(e, (0.921034 * mag_ref - 0.921034 * apparent_magnitude));
 	if (intensity > 1.0){
 		base_point_size = log2(intensity)/log(6.0) * base_point_size;
@@ -63,7 +63,7 @@ void vertex() {
 
 void fragment() {
     // TODO: mag_limit-1 fade the alpha
-    if (apparent_magnitude > mag_limit) {
+    if (apparent_magnitude > star_mag_limit) {
         discard;
     }
 	ALBEDO = COLOR.rgb;

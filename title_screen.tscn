@@ -270,8 +270,10 @@ script = ExtResource("6_bsqdu")
 mag_ref = 7.0
 mag_limit = 7.0
 star_labels_visible = false
-celestial_coords = Vector3(1.899, 2.541, -0.529)
+celestial_coords = Vector3(1.9012, 2.5439, -0.5295948950393277)
 camera_path = NodePath("../Camera3D_Moving")
+anchor_star = "Ran"
+anchor_offset_au = Vector3(0, 0, 1.058)
 
 [node name="DirectionalLight3D2" type="DirectionalLight3D" parent="." unique_id=2145149107]
 transform = Transform3D(0.997803, 0, 0.0662565, -0.025043, 0.925818, 0.37714, -0.0613414, -0.37797, 0.923783, 0, 0, 2856.64)
