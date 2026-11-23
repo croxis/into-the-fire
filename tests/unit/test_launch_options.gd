@@ -43,6 +43,22 @@ func test_values_may_contain_equals() -> void:
 	assert_eq(o.password, "a=b")
 
 
+func test_test_player_joins_localhost_by_default() -> void:
+	var o := LaunchOptions.parse(PackedStringArray(["--testplayer"]))
+	assert_eq(o.host, "127.0.0.1")
+
+
+func test_host_flag_sets_join_address() -> void:
+	var o := LaunchOptions.parse(PackedStringArray(["--testplayer", "--host=192.168.1.20"]))
+	assert_eq(o.host, "192.168.1.20")
+	assert_does_not_have(o.unknown, "--host")
+
+
+func test_empty_host_keeps_default() -> void:
+	var o := LaunchOptions.parse(PackedStringArray(["--testplayer", "--host="]))
+	assert_eq(o.host, LaunchOptions.DEFAULT_HOST)
+
+
 func test_bad_port_keeps_default() -> void:
 	var o := LaunchOptions.parse(PackedStringArray(["--server", "--port=abc"]))
 	assert_eq(o.port, LaunchOptions.DEFAULT_PORT)

@@ -100,7 +100,7 @@ func _start_test_player() -> void:
 				$Galaxy._on_join_game_request_spawn(options.faction, "test_system", ""),
 				CONNECT_ONE_SHOT)
 	await get_tree().create_timer(5.0).timeout
-	$network.join_game("127.0.0.1", options.port, "Test Player", "", "")
+	$network.join_game(options.host, options.port, "Test Player", "", "")
 	$loading.visible = false
 
 
