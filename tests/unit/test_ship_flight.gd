@@ -73,3 +73,21 @@ func test_frozen_ship_is_left_alone() -> void:
 	await wait_physics_frames(10)
 	assert_eq(ship.global_position, Vector3.ZERO)
 
+
+func test_ships_can_go_faster_than_jolts_default_cap() -> void:
+	# Jolt's default is 500 m/s; the project raises it (project.godot).
+	assert_gt(ProjectSettings.get_setting(FlightIntegrator.MAX_LINEAR_SETTING), 5000.0)
+	var ship := _ship(&"b5:aurora_starfury", Vector3.ZERO)
+	ship.linear_velocity = Vector3(0, 0, -3000)
+	await wait_physics_frames(3)
+	assert_almost_eq(ship.linear_velocity.length(), 3000.0, 1.0, "not clamped to 500 m/s")
+
+
+func test_spin_is_capped_at_1350_degrees_a_second() -> void:
+	# Half Jolt's default of 2700°/s (project.godot stores radians).
+	var cap := deg_to_rad(1350.0)
+	assert_almost_eq(float(ProjectSettings.get_setting(FlightIntegrator.MAX_ANGULAR_SETTING)), cap, 1e-4)
+	var ship := _ship(&"b5:aurora_starfury", Vector3.ZERO)
+	ship.angular_velocity = Vector3(0, 40, 0)  # About 2300°/s.
+	await wait_physics_frames(3)
+	assert_almost_eq(ship.angular_velocity.length(), cap, 1e-3)

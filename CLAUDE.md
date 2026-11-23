@@ -28,7 +28,8 @@ Stock Godot will not open this project correctly. The build has:
 - Physics stepping patch, godot PR 76462 (`PhysicsServer3D.space_step` / `space_flush_queries`).
   Jolt implements it. Kept for per-zone manual stepping, not for netfox physics rollback.
 
-Physics engine is Jolt, zero gravity and zero damping (`project.godot`).
+Physics engine is Jolt, zero gravity and zero damping (`project.godot`). Jolt's speed cap is raised from
+500 m/s to 10 km/s and its spin cap halved to 1350°/s (`physics/jolt_physics_3d/limits/*`).
 Zone spaces are inactive and stepped by `ZoneStepper`; a space created outside a zone is still stepped
 by the engine.
 
