@@ -22,6 +22,8 @@ var xr := false
 ## --faction=NAME: a test player spawns in this faction as soon as it joins,
 ## instead of waiting in the join menu (for automated two-process tests).
 var faction := ""
+## The display server is "headless": no window, nothing on screen.
+var headless := false
 ## Arguments that were not recognised, kept for logging.
 var unknown: PackedStringArray = []
 
@@ -31,6 +33,7 @@ var unknown: PackedStringArray = []
 ## [param dedicated_feature] is true for exports with the dedicated_server feature.
 static func parse(args: PackedStringArray, headless := false, dedicated_feature := false) -> LaunchOptions:
 	var options := LaunchOptions.new()
+	options.headless = headless
 	var flags := {}
 	for argument in args:
 		if not argument.begins_with("--"):
@@ -95,6 +98,12 @@ static func restart_args(current: PackedStringArray, xr_on: bool, project_path: 
 ## True when this process shows menus and a game view.
 func has_ui() -> bool:
 	return mode != Mode.DEDICATED
+
+
+## True when Discord rich presence should run: someone is playing on a screen.
+## Not on servers or headless runs (tests, the smoke test, test players).
+func wants_discord() -> bool:
+	return has_ui() and not headless
 
 
 func _to_string() -> String:

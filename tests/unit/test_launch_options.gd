@@ -90,3 +90,21 @@ func test_restart_from_source_keeps_the_project_path() -> void:
 	# The engine consumes --path too; a source run needs it to find the project again.
 	var args := LaunchOptions.restart_args(PackedStringArray(), true, "/home/me/ITF", false)
 	assert_eq(args, PackedStringArray(["--path", "/home/me/ITF", "--xr-mode", "on"]))
+
+
+# Discord rich presence runs only where a player is looking at a screen.
+
+func test_discord_runs_for_a_client_with_a_screen() -> void:
+	assert_true(LaunchOptions.parse(PackedStringArray()).wants_discord())
+	assert_true(LaunchOptions.parse(PackedStringArray(["--testserver"])).wants_discord())
+
+
+func test_no_discord_on_a_dedicated_server() -> void:
+	assert_false(LaunchOptions.parse(PackedStringArray(["--server"])).wants_discord())
+	assert_false(LaunchOptions.parse(PackedStringArray(), false, true).wants_discord(), "dedicated_server export")
+
+
+func test_no_discord_when_headless() -> void:
+	# A headless test player still has a menu, but nobody to show presence for.
+	assert_false(LaunchOptions.parse(PackedStringArray(["--testplayer"]), true).wants_discord())
+	assert_false(LaunchOptions.parse(PackedStringArray(), true).wants_discord())

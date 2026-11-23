@@ -3,14 +3,20 @@ extends Control
 # Replace with your Discord Application ID
 var APPLICATION_ID: int = 1356458511122567168
 
-var client := DiscordClient.new()
-var args := DiscordAuthorizationArgs.new()
+# Created when Discord starts, not when the node is: entry.gd only adds this
+# node for players on a screen (LaunchOptions.wants_discord).
+var client: DiscordClient
+var args: DiscordAuthorizationArgs
 var code_verifier: DiscordAuthorizationCodeVerifier = null
 
 
 func _ready() -> void:
+	set_process(false)  # No callbacks to run until the client exists.
 	return
 	print("🚀 Initializing Discord SDK...")
+	client = DiscordClient.new()
+	args = DiscordAuthorizationArgs.new()
+	set_process(true)
 
 	client.add_log_callback(_on_log_message, DiscordLoggingSeverity.INFO)
 	client.set_status_changed_callback(_on_status_changed)

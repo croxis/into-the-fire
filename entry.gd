@@ -7,6 +7,7 @@ var interface : XRInterface
 var VR_DEBUG := false
 
 const MainMenuScene := preload("res://ui/main_menu/main_menu.tscn")
+const DiscordScript := preload("res://discord.gd")
 
 var options: LaunchOptions
 ## Only exists when this process has a UI (not on a dedicated server).
@@ -30,6 +31,8 @@ func _ready():
 	$network.players = $Galaxy/Players
 	if options.has_ui():
 		_add_main_menu()
+	if options.wants_discord():
+		_add_discord()
 
 	match options.mode:
 		LaunchOptions.Mode.DEDICATED:
@@ -59,6 +62,16 @@ func _add_main_menu() -> void:
 	main_menu.set_resolution.connect($DisplayManager.set_resolution)
 	# set_ssaa has no handler yet; the old scene connection pointed at a missing method.
 	main_menu.set_taa.connect($DisplayManager._on_main_menu_set_taa)
+
+
+## Discord rich presence, only where someone plays on a screen. (The Discord
+## GDExtension itself is loaded by the engine at startup in every mode; this
+## keeps its client and per-frame callbacks off servers and headless runs.)
+func _add_discord() -> void:
+	var discord := Control.new()
+	discord.name = "Discord"
+	discord.set_script(DiscordScript)
+	add_child(discord)
 
 
 func _start_dedicated() -> void:
