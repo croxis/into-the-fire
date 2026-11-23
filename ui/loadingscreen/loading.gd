@@ -4,11 +4,15 @@ var loadpath
 var parent_node: Node
 var make_active := false
 var callback
+var _batch: SceneBatchLoader
+var _batch_callback: Callable
 
 @onready
 var progress = $CenterContainer/VBoxContainer/ProgressBar
 
 func _process(_delta):
+	if _batch:
+		_poll_batch()
 	if loadpath:
 		var progressmeter = []
 		var status = ResourceLoader.load_threaded_get_status(loadpath, progressmeter)
@@ -48,5 +52,29 @@ func load_scene(path, node: Node, make_active_scene: bool, show_load_screen = fa
 		visible = show_load_screen
 
 
-func _on_galaxy_load_scene(path, node, make_active_scene, show_load_screen, cback):
-	load_scene(path, node, make_active_scene, show_load_screen, cback)
+## Loads [param paths] together on worker threads and shows their combined
+## progress; [param done] gets the finished SceneBatchLoader.
+func load_scenes(paths: PackedStringArray, done: Callable) -> void:
+	Log.log(["Loading ", paths.size(), " scenes"], Log.MessageType.INFO)
+	_batch = SceneBatchLoader.new(paths)
+	_batch_callback = done
+	visible = true
+
+
+func _poll_batch() -> void:
+	progress.value = _batch.poll() * 100.0
+	if not _batch.is_done():
+		return
+	var batch := _batch
+	var done := _batch_callback
+	_batch = null
+	_batch_callback = Callable()
+	visible = false
+	for path in batch.failed:
+		Log.log(["Scene load failed: ", path], Log.MessageType.ERROR)
+	Log.log(["Scenes loaded"], Log.MessageType.INFO)
+	done.call(batch)
+
+
+func _on_galaxy_load_scenes(paths: PackedStringArray, done: Callable) -> void:
+	load_scenes(paths, done)

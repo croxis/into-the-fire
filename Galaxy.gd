@@ -10,6 +10,7 @@ var active_galaxy := false
 ## The scenario a new game starts from (content ID, kind "scenario").
 @export var scenario_id: StringName = &"b5:playtest"
 var _scenario: Scenario
+var _scenario_scenes: SceneBatchLoader  # Held from loading until populate() runs.
 
 ## Ship and pilot IDs for this world.
 var ids := WorldIds.new()
@@ -35,7 +36,9 @@ var _sync_timer: float = _sync_interval  # Countown in seconds for syncing netwo
 signal enter_system(system_name)
 ## Emitted on clients when a faction copy arrives from the server.
 signal factions_synced()
-signal load_scene(path, node: Node, make_active_scene: bool, show_load_screen: bool, callback)
+## Asks the loading screen to load [param paths] in the background; it calls
+## [param callback] with the finished SceneBatchLoader.
+signal load_scenes(paths: PackedStringArray, callback: Callable)
 
 
 func get_spawn_points(faction: Faction) -> Dictionary:
@@ -195,18 +198,24 @@ func _start_scenario(callback) -> bool:
 		return false
 	factions = ScenarioLoader.build_factions(_scenario)
 	ids = WorldIds.new()
-	_load_scenario_systems(callback)
+	# Every system and ship scene at once, on worker threads, so populate()
+	# later instantiates from the cache instead of reading files on this thread.
+	load_scenes.emit(ScenarioLoader.scene_paths(_scenario, Content.registry),
+			_on_scenario_scenes_loaded.bind(callback))
 	return true
 
 
-## Loads the scenario's systems one after another, then runs [param callback].
-func _load_scenario_systems(callback, index := 0) -> void:
-	if index >= _scenario.systems.size():
-		if callback:
-			callback.call()
-		return
-	var next := _load_scenario_systems.bind(callback, index + 1)
-	emit_signal("load_scene", Content.path_of(_scenario.systems[index]), $Systems, false, true, next)
+## Adds the scenario's systems, in order, then runs [param callback].
+func _on_scenario_scenes_loaded(batch: SceneBatchLoader, callback) -> void:
+	_scenario_scenes = batch  # Keeps the ship scenes cached until populate().
+	for id in _scenario.systems:
+		var scene := batch.scenes.get(Content.path_of(id)) as PackedScene
+		if scene == null:
+			Log.log(["Scenario system ", id, " failed to load"], Log.MessageType.ERROR)
+			continue
+		$Systems.add_child(scene.instantiate())
+	if callback:
+		callback.call()
 
 
 ## The loaded system node for a system content ID, or null.
@@ -232,12 +241,14 @@ func _on_main_menu_join_game(_ip, _port, _player_name, _server_password, _player
 
 func finish_setup_galaxy_all() -> void:
 	if not get_tree().root.get_node("entry").is_server:
+		_scenario_scenes = null
 		return
 	var systems := {}
 	for id in _scenario.systems:
 		systems[id] = _system_node(id)
 	ScenarioLoader.populate(_scenario, Content.registry, factions, systems, ids,
 			multiplayer.get_unique_id())
+	_scenario_scenes = null  # Placed ships hold their own references now.
 
 
 func finish_setup_galaxy_client():

@@ -181,6 +181,25 @@ func test_populate_seats_crew_at_their_console() -> void:
 	assert_eq(String(console.occupant.name), "Commander")
 
 
+## Scenes to load before building
+
+func test_scene_paths_are_systems_then_each_ship_once() -> void:
+	var s := _scenario()
+	s.ships.assign([_ship("A", "Babylon 5"), _ship("Station", "Babylon 5", &"b5:babylon_5"),
+			_ship("B", "Babylon 5")])
+	assert_eq(ScenarioLoader.scene_paths(s, content), PackedStringArray([
+			"res://systems/test_system/test_system.tscn",
+			"res://ships/Ship.tscn",
+			"res://ships/earth alliance/babylon 5/babylon_5.tscn"]))
+
+
+func test_scene_paths_skip_unknown_content() -> void:
+	var s := _scenario()
+	s.ships.assign([_ship("A", "Babylon 5", &"t:nothing")])
+	assert_eq(ScenarioLoader.scene_paths(s, content),
+			PackedStringArray(["res://systems/test_system/test_system.tscn"]))
+
+
 ## The shipped playtest scenario
 
 func test_playtest_scenario_is_valid() -> void:

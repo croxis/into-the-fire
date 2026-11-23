@@ -42,6 +42,24 @@ static func validate(scenario: Scenario, content: ContentRegistry) -> PackedStri
 	return errors
 
 
+## Every scene the scenario needs: its systems in order, then each kind of
+## ship once. Loaded in the background before the world is built (Galaxy).
+## Unknown content is left out; [method validate] reports it.
+static func scene_paths(scenario: Scenario, content: ContentRegistry) -> PackedStringArray:
+	var paths := PackedStringArray()
+	var ids: Array[StringName] = []
+	ids.append_array(scenario.systems)
+	for ship in scenario.ships:
+		ids.append(ship.content_id)
+	for id in ids:
+		if not content.has(id):
+			continue
+		var path := content.path_of(id)
+		if path not in paths:
+			paths.append(path)
+	return paths
+
+
 ## A new registry holding the scenario's factions. Assumes [method validate] passed.
 static func build_factions(scenario: Scenario) -> FactionRegistry:
 	var registry := FactionRegistry.new()
