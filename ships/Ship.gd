@@ -200,17 +200,34 @@ func _integrate_forces(state: PhysicsDirectBodyState3D):
 		_debug_all_stop = false
 
 
-func _rollback_tick(dt, _tick, _is_fresh):
+func _enter_tree() -> void:
+	NetworkTime.on_tick.connect(_on_tick)
+
+
+func _exit_tree() -> void:
+	NetworkTime.on_tick.disconnect(_on_tick)
+
+
+## One netfox tick (netcode slice N2), in on_tick: characters have already
+## handed this tick's input to the helms (before_tick); the zone steps after
+## (after_tick, ZoneStepper).
+func _on_tick(dt: float, tick: int) -> void:
+	_rollback_tick(dt, tick, true)
+
+
+## The ship's whole tick, in a fixed order: helms set thruster power, then the
+## ship flies with it. Prediction (N3) will replay ticks through here.
+func _rollback_tick(dt, tick, is_fresh):
+	for console in $Consoles.get_children():
+		var helm := (console as Console).get_capability(HelmCapability) if console is Console else null
+		if helm:
+			(helm as HelmCapability)._rollback_tick(dt, tick, is_fresh)
 	if is_station:
 		return
 	if custom_integrator and not freeze:  # Frozen: held by a launch arm.
 		_fly(dt)
 	acceleraction = (linear_velocity - start_velocity) / dt
 	start_velocity = linear_velocity
-
-
-func _physics_process(dt: float) -> void:
-	_rollback_tick(dt, 0, 0)
 
 
 ## Mass, inertia and centre of mass come from Jolt (worked out from the

@@ -9,10 +9,13 @@ extends Node
 ## godot PR 76462). That lets the game decide per zone: step it, pause it, and
 ## later step it at a lower rate or re-simulate it for netcode.
 ##
-## Order within a tick matches the engine's: every node's _physics_process runs
-## first (this node has the highest priority, so it goes last), then each zone
-## is stepped, then its results are flushed to the nodes (body transforms,
-## _integrate_forces, area signals), ready for the next tick.
+## Zones step once per netfox tick (netcode slice N2), on NetworkTime's
+## after_tick: after characters hand input to helms (before_tick) and ships fly
+## (on_tick). Each zone is stepped, then its results are flushed to the nodes
+## (body transforms, _integrate_forces, area signals), ready for the next tick.
+## Engine physics frames no longer move zones, so client and server agree on
+## which tick a state belongs to. No ticks run until NetworkTime starts (a
+## server is hosted or joined).
 ##
 ## Not here yet: a reduced step rate. Nodes push forces every tick, so a zone
 ## stepped every other tick would need its nodes to tick at that rate too.
@@ -28,7 +31,14 @@ var _modes: Dictionary[SubViewport, Mode] = {}
 
 func _init() -> void:
 	name = "ZoneStepper"
-	process_physics_priority = 1000
+
+
+func _enter_tree() -> void:
+	NetworkTime.after_tick.connect(step_zones)
+
+
+func _exit_tree() -> void:
+	NetworkTime.after_tick.disconnect(step_zones)
 
 
 ## Takes over stepping [param zone]'s physics. The zone must have its own world.
@@ -67,7 +77,8 @@ func set_mode(zone: SubViewport, mode: Mode) -> void:
 	_apply_mode(zone, mode)
 
 
-func _physics_process(delta: float) -> void:
+## Steps every FULL zone by [param delta] seconds (one tick).
+func step_zones(delta: float, _tick := 0) -> void:
 	for zone in _modes:
 		if _modes[zone] == Mode.FULL:
 			var space := _space(zone)

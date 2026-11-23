@@ -124,24 +124,47 @@ func set_multiplayer_id(id):
 	$InputsSync.set_multiplayer_authority(id)
 
 
-func _physics_process(_dt: float) -> void:
+func _enter_tree() -> void:
+	NetworkTime.before_tick_loop.connect(_read_input)
+	NetworkTime.before_tick.connect(_apply_input)
+
+
+func _exit_tree() -> void:
+	NetworkTime.before_tick_loop.disconnect(_read_input)
+	NetworkTime.before_tick.disconnect(_apply_input)
+
+
+## Once per tick loop: the player on this machine reads their controls; the
+## InputsSync synchronizer sends them to everyone. Read once, not per tick: one
+## frame can run several ticks, and the one-shot toggles would fire each time.
+func _read_input() -> void:
 	if multiplayer.multiplayer_peer == null or multiplayer.get_unique_id() == multiplayer_id:
-		# The client which this player represent will update the controls state, and notify it to everyone.
 		inputs.update()
+
+
+## Each tick, before ships fly (netcode slice N2): hand the input to the helm of
+## the console this character sits at.
+func _apply_input(_dt: float, _tick: int) -> void:
+	if not current_console:
+		return
+	var helm := current_console.get_capability(HelmCapability) as HelmCapability
+	if helm:
+		if inputs.autobreak_toggle:
+			helm.toggle_autobreak()
+		if inputs.autospin_toggle:
+			helm.toggle_autospin()
+		# One-shot: used once, even if this frame runs another tick.
+		inputs.autobreak_toggle = false
+		inputs.autospin_toggle = false
+		helm.input_rotation_throttle = inputs.rotation_throttle
+		helm.throttle = inputs.throttle
+		if inputs.debug_all_stop and debug_commands_allowed():
+			helm._debug_all_stop()
+	# TODO: Weapons capability is found but firing is not wired to inputs yet.
+
+
+func _physics_process(_dt: float) -> void:
 	if current_console:
-		var rotation_throttle = inputs.rotation_throttle  # May be needed for turrets
-		var throttle = inputs.throttle  # May be needed for turrent zoom or engineering
-		var helm := current_console.get_capability(HelmCapability) as HelmCapability
-		if helm:
-			if inputs.autobreak_toggle:
-				helm.toggle_autobreak()
-			if inputs.autospin_toggle:
-				helm.toggle_autospin()
-			helm.input_rotation_throttle = inputs.rotation_throttle
-			helm.throttle = inputs.throttle
-			if inputs.debug_all_stop and debug_commands_allowed():
-				helm._debug_all_stop()
-		# TODO: Weapons capability is found but firing is not wired to inputs yet.
 		if Input.is_action_just_released("camera_change") and _player_pilot_id == LocalGameManager.player_id:
 			current_console.change_camera()
 		var command := current_console.get_capability(CommandCapability) as CommandCapability

@@ -102,6 +102,11 @@ Autoloads include netfox (`NetworkTime`, `NetworkRollback`, ...), `Log`, `LimboC
 - Server authoritative. Client input reaches the server through each character's `InputsSync`
   (a `MultiplayerSynchronizer` owned by that player's peer).
 - netfox 1.35 is installed; rollback is currently disabled (`netfox/rollback/enabled=false`).
+- The simulation runs on netfox ticks, 60 Hz inside the physics frame (`netfox/time/tickrate`,
+  `sync_to_physics`), in a fixed order: `before_tick` characters hand input to their console's helm,
+  `on_tick` ships run their helms then fly (`Ship._rollback_tick`), `after_tick` `ZoneStepper` steps each
+  zone. Engine physics frames alone no longer move ships or zones; nothing ticks until a game is hosted or
+  joined. Tests run ticks by hand with `tests/unit/ticks.gd`.
 - Spawners only track nodes they spawned. Reparenting nodes across spawn paths (e.g. crew moving between
   ships) is not replicated; spawn with `spawn_function` and data dictionaries instead. Crew are created
   with `ship.spawn_crew(Character.pilot_data(..., galaxy.ids.next_pilot()))`, never `add_child`.
@@ -117,6 +122,11 @@ integrator, interpolation for remote ships, interest management, event-based wea
 
 - Ship `health` setter calls `destroy()` on clients too, and can emit `destroyed` twice.
 - `Ship._on_button_launch_pressed` calls a `request_spawn` RPC that does not exist.
+- "Jolt Physics job system exceeded the maximum number of jobs" warning once after a long stall (loading):
+  netfox then runs several ticks in one frame, and the stepping patch's `space_step` doesn't free Jolt's
+  finished jobs (`JoltJobSystem::post_step`); only the engine's own step does. Jolt waits and recovers, so it
+  is left as is for now. If it becomes a problem, fix it in godot-ci's stepping patch: wrap the call in
+  `JoltPhysicsServer3D::space_step` with `job_system->pre_step()` / `job_system->post_step()`, as `step()` does.
 
 ## Tests and CI
 

@@ -12,10 +12,8 @@ class_name HelmCapability
 @export var throttle := Vector3()
 
 
-func _physics_process(dt: float) -> void:
-	_rollback_tick(dt, 0, 0)
-
-
+## Called by the ship each tick, before it flies (Ship._rollback_tick), so the
+## thruster power set here moves the ship on the same tick.
 func _rollback_tick(dt, _tick, _is_fresh):
 	# Pilot input drives rotation; autospin only takes over idle axes below.
 	rotation_throttle = input_rotation_throttle

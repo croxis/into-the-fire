@@ -312,6 +312,8 @@ rollback/enabled=false
 autoconnect/port=2258
 autoconnect/simulated_latency_ms=100
 autoconnect/enabled=false
+time/tickrate=60
+time/sync_to_physics=true
 
 [physics]
 
