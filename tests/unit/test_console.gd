@@ -104,3 +104,35 @@ func test_npc_at_a_console_leaves_the_local_screen_alone() -> void:
 	console.occupy(_character())
 	assert_null(console.hud_layer.console_hud)
 	assert_true(view.current, "the NPC's camera must not become the view")
+
+
+# Seats reach clients (netcode N3a): occupy() runs on the server only, so the
+# character carries a synced path to its console.
+
+func test_occupying_records_the_seat() -> void:
+	var console := _console()
+	var pilot := _character()
+	console.occupy(pilot)
+	assert_eq(pilot.get_node(pilot.seat), console)
+
+
+func test_leaving_clears_the_seat() -> void:
+	var console := _console()
+	var pilot := _character()
+	console.occupy(pilot)
+	console.vacate()
+	assert_true(pilot.seat.is_empty())
+	assert_null(pilot.current_console)
+
+
+func test_a_synced_seat_tells_a_client_where_it_sits() -> void:
+	# What a client sees: only the replicated seat path, no occupy() call.
+	var console := _console()
+	var pilot := _character()
+	pilot.seat = pilot.get_path_to(console)
+	assert_eq(pilot.current_console, console)
+
+
+func test_seats_are_replicated() -> void:
+	var config: SceneReplicationConfig = (CharacterScene.instantiate() as Node).get_node("CharacterSync").replication_config
+	assert_true(config.has_property(NodePath(".:seat")))

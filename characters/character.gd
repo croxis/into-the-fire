@@ -37,6 +37,14 @@ var active_orders: Array[OrderData] = []
 var pending_orders: Array[OrderData] = []
 var personality
 var current_console: Console
+## The console this character sits at, as a path from the character (empty when
+## not seated). Console.occupy() runs on the server only; this is replicated
+## (CharacterSync) so every client knows who sits where, including the pilot's
+## own client, which needs its console to fly and send input.
+@export var seat: NodePath:
+	set(path):
+		seat = path
+		_resolve_seat()
 
 @onready var hsm: LimboHSM = $BrainHSM # Later make behavior tree
 
@@ -124,7 +132,13 @@ func set_multiplayer_id(id):
 	$InputsSync.set_multiplayer_authority(id)
 
 
+func _resolve_seat() -> void:
+	if is_inside_tree():
+		current_console = get_node_or_null(seat) as Console if not seat.is_empty() else null
+
+
 func _enter_tree() -> void:
+	_resolve_seat.call_deferred()  # The console may enter the tree after us.
 	NetworkTime.before_tick_loop.connect(_read_input)
 	NetworkTime.before_tick.connect(_apply_input)
 
@@ -142,25 +156,88 @@ func _read_input() -> void:
 		inputs.update()
 
 
+## Tick-stamped input (netcode slice N3a). On the pilot's own client it builds
+## the packets to send; on the server it queues what arrives from that client.
+var input_channel := InputChannel.new()
+var _first_remote_input_logged := false
+
+
 ## Each tick, before ships fly (netcode slice N2): hand the input to the helm of
-## the console this character sits at.
-func _apply_input(_dt: float, _tick: int) -> void:
+## the console this character sits at. A player on another machine is flown
+## from their tick-stamped input (one per tick, in order), not from the
+## InputsSync values, which carry no tick.
+func _apply_input(_dt: float, tick: int) -> void:
 	if not current_console:
 		return
 	var helm := current_console.get_capability(HelmCapability) as HelmCapability
-	if helm:
-		if inputs.autobreak_toggle:
-			helm.toggle_autobreak()
-		if inputs.autospin_toggle:
-			helm.toggle_autospin()
+	if not helm:
+		return
+	var r: Dictionary
+	var source := input_source(multiplayer.is_server(), is_player(), _plays_here())
+	if source == InputSource.CHANNEL:
+		r = input_channel.next()
+		if not _first_remote_input_logged and input_channel.last_applied_tick >= 0:
+			_first_remote_input_logged = true
+			Log.log(["First input from ", name, " applied (client tick ",
+					input_channel.last_applied_tick, ")"], Log.MessageType.SUCCESS)
+	else:
+		r = InputChannel.make_record(tick, inputs.throttle, inputs.rotation_throttle,
+				inputs.autospin_toggle, inputs.autobreak_toggle, inputs.debug_all_stop)
 		# One-shot: used once, even if this frame runs another tick.
 		inputs.autobreak_toggle = false
 		inputs.autospin_toggle = false
-		helm.input_rotation_throttle = inputs.rotation_throttle
-		helm.throttle = inputs.throttle
-		if inputs.debug_all_stop and debug_commands_allowed():
-			helm._debug_all_stop()
+		if source == InputSource.LOCAL_AND_SEND:
+			_submit_inputs.rpc_id(1, input_channel.record(r))
+	if r.autobreak_toggle:
+		helm.toggle_autobreak()
+	if r.autospin_toggle:
+		helm.toggle_autospin()
+	helm.input_rotation_throttle = r.rotation_throttle
+	helm.throttle = r.throttle
+	if r.debug_all_stop and debug_commands_allowed():
+		helm._debug_all_stop()
 	# TODO: Weapons capability is found but firing is not wired to inputs yet.
+
+
+enum InputSource {
+	LOCAL,  ## The InputsSync values: the host's own player, NPCs, others seen on a client.
+	LOCAL_AND_SEND,  ## The pilot's own client: fly with it, and send it to the server.
+	CHANNEL,  ## The server, for a player on another machine: their tick-stamped input.
+}
+
+
+## Where a character's input comes from each tick.
+static func input_source(is_server: bool, player: bool, plays_here: bool) -> InputSource:
+	if player and is_server and not plays_here:
+		return InputSource.CHANNEL
+	if player and plays_here and not is_server:
+		return InputSource.LOCAL_AND_SEND
+	return InputSource.LOCAL
+
+
+## True when this character's player is at this machine.
+func _plays_here() -> bool:
+	return multiplayer.multiplayer_peer == null or multiplayer_id == multiplayer.get_unique_id()
+
+
+## A pilot's client sends its latest inputs every tick. Unreliable: a lost
+## packet is covered by the next, which repeats the last few inputs.
+@rpc("any_peer", "call_remote", "unreliable")
+func _submit_inputs(packet: Variant) -> void:
+	if not multiplayer.is_server():
+		return
+	var refusal := receive_inputs_from(multiplayer.get_remote_sender_id(), packet)
+	if refusal:
+		Log.log(["Input from peer ", multiplayer.get_remote_sender_id(), " for ", name,
+				" refused: ", refusal], Log.MessageType.WARNING)
+
+
+## Server: queues [param packet] if [param sender] is this character's player.
+## Returns why not ("" when accepted).
+func receive_inputs_from(sender: int, packet: Variant) -> String:
+	if sender != multiplayer_id or not is_player():
+		return "not this character's player"
+	return input_channel.receive(packet)
 
 
 func _physics_process(_dt: float) -> void:

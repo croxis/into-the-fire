@@ -110,6 +110,9 @@ Autoloads include netfox (`NetworkTime`, `NetworkRollback`, ...), `Log`, `LimboC
 - Spawners only track nodes they spawned. Reparenting nodes across spawn paths (e.g. crew moving between
   ships) is not replicated; spawn with `spawn_function` and data dictionaries instead. Crew are created
   with `ship.spawn_crew(Character.pilot_data(..., galaxy.ids.next_pilot()))`, never `add_child`.
+- Pilots on another machine send tick-stamped input (`InputChannel`, `Character._submit_inputs`, unreliable,
+  each packet repeating the last 4 inputs); the server checks it and applies one per tick, in order. The host's
+  own input and NPCs still go through `InputsSync`. This is step one of own-ship prediction (design doc).
 - Never trust IDs sent by clients: validate every `any_peer` RPC on the server. Work out who asked from
   `multiplayer.get_remote_sender_id()`, not from arguments (see `Ship.request_launch`). Logins are checked by
   `network.gd` `check_login` before anything else, and never logged (they hold passwords).
@@ -125,7 +128,8 @@ integrator, interpolation for remote ships, interest management, event-based wea
 - "Jolt Physics job system exceeded the maximum number of jobs" warning once after a long stall (loading):
   netfox then runs several ticks in one frame, and the stepping patch's `space_step` doesn't free Jolt's
   finished jobs (`JoltJobSystem::post_step`); only the engine's own step does. Jolt waits and recovers, so it
-  is left as is for now. If it becomes a problem, fix it in godot-ci's stepping patch: wrap the call in
+  is left as is until a new symptom appears. Known symptom: `test_ship_flight.gd` run on its own fails on this
+  warning (the full suite passes). The fix belongs in godot-ci's stepping patch: wrap the call in
   `JoltPhysicsServer3D::space_step` with `job_system->pre_step()` / `job_system->post_step()`, as `step()` does.
 
 ## Tests and CI

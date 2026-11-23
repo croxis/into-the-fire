@@ -25,7 +25,7 @@ func occupy(character: Character) -> bool:
 		return false
 	Log.log([character.name, "trying to sit at", self.name, "on", character.current_ship], Log.MessageType.QUESTION)
 	occupant = character
-	character.current_console = self
+	character.seat = character.get_path_to(self)  # Also sets current_console; replicated.
 	# Only players get a view and a HUD. NPC crew carry the server's peer id, so
 	# without this check a host-and-play server would show them on the host.
 	if character.is_player():
@@ -66,7 +66,7 @@ func vacate():
 	if occupant:
 		if occupant.is_player():
 			_hide_hud.rpc_id(occupant.multiplayer_id)
-		occupant.current_console = null
+		occupant.seat = NodePath()  # Also clears current_console; replicated.
 		for b_tree in occupant.get_node("BrainHSM/OperatingConsoleState").get_children():
 			b_tree.queue_free()
 	occupant = null

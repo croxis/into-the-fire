@@ -129,3 +129,33 @@ func test_pilot_input_moves_the_ship_on_the_same_tick() -> void:
 	await Ticks.run(1)
 	assert_eq(_helm(ship).throttle, Vector3(0, 0, -1), "the helm got the input")
 	assert_lt((ship.global_basis.inverse() * ship.linear_velocity).z, 0.0, "and the ship moved with it")
+
+
+# Remote pilots fly from their tick-stamped input (netcode slice N3a).
+
+func _remote_player_at_cockpit(ship: Ship) -> Character:
+	# Peer 99 is another machine. Seated through the spawner and occupy() needs
+	# no RPC to it here: occupy() only messages players, so set the player id after.
+	var pilot: Character = ship.get_node("CrewMultiplayerSpawner").spawn(
+			Character.pilot_data("Remote", 0, 99, 1))
+	(ship.get_node("Consoles/Cockpit") as Console).occupy(pilot)
+	pilot._player_pilot_id = 5
+	return pilot
+
+
+func test_the_server_flies_a_remote_pilot_from_their_input_channel() -> void:
+	var ship := _ship(&"b5:aurora_starfury", Vector3.ZERO)
+	var pilot := _remote_player_at_cockpit(ship)
+	pilot.inputs.throttle = Vector3(0, 0, 1)  # The old synced value: must not be used.
+	assert_eq(pilot.receive_inputs_from(99, [InputChannel.make_record(7, Vector3(0, 0, -1), Vector3.ZERO)]), "")
+	await Ticks.run(1)
+	assert_eq(_helm(ship).throttle, Vector3(0, 0, -1), "from the channel")
+	assert_eq(pilot.input_channel.last_applied_tick, 7)
+
+
+func test_input_packets_only_from_that_characters_player() -> void:
+	var ship := _ship(&"b5:aurora_starfury", Vector3.ZERO)
+	var pilot := _remote_player_at_cockpit(ship)
+	var packet := [InputChannel.make_record(7, Vector3(0, 0, -1), Vector3.ZERO)]
+	assert_ne(pilot.receive_inputs_from(42, packet), "", "another peer can't steer my ship")
+	assert_eq(pilot.input_channel.queued(), 0)
