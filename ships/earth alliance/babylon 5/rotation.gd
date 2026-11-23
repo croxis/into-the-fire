@@ -1,6 +1,11 @@
 #@tool
 extends MeshInstance3D
 
+# TODO: Should the rotating section's collision be an AnimatableBody3D turned
+# on netfox ticks? Its StaticBody3Ds (Main_Cylinder, Neck_Section) are turned
+# here every render frame, so Jolt sees them teleport: a ship touching the
+# hull isn't carried along, and the rotation doesn't follow the 60 Hz ticks.
+
 @export var rpm = 0.75
 var radian_per_second = rpm * 2 * PI / 60
 
