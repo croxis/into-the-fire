@@ -124,3 +124,11 @@ func test_no_discord_when_headless() -> void:
 	# A headless test player still has a menu, but nobody to show presence for.
 	assert_false(LaunchOptions.parse(PackedStringArray(["--testplayer"]), true).wants_discord())
 	assert_false(LaunchOptions.parse(PackedStringArray(), true).wants_discord())
+
+
+func test_launch_flag_for_automated_flight_tests() -> void:
+	# --testplayer --faction=X --launch: board, then launch, with no menu clicks.
+	var options := LaunchOptions.parse(PackedStringArray(["--testplayer", "--faction=Zeta Wing", "--launch"]))
+	assert_true(options.launch)
+	assert_false("--launch" in options.unknown)
+	assert_false(LaunchOptions.parse(PackedStringArray(["--testplayer"])).launch)

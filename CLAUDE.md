@@ -48,7 +48,7 @@ and dispatched in `entry.gd`; full reference in `documentation/command_line.md`.
 | (none) | Client with title screen and menu |
 | `--server [--game=NAME --password=PW --port=N]` | Dedicated server (also the `dedicated_server` feature, or `--headless` with no mode flag) |
 | `--testserver` | Hosts "Test Server" on port 2258 and plays |
-| `--testplayer [--host=ADDR --faction=NAME]` | Joins `--host` (default 127.0.0.1) on port 2258 after 5 s as "Test Player"; `--host` lets another device (e.g. a Steam Deck) join a `--testserver` on the dev machine; with `--faction`, spawns in that faction without the menu |
+| `--testplayer [--host=ADDR --faction=NAME --launch]` | Joins `--host` (default 127.0.0.1) on port 2258 after 5 s as "Test Player"; `--host` lets another device (e.g. a Steam Deck) join a `--testserver` on the dev machine; with `--faction`, spawns in that faction without the menu; with `--launch` as well, presses Launch once aboard |
 | `--xr-mode on` | OpenXR. Godot's own engine flag: OpenXR can only start with the engine, so the project keeps `xr/openxr/enabled` off. `--xr_mode` alone only prints this hint. Players switch with Options > "VR mode", which restarts the game (`LaunchOptions.restart_args`). XR is low priority for now |
 
 Default port 2258, max 12 peers (`network/network.gd`). Dedicated servers must run with `--headless` on

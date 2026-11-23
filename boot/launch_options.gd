@@ -27,6 +27,9 @@ var xr := false
 ## --faction=NAME: a test player spawns in this faction as soon as it joins,
 ## instead of waiting in the join menu (for automated two-process tests).
 var faction := ""
+## --launch: once aboard, a test player presses Launch by itself (for automated
+## two-process tests of a remote pilot flying).
+var launch := false
 ## The display server is "headless": no window, nothing on screen.
 var headless := false
 ## Arguments that were not recognised, kept for logging.
@@ -76,9 +79,10 @@ static func parse(args: PackedStringArray, headless := false, dedicated_feature 
 		options.host = flags["host"]
 	options.xr = flags.has("xr_mode")
 	options.faction = flags.get("faction", "")
+	options.launch = flags.has("launch")
 
 	for key in flags:
-		if key not in ["server", "testserver", "testplayer", "game", "password", "port", "host", "xr_mode", "faction"]:
+		if key not in ["server", "testserver", "testplayer", "game", "password", "port", "host", "xr_mode", "faction", "launch"]:
 			options.unknown.append("--" + key)
 	return options
 

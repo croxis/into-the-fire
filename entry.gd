@@ -99,9 +99,21 @@ func _start_test_player() -> void:
 		$Galaxy.factions_synced.connect(func() -> void:
 				$Galaxy._on_join_game_request_spawn(options.faction, "test_system", ""),
 				CONNECT_ONE_SHOT)
+	if options.launch:
+		_launch_when_aboard()
 	await get_tree().create_timer(5.0).timeout
 	$network.join_game(options.host, options.port, "Test Player", "", "")
 	$loading.visible = false
+
+
+## --launch: press Launch once the passenger HUD appears, as a player would.
+func _launch_when_aboard() -> void:
+	var hud: HudLayer = $Galaxy.hud
+	while hud.passenger == null:
+		await get_tree().create_timer(0.5).timeout
+	await get_tree().create_timer(1.0).timeout
+	Log.log(["Test player launching"], Log.MessageType.INFO)
+	hud.passenger.request_launch.emit()
 
 
 func _start_client() -> void:
