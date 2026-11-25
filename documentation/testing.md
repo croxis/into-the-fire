@@ -42,7 +42,8 @@ PASS: Scripts 27, Tests 267, Passing Tests 267, Asserts 736, Time 16.179s
 When something fails it prints each failing test's own output (its errors, backtraces and log lines,
 without GUT's internal stack frames), then the totals and where the full log is. The exit code is
 GUT's: 0 when everything passes, 1 when anything fails. It also fails when no test matched the
-selection, and shows the end of the log when GUT crashed before its summary. Engine errors go to
+selection, or when a test script doesn't load (GUT skips a script with a parse error and can still
+report everything else as passed), and shows the end of the log when GUT crashed before its summary. Engine errors go to
 stderr and GUT's lines to stdout, so now and then an error line lands in the next test's block; the
 full log has the exact order. Set `TEST_LOG=path` to keep the log somewhere specific.
 

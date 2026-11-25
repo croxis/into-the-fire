@@ -41,6 +41,15 @@ func get_message_type_symbol(message_type : MessageType) -> String:
 		# Other possibly useful symbols: ❎❌❌🕱✅☑🗹🛈ℹ❗❕◉◎⌁⚡
 
 
+## Who logged a line ([param role]: "SERVER", a client's peer id, or "" offline)
+## and, when [param tick] is 0 or more, "@tick" as netfox writes it. Each machine
+## logs its own tick: a client's is kept close to the server's, not equal to it.
+static func prefix(role: String, tick: int) -> String:
+	if tick < 0:
+		return role
+	return "%s @%d" % [role, tick]
+
+
 func log(what : Variant, message_type := MessageType.NONE) -> void:
 	var pid : int
 
@@ -65,11 +74,17 @@ func log(what : Variant, message_type := MessageType.NONE) -> void:
 			log_color = _get_color_from_pid(pid)
 			log_prefix = str(pid).left(6)
 
+	# The tick lines this log up with the other machine's and with netfox's own
+	# [@tick] lines. Before a game is hosted or joined (and in tests, which run
+	# ticks by hand) NetworkTime isn't active and the tick means nothing.
+	# _is_active() is netfox's own check; it has no public one.
+	var tick := NetworkTime.tick if NetworkTime._is_active() else -1
+
 	# Convert the log message to a string, trying to do a clean job
 	var args : Array = []
 	args.append(log_color.to_html(false)) # color
 	args.append(get_message_type_symbol(message_type))
-	args.append(log_prefix)
+	args.append(prefix(log_prefix, tick))
 	var msg : String = ''
 	if what is Array:
 		for i in what:

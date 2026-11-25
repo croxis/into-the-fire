@@ -29,7 +29,17 @@ status=$?
 # GUT colours a few lines before it reads -gdisable_colors; strip what is left.
 sed -i 's/\x1b\[[0-9;]*m//g' "$log"
 
-if grep -q 'Nothing was run' "$log"; then
+# GUT skips a test script that fails to load (a parse error) and can still
+# report every remaining test as passed.
+broken="$(grep -oE 'Failed to load script "res://tests/[^"]+"' "$log" | sort -u)"
+if [ -n "$broken" ]; then
+	echo "FAIL: test scripts that did not load (GUT skipped them):"
+	printf '%s\n' "$broken"
+	grep -E -A2 'Parse Error' "$log" | grep -vE 'GDScript backtrace|^--$' | head -n 20
+	echo "Full log: $log"
+	exit 1
+fi
+if grep -qE 'Nothing was run|Could not find script matching' "$log"; then
 	echo "FAIL: no tests matched the selection: ${args[*]}"
 	exit 1
 fi
