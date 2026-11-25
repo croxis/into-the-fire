@@ -58,3 +58,17 @@ func test_babylon_5_with_every_arm_busy_has_none() -> void:
 	for arm in b5.find_children("CobraBayArm*", "", true, false):
 		arm.is_ready = false  # Busy launching.
 	assert_eq(b5.find_free_spawner(), [], "and it must not loop forever")
+
+
+func test_babylon_5_launches_a_fighter_at_its_own_size() -> void:
+	# The bays' spawn points sit under scaled nodes (a global scale of 0.81).
+	# The arm must place the fighter there without that scale, or it flies at
+	# 81% size with its thrust scaled down too.
+	var b5 := _in_system(&"b5:babylon_5")
+	var spawn := b5.find_free_spawner()
+	var fighter: Ship = Content.instantiate(&"b5:aurora_starfury")
+	b5.get_current_system().add_ship(fighter)
+	spawn[0].spawn_ship(fighter)
+	spawn[0]._process(0.0)  # The arm holds the fighter at its spawn point.
+	assert_almost_eq(fighter.global_transform.basis.get_scale(), Vector3.ONE, Vector3.ONE * 1e-6)
+	assert_almost_eq(fighter.global_position, spawn[1], Vector3.ONE * 0.01)

@@ -13,7 +13,10 @@ var ship: Ship
 
 func _process(_delta: float) -> void:
 	if ship:
-		ship.global_transform = $"loading/loadingexternder/extender-rotating/spawn_point".global_transform
+		# Position and rotation only: the bays sit under scaled nodes (a spawn
+		# point's global scale is 0.81), which would shrink the ship and its thrust.
+		var at: Transform3D = $"loading/loadingexternder/extender-rotating/spawn_point".global_transform
+		ship.global_transform = Transform3D(at.basis.orthonormalized(), at.origin)
 
 
 func spawn_ship(_newship: Ship):

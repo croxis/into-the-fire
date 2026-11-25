@@ -66,7 +66,10 @@ func step(state: FlightState, force: Vector3, torque: Vector3, dt: float) -> Fli
 	var com := state.transform.origin + basis * center_of_mass_local + s.linear_velocity * dt
 	var turn := s.angular_velocity * dt
 	if turn.length() > 1e-12:
-		basis = (Basis(turn.normalized(), turn.length()) * basis).orthonormalized()
+		# Turn the rotation only and keep any scale, as Jolt does.
+		var scale := basis.get_scale()
+		basis = (Basis(turn.normalized(), turn.length()) * basis.orthonormalized()).orthonormalized() \
+				* Basis.from_scale(scale)
 	s.transform = Transform3D(basis, com - basis * center_of_mass_local)
 	return s
 

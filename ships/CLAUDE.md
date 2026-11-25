@@ -10,6 +10,11 @@ velocities from it each tick (`Ship._fly`), using Jolt's mass and inertia; Jolt 
 contacts. Stations keep Jolt's own integration. It clamps to Jolt's speed limits
 (`physics/jolt_physics_3d/limits/*`), so replays match Jolt.
 
+Thrust uses the ship's basis for both force direction and thruster lever arms (`Ship.thrust`), so a scaled
+ship thrusts differently. Place ships with position and rotation only (`orthonormalized()`): Babylon 5's
+launch-arm spawn points sit at a global scale of 0.81. `FlightIntegrator.step` keeps any scale when it turns
+a ship, as Jolt does.
+
 ## Own-ship prediction
 
 Our own reconciler, not netfox rollback. The pilot's input reaches the server through `InputChannel`

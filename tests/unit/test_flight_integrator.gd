@@ -161,3 +161,13 @@ func test_flies_like_jolt() -> void:
 		replay = flight.step(replay, FORCE, Pusher.torque(flight, replay.transform.basis), dt)
 	assert_almost_eq(replay.transform.origin, by_jolt.global_position, Vector3.ONE * 1e-3, "replay lands there too")
 	assert_almost_eq(replay.transform.basis.z, by_jolt.global_basis.z, Vector3.ONE * 1e-4)
+
+
+func test_a_turn_keeps_the_ships_scale() -> void:
+	# A scaled ship stays scaled as it turns, as Jolt keeps it; otherwise a
+	# replay and the live flight would disagree (thrust uses the basis).
+	var f := _integrator()
+	var scaled := Transform3D(Basis.from_scale(Vector3.ONE * 0.81), Vector3.ZERO)
+	var s := f.step(_state(Vector3.ZERO, Vector3(0, 1, 0), scaled), Vector3.ZERO, Vector3.ZERO, DT)
+	assert_almost_eq(s.transform.basis.get_scale(), Vector3.ONE * 0.81, Vector3.ONE * 1e-9)
+	assert_almost_eq(s.transform.basis.get_rotation_quaternion().get_angle(), 1.0 * DT, 1e-9)
