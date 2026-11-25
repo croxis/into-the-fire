@@ -417,6 +417,14 @@ func _fly(dt: float, tick := 0) -> void:
 	if flight == null:
 		flight = FlightIntegrator.from_body(state)
 	var push := thrust(state.center_of_mass, global_transform.basis)
+	if NetDebug.on() and (is_predicted_here() or remote_pilot() != null):  # TEMPORARY
+		var powered: Array[String] = []
+		for thruster in $Engines.thrusters:
+			if thruster.power > 0.0:
+				powered.append("%s=%.3f" % [thruster.name, thruster.power])
+		NetDebug.line("server" if multiplayer.is_server() else "client",
+				"fly %d force=%s torque=%s inv_mass=%.8f helms=%d powered=%s" % [tick, NetDebug.v(push[0]),
+				NetDebug.v(push[1]), flight.inverse_mass, _helms().size(), ",".join(powered)])
 	var now := FlightIntegrator.FlightState.new()
 	now.transform = global_transform
 	now.linear_velocity = linear_velocity
