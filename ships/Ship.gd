@@ -308,10 +308,6 @@ func _send_pilot_state() -> bool:
 		return false
 	_receive_state.rpc_id(pilot.multiplayer_id, pilot.input_channel.last_applied_tick,
 			global_transform, linear_velocity, angular_velocity, freeze)
-	if NetDebug.on():  # TEMPORARY
-		NetDebug.line("server", "state ack=%d pos=%s vel=%s spin=%s frozen=%s" % [
-				pilot.input_channel.last_applied_tick, NetDebug.v(global_position),
-				NetDebug.v(linear_velocity), NetDebug.v(angular_velocity), freeze])
 	return true
 
 
@@ -354,8 +350,6 @@ func reconcile_with(server: FlightIntegrator.FlightState, ack: int, last_tick: i
 		return  # Older than a state already used.
 	place(smoother.apply(global_transform, now.transform))
 	var error := smoother.last_correction
-	if NetDebug.on():  # TEMPORARY
-		NetDebug.line("client", "reconcile ack=%d last=%d correction=%.6f" % [ack, last_tick, error])
 	if error > 0.001:
 		_corrections += 1
 		_largest_correction = maxf(_largest_correction, error)
@@ -388,11 +382,6 @@ func _rollback_tick(dt, tick, is_fresh):
 		# Recorded before the helms run (they write assisted throttle back), and
 		# while frozen too: the server may already have let go of the ship.
 		prediction.record(tick, helms.map(func(h: HelmCapability) -> Dictionary: return h.input_record()))
-		if NetDebug.on() and not helms.is_empty():  # TEMPORARY: state before this tick = after the last.
-			var rec: Dictionary = helms[0].input_record()
-			NetDebug.line("client", "tick %d pre_pos=%s pre_vel=%s pre_spin=%s thr=%s rot=%s spin=%s brake=%s frozen=%s" % [
-					tick, NetDebug.v(global_position), NetDebug.v(linear_velocity), NetDebug.v(angular_velocity),
-					NetDebug.v(rec.throttle), NetDebug.v(rec.rotation), rec.autospin, rec.autobreak, freeze])
 	for helm in helms:
 		helm._rollback_tick(dt, tick, is_fresh)
 	if is_station:
@@ -417,14 +406,6 @@ func _fly(dt: float, tick := 0) -> void:
 	if flight == null:
 		flight = FlightIntegrator.from_body(state)
 	var push := thrust(state.center_of_mass, global_transform.basis)
-	if NetDebug.on() and (is_predicted_here() or remote_pilot() != null):  # TEMPORARY
-		var powered: Array[String] = []
-		for thruster in $Engines.thrusters:
-			if thruster.power > 0.0:
-				powered.append("%s=%.3f" % [thruster.name, thruster.power])
-		NetDebug.line("server" if multiplayer.is_server() else "client",
-				"fly %d force=%s torque=%s inv_mass=%.8f helms=%d powered=%s" % [tick, NetDebug.v(push[0]),
-				NetDebug.v(push[1]), flight.inverse_mass, _helms().size(), ",".join(powered)])
 	var now := FlightIntegrator.FlightState.new()
 	now.transform = global_transform
 	now.linear_velocity = linear_velocity
