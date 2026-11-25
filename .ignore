@@ -1,0 +1,15 @@
+# Read by ripgrep and tools built on it (Claude Code's Grep and Glob), not by git or Godot.
+# Keeps project-wide searches to our own code. Search these on purpose by naming the path,
+# e.g. `rg NetworkTime addons/netfox`.
+
+# Third-party addons and the LimboAI demo
+addons/
+demo/
+
+# Godot sidecar files
+*.import
+*.uid
+
+# Large generated input maps
+default_action_map.tres
+openxr_action_map.tres

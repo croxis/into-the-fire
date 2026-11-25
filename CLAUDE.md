@@ -1,14 +1,13 @@
 # Into The Fire
 
-A persistent, self-hosted 3D space combat and trading sandbox set in Babylon 5, built in Godot.
-Inspired by X4 (sandbox, empire, map), Babylon 5: I Found Her (hyperspace) and Sierra's cancelled
-Babylon 5: Into the Fire (crew combat). Long term it is meant to be a general sci-fi spaceship engine with
-Babylon 5 as the default mod. Early development: many systems are partial or stubbed.
+A persistent, self-hosted 3D space combat and trading sandbox set in Babylon 5, built in Godot; long term a
+general sci-fi spaceship engine with Babylon 5 as the default mod. Early development: many systems are partial
+or stubbed.
 
-Project documentation lives in `documentation/` (`testing.md`, `content_registry.md`, `factions.md`, `scenarios.md`, `command_line.md`).
-
-Design doc (target architecture, decisions, open questions):
-https://claude.ai/artifact/SbiKWXHGRsfhgvoeBBGW7J
+Docs: `documentation/` (`testing.md`, `content_registry.md`, `factions.md`, `scenarios.md`, `command_line.md`).
+Design doc (target architecture, decisions, open questions): https://claude.ai/artifact/SbiKWXHGRsfhgvoeBBGW7J
+Folders with their own `CLAUDE.md` (loaded when you work there): `ships/` (flight, own-ship prediction),
+`characters/` (pilot input, jitter buffer), `zones/` (Jolt job pool warning).
 
 ## Working agreements
 
@@ -18,6 +17,8 @@ https://claude.ai/artifact/SbiKWXHGRsfhgvoeBBGW7J
 - Prefer editing scenes through the Godot editor (godot-ai MCP tools) over hand-editing `.tscn`/`.tres`.
   If you must hand-edit, keep `uid` and `unique_id` values intact.
 - The README says no vibe coding; keep changes reviewable and small.
+- Search with `rg`, which honours `.ignore` (addons, `demo/`, `*.import`, `*.uid` and the action maps are
+  skipped). To search an addon, name its path: `rg NetworkTime addons/netfox`.
 
 ## Engine: custom Godot 4.7.2 build (required)
 
@@ -25,154 +26,97 @@ Stock Godot will not open this project correctly. The build has:
 
 - `precision=double` (large world coordinates). Jolt is built with `JPH_DOUBLE_PRECISION`.
 - LimboAI as an engine module (BT/HSM classes: `LimboHSM`, `BTPlayer`, `BTAction`, ...).
-- Physics stepping patch, godot PR 76462 (`PhysicsServer3D.space_step` / `space_flush_queries`).
-  Jolt implements it. Kept for per-zone manual stepping, not for netfox physics rollback.
+- Physics stepping patch, godot PR 76462 (`PhysicsServer3D.space_step` / `space_flush_queries`), for
+  per-zone manual stepping (not netfox physics rollback).
 
-Physics engine is Jolt, zero gravity and zero damping (`project.godot`). Jolt's speed cap is raised from
-500 m/s to 10 km/s and its spin cap halved to 1350°/s (`physics/jolt_physics_3d/limits/*`).
-Zone spaces are inactive and stepped by `ZoneStepper`; a space created outside a zone is still stepped
-by the engine.
+Jolt physics, zero gravity and damping. Speed cap raised to 10 km/s, spin cap 1350°/s
+(`physics/jolt_physics_3d/limits/*`). Zone spaces are inactive and stepped by `ZoneStepper`; a space created
+outside a zone is still stepped by the engine.
 
-Build image and export templates: the separate godot-ci repo (a fork of abarichello/godot-ci, usually
-checked out beside this repo as `../godot-ci`). Its `Dockerfile` pins `GODOT_VERSION`, the LimboAI commit
-and `patches/`. Engine changes go there, not here. This repo's `.gitlab-ci.yml` uses the image
-`registry.gitlab.com/croxis/itf:<version>.custom`; keep the tag in step with the engine version.
+Engine changes, the build image and export templates live in the separate godot-ci repo (usually
+`../godot-ci`; its `Dockerfile` pins `GODOT_VERSION`, the LimboAI commit and `patches/`). `.gitlab-ci.yml`
+uses `registry.gitlab.com/croxis/itf:<version>.custom`; keep the tag in step with the engine version.
 
 ## Running
 
-Main scene: `res://entry.tscn`. Command-line flags are parsed by `boot/launch_options.gd` (`LaunchOptions`)
-and dispatched in `entry.gd`; full reference in `documentation/command_line.md`. The main menu is created at runtime only when there is a UI:
+Main scene `res://entry.tscn`; flags parsed by `boot/launch_options.gd`, dispatched in `entry.gd`, full
+reference in `documentation/command_line.md`. The main menu exists only when there is a UI.
 
 | Flags | Mode |
 | --- | --- |
 | (none) | Client with title screen and menu |
-| `--server [--game=NAME --password=PW --port=N]` | Dedicated server (also the `dedicated_server` feature, or `--headless` with no mode flag) |
+| `--server [--game=NAME --password=PW --port=N]` | Dedicated server (also `dedicated_server` feature, or `--headless` alone) |
 | `--testserver` | Hosts "Test Server" on port 2258 and plays |
-| `--testplayer [--host=ADDR --faction=NAME --launch]` | Joins `--host` (default 127.0.0.1) on port 2258 after 5 s as "Test Player"; `--host` lets another device (e.g. a Steam Deck) join a `--testserver` on the dev machine; with `--faction`, spawns in that faction without the menu; with `--launch` as well, presses Launch once aboard |
-| `--xr-mode on` | OpenXR. Godot's own engine flag: OpenXR can only start with the engine, so the project keeps `xr/openxr/enabled` off. `--xr_mode` alone only prints this hint. Players switch with Options > "VR mode", which restarts the game (`LaunchOptions.restart_args`). XR is low priority for now |
+| `--testplayer [--host=ADDR --faction=NAME --launch]` | Joins after 5 s; `--faction` spawns without the menu, `--launch` also presses Launch |
+| `--xr-mode on` | OpenXR (low priority) |
 
-Default port 2258, max 12 peers (`network/network.gd`). Dedicated servers must run with `--headless` on
-GPU-less machines; nothing on the server path may depend on rendering.
+Default port 2258, max 12 peers (`network/network.gd`). Dedicated servers run `--headless` on GPU-less
+machines; nothing on the server path may depend on rendering.
 
 ## Code map
 
-- `entry.gd` / `entry.tscn`: boot and run-mode dispatch, owns `network` and `Galaxy`.
-- `boot/`: `LaunchOptions` (command-line parsing, no node dependencies).
+- `entry.gd`: boot and run-mode dispatch, owns `network` and `Galaxy`. `boot/`: `LaunchOptions`.
 - `content/`: `ContentRegistry` and the `Content` autoload. Game code asks for content by ID
-  (`Content.instantiate(&"b5:aurora_starfury")`), never by `res://` path. IDs are listed in manifests
-  such as `content/babylon5.cfg` (uid:// values; `*.cfg` there is in the export include filter).
+  (`Content.instantiate(&"b5:aurora_starfury")`), never by `res://` path; IDs are in manifests such as
+  `content/babylon5.cfg`.
 - `network/network.gd`: ENet host/join and the custom auth handshake.
-- `Galaxy.gd`: owns the world state (factions, systems, players, `ids`). Starts a new game from the
-  scenario `scenario_id` (default `b5:playtest`), player spawning, respawn. The server sends factions to
-  each client on connect.
-- `scenario/`: `Scenario` resources (factions, systems, ships, crew) and `ScenarioLoader` (validate,
-  build factions, populate). Scenarios are content, e.g. `content/scenarios/playtest.tres`.
-- `world_ids.gd`: `WorldIds`, the world's ship and pilot ID counters (start at 1; never statics).
-- `systems/`: each star system (`System`, `system_template.*`) is a zone: a `SubViewport` root with its own
-  `World3D`, holding `ships`, `bolts` and their spawners. `System.find_for(node)` finds a node's system.
-- `zones/`: `ZoneView` (in Galaxy) draws the viewed zone in the main window: sets its `world_3d`, a camera rig
-  (or XR origin) follows the zone's current camera, input is forwarded. Zone SubViewports don't render.
-  `ZoneStepper` (`Galaxy.zone_stepper`) steps each system's physics space itself (`space_step`, then
-  `space_flush_queries`) instead of the engine; modes FULL and PAUSED. Every system runs FULL for now.
-- `ui/hud/`: `HudLayer` (`Galaxy.hud`), the local player's HUD in the main window. 2D UI inside a ship is never
-  drawn, so HUDs go here, client-side only: the passenger HUD (Launch) on capital ships and space stations, and
-  the console's `hud_scene` while a player sits at it. Say "console" for a spacecraft's crew interface;
-  "station" means a space station.
-- `ships/`: `Ship.gd` (RigidBody3D), `Engines.gd` (per-thruster forces), `crew.gd`, `PID.gd`.
-  `FlightIntegrator` (`flight_integrator.gd`) is ship motion without nodes: ships set `custom_integrator` and
-  take their velocities from it each tick (`Ship._fly`), using Jolt's mass and inertia; Jolt still moves them and
-  handles contacts. Stations keep Jolt's own integration. It clamps to Jolt's speed limits
-  (`physics/jolt_physics_3d/limits/*`), so replays match Jolt.
-- `ship_systems/workstations/`: `Console` plus capabilities (Helm, Weapons, Command); each capability
-  brings a behaviour tree that runs in the occupant's `BrainHSM`.
-- `characters/`: `Character` (crew member, player or NPC), input sync, LimboAI state.
-- `factions/`: `Faction` resource tree, `FactionRegistry` (one per world, owned by `Galaxy.factions`),
-  `FactionDoctrine`. ID 0 is "no faction". Ships and characters find the registry through the Galaxy
-  above them (`Galaxy.find_for(node)`), or use an explicitly set `faction_registry` (tests).
-- `orders/`: order data model (logic mostly not implemented).
-- `ai/`: LimboAI trees, blackboards and command tasks.
-- `demo/`: LimboAI demo content, not game code.
+- `Galaxy.gd`: world state (factions, systems, players, `ids`), new game from scenario `scenario_id`
+  (default `b5:playtest`), player spawning, respawn. `world_ids.gd`: ship and pilot ID counters (never statics).
+- `scenario/`: `Scenario` resources and `ScenarioLoader`; scenarios are content (`content/scenarios/`).
+- `systems/`: each star system is a zone: a `SubViewport` with its own `World3D`, holding `ships`, `bolts`
+  and their spawners. `System.find_for(node)` finds a node's system.
+- `zones/`: `ZoneView` draws the viewed zone in the main window (zone SubViewports don't render).
+  `ZoneStepper` (`Galaxy.zone_stepper`) steps each system's physics space itself; modes FULL and PAUSED.
+- `ui/hud/`: `HudLayer` (`Galaxy.hud`), the local player's HUD, client-side only. 2D UI inside a ship is never
+  drawn, so HUDs go here (passenger HUD, a console's `hud_scene`). "Console" is a spacecraft's crew
+  interface; "station" means a space station.
+- `ships/`: `Ship`, `Engines`, `FlightIntegrator`, prediction (see `ships/CLAUDE.md`).
+- `ship_systems/workstations/`: `Console` plus capabilities (Helm, Weapons, Command), each with a behaviour
+  tree run in the occupant's `BrainHSM`. Helm's part in prediction: `ships/CLAUDE.md`.
+- `characters/`: `Character` (crew, player or NPC), input, LimboAI state.
+- `factions/`: `Faction`, `FactionRegistry` (one per world, `Galaxy.factions`; found via
+  `Galaxy.find_for(node)` or an explicit `faction_registry` in tests). ID 0 is "no faction".
+- `orders/` (data model, logic mostly missing), `ai/` (LimboAI trees and tasks), `demo/` (LimboAI demo, not game code).
 
-Autoloads include netfox (`NetworkTime`, `NetworkRollback`, ...), `Log`, `LimboConsole`,
-`LocalGameManager` (local player id), `Content` (content registry), and `_mcp_game_helper` (godot-ai addon).
+Autoloads include netfox (`NetworkTime`, `NetworkRollback`, ...), `Log`, `LimboConsole`, `LocalGameManager`
+(local player id), `Content`, and `_mcp_game_helper` (godot-ai).
 
 ## Netcode
 
-- ENet with Godot's high-level multiplayer: RPCs, `MultiplayerSpawner`, `MultiplayerSynchronizer`.
-- Server authoritative. Client input reaches the server through each character's `InputsSync`
-  (a `MultiplayerSynchronizer` owned by that player's peer).
-- netfox 1.35 is installed; rollback is currently disabled (`netfox/rollback/enabled=false`).
-- The simulation runs on netfox ticks, 60 Hz inside the physics frame (`netfox/time/tickrate`,
-  `sync_to_physics`), in a fixed order: `before_tick` characters hand input to their console's helm,
-  `on_tick` ships run their helms then fly (`Ship._rollback_tick`), `after_tick` `ZoneStepper` steps each
-  zone. Engine physics frames alone no longer move ships or zones; nothing ticks until a game is hosted or
+- ENet with Godot's high-level multiplayer (RPCs, `MultiplayerSpawner`, `MultiplayerSynchronizer`). Server
+  authoritative. netfox 1.35 is installed, rollback disabled; own-ship prediction is our own (`ships/CLAUDE.md`).
+- The simulation runs on netfox ticks, 60 Hz inside the physics frame, in a fixed order: `before_tick`
+  characters hand input to their console's helm, `on_tick` ships run their helms then fly
+  (`Ship._rollback_tick`), `after_tick` `ZoneStepper` steps each zone. Nothing ticks until a game is hosted or
   joined. Tests run ticks by hand with `tests/unit/ticks.gd`.
-- Spawners only track nodes they spawned. Reparenting nodes across spawn paths (e.g. crew moving between
-  ships) is not replicated; spawn with `spawn_function` and data dictionaries instead. Crew are created
-  with `ship.spawn_crew(Character.pilot_data(..., galaxy.ids.next_pilot()))`, never `add_child`.
-- Pilots on another machine send tick-stamped input (`InputChannel`, `Character._submit_inputs`, unreliable,
-  each packet repeating the last 4 inputs); the server checks it and applies one per tick, in order. The host's
-  own input and NPCs still go through `InputsSync`. The server keeps a cushion (jitter buffer) per pilot and
-  skips a backlog back to it. The cushion adapts, 2 to 8 ticks: it grows a tick each time it runs dry and shrinks
-  after a steady spell (5 s, doubling up to 40 s if it ran dry soon after the last shrink). Every hold or skip is
-  a one-tick jump on the pilot's screen, so this trades a little delay for others against those jumps.
-- Own-ship prediction (our own reconciler, not netfox rollback): the pilot's client flies its ship at once and
-  records its thrust (`ShipPrediction`); after each tick loop the server sends that client its ship's state
-  and the last input tick it applied (`Ship._send_pilot_state`); the client replays its thrust since then, and
-  eases a correction of its position in over about 100 ms (`CorrectionSmoother`; rotation, velocity and jumps
-  over 100 m snap, since thrust follows the way the ship points). Corrections go through `Ship.place`, which
-  sets the transform in Jolt directly: Godot only sends a node's new transform to physics at the start of the
-  next physics frame, after our ticks have stepped the zone. While the server holds the ship frozen (a launch
-  arm), its state says so and the client freezes the ship too and follows it exactly, still recording thrust
-  for the replay after release. The shared ship sync goes through `sync_*` proxies that the predicting client
-  ignores. The host never predicts. Logs: server "Input from X: held, skipped, queued, cushion", client
-  "Prediction for X: N corrections" every 5 s. Not done yet: the replay records thrust, not input, so flight
-  assist (autospin, autobreak: thrust from the current spin or speed) brings about a round trip of small
-  corrections after each one (a pending test); under lag the client logs "SYS_COMMAND_AUTH" errors while
-  joining (game packets arrive before its login finishes), and under lag a late `InputsSync` delta for the
-  pilot's freed pre-launch character logs "Node not found" on the server; remote ships aren't smoothed (N4).
-  Test lag with `tests/lag/lag_run.sh` (a UDP delay proxy between `--server` and `--testplayer`; see
-  `documentation/testing.md`).
-- Never trust IDs sent by clients: validate every `any_peer` RPC on the server. Work out who asked from
-  `multiplayer.get_remote_sender_id()`, not from arguments (see `Ship.request_launch`). Logins are checked by
-  `network.gd` `check_login` before anything else, and never logged (they hold passwords).
-
-Target direction (see the design doc): data records separate from scene nodes, per-zone physics stepping,
-own-ship prediction with netfox `RollbackSynchronizer` and a custom flight
-integrator, interpolation for remote ships, interest management, event-based weapons.
-
-## Known issues (from review, not yet fixed)
-
-- Ship `health` setter calls `destroy()` on clients too, and can emit `destroyed` twice.
-- `Ship._on_button_launch_pressed` calls a `request_spawn` RPC that does not exist.
-- "Jolt Physics job system exceeded the maximum number of jobs" warning once after a long stall (loading):
-  netfox then runs several ticks in one frame, and the stepping patch's `space_step` doesn't free Jolt's
-  finished jobs (`JoltJobSystem::post_step`); only the engine's own step does. Jolt waits and recovers, so it
-  is left as is until a new symptom appears. Known symptom: `test_ship_flight.gd` run on its own fails on this
-  warning (the full suite passes). The fix belongs in godot-ci's stepping patch: wrap the call in
-  `JoltPhysicsServer3D::space_step` with `job_system->pre_step()` / `job_system->post_step()`, as `step()` does.
+- Spawners only track nodes they spawned; reparenting across spawn paths is not replicated. Spawn with
+  `spawn_function` and data dictionaries: crew via
+  `ship.spawn_crew(Character.pilot_data(..., galaxy.ids.next_pilot()))`, never `add_child`.
+- Never trust IDs sent by clients: validate every `any_peer` RPC on the server, and get the sender from
+  `multiplayer.get_remote_sender_id()`, not arguments (see `Ship.request_launch`). Logins are checked by
+  `network.gd` `check_login` first and never logged (they hold passwords).
 
 ## Tests and CI
 
-Tests need the custom engine binary (`GODOT` below). Stock Godot lacks LimboAI and doubles.
+Tests need the custom engine binary (`GODOT` below); stock Godot lacks LimboAI and doubles.
 
-- Unit tests: GUT 9.7.1 in `addons/gut`, tests in `tests/unit/test_*.gd`, config `.gutconfig.json`.
-  GUT fails a test on any engine error, script error or `push_error` during it.
+- Unit tests: GUT 9.7.1, `tests/unit/test_*.gd`. GUT fails a test on any engine error, script error or
+  `push_error` during it. `tests/run.sh` prints one line on a pass, only the failing tests' output otherwise
+  (`tests/run.sh NAME` = `-gselect=NAME`; other GUT options pass through).
   ```bash
-  $GODOT --headless --path . -s addons/gut/gut_cmdln.gd -gconfig=.gutconfig.json
+  GODOT=$GODOT tests/run.sh
   ```
-- Smoke test: boots `--server` headless for 1800 frames, checks startup markers, and fails on any
-  error not matched by `tests/smoke/known_issues.txt`. Remove a known-issue line when its cause is fixed.
+- Smoke test: boots `--server` headless for 1800 frames, checks startup markers, fails on any error not in
+  `tests/smoke/known_issues.txt` (remove a line when its cause is fixed).
   ```bash
   GODOT=$GODOT tests/smoke/server_smoke.sh
   ```
-- Write a failing test first when fixing a bug. Don't keep game state in statics; tests make their own
-  (e.g. a fresh `FactionRegistry` in `before_each`).
-- CI (`.gitlab-ci.yml`): import assets, `test` stage (`unit-tests` with JUnit report, `server-smoke`),
-  then export Linux and Windows debug builds with the custom image.
-- Planned packaging: one binary per OS, base pck plus content pcks (Babylon 5 as the default mod).
+- Write a failing test first when fixing a bug. No game state in statics; tests make their own (e.g. a fresh
+  `FactionRegistry` in `before_each`).
+- `test_ship_flight.gd` run on its own fails on a known Jolt warning (`zones/CLAUDE.md`); the full suite passes.
+- CI (`.gitlab-ci.yml`): import, `unit-tests` (JUnit) and `server-smoke`, then Linux and Windows debug exports.
 
 ## godot-ai MCP
 
-The godot-ai editor addon exposes the running editor (scene, node, script, filesystem and run tools).
-Use `editor_state` to confirm the connection. `game_eval` and game screenshots need the project running.
+The editor addon exposes scene, node, script, filesystem and run tools. `editor_state` confirms the
+connection; `game_eval` and game screenshots need the project running.

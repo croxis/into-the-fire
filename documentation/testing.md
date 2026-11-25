@@ -30,30 +30,41 @@ tests are how we know the rewritten code still does what the old code did.
 ### Unit tests
 
 ```bash
-$GODOT --headless --path . -s addons/gut/gut_cmdln.gd -gconfig=.gutconfig.json
+GODOT=$GODOT tests/run.sh
 ```
 
-The run ends with a summary like this, and the exit code is 0 when everything passes and 1 when
-anything fails:
+`tests/run.sh` runs GUT and prints a short report. When everything passes that is one line:
 
 ```
-Scripts               7
-Tests                41
-Passing Tests        41
----- All tests passed! ----
+PASS: Scripts 27, Tests 267, Passing Tests 267, Asserts 736, Time 16.179s
 ```
 
-The leak warnings printed after the summary (`ObjectDB instances were leaked at exit`, `resources still
-in use at exit`) come from engine shutdown and don't affect the result.
+When something fails it prints each failing test's own output (its errors, backtraces and log lines,
+without GUT's internal stack frames), then the totals and where the full log is. The exit code is
+GUT's: 0 when everything passes, 1 when anything fails. It also fails when no test matched the
+selection, and shows the end of the log when GUT crashed before its summary. Engine errors go to
+stderr and GUT's lines to stdout, so now and then an error line lands in the next test's block; the
+full log has the exact order. Set `TEST_LOG=path` to keep the log somewhere specific.
+
+Why a wrapper: a passing run of the plain command prints about 1000 lines (colours, orphan listings,
+the game's own log, leak warnings at shutdown), which buries the few lines that matter.
 
 Run only part of the suite while you work on something:
 
 ```bash
 # Only scripts whose file name contains "faction"
-$GODOT --headless --path . -s addons/gut/gut_cmdln.gd -gconfig=.gutconfig.json -gselect=faction
+GODOT=$GODOT tests/run.sh faction
 
-# Only tests whose name contains "rotation"
-$GODOT --headless --path . -s addons/gut/gut_cmdln.gd -gconfig=.gutconfig.json -gunit_test_name=rotation
+# Only tests whose name contains "rotation" (any GUT option is passed through)
+GODOT=$GODOT tests/run.sh -gunit_test_name=rotation
+```
+
+The plain GUT command still works and shows everything, including the leak warnings printed after
+the summary (`ObjectDB instances were leaked at exit`, `resources still in use at exit`; they come
+from engine shutdown and don't affect the result):
+
+```bash
+$GODOT --headless --path . -s addons/gut/gut_cmdln.gd -gconfig=.gutconfig.json
 ```
 
 If you add a new `class_name` script, run `$GODOT --headless --path . --import` once first (or focus
