@@ -26,16 +26,20 @@ import-assets:
   script:
     - godot --verbose --headless --import --editor --quit
 
-# GUT unit tests. Results show on merge requests via the JUnit report.
+# GUT unit tests through tests/run.sh: a short job log, and the job fails when a
+# test script doesn't load (plain GUT skips it). The full GUT log is kept as
+# gut.log. Results show on merge requests via the JUnit report.
 unit-tests:
   stage: test
   before_script:
     - godot --headless --import
   script:
     - mkdir -p test-results
-    - godot --headless -s addons/gut/gut_cmdln.gd -gconfig=.gutconfig.json -gjunit_xml_file=res://test-results/junit.xml
+    - TEST_LOG=test-results/gut.log GODOT=godot tests/run.sh -gjunit_xml_file=res://test-results/junit.xml
   artifacts:
     when: always
+    paths:
+      - test-results/gut.log
     reports:
       junit: test-results/junit.xml
 

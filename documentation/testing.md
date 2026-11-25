@@ -320,8 +320,8 @@ loop in `tests/smoke/server_smoke.sh`.
 `.gitlab-ci.yml` has a `test` stage that runs after assets are imported and before the builds are
 exported:
 
-- **`unit-tests`** runs the GUT suite and writes a JUnit report. GitLab shows that report on merge
-  requests, test by test.
+- **`unit-tests`** runs the GUT suite through `tests/run.sh` and writes a JUnit report. GitLab shows
+  that report on merge requests, test by test. The full GUT log is kept as `test-results/gut.log`.
 - **`server-smoke`** runs the smoke test and keeps `smoke.log` as a job artifact. Download it from
   the job page when the smoke test fails.
 
