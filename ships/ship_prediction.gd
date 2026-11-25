@@ -33,12 +33,8 @@ func record(tick: int, local_force: Vector3, local_torque: Vector3) -> void:
 ## older than one already used. Thrust up to the ack is forgotten.
 func reconcile(server: FlightIntegrator.FlightState, ack: int, last_tick: int,
 		flight: FlightIntegrator, dt: float) -> FlightIntegrator.FlightState:
-	if ack < _last_ack:
+	if not confirm(ack):
 		return null
-	_last_ack = ack
-	for tick in _history.keys():
-		if tick <= ack:
-			_history.erase(tick)
 	var s := server.duplicate()
 	for tick in range(ack + 1, last_tick + 1):
 		var force := Vector3.ZERO
@@ -49,6 +45,18 @@ func reconcile(server: FlightIntegrator.FlightState, ack: int, last_tick: int,
 			torque = basis * _history[tick][1]
 		s = flight.step(s, force, torque, dt)
 	return s
+
+
+## The server has applied input [param ack]: forget thrust up to it. False for
+## an ack older than one already used (nothing changes then).
+func confirm(ack: int) -> bool:
+	if ack < _last_ack:
+		return false
+	_last_ack = ack
+	for tick in _history.keys():
+		if tick <= ack:
+			_history.erase(tick)
+	return true
 
 
 ## The earliest tick still recorded, or -1 when none is.

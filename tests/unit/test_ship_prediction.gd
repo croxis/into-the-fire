@@ -159,3 +159,186 @@ func test_no_state_is_sent_to_a_pilot_who_left() -> void:
 			InputChannel.make_record(2, Vector3.ZERO, Vector3.ZERO)])
 	pilot.input_channel.next()
 	assert_false(ship._send_pilot_state(), "nothing sent")
+
+
+# A replay must land where Jolt really flew the ship. -------------------------
+# The client flies with Jolt but replays with FlightIntegrator.step; any
+# difference is a correction on every state from the server while flying.
+
+const Ticks := preload("res://tests/unit/ticks.gd")
+const SystemScene := preload("res://systems/system_template.tscn")
+
+
+func test_a_replay_lands_where_jolt_flew_the_ship() -> void:
+	var stepper := ZoneStepper.new()
+	add_child_autofree(stepper)
+	var system: System = SystemScene.instantiate()
+	add_child_autofree(system)
+	stepper.add_zone(system)
+	var ship: Ship = Content.instantiate(&"b5:aurora_starfury")
+	system.add_ship(ship)
+	ship.prediction_forced = true  # So it records its thrust, as the pilot's client does.
+	var helm: HelmCapability = (ship.get_node("Consoles/Cockpit") as Console).get_capability(HelmCapability)
+	helm.throttle = Vector3(0.5, 0, -1)
+	helm.input_rotation_throttle = Vector3(0.6, -0.4, 0.3)
+	await Ticks.run(30)  # Get it moving and turning.
+	var start := FlightIntegrator.FlightState.new()
+	start.transform = ship.global_transform
+	start.linear_velocity = ship.linear_velocity
+	start.angular_velocity = ship.angular_velocity
+	await Ticks.run(15, 30)
+	var replayed := ship.prediction.reconcile(start, 29, 44, ship.flight, Ticks.DT)
+	assert_gt(ship.angular_velocity.length(), 0.5, "it really is turning")
+	assert_almost_eq(replayed.transform.origin, ship.global_position, Vector3.ONE * 1e-3, "position")
+	assert_almost_eq(replayed.transform.basis.z, ship.global_basis.z, Vector3.ONE * 1e-5, "heading")
+	assert_almost_eq(replayed.angular_velocity, ship.angular_velocity, Vector3.ONE * 1e-5, "spin")
+
+
+# Flight assist (autospin) works out thrust from how fast the ship spins, so a
+# replay must work it out again from the replayed spin, as the server does.
+
+## Gives both helms the same input each tick, before the ships fly: some turning,
+## then none (so autospin, when on, damps the spin).
+class Pilot extends Node:
+	var helms: Array[HelmCapability] = []
+
+	func _enter_tree() -> void:
+		NetworkTime.before_tick.connect(_steer)
+
+	func _exit_tree() -> void:
+		NetworkTime.before_tick.disconnect(_steer)
+
+	func _steer(_dt: float, tick: int) -> void:
+		for helm in helms:
+			helm.throttle = Vector3(0, 0, -1)
+			helm.input_rotation_throttle = Vector3(0.5, -0.3, 0) if tick % 40 < 15 else Vector3.ZERO
+
+
+## Flies a predicted "client" ship and a "server" ship side by side with the
+## same input, the server's state reaching the client [param latency] ticks
+## late. The server's ship is knocked once (a collision). Returns the client's
+## corrections after the first one the knock causes has had time to arrive.
+func _corrections_after_a_knock(autospin: bool, latency := 6) -> int:
+	var stepper := ZoneStepper.new()
+	add_child_autofree(stepper)
+	var ships: Array[Ship] = []
+	var pilot := Pilot.new()
+	for i in 2:
+		var system: System = SystemScene.instantiate()  # One zone each: no collisions.
+		add_child_autofree(system)
+		stepper.add_zone(system)
+		var ship: Ship = Content.instantiate(&"b5:aurora_starfury")
+		system.add_ship(ship)
+		var helm: HelmCapability = (ship.get_node("Consoles/Cockpit") as Console).get_capability(HelmCapability)
+		helm.autospin = autospin
+		pilot.helms.append(helm)
+		ships.append(ship)
+	add_child_autofree(pilot)
+	var client := ships[0]
+	var server := ships[1]
+	client.prediction_forced = true
+	var sent: Dictionary[int, FlightIntegrator.FlightState] = {}
+	var corrections := 0
+	for tick in 160:
+		await Ticks.run(1, tick)
+		if tick == 30:
+			server.angular_velocity += server.global_basis.y * 0.05
+		var s := FlightIntegrator.FlightState.new()
+		s.transform = server.global_transform
+		s.linear_velocity = server.linear_velocity
+		s.angular_velocity = server.angular_velocity
+		sent[tick] = s
+		if tick >= latency:
+			client.reconcile_with(sent[tick - latency], tick - latency, tick)
+			if tick > 30 + latency + 1 and client.smoother.last_correction > 1e-4:
+				corrections += 1
+	return corrections
+
+
+func test_a_correction_moves_the_physics_body_too() -> void:
+	# Godot sends a node's new transform to the physics engine only at the start
+	# of the next physics frame; our ticks step the zone before that, and the
+	# step then writes the old place back. A correction must reach Jolt at once.
+	var stepper := ZoneStepper.new()
+	add_child_autofree(stepper)
+	var system: System = SystemScene.instantiate()
+	add_child_autofree(system)
+	stepper.add_zone(system)
+	var ship: Ship = Content.instantiate(&"b5:aurora_starfury")
+	system.add_ship(ship)
+	ship.prediction_forced = true
+	await Ticks.run(5)
+	var server := FlightIntegrator.FlightState.new()
+	server.transform = ship.global_transform.translated(Vector3(CorrectionSmoother.SNAP_DISTANCE * 2, 0, 0))
+	ship.reconcile_with(server, 4, 4)  # Nothing to replay; a big jump, so it snaps.
+	await Ticks.run(1, 5)
+	assert_almost_eq(ship.global_position.x, CorrectionSmoother.SNAP_DISTANCE * 2, 1.0)
+
+
+func test_with_autospin_off_a_knock_is_corrected_once() -> void:
+	assert_eq(await _corrections_after_a_knock(false), 0)
+
+
+func test_with_autospin_on_a_knock_is_corrected_once() -> void:
+	# Autospin works out thrust from the current spin, but the client records
+	# thrust, so after a knock it replays thrust worked out from its own wrong
+	# spin: about a round trip of small corrections (8 here). Fix: record input
+	# and re-run flight assist in the replay.
+	pending("replay records thrust, not input; flight assist needs input replay")
+	return
+	@warning_ignore("unreachable_code")
+	assert_eq(await _corrections_after_a_knock(true), 0)
+
+
+# Held on a launch arm, the ship is moved by the arm on the server, not by the
+# pilot, so the client follows the server's state exactly instead of predicting.
+
+func _predicted_starfury_in_a_zone() -> Ship:
+	var stepper := ZoneStepper.new()
+	add_child_autofree(stepper)
+	var system: System = SystemScene.instantiate()
+	add_child_autofree(system)
+	stepper.add_zone(system)
+	var ship: Ship = Content.instantiate(&"b5:aurora_starfury")
+	system.add_ship(ship)
+	ship.prediction_forced = true
+	return ship
+
+
+func _state_at(origin: Vector3, velocity := Vector3.ZERO) -> FlightIntegrator.FlightState:
+	var s := FlightIntegrator.FlightState.new()
+	s.transform = Transform3D(Basis(), origin)
+	s.linear_velocity = velocity
+	return s
+
+
+func test_a_frozen_ship_goes_exactly_where_the_server_has_it() -> void:
+	var ship := _predicted_starfury_in_a_zone()
+	await Ticks.run(5)
+	ship.reconcile_with(_state_at(Vector3(3, 0, 0)), 2, 4, true)  # No easing, no replay.
+	assert_eq(ship.global_position, Vector3(3, 0, 0))
+	assert_true(ship.freeze, "frozen here too, so it doesn't fly off between states")
+	await Ticks.run(1, 5)
+	assert_eq(ship.global_position, Vector3(3, 0, 0))
+	assert_eq(ship._corrections, 0, "following the arm isn't a correction")
+
+
+func test_released_it_is_predicted_again() -> void:
+	var ship := _predicted_starfury_in_a_zone()
+	await Ticks.run(5)
+	ship.reconcile_with(_state_at(Vector3(3, 0, 0)), 2, 4, true)
+	ship.reconcile_with(_state_at(Vector3(3, 0, 0), Vector3(0, 0, -30)), 4, 4, false)
+	assert_false(ship.freeze)
+	await Ticks.run(1, 5)
+	assert_lt(ship.global_position.z, 0.0, "flies off the arm")
+
+
+func test_thrust_is_recorded_while_frozen() -> void:
+	# So the replay after release includes what the pilot did as the arm let
+	# go, which the server applied as soon as its ship was free.
+	var ship := _predicted_starfury_in_a_zone()
+	ship.freeze = true
+	(ship.get_node("Consoles/Cockpit") as Console).get_capability(HelmCapability).throttle = Vector3(0, 0, -1)
+	await Ticks.run(3)
+	assert_eq(ship.prediction.size(), 3)
+	assert_eq(ship.global_position, Vector3.ZERO, "but it doesn't fly")
