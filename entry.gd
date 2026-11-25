@@ -54,6 +54,8 @@ func _add_main_menu() -> void:
 	add_child(main_menu)
 	move_child(main_menu, $network.get_index() + 1)  # Same draw order as before.
 	# Order matters: entry hosts the server before Galaxy checks is_server.
+	main_menu.join_game.connect(func(_ip, _port, player_name, _s, _p) -> void:
+			_show_role("Client", player_name))
 	main_menu.join_game.connect($Galaxy._on_main_menu_join_game)
 	main_menu.join_game.connect($network._on_main_menu_join_game)
 	main_menu.new_game.connect(_on_main_menu_new_game)
@@ -74,6 +76,13 @@ func _add_discord() -> void:
 	add_child(discord)
 
 
+## Puts "Host" or "Client" and the player's name in the window title.
+func _show_role(role: String, player_name: String) -> void:
+	if options.has_ui():
+		get_window().title = LaunchOptions.window_title(
+				ProjectSettings.get_setting("application/config/name"), role, player_name)
+
+
 func _start_dedicated() -> void:
 	_dedicated_server = true
 	if not $network.start_server(options.game_name, options.password, options.port):
@@ -88,6 +97,7 @@ func _start_test_server() -> void:
 		print("Failure to activate network. Is port in use?")
 		get_tree().quit(1)
 		return
+	_show_role("Host", "Test Host")
 	var callback := Callable($Galaxy, "finish_setup_galaxy_client")
 	$Galaxy.game_name = "Test Server"
 	$Galaxy.setup_new_galaxy(false, callback)
@@ -101,6 +111,7 @@ func _start_test_player() -> void:
 				CONNECT_ONE_SHOT)
 	if options.launch:
 		_launch_when_aboard()
+	_show_role("Client", "Test Player")
 	await get_tree().create_timer(5.0).timeout
 	$network.join_game(options.host, options.port, "Test Player", "", "")
 	$loading.visible = false
@@ -156,6 +167,7 @@ func _on_network_connection_succeeded():
 func _on_main_menu_new_game(game_name, player_name, port, server_password, player_password):
 	if not $network.host_server(game_name, player_name, port, server_password, player_password):
 		return
+	_show_role("Host", player_name)
 	end_title_sequence()
 	
 

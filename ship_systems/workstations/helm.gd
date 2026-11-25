@@ -15,9 +15,37 @@ class_name HelmCapability
 ## Called by the ship each tick, before it flies (Ship._rollback_tick), so the
 ## thruster power set here moves the ship on the same tick.
 func _rollback_tick(dt, _tick, _is_fresh):
+	var local_velocity := Vector3.ZERO
+	var local_spin := Vector3.ZERO
+	if ship:
+		local_velocity = ship.global_transform.basis.transposed() * ship.linear_velocity
+		local_spin = ship.local_angular_velocity
+	var throttles := assist(input_record(), local_velocity, local_spin, dt)
+	throttle = throttles[0]
+	rotation_throttle = throttles[1]
+	system.request_thrust(throttle, rotation_throttle)
+
+
+## What the pilot (or NPC) set at this helm this tick: the input a replay of
+## this tick needs (own-ship prediction, ShipPrediction).
+func input_record() -> Dictionary:
+	return {"throttle": throttle, "rotation": input_rotation_throttle,
+			"autospin": autospin, "autobreak": autobreak}
+
+
+## [linear, rotation] throttles for [param input] (an input_record()), with
+## flight assist working against [param local_velocity] and
+## [param local_spin] (the ship's own frame). Replays call this with the
+## replayed state, so it must depend on nothing else: the PIDs have only
+## proportional gain (ki = kd = 0), so their own memory doesn't matter. Give
+## them integral or derivative gain and replays need the PIDs' state too.
+func assist(input: Dictionary, local_velocity: Vector3, local_spin: Vector3,
+		dt: float) -> Array[Vector3]:
+	var linear: Vector3 = input.throttle
+	var input_rotation: Vector3 = input.rotation
 	# Pilot input drives rotation; autospin only takes over idle axes below.
-	rotation_throttle = input_rotation_throttle
-	if autospin:
+	var rotation := input_rotation
+	if input.autospin:
 		# We can just assume local space
 		# If there is no input on an axis, we want to stop motion on it
 		# If we are spinning left, then a right input would be the same as neutral, until the rotation stops.
@@ -26,37 +54,27 @@ func _rollback_tick(dt, _tick, _is_fresh):
 		# would act more like X or Wing Commander
 		var deadzone := 0.001
 		# The X axis of the joystick manipulates the y axis of the ship. Godot accounts for this
-		if abs(input_rotation_throttle.y) <= deadzone:
-			var ry := ship.local_angular_velocity.y
-			var err_rot_y := 0.0 - ry
-			rotation_throttle.y = $PIDS/PID_rotate_break_Y._update(err_rot_y, dt)		
-		if abs(input_rotation_throttle.x) <= deadzone:
-			var rx := ship.local_angular_velocity.x
-			var err_rot_x := 0.0 - rx
-			rotation_throttle.x = $PIDS/PID_rotate_break_X._update(err_rot_x, dt)
-		if abs(input_rotation_throttle.z) <= deadzone:
-			var rz := ship.local_angular_velocity.z
-			var err_rot_z := 0.0 - rz
-			rotation_throttle.z = $PIDS/PID_rotate_break_Z._update(err_rot_z, dt)
+		if abs(input_rotation.y) <= deadzone:
+			rotation.y = $PIDS/PID_rotate_break_Y._update(0.0 - local_spin.y, dt)
+		if abs(input_rotation.x) <= deadzone:
+			rotation.x = $PIDS/PID_rotate_break_X._update(0.0 - local_spin.x, dt)
+		if abs(input_rotation.z) <= deadzone:
+			rotation.z = $PIDS/PID_rotate_break_Z._update(0.0 - local_spin.z, dt)
 
-	if autobreak:
-		var local_velocity := ship.global_transform.basis.transposed() * ship.linear_velocity
-		if throttle.x == 0:
-			var err_x := 0.0 - local_velocity.x
-			throttle.x = $PIDS/PID_X._update(err_x, dt)
-			if abs(throttle.x) < 0.02:
-				throttle.x = 0.0
-		if throttle.y == 0:
-			var err_y := 0.0 - local_velocity.y
-			throttle.y = $PIDS/PID_X._update(err_y, dt)
-			if abs(throttle.y) < 0.02:
-				throttle.y = 0.0
-		if throttle.z == 0:
-			var err_z := 0.0 - local_velocity.z
-			throttle.z = $PIDS/PID_X._update(err_z, dt)
-			if abs(throttle.z) < 0.02:
-				throttle.z = 0.0
-	system.request_thrust(throttle, rotation_throttle)
+	if input.autobreak:
+		if linear.x == 0:
+			linear.x = $PIDS/PID_X._update(0.0 - local_velocity.x, dt)
+			if abs(linear.x) < 0.02:
+				linear.x = 0.0
+		if linear.y == 0:
+			linear.y = $PIDS/PID_X._update(0.0 - local_velocity.y, dt)
+			if abs(linear.y) < 0.02:
+				linear.y = 0.0
+		if linear.z == 0:
+			linear.z = $PIDS/PID_X._update(0.0 - local_velocity.z, dt)
+			if abs(linear.z) < 0.02:
+				linear.z = 0.0
+	return [linear, rotation]
 
 
 func toggle_autospin() -> bool:

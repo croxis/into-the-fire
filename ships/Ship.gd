@@ -308,6 +308,10 @@ func _send_pilot_state() -> bool:
 		return false
 	_receive_state.rpc_id(pilot.multiplayer_id, pilot.input_channel.last_applied_tick,
 			global_transform, linear_velocity, angular_velocity, freeze)
+	if NetDebug.on():  # TEMPORARY
+		NetDebug.line("server", "state ack=%d pos=%s vel=%s spin=%s frozen=%s" % [
+				pilot.input_channel.last_applied_tick, NetDebug.v(global_position),
+				NetDebug.v(linear_velocity), NetDebug.v(angular_velocity), freeze])
 	return true
 
 
@@ -345,11 +349,13 @@ func reconcile_with(server: FlightIntegrator.FlightState, ack: int, last_tick: i
 		freeze = false  # Released by the arm.
 	if flight == null:
 		flight = FlightIntegrator.from_body(PhysicsServer3D.body_get_direct_state(get_rid()))
-	var now := prediction.reconcile(server, ack, last_tick, flight, NetworkTime.ticktime)
+	var now := prediction.reconcile(server, ack, last_tick, flight, NetworkTime.ticktime, _replay_thrust)
 	if now == null:
 		return  # Older than a state already used.
 	place(smoother.apply(global_transform, now.transform))
 	var error := smoother.last_correction
+	if NetDebug.on():  # TEMPORARY
+		NetDebug.line("client", "reconcile ack=%d last=%d correction=%.6f" % [ack, last_tick, error])
 	if error > 0.001:
 		_corrections += 1
 		_largest_correction = maxf(_largest_correction, error)
@@ -377,19 +383,22 @@ func _on_tick(dt: float, tick: int) -> void:
 ## The ship's whole tick, in a fixed order: helms set thruster power, then the
 ## ship flies with it. Prediction (N3) will replay ticks through here.
 func _rollback_tick(dt, tick, is_fresh):
-	for console in $Consoles.get_children():
-		var helm := (console as Console).get_capability(HelmCapability) if console is Console else null
-		if helm:
-			(helm as HelmCapability)._rollback_tick(dt, tick, is_fresh)
+	var helms := _helms()
+	if is_predicted_here() and not is_station:
+		# Recorded before the helms run (they write assisted throttle back), and
+		# while frozen too: the server may already have let go of the ship.
+		prediction.record(tick, helms.map(func(h: HelmCapability) -> Dictionary: return h.input_record()))
+		if NetDebug.on() and not helms.is_empty():  # TEMPORARY: state before this tick = after the last.
+			var rec: Dictionary = helms[0].input_record()
+			NetDebug.line("client", "tick %d pre_pos=%s pre_vel=%s pre_spin=%s thr=%s rot=%s spin=%s brake=%s frozen=%s" % [
+					tick, NetDebug.v(global_position), NetDebug.v(linear_velocity), NetDebug.v(angular_velocity),
+					NetDebug.v(rec.throttle), NetDebug.v(rec.rotation), rec.autospin, rec.autobreak, freeze])
+	for helm in helms:
+		helm._rollback_tick(dt, tick, is_fresh)
 	if is_station:
 		return
 	if custom_integrator and not freeze:  # Frozen: held by a launch arm.
 		_fly(dt, tick)
-	elif custom_integrator and is_predicted_here():
-		# Frozen, but the server may already have released it: keep the pilot's
-		# thrust for the replay after release.
-		var state := PhysicsServer3D.body_get_direct_state(get_rid())
-		_record_thrust(tick, thrust(state.center_of_mass))
 	acceleraction = (linear_velocity - start_velocity) / dt
 	start_velocity = linear_velocity
 
@@ -407,9 +416,7 @@ func _fly(dt: float, tick := 0) -> void:
 	var state := PhysicsServer3D.body_get_direct_state(get_rid())
 	if flight == null:
 		flight = FlightIntegrator.from_body(state)
-	var push := thrust(state.center_of_mass)
-	if is_predicted_here():
-		_record_thrust(tick, push)
+	var push := thrust(state.center_of_mass, global_transform.basis)
 	var now := FlightIntegrator.FlightState.new()
 	now.transform = global_transform
 	now.linear_velocity = linear_velocity
@@ -419,20 +426,37 @@ func _fly(dt: float, tick := 0) -> void:
 	angular_velocity = next.angular_velocity
 
 
-## Remembers this tick's thrust ([force, torque], world space) for replays, in
-## the ship's own frame.
-func _record_thrust(tick: int, push: Array[Vector3]) -> void:
-	var to_ship := global_basis.orthonormalized().inverse()
-	prediction.record(tick, to_ship * push[0], to_ship * push[1])
+## The helm capabilities of this ship's consoles, in console order.
+func _helms() -> Array[HelmCapability]:
+	var helms: Array[HelmCapability] = []
+	for console in $Consoles.get_children():
+		var helm := (console as Console).get_capability(HelmCapability) if console is Console else null
+		if helm:
+			helms.append(helm)
+	return helms
+
+
+## Replays (ShipPrediction): [force, torque] for the helms' recorded
+## [param inputs] with the ship in [param s], worked out as a live tick does:
+## flight assist from the replayed spin and speed, then the thrusters.
+func _replay_thrust(inputs: Variant, s: FlightIntegrator.FlightState) -> Array[Vector3]:
+	var helms := _helms()
+	var to_ship := s.transform.basis.transposed()
+	var local_velocity := to_ship * s.linear_velocity
+	var local_spin := to_ship * s.angular_velocity
+	for i in mini(helms.size(), (inputs as Array).size()):
+		var throttles := helms[i].assist(inputs[i], local_velocity, local_spin, NetworkTime.ticktime)
+		helms[i].system.request_thrust(throttles[0], throttles[1])
+	return thrust(s.transform.basis * flight.center_of_mass_local, s.transform.basis)
 
 
 ## [force, torque] from all thrusters this tick, in world space; torque is about
 ## the centre of mass ([param center_of_mass]: offset from the ship's origin, in
-## world axes). The same sums Jolt made from apply_force at each thruster.
-func thrust(center_of_mass: Vector3) -> Array[Vector3]:
+## world axes), with the ship turned to [param basis]. The same sums Jolt made
+## from apply_force at each thruster.
+func thrust(center_of_mass: Vector3, basis: Basis) -> Array[Vector3]:
 	var force := Vector3.ZERO
 	var torque := Vector3.ZERO
-	var basis := global_transform.basis
 	for thruster in $Engines.thrusters:
 		var f: Vector3 = basis * thruster.force_vector
 		force += f

@@ -132,3 +132,16 @@ func test_launch_flag_for_automated_flight_tests() -> void:
 	assert_true(options.launch)
 	assert_false("--launch" in options.unknown)
 	assert_false(LaunchOptions.parse(PackedStringArray(["--testplayer"])).launch)
+
+
+# Window title: which window is which when a host and clients run side by side.
+
+func test_window_title_names_the_role_and_player() -> void:
+	assert_eq(LaunchOptions.window_title("Into The Fire", "Host", "Test Host"),
+			"Into The Fire [Host: Test Host]")
+	assert_eq(LaunchOptions.window_title("Into The Fire", "Client", "Test Player"),
+			"Into The Fire [Client: Test Player]")
+
+
+func test_window_title_without_a_player_name() -> void:
+	assert_eq(LaunchOptions.window_title("Into The Fire", "Client", ""), "Into The Fire [Client]")

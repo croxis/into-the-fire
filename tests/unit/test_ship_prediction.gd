@@ -1,7 +1,8 @@
 extends GutTest
 ## ShipPrediction: the pilot's client flies its own ship at once, and when the
 ## server's state for an earlier tick arrives, starts again from it and replays
-## its own thrust since (netcode slices N3b/N3c).
+## its own input since (netcode slices N3b/N3c), working thrust out again from
+## the replayed state, as the server did.
 
 const DT := 1.0 / 60.0
 ## Forward thrust and a little yaw, in the ship's own frame.
@@ -19,13 +20,22 @@ func before_each() -> void:
 	prediction = ShipPrediction.new()
 
 
-## Flies ticks [first, last] locally from [param start], recording thrust.
+## The thrust for a recorded input [force, torque] (ship frame), in world space.
+func _thrust(input: Variant, s: FlightIntegrator.FlightState) -> Array[Vector3]:
+	return [s.transform.basis * input[0], s.transform.basis * input[1]]
+
+
+func _replay(server: FlightIntegrator.FlightState, ack: int, last: int) -> FlightIntegrator.FlightState:
+	return prediction.reconcile(server, ack, last, flight, DT, _thrust)
+
+
+## Flies ticks [first, last] locally from [param start], recording input.
 func _fly(start: FlightIntegrator.FlightState, first: int, last: int) -> FlightIntegrator.FlightState:
 	var s := start
 	for tick in range(first, last + 1):
-		prediction.record(tick, PUSH, TWIST)
-		var basis := s.transform.basis
-		s = flight.step(s, basis * PUSH, basis * TWIST, DT)
+		prediction.record(tick, [PUSH, TWIST])
+		var push := _thrust([PUSH, TWIST], s)
+		s = flight.step(s, push[0], push[1], DT)
 	return s
 
 
@@ -34,7 +44,7 @@ func test_a_correct_prediction_needs_no_correction() -> void:
 	var start := FlightIntegrator.FlightState.new()
 	var at_5 := _fly(start, 1, 5)
 	var at_10 := _fly(at_5, 6, 10)
-	var replayed := prediction.reconcile(at_5, 5, 10, flight, DT)
+	var replayed := _replay(at_5, 5, 10)
 	assert_almost_eq(replayed.transform.origin, at_10.transform.origin, Vector3.ONE * 1e-9)
 	assert_almost_eq(replayed.transform.basis.z, at_10.transform.basis.z, Vector3.ONE * 1e-9)
 	assert_almost_eq(replayed.linear_velocity, at_10.linear_velocity, Vector3.ONE * 1e-9)
@@ -47,13 +57,13 @@ func test_a_server_correction_is_carried_forward() -> void:
 	var at_10 := _fly(at_5, 6, 10)
 	var server := at_5.duplicate()
 	server.transform.origin += Vector3(3, 0, 0)
-	var replayed := prediction.reconcile(server, 5, 10, flight, DT)
+	var replayed := _replay(server, 5, 10)
 	assert_almost_eq(replayed.transform.origin, at_10.transform.origin + Vector3(3, 0, 0), Vector3.ONE * 1e-6)
 
 
 func test_confirmed_thrust_is_forgotten() -> void:
 	_fly(FlightIntegrator.FlightState.new(), 1, 10)
-	prediction.reconcile(FlightIntegrator.FlightState.new(), 5, 10, flight, DT)
+	_replay(FlightIntegrator.FlightState.new(), 5, 10)
 	assert_eq(prediction.oldest_tick(), 6, "ticks up to the server's ack are dropped")
 
 
@@ -61,15 +71,32 @@ func test_a_missing_tick_replays_as_coasting() -> void:
 	# A tick with no record (say the ship was frozen) adds no thrust.
 	var server := FlightIntegrator.FlightState.new()
 	server.linear_velocity = Vector3(0, 0, -10)
-	var replayed := prediction.reconcile(server, 0, 3, flight, DT)
+	var replayed := _replay(server, 0, 3)
 	assert_almost_eq(replayed.transform.origin, Vector3(0, 0, -10 * 3 * DT), Vector3.ONE * 1e-9)
 
 
 func test_an_old_ack_is_ignored() -> void:
 	# Unreliable, ordered packets can still arrive after a newer one was used.
 	_fly(FlightIntegrator.FlightState.new(), 1, 10)
-	prediction.reconcile(FlightIntegrator.FlightState.new(), 7, 10, flight, DT)
-	assert_null(prediction.reconcile(FlightIntegrator.FlightState.new(), 6, 10, flight, DT))
+	_replay(FlightIntegrator.FlightState.new(), 7, 10)
+	assert_null(_replay(FlightIntegrator.FlightState.new(), 6, 10))
+
+
+func test_thrust_that_depends_on_the_state_is_worked_out_again() -> void:
+	# Flight assist: thrust that damps the spin, so it depends on the spin now.
+	# The server's ship spun differently (knocked); replaying the client's
+	# recorded thrust would be wrong, so the replay works it out again.
+	var damp := func(_input: Variant, s: FlightIntegrator.FlightState) -> Array[Vector3]:
+		return [Vector3.ZERO, -s.angular_velocity * 2000.0]
+	var server := FlightIntegrator.FlightState.new()
+	server.angular_velocity = Vector3(0, 0.5, 0)
+	var truth := server
+	for tick in range(1, 6):
+		prediction.record(tick, null)
+		var push: Array[Vector3] = damp.call(null, truth)
+		truth = flight.step(truth, push[0], push[1], DT)
+	var replayed := prediction.reconcile(server, 0, 5, flight, DT, damp)
+	assert_almost_eq(replayed.angular_velocity, truth.angular_velocity, Vector3.ONE * 1e-12)
 
 
 func test_history_is_bounded() -> void:
@@ -187,7 +214,7 @@ func test_a_replay_lands_where_jolt_flew_the_ship() -> void:
 	start.linear_velocity = ship.linear_velocity
 	start.angular_velocity = ship.angular_velocity
 	await Ticks.run(15, 30)
-	var replayed := ship.prediction.reconcile(start, 29, 44, ship.flight, Ticks.DT)
+	var replayed := ship.prediction.reconcile(start, 29, 44, ship.flight, Ticks.DT, ship._replay_thrust)
 	assert_gt(ship.angular_velocity.length(), 0.5, "it really is turning")
 	assert_almost_eq(replayed.transform.origin, ship.global_position, Vector3.ONE * 1e-3, "position")
 	assert_almost_eq(replayed.transform.basis.z, ship.global_basis.z, Vector3.ONE * 1e-5, "heading")
@@ -280,13 +307,9 @@ func test_with_autospin_off_a_knock_is_corrected_once() -> void:
 
 
 func test_with_autospin_on_a_knock_is_corrected_once() -> void:
-	# Autospin works out thrust from the current spin, but the client records
-	# thrust, so after a knock it replays thrust worked out from its own wrong
-	# spin: about a round trip of small corrections (8 here). Fix: record input
-	# and re-run flight assist in the replay.
-	pending("replay records thrust, not input; flight assist needs input replay")
-	return
-	@warning_ignore("unreachable_code")
+	# Autospin works out thrust from the current spin. Replaying the thrust the
+	# client worked out from its own (wrong) spin gave about a round trip of
+	# small corrections after a knock; the replay works it out again instead.
 	assert_eq(await _corrections_after_a_knock(true), 0)
 
 

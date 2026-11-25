@@ -38,6 +38,10 @@ const MAX_SHRINK_AFTER := SHRINK_AFTER * 8
 const BACKLOG_SLACK := 3
 const _VECTOR_FIELDS: Array[String] = ["throttle", "rotation_throttle"]
 const _BOOL_FIELDS: Array[String] = ["autospin_toggle", "autobreak_toggle", "debug_all_stop"]
+## One-shot presses that switch a setting: a dropped one is carried to the next
+## input used (two cancel out), or the server would fly with the other setting
+## for good while the pilot's client flies with theirs.
+const _TOGGLE_FIELDS: Array[String] = ["autospin_toggle", "autobreak_toggle"]
 
 ## Server: the client tick of the last input handed out by next(), -1 before any.
 var last_applied_tick := -1
@@ -46,6 +50,7 @@ var _recent: Array[Dictionary] = []  # Client: the latest records, oldest first.
 var _queue: Dictionary[int, Dictionary] = {}  # Server: tick -> record.
 var _last: Dictionary = make_record(-1, Vector3.ZERO, Vector3.ZERO)  # Server.
 var _buffering := true  # Server: waiting for the cushion.
+var _carried: Dictionary = {}  # Server: field -> true, presses from dropped inputs still to apply.
 ## Server: the cushion now, between JITTER_BUFFER and MAX_CUSHION. Each hold or
 ## skip is a one-tick jump on the pilot's screen, so a link that runs dry gets a
 ## tick more; a steady one gives it back, since every tick of cushion also shows
@@ -100,7 +105,7 @@ func receive(packet: Variant) -> String:
 		if r.tick > last_applied_tick and not _queue.has(r.tick):
 			_queue[r.tick] = r
 	while _queue.size() > MAX_QUEUE:
-		_queue.erase(_queue.keys().min())
+		_drop(_queue.keys().min())
 	return ""
 
 
@@ -137,7 +142,7 @@ func next() -> Dictionary:
 		while _queue.size() > cushion + 1:
 			_skip_oldest()
 	var tick: int = _queue.keys().min()
-	_last = _queue[tick]
+	_last = _with_carried(_queue[tick])
 	_queue.erase(tick)
 	last_applied_tick = tick
 	return _last
@@ -150,8 +155,31 @@ func _set_cushion(size: int) -> void:
 
 
 func _skip_oldest() -> void:
-	_queue.erase(_queue.keys().min())
+	_drop(_queue.keys().min())
 	skipped_ticks += 1
+
+
+## Removes the input for [param tick] unused, keeping its presses for later.
+func _drop(tick: int) -> void:
+	var r: Dictionary = _queue[tick]
+	for field in _TOGGLE_FIELDS:
+		if r[field]:
+			_carried[field] = not _carried.get(field, false)
+	if r.debug_all_stop:
+		_carried["debug_all_stop"] = true  # A stop, not a switch: once is enough.
+	_queue.erase(tick)
+
+
+## [param r] with the presses of dropped inputs added (a copy when any).
+func _with_carried(r: Dictionary) -> Dictionary:
+	if _carried.is_empty():
+		return r
+	var out := r.duplicate()
+	for field in _TOGGLE_FIELDS:
+		out[field] = out[field] != _carried.get(field, false)
+	out.debug_all_stop = out.debug_all_stop or _carried.get("debug_all_stop", false)
+	_carried.clear()
+	return out
 
 
 ## Server: inputs waiting to be applied.

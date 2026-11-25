@@ -15,7 +15,9 @@ Folders with their own `CLAUDE.md` (loaded when you work there): `ships/` (fligh
   reasoning behind non-obvious choices.
 - GDScript first. GDExtensions or engine modules if GDScript is not sufficient or when profiling shows a need.
 - Prefer editing scenes through the Godot editor (godot-ai MCP tools) over hand-editing `.tscn`/`.tres`.
-  If you must hand-edit, keep `uid` and `unique_id` values intact.
+  If you must hand-edit, keep `uid` and `unique_id` values intact. To understand a scene, start with
+  `scene_get_hierarchy` / `node_get_properties` (editor running) or `rg -n` for the node you need; read a whole
+  `.tscn` only when that isn't enough (meshes and materials make them long).
 - The README says no vibe coding; keep changes reviewable and small.
 - Search with `rg`, which honours `.ignore` (addons, `demo/`, `*.import`, `*.uid` and the action maps are
   skipped). To search an addon, name its path: `rg NetworkTime addons/netfox`.

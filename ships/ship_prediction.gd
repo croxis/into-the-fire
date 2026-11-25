@@ -4,50 +4,51 @@ extends RefCounted
 ## or networking: Ship records and reconciles through this.
 ##
 ## The client flies its ship at once from its own input. Each tick, Ship records
-## the thrust it applied, in the ship's own frame. The server, later, sends the
-## ship's state together with the client tick of the last input it applied (the
-## ack). reconcile() starts again from that state and replays the recorded
-## thrust for every tick after the ack, with the same FlightIntegrator, so a
-## correct prediction lands exactly where the ship already is and a wrong one
-## (a collision, a lost input) is carried forward from the server's truth.
+## the input its helms used. The server, later, sends the ship's state together
+## with the client tick of the last input it applied (the ack). reconcile()
+## starts again from that state and replays the recorded input for every tick
+## after the ack, with the same FlightIntegrator, so a correct prediction lands
+## exactly where the ship already is and a wrong one (a collision, a lost
+## input) is carried forward from the server's truth.
 ##
-## Thrust, not input, is recorded: the helm's flight assist (PIDs) keeps state
-## of its own, which replaying input would disturb.
+## Input, not thrust, is recorded: flight assist (autospin, autobreak) works
+## thrust out from the ship's spin and speed at that tick, so after a correction
+## the replay must work it out again from the replayed state, as the server did.
+## The caller passes how (thrust_for).
 
 ## Ticks of thrust kept at most (two seconds at 60 Hz), if the server goes quiet.
 const MAX_HISTORY := 120
 
-var _history: Dictionary[int, Array] = {}  # tick -> [force, torque], ship frame.
+var _history: Dictionary[int, Variant] = {}  # tick -> input, as the caller recorded it.
 var _last_ack := -1
 
 
-## Remembers the thrust applied at [param tick], in the ship's own frame.
-func record(tick: int, local_force: Vector3, local_torque: Vector3) -> void:
-	_history[tick] = [local_force, local_torque]
+## Remembers the input used at [param tick].
+func record(tick: int, input: Variant) -> void:
+	_history[tick] = input
 	while _history.size() > MAX_HISTORY:
 		_history.erase(_history.keys().min())
 
 
 ## The ship's state at [param last_tick], replayed from [param server] (the
-## server's state after applying input [param ack]). Returns null for an ack
-## older than one already used. Thrust up to the ack is forgotten.
+## server's state after applying input [param ack]). [param thrust_for] gives
+## [force, torque] in world space for (input, state before the tick). A tick
+## with no input recorded (none yet) coasts. Returns null for an ack older
+## than one already used. Input up to the ack is forgotten.
 func reconcile(server: FlightIntegrator.FlightState, ack: int, last_tick: int,
-		flight: FlightIntegrator, dt: float) -> FlightIntegrator.FlightState:
+		flight: FlightIntegrator, dt: float, thrust_for: Callable) -> FlightIntegrator.FlightState:
 	if not confirm(ack):
 		return null
 	var s := server.duplicate()
 	for tick in range(ack + 1, last_tick + 1):
-		var force := Vector3.ZERO
-		var torque := Vector3.ZERO
+		var push: Array[Vector3] = [Vector3.ZERO, Vector3.ZERO]
 		if _history.has(tick):
-			var basis := s.transform.basis
-			force = basis * _history[tick][0]
-			torque = basis * _history[tick][1]
-		s = flight.step(s, force, torque, dt)
+			push = thrust_for.call(_history[tick], s)
+		s = flight.step(s, push[0], push[1], dt)
 	return s
 
 
-## The server has applied input [param ack]: forget thrust up to it. False for
+## The server has applied input [param ack]: forget input up to it. False for
 ## an ack older than one already used (nothing changes then).
 func confirm(ack: int) -> bool:
 	if ack < _last_ack:

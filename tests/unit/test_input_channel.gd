@@ -249,3 +249,38 @@ func test_the_wait_has_a_ceiling() -> void:
 		_run_dry()
 		tick = _feed(tick + 10, server.shrink_after + 10)
 	assert_eq(server.shrink_after, InputChannel.MAX_SHRINK_AFTER)
+
+
+# Toggles survive skips ---------------------------------------------------------
+# A skipped input still happened on the pilot's client: dropping its autospin or
+# autobreak toggle would leave the server flying with the other setting for good.
+
+func test_a_skipped_toggle_is_carried_to_the_next_input() -> void:
+	var burst := []
+	for tick in range(10, 20):
+		burst.append(_rec(tick))
+	burst[0] = InputChannel.make_record(10, Vector3.ZERO, Vector3.ZERO, true)  # Autospin pressed.
+	for i in range(0, burst.size(), InputChannel.REDUNDANCY):
+		server.receive(burst.slice(i, i + InputChannel.REDUNDANCY))
+	var applied := server.next()  # Skips 10 and others to catch up.
+	assert_gt(server.skipped_ticks, 0)
+	assert_true(applied.autospin_toggle, "the toggle from tick 10 comes with it")
+	assert_false(server.next().autospin_toggle, "once")
+
+
+func test_two_skipped_toggles_cancel_out() -> void:
+	var burst := []
+	for tick in range(10, 20):
+		burst.append(_rec(tick))
+	burst[0] = InputChannel.make_record(10, Vector3.ZERO, Vector3.ZERO, false, true)
+	burst[1] = InputChannel.make_record(11, Vector3.ZERO, Vector3.ZERO, false, true)
+	for i in range(0, burst.size(), InputChannel.REDUNDANCY):
+		server.receive(burst.slice(i, i + InputChannel.REDUNDANCY))
+	assert_false(server.next().autobreak_toggle, "pressed twice: back as it was")
+
+
+func test_a_toggle_dropped_by_a_flood_is_kept() -> void:
+	server.receive([InputChannel.make_record(0, Vector3.ZERO, Vector3.ZERO, true)])
+	for tick in range(1, InputChannel.MAX_QUEUE + 5):
+		server.receive([_rec(tick)])
+	assert_true(server.next().autospin_toggle)

@@ -117,6 +117,15 @@ func wants_discord() -> bool:
 	return has_ui() and not headless
 
 
+## The game window's title once this process hosts or joins: [param app] with
+## the [param role] ("Host" or "Client") and the local player's name, so a host
+## and clients side by side (tests, screenshots) can be told apart.
+static func window_title(app: String, role: String, player_name: String) -> String:
+	if player_name.is_empty():
+		return "%s [%s]" % [app, role]
+	return "%s [%s: %s]" % [app, role, player_name]
+
+
 func _to_string() -> String:
 	return "LaunchOptions(mode=%s game=%s port=%d xr=%s)" % [
 		Mode.keys()[mode], game_name, port, xr]

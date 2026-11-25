@@ -207,6 +207,10 @@ func _apply_input(_dt: float, tick: int) -> void:
 	helm.throttle = r.throttle
 	if r.debug_all_stop and debug_commands_allowed():
 		helm._debug_all_stop()
+	if source == InputSource.CHANNEL and NetDebug.on():  # TEMPORARY
+		NetDebug.line("server", "apply server_tick=%d input_tick=%d thr=%s rot=%s spin=%s brake=%s" % [
+				tick, input_channel.last_applied_tick, NetDebug.v(r.throttle), NetDebug.v(r.rotation_throttle),
+				helm.autospin, helm.autobreak])
 	# TODO: Weapons capability is found but firing is not wired to inputs yet.
 
 

@@ -15,21 +15,22 @@ contacts. Stations keep Jolt's own integration. It clamps to Jolt's speed limits
 Our own reconciler, not netfox rollback. The pilot's input reaches the server through `InputChannel`
 (see `characters/CLAUDE.md`).
 
-- The pilot's client flies its ship at once and records its thrust (`ShipPrediction`).
+- The pilot's client flies its ship at once and records each helm's input every tick (`ShipPrediction`,
+  `HelmCapability.input_record`).
 - After each tick loop the server sends that client its ship's state and the last input tick it applied
   (`Ship._send_pilot_state`).
-- The client replays its thrust since then.
+- The client replays its input since then, working thrust out again from the replayed state
+  (`Ship._replay_thrust`, `HelmCapability.assist`: flight assist depends on the current spin and speed; its
+  PIDs are proportional only, so replays can re-run them).
 - It eases a correction of its position in over about 100 ms (`CorrectionSmoother`); rotation, velocity and
   jumps over 100 m snap, since thrust follows the way the ship points.
 - Corrections go through `Ship.place`, which sets the transform in Jolt directly: Godot only sends a node's new
   transform to physics at the start of the next physics frame, after our ticks have stepped the zone.
 - While the server holds the ship frozen (a launch arm), its state says so and the client freezes the ship too
-  and follows it exactly, still recording thrust for the replay after release.
+  and follows it exactly, still recording input for the replay after release.
 - The shared ship sync goes through `sync_*` proxies that the predicting client ignores. The host never predicts.
 - Logs: client "Prediction for X: N corrections" every 5 s.
-- Not done yet: the replay records thrust, not input, so flight assist (autospin, autobreak: thrust from the
-  current spin or speed) brings about a round trip of small corrections after each one (a pending test);
-  under lag the client logs "SYS_COMMAND_AUTH" errors while joining (game packets arrive before
+- Not done yet: under lag the client logs "SYS_COMMAND_AUTH" errors while joining (game packets arrive before
   its login finishes), and a late `InputsSync` delta for the pilot's freed pre-launch character logs
   "Node not found" on the server; remote ships aren't smoothed (N4).
 - Test lag with `tests/lag/lag_run.sh` (a UDP delay proxy between `--server` and `--testplayer`; see
