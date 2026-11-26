@@ -71,10 +71,17 @@ var factions: FactionRegistry:
 @export var sensor: Sensor
 @onready var crew := $Crew
 
+## What this ship gives off to others' sensors (fog of war), signal 1.0 at
+## 1 km. The base EM stands for its subsystems' power use (no power system
+## yet); its drive adds to it with thrust each tick (emissions_for).
 @export var em_output_base: float = 1.0
-@export var neutron_output_base: float = 1.0
+## Neutrinos: esoteric ships only (Shadows, Vorlons). None today.
+@export var neutron_output_base: float = 0.0
+## Its engines: what thrust gives off. Chemical unless the ship says otherwise.
+@export var drive: DriveProfile = preload("res://ship_systems/drives/chemical.tres")
 var em_output := 1.0
-var neutron_output := 1.0
+var neutron_output := 0.0
+var gravimetric_output := 0.0
 
 var detected_ships: Array[Ship] = []
 var _visual_radius := -1.0  # Worked out once, from the body's shapes.
@@ -176,8 +183,7 @@ func _ready():
 	# Stations don't fly; Jolt keeps them as they are.
 	custom_integrator = not is_station
 	# What it gives off to others' sensors (fog of war); power use will vary it.
-	em_output = em_output_base
-	neutron_output = neutron_output_base
+	_set_emissions(emissions_for(0.0))
 	#target_rot = rotation_degrees
 	
 	# No Galaxy when a ship runs on its own (tests, tools).
@@ -642,6 +648,7 @@ func _rollback_tick(dt, tick, is_fresh):
 		return
 	if custom_integrator and not freeze:  # Frozen: held by a launch arm.
 		_fly(dt, tick)
+	_set_emissions(emissions_for(_thrust_now()))
 	acceleraction = (linear_velocity - start_velocity) / dt
 	start_velocity = linear_velocity
 
@@ -855,6 +862,34 @@ func get_current_system() -> System:
 	return System.find_for(self)
 
 
+## What this ship gives off with [param thrust_newtons] of thrust: its base
+## plus its drive's share, as (EM, neutrino, gravimetric).
+func emissions_for(thrust_newtons: float) -> Vector3:
+	var out := Vector3(em_output_base, neutron_output_base, 0.0)
+	if drive:
+		var mn := thrust_newtons / 1e6
+		out += Vector3(drive.em_per_meganewton, drive.neutrino_per_meganewton,
+				drive.gravimetric_per_meganewton) * mn
+	return out
+
+
+func _set_emissions(e: Vector3) -> void:
+	em_output = e.x
+	neutron_output = e.y
+	gravimetric_output = e.z
+
+
+## The thrust all thrusters are putting out now, in newtons: every one that is
+## firing burns, whichever way it pushes.
+func _thrust_now() -> float:
+	if not has_node("Engines"):
+		return 0.0
+	var total := 0.0
+	for thruster in $Engines.thrusters:
+		total += (thruster.force_vector as Vector3).length()
+	return total
+
+
 ## How far this ship reaches from its origin, in metres: the radius of a sphere
 ## around everything it is made of, for visual detection. Its own collision
 ## shapes and those of physics bodies inside it (the Hyperion's hull is static
@@ -921,7 +956,9 @@ func sensor_check(other_ship: Ship) -> bool:
 		var km_squared := distance_squared / 1e6
 		var em_signal := other_ship.em_output / km_squared
 		var neutrino_signal := other_ship.neutron_output / km_squared
-		detected = em_signal * sensor.em_sensitive > 1.0 or neutrino_signal * sensor.neutrino_sensitive > 1.0
+		var gravimetric_signal := other_ship.gravimetric_output / km_squared
+		detected = em_signal * sensor.em_sensitive > 1.0 or neutrino_signal * sensor.neutrino_sensitive > 1.0 \
+				or gravimetric_signal * sensor.gravametric_sensitive > 1.0
 		if not detected and sensor.visual_acuity_degrees > 0.0:
 			var across := rad_to_deg(2.0 * atan2(other_ship.visual_radius(), sqrt(distance_squared)))
 			detected = across > sensor.visual_acuity_degrees
