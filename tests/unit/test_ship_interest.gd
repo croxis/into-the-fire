@@ -109,14 +109,16 @@ func test_hidden_crew_go_before_their_ship_and_come_back_after_it() -> void:
 	assert_eq(hiding.size(), _synchronizers(ship).size(), "all of them")
 
 
-func test_a_players_own_inputs_go_only_to_the_server() -> void:
-	# Remote pilots send input through InputChannel; a client-owned InputsSync
-	# sent everywhere would reach clients that don't have the character.
+func test_a_players_own_inputs_stay_on_their_machine() -> void:
+	# Remote pilots send input through InputChannel, so nobody needs their
+	# InputsSync. Sent to the server, its last packet reached a character the
+	# server had just freed at launch ("Node not found"); sent everywhere, it
+	# reached clients that don't have the character.
 	var c: Character = autofree(preload("res://characters/character.tscn").instantiate())
-	c.send_inputs_only_to_server()
+	c.keep_inputs_local()
 	var sync: MultiplayerSynchronizer = c.get_node("InputsSync")
 	assert_false(sync.public_visibility)
-	assert_true(sync.get_visibility_for(1))
+	assert_false(sync.get_visibility_for(1), "not even the server")
 	assert_false(sync.get_visibility_for(5))
 
 

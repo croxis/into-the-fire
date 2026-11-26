@@ -94,6 +94,10 @@ Autoloads include netfox (`NetworkTime`, `NetworkRollback`, ...), `Log`, `LimboC
 - Spawners only track nodes they spawned; reparenting across spawn paths is not replicated. Spawn with
   `spawn_function` and data dictionaries: crew via
   `ship.spawn_crew(Character.pilot_data(..., galaxy.ids.next_pilot()))`, never `add_child`.
+- A player who disconnects keeps their character in the world (`Galaxy._on_peer_disconnected`,
+  `Character.pilot_disconnected`): controls go neutral and a one-seat craft brakes to a stop. Logging back in
+  with the same name resumes it (`Galaxy._resume`: new peer id and input authority, a fresh `InputChannel`,
+  camera and HUD again, no join menu).
 - Never trust IDs sent by clients: validate every `any_peer` RPC on the server, and get the sender from
   `multiplayer.get_remote_sender_id()`, not arguments (see `Ship.request_launch`). Logins are checked by
   `network.gd` `check_login` first and never logged (they hold passwords).
@@ -131,7 +135,8 @@ Autoloads include netfox (`NetworkTime`, `NetworkRollback`, ...), `Log`, `LimboC
     Synchronizers that keep a node spawned (the ship's own, crew's) must send nothing unreliable.
   - Snapshots and the syncs that aren't part of the spawn start only once the client confirms it has the ship
     (`Ship._have_ship`, from its `_ready` there); a despawn forgets that. Sent at once they overtook the spawn.
-  - A player's own client sends its `InputsSync` only to the server. New broadcast RPCs (`.rpc()`) on ship
+  - A player's own client sends its `InputsSync` to nobody (`Character.keep_inputs_local`): its input goes
+    through `InputChannel`. New broadcast RPCs (`.rpc()`) on ship
     nodes would reach clients that don't have the ship: send to the clients that know it. (`Gun.fire_sound`
     does; fix it when weapons are restored.)
   - Server log "Interest: peer X now knows N ships (+ more, leaving, gone)".

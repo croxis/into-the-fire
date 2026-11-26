@@ -159,6 +159,7 @@ func _ready():
 	#TODO: Serialize from save
 	_play_time = 0
 	multiplayer.peer_connected.connect(_on_peer_connected)
+	multiplayer.peer_disconnected.connect(_on_peer_disconnected)
 	zone_view.name = "ZoneView"
 	add_child(zone_view)
 	add_child(hud)
@@ -177,7 +178,48 @@ func _on_system_entered(node: Node) -> void:
 func _on_peer_connected(peer_id: int) -> void:
 	if multiplayer.is_server():
 		_rpc_receive_factions.rpc_id(peer_id, factions.to_data())
-		refresh_interest()  # So its ships spawn there now, not up to 0.5 s later.
+		var player: Player = $Players.find_player_by_netid(peer_id)
+		var character := find_player_character($Systems, player.player_id) if player else null
+		if character:
+			_resume(character, peer_id)
+		else:
+			refresh_interest()  # So its ships spawn there now, not up to 0.5 s later.
+
+
+## Server: a peer left. A player's character stays in the world, hands off the
+## controls, until they log back in (Character.pilot_disconnected).
+func _on_peer_disconnected(peer_id: int) -> void:
+	if not multiplayer.is_server():
+		return
+	for character in $Systems.find_children("*", "", true, false):
+		if character is Character and character.is_player() and character.multiplayer_id == peer_id:
+			character.pilot_disconnected()
+			Log.log([character.name, " left; their character stays"], Log.MessageType.INFO)
+
+
+## Server: a player whose character is still in the world logged back in from
+## [param peer]: they take it over again, where it is, with its camera and HUD.
+func _resume(character: Character, peer: int) -> void:
+	character.pilot_rejoined(peer)
+	refresh_interest()  # Their ship and its system spawn there before the RPCs below.
+	var system := System.find_for(character)
+	_rpc_resume.rpc_id(peer, String(system.name) if system else "")
+	player_enter_system.rpc_id(peer, String(system.name))
+	var console := character.current_console
+	if console:
+		console.set_camera.rpc_id(peer)
+		console._show_hud.rpc_id(peer)
+	elif character.current_ship:
+		character.current_ship.set_camera.rpc_id(peer)
+		character.current_ship.set_capital_ui.rpc_id(peer)
+	Log.log(["Resumed ", character.name, " for peer ", peer], Log.MessageType.SUCCESS)
+
+
+## Client: the server put us back in our character: no join menu.
+@rpc("authority", "call_remote", "reliable")
+func _rpc_resume(_system_name: String) -> void:
+	_join_menu_wanted = false
+	$CanvasLayer/JoinGame.visible = false
 
 
 ## Client: replace the local copy with the server's.

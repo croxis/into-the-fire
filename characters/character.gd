@@ -31,7 +31,23 @@ var factions: FactionRegistry:
 	set(new_id):
 		_player_pilot_id = new_id
 		_update_brain_active()
-@export var multiplayer_id: int
+## The peer this character's player plays from (0 or the server's for NPCs).
+## Changing it moves input authority too: a player who rejoins gets a new peer
+## id (pilot_rejoined), and clients learn it from CharacterSync.
+@export var multiplayer_id: int:
+	set(id):
+		multiplayer_id = id
+		var sync := get_node_or_null("InputsSync")
+		if sync:
+			sync.set_multiplayer_authority(id)
+			# The sync may not be in the tree yet (a spawn sets this mid-entry), so
+			# compare ids rather than ask it is_multiplayer_authority().
+			if is_inside_tree() and multiplayer.has_multiplayer_peer() and not multiplayer.is_server() \
+					and id == multiplayer.get_unique_id():
+				keep_inputs_local()
+## Server: false while this character's player is disconnected (it stays in the
+## world, controls neutral, until they log back in).
+var player_connected := true
 @export var pilot_id: int
 var active_orders: Array[OrderData] = []
 var pending_orders: Array[OrderData] = []
@@ -85,7 +101,7 @@ func _ready():
 	_init_brain()
 	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server() \
 			and $InputsSync.is_multiplayer_authority():
-		send_inputs_only_to_server()
+		keep_inputs_local()
 
 
 func _init_brain() -> void:
@@ -129,19 +145,41 @@ func _update_brain_active() -> void:
 	hsm.set_active(multiplayer.is_server() and not is_player())
 
 
-## A player's own client: its InputsSync goes only to the server. Remote
-## pilots send input through InputChannel; sent everywhere (through the
-## server's relay), it would reach clients that don't have this character
-## (netcode N5a2) and log "Node not found" there.
-func send_inputs_only_to_server() -> void:
+## A player's own client: its InputsSync goes to nobody. Remote pilots send
+## input through InputChannel, so the server never reads it, and other clients
+## draw the ship from snapshots. Sent to the server, its last packet reached a
+## character freed at launch; sent everywhere (the server relays), it reached
+## clients that don't have this character. Both logged "Node not found".
+func keep_inputs_local() -> void:
 	$InputsSync.public_visibility = false
-	$InputsSync.set_visibility_for(1, true)
 
 
 func set_multiplayer_id(id):
-	multiplayer_id = id
-	# Give authority over the player input to the appropriate peer.
-	$InputsSync.set_multiplayer_authority(id)
+	multiplayer_id = id  # The setter gives input authority to that peer.
+
+
+## Server: this character's player disconnected. The character stays in the
+## world; its controls go neutral (the server stops holding their last input),
+## and a one-seat craft they fly brakes to a stop. (A crewed ship is left to its
+## crew; an NPC may take the seat over later.)
+func pilot_disconnected() -> void:
+	player_connected = false
+	input_channel = InputChannel.new()
+	var helm := current_console.get_capability(HelmCapability) as HelmCapability if current_console else null
+	var ship := current_ship
+	if helm and ship and ship.has_node("Crew") and ship.get_node("Crew").max_crew <= 1:
+		helm.bring_to_rest()
+
+
+## Server: this character's player logged back in, from peer [param peer]: they
+## fly it again. A fresh input channel, since the new client counts ticks anew.
+func pilot_rejoined(peer: int) -> void:
+	multiplayer_id = peer
+	input_channel = InputChannel.new()
+	_held_at_last_report = 0  # The input report counts from the new channel.
+	_skipped_at_last_report = 0
+	_first_remote_input_logged = false
+	player_connected = true
 
 
 func _resolve_seat() -> void:
@@ -160,8 +198,9 @@ func _exit_tree() -> void:
 	NetworkTime.before_tick.disconnect(_apply_input)
 
 
-## Once per tick loop: the player on this machine reads their controls; the
-## InputsSync synchronizer sends them to everyone. Read once, not per tick: one
+## Once per tick loop: the player on this machine reads their controls into
+## InputsSync (synced from the server for the host's player and NPCs; a remote
+## pilot's go through InputChannel instead). Read once, not per tick: one
 ## frame can run several ticks, and the one-shot toggles would fire each time.
 func _read_input() -> void:
 	if multiplayer.multiplayer_peer == null or multiplayer.get_unique_id() == multiplayer_id:
@@ -189,7 +228,9 @@ func _apply_input(_dt: float, tick: int) -> void:
 		return
 	var r: Dictionary
 	var source := input_source(multiplayer.is_server(), is_player(), _plays_here())
-	if source == InputSource.CHANNEL:
+	if source == InputSource.CHANNEL and not player_connected:
+		r = InputChannel.make_record(tick, Vector3.ZERO, Vector3.ZERO)  # Away: hands off.
+	elif source == InputSource.CHANNEL:
 		r = input_channel.next()
 		if not _first_remote_input_logged and input_channel.last_applied_tick >= 0:
 			_first_remote_input_logged = true

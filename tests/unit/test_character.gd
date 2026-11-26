@@ -97,3 +97,68 @@ func test_serialize_orders_cross_the_network() -> void:
 		assert_false(orders.is_typed(), "%s is a plain array" % key)
 		for order in orders:
 			assert_false(order is Object, "%s holds no Objects" % key)
+
+
+## A player who disconnects keeps their character in the world; it is theirs
+## again when they log back in. Meanwhile a one-seat craft brakes to a stop.
+
+func _remote_pilot() -> Array:
+	var fury: Ship = Content.instantiate(&"b5:aurora_starfury")
+	add_child_autofree(fury)
+	# Peer 7: a player on another machine, so the server flies them from their
+	# tick-stamped input.
+	var pilot: Character = fury.get_node("CrewMultiplayerSpawner").spawn(
+			Character.pilot_data("Ivanova", 0, 7, 4))  # Seated as an NPC: no RPCs to a peer that isn't there.
+	var cockpit := fury.get_node("Consoles/Cockpit") as Console
+	cockpit.occupy(pilot)
+	pilot._player_pilot_id = 3
+	return [fury, pilot, cockpit.get_capability(HelmCapability)]
+
+
+func test_a_disconnected_pilots_controls_go_neutral() -> void:
+	var parts := _remote_pilot()
+	var pilot: Character = parts[1]
+	var helm: HelmCapability = parts[2]
+	# Their last input, which the server would otherwise keep holding.
+	pilot.input_channel._last = InputChannel.make_record(10, Vector3(0, 0, -1), Vector3(0, 1, 0))
+	pilot.pilot_disconnected()
+	pilot._apply_input(1.0 / 60.0, 11)
+	assert_eq(helm.throttle, Vector3.ZERO)
+	assert_eq(helm.input_rotation_throttle, Vector3.ZERO)
+
+
+func test_a_one_seat_craft_brakes_to_a_stop() -> void:
+	var parts := _remote_pilot()
+	var helm: HelmCapability = parts[2]
+	(parts[1] as Character).pilot_disconnected()
+	assert_true(helm.autobreak, "stops moving")
+	assert_true(helm.autospin, "stops turning")
+
+
+func test_a_crewed_ship_is_left_to_its_crew() -> void:
+	# Multi-crew ships: an NPC may take over the seat later (not built yet).
+	var parts := _remote_pilot()
+	var fury: Ship = parts[0]
+	fury.get_node("Crew").max_crew = 4
+	(parts[1] as Character).pilot_disconnected()
+	assert_false((parts[2] as HelmCapability).autobreak)
+
+
+func test_a_rejoining_player_takes_their_character_back() -> void:
+	var parts := _remote_pilot()
+	var pilot: Character = parts[1]
+	pilot.pilot_disconnected()
+	pilot.input_channel._last = InputChannel.make_record(50, Vector3(0, 0, -1), Vector3.ZERO)
+	pilot.pilot_rejoined(9)  # A new connection, a new peer id.
+	assert_eq(pilot.multiplayer_id, 9)
+	assert_eq(pilot.get_node("InputsSync").get_multiplayer_authority(), 9, "their input again")
+	assert_true(pilot.player_connected)
+	assert_eq(pilot.input_channel.last_applied_tick, -1, "a fresh channel: the new client counts ticks anew")
+	assert_eq([pilot._held_at_last_report, pilot._skipped_at_last_report], [0, 0], "its report counts from zero")
+
+
+func test_a_new_player_id_moves_input_authority_with_it() -> void:
+	# Clients learn the new peer from CharacterSync, which sets the property.
+	var c := _spawn("Garibaldi")
+	c.multiplayer_id = 12
+	assert_eq(c.get_node("InputsSync").get_multiplayer_authority(), 12)

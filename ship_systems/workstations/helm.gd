@@ -84,6 +84,14 @@ func toggle_autospin() -> bool:
 	return autospin
 
 
+## Flight assist brings the ship to rest: autobreak stops it moving, autospin
+## holds its heading. For a pilot who left.
+func bring_to_rest() -> void:
+	autobreak = true
+	if not autospin:
+		toggle_autospin()
+
+
 func toggle_autobreak() -> bool:
 	autobreak = !autobreak
 	return autobreak
