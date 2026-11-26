@@ -223,6 +223,16 @@ func test_snapshots_go_only_to_peers_that_have_the_ship() -> void:
 	assert_eq(ship.snapshot_recipients([7, 8, 9], 0), [9] as Array[int], "and are forgotten")
 
 
+func test_snapshots_go_only_to_peers_told_about_the_ship() -> void:
+	# Interest management (N5): a client that isn't told about a ship gets none
+	# of its snapshots.
+	var ship := _starfury()
+	ship._add_snapshot_peer(7)
+	ship._add_snapshot_peer(9)
+	var knows := func(peer: int) -> bool: return peer == 9
+	assert_eq(ship.snapshot_recipients([7, 9], 0, knows), [9] as Array[int])
+
+
 func test_motion_is_synchronised_only_when_a_ship_appears() -> void:
 	# Snapshots carry motion from then on. Position and velocity still come with
 	# the spawn, so a new ship is in the right place before its first snapshot.

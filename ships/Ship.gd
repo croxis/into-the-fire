@@ -289,7 +289,10 @@ func _after_tick_loop() -> void:
 		if _snapshot_due(last_tick):
 			_last_snapshot_tick = last_tick
 			var pilot := remote_pilot()
-			for peer in snapshot_recipients(multiplayer.get_peers(), pilot.multiplayer_id if pilot else 0):
+			var knows := Callable()
+			if galaxy:
+				knows = func(peer: int) -> bool: return galaxy.interest.knows(peer, self)
+			for peer in snapshot_recipients(multiplayer.get_peers(), pilot.multiplayer_id if pilot else 0, knows):
 				_receive_snapshot.rpc_id(peer, last_tick, global_transform, linear_velocity, angular_velocity)
 	elif is_predicted_here() and NetworkTime.tick >= _next_report_tick:
 		_next_report_tick = NetworkTime.tick + PREDICTION_REPORT_TICKS
@@ -308,14 +311,15 @@ func _snapshot_due(last_tick: int) -> bool:
 
 ## Server: the peers a snapshot goes to: those that asked for this ship's
 ## (they have it, so the RPC finds it) and are still [param connected], except
-## [param pilot_peer], who predicts the ship and gets its own state. Peers that
-## left are forgotten.
-func snapshot_recipients(connected: Array, pilot_peer: int) -> Array[int]:
+## [param pilot_peer], who predicts the ship and gets its own state, and any
+## that [param knows] (peer -> bool, Galaxy.interest) says aren't told about it
+## (netcode N5). Peers that left are forgotten.
+func snapshot_recipients(connected: Array, pilot_peer: int, knows := Callable()) -> Array[int]:
 	var out: Array[int] = []
 	for peer in _snapshot_peers.keys():
 		if not peer in connected:
 			_snapshot_peers.erase(peer)
-		elif peer != pilot_peer:
+		elif peer != pilot_peer and (not knows.is_valid() or knows.call(peer)):
 			out.append(peer)
 	return out
 

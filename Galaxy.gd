@@ -23,6 +23,11 @@ var hud := HudLayer.new()
 var zone_stepper := ZoneStepper.new()
 ## Client: when ships' snapshots arrive, so when to draw them (netcode N4c).
 var snapshot_clock := SnapshotClock.new()
+## Server: which ships each client is told about (netcode N5). Kept up to date
+## every INTEREST_SECONDS and when a ship appears (refresh_interest).
+var interest := Interest.new()
+const INTEREST_SECONDS := 0.5
+var _interest_timer := 0.0
 
 ## Every faction in this world. The server creates them; clients receive a copy
 ## when they join (see _rpc_receive_factions). Replaced as a whole, never patched
@@ -328,11 +333,51 @@ func unpause_game():
 
 func _process(delta: float) -> void:
 	_play_time += delta
+	if multiplayer.has_multiplayer_peer() and multiplayer.is_server():
+		_interest_timer -= delta
+		if _interest_timer <= 0:
+			_interest_timer = INTEREST_SECONDS
+			refresh_interest()
 	if get_tree().root.get_node("entry").is_server:
 		_sync_timer -= delta
 		if _sync_timer <= 0:
 			_sync_timer = _sync_interval
 			_rpc_sync_time.rpc(_play_time)
+
+
+## Server: works out again which ships each client knows (Interest), from where
+## each client's player and each ship is now.
+func refresh_interest() -> void:
+	var systems: Array[System] = []
+	for node in $Systems.get_children():
+		if node is System:
+			systems.append(node)
+	var ships := {}
+	var spawn_systems: Array[System] = []
+	for system in systems:
+		for ship in system.get_ships():
+			ships[ship] = system
+			if ship.has_spawn_points and system not in spawn_systems:
+				spawn_systems.append(system)
+	var peers := {}
+	for peer in multiplayer.get_peers():
+		peers[peer] = _player_system(peer)
+	var changes := interest.update(peers, ships, spawn_systems)
+	for peer in changes:
+		Log.log(["Interest: peer ", peer, " now knows ", ships.keys().filter(
+				func(s: Ship) -> bool: return interest.knows(peer, s)).size(), " ships (",
+				changes[peer]["shown"].size(), " more, ", changes[peer]["hidden"].size(), " fewer)"],
+				Log.MessageType.INFO)
+
+
+## Server: the system [param peer]'s player character is in, or null (no
+## character yet, or not logged in).
+func _player_system(peer: int) -> System:
+	var player: Player = $Players.find_player_by_netid(peer)
+	if player == null:
+		return null
+	var character := find_player_character($Systems, player.player_id)
+	return System.find_for(character) if character else null
 
 
 @rpc("authority", "call_remote", "unreliable_ordered")

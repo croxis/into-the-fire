@@ -97,6 +97,11 @@ Autoloads include netfox (`NetworkTime`, `NetworkRollback`, ...), `Log`, `LimboC
 - Never trust IDs sent by clients: validate every `any_peer` RPC on the server, and get the sender from
   `multiplayer.get_remote_sender_id()`, not arguments (see `Ship.request_launch`). Logins are checked by
   `network.gd` `check_login` first and never logged (they hold passwords).
+- Interest management (N5, `network/interest.gd`, `Galaxy.interest`): the server decides which ships each
+  client is told about, refreshed every 0.5 s (`Galaxy.refresh_interest`); for now, the ships in its player's
+  system, or where it could spawn before it has a character. Snapshots go only to clients that know the ship.
+  It is to grow into fog of war (faction sensor pictures), so a client never learns of a ship it shouldn't
+  see: next, unknown ships are despawned on that client (N5a2). Server log "Interest: peer X now knows N ships".
 
 ## Tests and CI
 

@@ -47,7 +47,8 @@ Our own reconciler, not netfox rollback. The pilot's input reaches the server th
   (`transform`, velocities: spawn only), so a new ship starts in the right place.
 - Each client asks for a ship's snapshots from that ship's `_ready` (`_want_snapshots`): a snapshot sent before
   the ship exists on a joining client would fail ("node not found"). `snapshot_recipients` skips peers that
-  left and the pilot predicting the ship, who gets its own state. Interest management (N5) will narrow it.
+  left and the pilot predicting the ship, who gets its own state, and clients that interest management
+  (`Galaxy.interest`, see the top-level `CLAUDE.md`) says aren't told about the ship.
 - Snapshots are plain `unreliable`, not `unreliable_ordered`: ENet drops an ordered packet that a later one on
   the same channel overtook, and every ship's snapshots and the pilot's state share it, so under jitter half
   were lost. `SnapshotBuffer` orders them itself.
