@@ -103,15 +103,25 @@ var is_spawning := false
 
 ## Motion reaches clients as tick-stamped snapshots (netcode slice N4b), not
 ## through the MultiplayerSynchronizer (it sends motion only when a ship
-## appears): the server sends them every SNAPSHOT_TICKS, clients keep them here.
+## appears): the server sends them every SNAPSHOT_TICKS, clients keep them here
+## and draw the ship from them a little in the past (N4c, draw_remote).
 ## The pilot's own client predicts its ship instead and ignores them.
 var snapshots := SnapshotBuffer.new(1.0 / 60.0)
+## When snapshots arrive, so when to draw from them. Shared by every ship in
+## the Galaxy (set in _ready); a ship on its own (tests) keeps its own.
+var snapshot_clock := SnapshotClock.new()
+var _drawn := false  # Client: drawn from snapshots, kinematic.
+var _drawn_frames := 0  # Since the last drawing report.
+var _drawn_behind := 0.0  # Summed ticks behind the newest snapshot.
+var _drawn_past_newest := 0  # Frames drawn past the newest (extrapolated).
 ## Ticks between snapshots: 2 at 60 Hz, so 30 a second.
 const SNAPSHOT_TICKS := 2
 var _last_snapshot_tick := -SNAPSHOT_TICKS  # Server: the tick of the last snapshot sent.
 var _snapshot_peers: Dictionary[int, bool] = {}  # Server: peers that have this ship.
 ## Set to treat this ship as predicted on this machine (unit tests).
 var prediction_forced := false
+## Set to treat this machine as a client that draws this ship (unit tests).
+var drawing_forced := false
 
 
 ## True on the pilot's own client: a client, not the server, where the player
@@ -165,6 +175,7 @@ func _ready():
 	galaxy = Galaxy.find_for(self)
 	if galaxy:
 		destroyed.connect(galaxy._on_ship_destroyed)
+		snapshot_clock = galaxy.snapshot_clock
 	# A client that now has this ship asks for its snapshots (see snapshot_recipients).
 	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server() \
 			and multiplayer.multiplayer_peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED:
@@ -322,9 +333,11 @@ func _want_snapshots() -> void:
 
 
 ## Clients: this ship's state after server tick [param tick]. Unreliable and
-## ordered per sender, but a later packet can still be lost and an earlier one
-## arrive; SnapshotBuffer sorts that out.
-@rpc("authority", "call_remote", "unreliable_ordered")
+## not ordered: SnapshotBuffer puts them in order, and a late one still fills
+## its gap. ("unreliable_ordered" would have ENet drop any packet overtaken by
+## a later one on its channel, which every ship's snapshots and the pilot's
+## state share: under jitter that lost half of them.)
+@rpc("authority", "call_remote", "unreliable")
 func _receive_snapshot(tick: int, server_transform: Transform3D, server_velocity: Vector3,
 		server_spin: Vector3) -> void:
 	if multiplayer.is_server():
@@ -333,21 +346,89 @@ func _receive_snapshot(tick: int, server_transform: Transform3D, server_velocity
 	s.transform = server_transform
 	s.linear_velocity = server_velocity
 	s.angular_velocity = server_spin
-	take_snapshot(tick, s)
+	take_snapshot(tick, s, _local_clock())
 
 
-## Keeps a snapshot and, when it is the newest, puts the ship there (through
-## Jolt, as corrections are). Ignored for the ship this client predicts.
-func take_snapshot(tick: int, s: FlightIntegrator.FlightState) -> void:
+## Keeps a snapshot, which arrived at this client's tick [param local_now], for
+## drawing the ship (draw_remote). The newest also sets the clock: a late one
+## would make the server look further behind than it is. Ignored for the ship
+## this client predicts.
+func take_snapshot(tick: int, s: FlightIntegrator.FlightState, local_now: float) -> void:
 	if is_predicted_here():
 		return
 	if not snapshots.push(tick, s) or tick != snapshots.newest_tick():
 		return
+	snapshot_clock.observe(tick, local_now)
 	if snapshots.size() == 1:
 		Log.log(["First snapshot for ", name, " (server tick ", tick, ")"], Log.MessageType.INFO)
+
+
+## True on a client for a ship it doesn't predict: drawn from snapshots.
+func is_drawn_here() -> bool:
+	if is_predicted_here():
+		return false
+	return drawing_forced or not multiplayer.is_server()
+
+
+## This machine's steady clock, in ticks (fractional: render frames fall
+## between ticks), for SnapshotClock. Not NetworkTime.tick: netfox runs a
+## client's ticks a little fast or slow to catch up with the server, and nor
+## does it tick before a game starts, so snapshots measured against it said the
+## server was further ahead than it was and ships were drawn past their newest.
+func _local_clock() -> float:
+	return Time.get_ticks_usec() / 1e6 / NetworkTime.ticktime
+
+
+## Client, each frame: a ship nobody here predicts is drawn from its snapshots
+## at the clock's moment, [constant SnapshotClock.DELAY_TICKS] behind the newest
+## (netcode slice N4c), instead of being flown here. When this client starts
+## predicting it (our player took the helm), it stays frozen until the server's
+## first state for the pilot lets it go (reconcile_with), as on a launch arm.
+func draw_remote(local_now: float) -> void:
+	if not is_drawn_here():
+		if _drawn:
+			_drawn = false
+			freeze_mode = RigidBody3D.FREEZE_MODE_STATIC  # As the launch arms freeze.
+		return
+	if snapshot_clock.has_estimate():
+		var at := snapshot_clock.render_tick(local_now)
+		if show_snapshots(at):
+			_note_drawn(at)
+
+
+## Client: every 5 s, how far behind its newest snapshot the ship was drawn and
+## how often it ran past it (a late or lost snapshot, so extrapolated).
+func _note_drawn(at: float) -> void:
+	_drawn_frames += 1
+	_drawn_behind += snapshots.newest_tick() - at
+	if at > snapshots.newest_tick():
+		_drawn_past_newest += 1
+	if NetworkTime.tick >= _next_report_tick:
+		_next_report_tick = NetworkTime.tick + PREDICTION_REPORT_TICKS
+		Log.log(["Drawing ", name, ": ", "%.1f" % (_drawn_behind / _drawn_frames),
+				" ticks behind the newest snapshot, ", _drawn_past_newest, " of ", _drawn_frames,
+				" frames past it"], Log.MessageType.INFO)
+		_drawn_frames = 0
+		_drawn_behind = 0.0
+		_drawn_past_newest = 0
+
+
+## Puts the ship where its snapshots have it at server tick [param at],
+## kinematic: Jolt doesn't fly it, but other bodies still hit it. Its velocities
+## are zeroed: on a kinematic body they would be a conveyor-belt surface
+## velocity. False with no snapshots of this ship yet (it stays as it spawned).
+func show_snapshots(at: float) -> bool:
+	var s := snapshots.sample(at)
+	if s == null:
+		return false
+	if not _drawn:
+		_drawn = true
+		freeze_mode = RigidBody3D.FREEZE_MODE_KINEMATIC
+		freeze = true
+		linear_velocity = Vector3.ZERO
+		angular_velocity = Vector3.ZERO
 	place(s.transform)
-	linear_velocity = s.linear_velocity
-	angular_velocity = s.angular_velocity
+	return true
 
 
 ## Server: tell the remote pilot where their ship is after the ticks just run,
@@ -507,7 +588,8 @@ func thrust(center_of_mass: Vector3, basis: Basis) -> Array[Vector3]:
 
 
 func _process(_delta: float) -> void:
-	pass
+	if multiplayer.has_multiplayer_peer():
+		draw_remote(_local_clock())
 	#DebugDraw3D.draw_arrow_ray(global_position, target_rot, 32.0, Color.LAVENDER, 0.5)
 	#DebugDraw3D.draw_arrow(global_position, global_position+Vector3(0,0,-2050), Color.MAGENTA, 32, false)
 	#DebugDraw3D.draw_arrow(position, position+Vector3(0,2000,-2050), Color.MAGENTA, 32, false)

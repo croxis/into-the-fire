@@ -48,11 +48,22 @@ Our own reconciler, not netfox rollback. The pilot's input reaches the server th
 - Each client asks for a ship's snapshots from that ship's `_ready` (`_want_snapshots`): a snapshot sent before
   the ship exists on a joining client would fail ("node not found"). `snapshot_recipients` skips peers that
   left and the pilot predicting the ship, who gets its own state. Interest management (N5) will narrow it.
+- Snapshots are plain `unreliable`, not `unreliable_ordered`: ENet drops an ordered packet that a later one on
+  the same channel overtook, and every ship's snapshots and the pilot's state share it, so under jitter half
+  were lost. `SnapshotBuffer` orders them itself.
 - Clients keep them in `Ship.snapshots` (`SnapshotBuffer`: in tick order, samples between them on a Hermite
-  curve with slerped rotation, extrapolates up to 15 ticks past the newest). For now the newest is applied
-  through `Ship.place` and the client still flies the ship between snapshots; drawing remote ships a little in
-  the past from the buffer is N4c. A client's netfox tick runs behind the server's by about the latency, so
-  that needs an estimate of the server's tick. Log: client "First snapshot for X".
+  curve with slerped rotation, extrapolates up to 15 ticks past the newest).
+- Drawing (N4c): on a client, every ship it doesn't predict (stations too) is kinematic and drawn each frame
+  from its buffer (`Ship.draw_remote`), `SnapshotClock.DELAY_TICKS` (6, 100 ms) behind the newest snapshot.
+  `SnapshotClock` (one per `Galaxy`) estimates the newest server tick from when snapshots arrive, averaged
+  against this machine's real time (`Ship._local_clock`), not the netfox tick: netfox speeds up and slows a
+  client's ticks to catch the server, and doesn't tick before a game starts. Jolt moves a kinematic body to
+  its new transform during the next step, with the velocity that takes, so contacts see it moving; velocities
+  set on it would be a surface velocity, so they are zeroed. When our player takes the helm the ship stays
+  frozen until the server's first state releases it (`reconcile_with`).
+- Logs: client "First snapshot for X"; every 5 s "Drawing X: N ticks behind the newest snapshot, M of F frames
+  past it" (about 5 behind is right: 6, less the time since the last arrival; frames past it were
+  extrapolated, from late or lost snapshots).
 - Test lag with `tests/lag/lag_run.sh` (a UDP delay proxy between `--server` and `--testplayer`; see
   `documentation/testing.md`).
 

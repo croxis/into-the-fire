@@ -21,6 +21,8 @@ var zone_view := ZoneView.new()
 var hud := HudLayer.new()
 ## Steps every system's physics space (zones), on server and clients.
 var zone_stepper := ZoneStepper.new()
+## Client: when ships' snapshots arrive, so when to draw them (netcode N4c).
+var snapshot_clock := SnapshotClock.new()
 
 ## Every faction in this world. The server creates them; clients receive a copy
 ## when they join (see _rpc_receive_factions). Replaced as a whole, never patched

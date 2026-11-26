@@ -121,31 +121,80 @@ func _snapshot(origin: Vector3, velocity := Vector3.ZERO) -> FlightIntegrator.Fl
 	return s
 
 
-func test_a_snapshot_moves_a_ship_nobody_here_predicts() -> void:
+func test_a_snapshot_is_kept_and_sets_the_clock() -> void:
 	var ship := _starfury()
-	ship.take_snapshot(5, _snapshot(Vector3(1, 2, 3), Vector3(0, 0, -5)))
-	assert_almost_eq(ship.global_position, Vector3(1, 2, 3), Vector3.ONE * 1e-9)
-	assert_eq(ship.linear_velocity, Vector3(0, 0, -5))
-	assert_eq(ship.angular_velocity, Vector3(0, 0.1, 0))
+	ship.take_snapshot(5, _snapshot(Vector3(1, 2, 3), Vector3(0, 0, -5)), 2.0)
+	assert_eq(ship.snapshots.size(), 1)
+	assert_almost_eq(ship.snapshot_clock.server_tick(2.0), 5.0, 1e-9, "server tick 5 arrived at our tick 2")
+	assert_eq(ship.global_position, Vector3.ZERO, "drawn later, not moved on arrival")
+
+
+func test_a_remote_ship_is_drawn_between_snapshots() -> void:
+	# N4c: other ships are drawn a little in the past, between two snapshots,
+	# not flown here: kinematic, so Jolt neither moves nor pushes them.
+	var ship := _starfury()
+	ship.take_snapshot(10, _snapshot(Vector3(0, 0, 0), Vector3(60, 0, 0)), 0.0)
+	ship.take_snapshot(12, _snapshot(Vector3(2, 0, 0), Vector3(60, 0, 0)), 2.0)
+	ship.show_snapshots(11.0)
+	assert_almost_eq(ship.global_position, Vector3(1, 0, 0), Vector3.ONE * 1e-6)
+	assert_true(ship.freeze)
+	assert_eq(ship.freeze_mode, RigidBody3D.FREEZE_MODE_KINEMATIC, "still something to collide with")
+	assert_eq(ship.linear_velocity, Vector3.ZERO, "on a kinematic body it would be a surface velocity")
+
+
+func test_jolt_moves_a_drawn_ship_to_where_it_is_drawn() -> void:
+	# A kinematic body's new transform is where Jolt moves it in the next step
+	# (with the velocity that takes, so contacts see it moving), not a jump.
+	var ship := _predicted_starfury_in_a_zone()
+	ship.prediction_forced = false
+	ship.take_snapshot(2, _state_at(Vector3(3, 0, 0)), 0.0)
+	ship.show_snapshots(2.0)
+	await Ticks.run(1)
 	var in_jolt: Transform3D = PhysicsServer3D.body_get_state(ship.get_rid(), PhysicsServer3D.BODY_STATE_TRANSFORM)
-	assert_almost_eq(in_jolt.origin, Vector3(1, 2, 3), Vector3.ONE * 1e-9, "in the physics engine too")
+	assert_almost_eq(in_jolt.origin, Vector3(3, 0, 0), Vector3.ONE * 1e-6)
+	assert_almost_eq(ship.global_position, Vector3(3, 0, 0), Vector3.ONE * 1e-6)
 
 
-func test_a_late_snapshot_doesnt_move_the_ship_back() -> void:
+func test_drawing_uses_the_clock() -> void:
 	var ship := _starfury()
-	ship.take_snapshot(8, _snapshot(Vector3(8, 0, 0)))
-	ship.take_snapshot(6, _snapshot(Vector3(6, 0, 0)))  # Arrived after 8.
-	assert_almost_eq(ship.global_position, Vector3(8, 0, 0), Vector3.ONE * 1e-9)
-	assert_eq(ship.snapshots.size(), 2, "kept, for drawing between them later")
+	ship.take_snapshot(20, _snapshot(Vector3(0, 0, 0), Vector3(60, 0, 0)), 0.0)
+	ship.take_snapshot(30, _snapshot(Vector3(10, 0, 0), Vector3(60, 0, 0)), 10.0)
+	ship.drawing_forced = true  # As on a client.
+	ship.draw_remote(10.0)  # Server tick 30 here, drawn DELAY_TICKS behind it.
+	var drawn := 30.0 - SnapshotClock.DELAY_TICKS
+	assert_almost_eq(ship.global_position.x, drawn - 20.0, 0.05)
+
+
+func test_a_drawn_ship_we_start_piloting_is_released_by_its_first_state() -> void:
+	var ship := _predicted_starfury_in_a_zone()
+	ship.prediction_forced = false
+	ship.take_snapshot(2, _state_at(Vector3(3, 0, 0)), 0.0)
+	ship.show_snapshots(2.0)
+	assert_true(ship.freeze)
+	ship.prediction_forced = true  # Our player sat at the helm.
+	await Ticks.run(5)
+	ship.reconcile_with(_state_at(Vector3(3, 0, 0), Vector3(0, 0, -30)), 4, 4, false)
+	assert_false(ship.freeze)
+	await Ticks.run(1, 5)
+	assert_lt(ship.global_position.z, 0.0, "flies")
 
 
 func test_snapshots_are_ignored_for_the_ship_we_predict() -> void:
 	var ship := _starfury()
 	ship.prediction_forced = true  # As on the pilot's own client: it gets its own state.
-	ship.take_snapshot(5, _snapshot(Vector3(1, 2, 3), Vector3(0, 0, -5)))
+	ship.take_snapshot(5, _snapshot(Vector3(1, 2, 3), Vector3(0, 0, -5)), 2.0)
 	assert_eq(ship.global_position, Vector3.ZERO)
 	assert_eq(ship.linear_velocity, Vector3.ZERO)
 	assert_eq(ship.snapshots.size(), 0)
+
+
+func test_snapshots_are_not_ordered_by_enet() -> void:
+	# "unreliable_ordered" drops any packet overtaken by a later one on its
+	# channel, which all ships' snapshots share: under jitter that lost half of
+	# them. SnapshotBuffer orders them itself.
+	var ship := _starfury()
+	var config: Dictionary = (ship.get_script() as Script).get_rpc_config()[&"_receive_snapshot"]
+	assert_eq(config["transfer_mode"], MultiplayerPeer.TRANSFER_MODE_UNRELIABLE)
 
 
 func test_snapshots_go_out_every_other_tick() -> void:
