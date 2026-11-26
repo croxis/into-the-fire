@@ -38,6 +38,40 @@ func test_contact_lost_when_out_of_range() -> void:
 	assert_does_not_have(a.detected_ships, b)
 
 
+func test_a_more_sensitive_sensor_sees_further() -> void:
+	# Higher sensitivity is better: sensitivity S picks up signals down to 1/S.
+	# A Starfury's EM 2.0 at 5 km is 0.08: under 1, over 1/20.
+	var a := _ship(Vector3.ZERO)
+	var b := _ship(Vector3(5000, 0, 0))
+	b.em_output = 2.0
+	b.neutron_output = 0.0
+	assert_false(a.sensor_check(b), "sensitivity 1: needs a signal of 1")
+	a.sensor.em_sensitive = 20.0
+	assert_true(a.sensor_check(b), "sensitivity 20: 0.05 is enough")
+
+
+func test_each_signature_is_checked_against_its_own_sensitivity() -> void:
+	var a := _ship(Vector3.ZERO)
+	var b := _ship(Vector3(5000, 0, 0))
+	b.em_output = 0.0
+	b.neutron_output = 2.0
+	a.sensor.em_sensitive = 20.0
+	assert_false(a.sensor_check(b), "no EM to see")
+	a.sensor.neutrino_sensitive = 20.0
+	assert_true(a.sensor_check(b))
+
+
+func test_a_ship_without_sensors_sees_nothing() -> void:
+	var a := _ship(Vector3.ZERO)
+	var b := _ship(Vector3(10, 0, 0))
+	a.sensor = null
+	assert_false(a.sensor_check(b))
+	a.sensor = Sensor.new()
+	a.sensor.em_sensitive = 0.0
+	a.sensor.neutrino_sensitive = 0.0
+	assert_false(a.sensor_check(b), "sensitivity 0: blind")
+
+
 func test_system_sensor_scan_timer_runs_on_server() -> void:
 	var system: System = SystemScene.instantiate()
 	add_child_autofree(system)

@@ -840,14 +840,18 @@ func get_current_system() -> System:
 	return System.find_for(self)
 
 
+## Server: whether this ship's sensors pick up [param other_ship] now, kept in
+## detected_ships. Each signature falls off with the square of the distance (in
+## km: an output of 1.0 is a signal of 1.0 at 1 km). Higher sensitivity is
+## better: sensitivity S picks up signals down to 1/S, so 0 is blind.
 func sensor_check(other_ship: Ship) -> bool:
 	var detected := false
-	var distance := global_position.distance_to(other_ship.global_position)
-	#TODO: Calculate angular size of other ship. IF bigger than 1 degree, it is detected.
-	var em_signal := other_ship.em_output / pow(distance/1000.0, 2) # Convert to km. Signal strength of 1.0 can be detected by a sensor of 1.0 at 1 km
-	var neuteno_signal := other_ship.neutron_output / pow(distance/1000.0, 2)
-	if em_signal > sensor.em_sensitive or neuteno_signal > sensor.neutrino_sensitive:
-		detected = true
+	if sensor:
+		var km_squared := global_position.distance_squared_to(other_ship.global_position) / 1e6
+		#TODO: Calculate angular size of other ship. IF bigger than 1 degree, it is detected.
+		var em_signal := other_ship.em_output / km_squared
+		var neutrino_signal := other_ship.neutron_output / km_squared
+		detected = em_signal * sensor.em_sensitive > 1.0 or neutrino_signal * sensor.neutrino_sensitive > 1.0
 	if detected:
 		if other_ship not in detected_ships:
 			detected_ships.append(other_ship)
