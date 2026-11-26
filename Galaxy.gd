@@ -28,6 +28,8 @@ var snapshot_clock := SnapshotClock.new()
 var interest := Interest.new()
 const INTEREST_SECONDS := 0.5
 var _interest_timer := 0.0
+## Server: refresh_interest has just run.
+signal interest_refreshed()
 
 ## Every faction in this world. The server creates them; clients receive a copy
 ## when they join (see _rpc_receive_factions). Replaced as a whole, never patched
@@ -154,6 +156,7 @@ func _on_system_entered(node: Node) -> void:
 func _on_peer_connected(peer_id: int) -> void:
 	if multiplayer.is_server():
 		_rpc_receive_factions.rpc_id(peer_id, factions.to_data())
+		refresh_interest()  # So its ships spawn there now, not up to 0.5 s later.
 
 
 ## Client: replace the local copy with the server's.
@@ -346,7 +349,10 @@ func _process(delta: float) -> void:
 
 
 ## Server: works out again which ships each client knows (Interest), from where
-## each client's player and each ship is now.
+## each client's player and each ship is now. Runs every INTEREST_SECONDS, and
+## at once when that changes: a client connects, a ship appears, a crew member
+## boards (before any RPC to them: Godot refuses an RPC to a peer that can't
+## see the node).
 func refresh_interest() -> void:
 	var systems: Array[System] = []
 	for node in $Systems.get_children():
@@ -363,11 +369,22 @@ func refresh_interest() -> void:
 	for peer in multiplayer.get_peers():
 		peers[peer] = _player_system(peer)
 	var changes := interest.update(peers, ships, spawn_systems)
+	# Spawn or despawn on each client (N5a2). A leaving ship stops its unreliable
+	# syncs now and is despawned at the next refresh (see Interest).
+	for peer in changes:
+		for key in ["leaving", "hidden"]:
+			for ship in changes[peer][key]:  # Untyped: a hidden one may have been freed.
+				if is_instance_valid(ship) and (ship as Ship).is_inside_tree():
+					(ship as Ship).update_interest(peer, false, key == "hidden")
+		for ship: Ship in changes[peer]["shown"]:
+			ship.update_interest(peer, true)
 	for peer in changes:
 		Log.log(["Interest: peer ", peer, " now knows ", ships.keys().filter(
 				func(s: Ship) -> bool: return interest.knows(peer, s)).size(), " ships (",
-				changes[peer]["shown"].size(), " more, ", changes[peer]["hidden"].size(), " fewer)"],
+				changes[peer]["shown"].size(), " more, ", changes[peer]["leaving"].size(), " leaving, ",
+				changes[peer]["hidden"].size(), " gone)"],
 				Log.MessageType.INFO)
+	interest_refreshed.emit()
 
 
 ## Server: the system [param peer]'s player character is in, or null (no

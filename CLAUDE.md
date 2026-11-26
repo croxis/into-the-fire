@@ -98,10 +98,23 @@ Autoloads include netfox (`NetworkTime`, `NetworkRollback`, ...), `Log`, `LimboC
   `multiplayer.get_remote_sender_id()`, not arguments (see `Ship.request_launch`). Logins are checked by
   `network.gd` `check_login` first and never logged (they hold passwords).
 - Interest management (N5, `network/interest.gd`, `Galaxy.interest`): the server decides which ships each
-  client is told about, refreshed every 0.5 s (`Galaxy.refresh_interest`); for now, the ships in its player's
-  system, or where it could spawn before it has a character. Snapshots go only to clients that know the ship.
-  It is to grow into fog of war (faction sensor pictures), so a client never learns of a ship it shouldn't
-  see: next, unknown ships are despawned on that client (N5a2). Server log "Interest: peer X now knows N ships".
+  client is told about; a ship a client doesn't know does not exist there. For now: the ships in its player's
+  system, or where it could spawn before it has a character. It is to grow into fog of war (faction sensor
+  pictures). `Galaxy.refresh_interest` runs every 0.5 s and at once when a client connects, a ship appears or
+  crew board (Godot refuses an RPC to a peer that can't see the node).
+  - Every synchronizer in a ship, crew included, has a visibility filter (`Ship._follow_interest`) and is
+    updated only when interest changes (`visibility_update_mode` none; `Ship.update_interest`, the ship's own
+    synchronizer first when shown, last when hidden). Godot spawns a node on a peer while the synchronizers
+    rooted at it are visible there.
+  - A ship a client stops knowing is "leaving" for one refresh (snapshots and its other syncs stop; it stays
+    on the client), then despawned: unreliable packets sent just before would otherwise arrive after it went.
+    Synchronizers that keep a node spawned (the ship's own, crew's) must send nothing unreliable.
+  - Snapshots and the syncs that aren't part of the spawn start only once the client confirms it has the ship
+    (`Ship._have_ship`, from its `_ready` there); a despawn forgets that. Sent at once they overtook the spawn.
+  - A player's own client sends its `InputsSync` only to the server. New broadcast RPCs (`.rpc()`) on ship
+    nodes would reach clients that don't have the ship: send to the clients that know it. (`Gun.fire_sound`
+    does; fix it when weapons are restored.)
+  - Server log "Interest: peer X now knows N ships (+ more, leaving, gone)".
 
 ## Tests and CI
 

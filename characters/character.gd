@@ -83,6 +83,9 @@ static func pilot_data(pilot_name: String, faction: int, peer_id: int, pilot_id:
 
 func _ready():
 	_init_brain()
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server() \
+			and $InputsSync.is_multiplayer_authority():
+		send_inputs_only_to_server()
 
 
 func _init_brain() -> void:
@@ -124,6 +127,15 @@ func _update_brain_active() -> void:
 	if not _brain_initialized:
 		return
 	hsm.set_active(multiplayer.is_server() and not is_player())
+
+
+## A player's own client: its InputsSync goes only to the server. Remote
+## pilots send input through InputChannel; sent everywhere (through the
+## server's relay), it would reach clients that don't have this character
+## (netcode N5a2) and log "Node not found" there.
+func send_inputs_only_to_server() -> void:
+	$InputsSync.public_visibility = false
+	$InputsSync.set_visibility_for(1, true)
 
 
 func set_multiplayer_id(id):

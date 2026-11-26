@@ -117,11 +117,16 @@ var _drawn_past_newest := 0  # Frames drawn past the newest (extrapolated).
 ## Ticks between snapshots: 2 at 60 Hz, so 30 a second.
 const SNAPSHOT_TICKS := 2
 var _last_snapshot_tick := -SNAPSHOT_TICKS  # Server: the tick of the last snapshot sent.
-var _snapshot_peers: Dictionary[int, bool] = {}  # Server: peers that have this ship.
+var _peers_with_ship: Dictionary[int, bool] = {}  # Server: clients that confirmed they have this ship.
 ## Set to treat this ship as predicted on this machine (unit tests).
 var prediction_forced := false
 ## Set to treat this machine as a client that draws this ship (unit tests).
 var drawing_forced := false
+## Who knows this ship, instead of Galaxy.interest (unit tests).
+var interest_override: Interest
+## Server: synchronizers given an interest filter, and whether it is the
+## "held" one (true: they keep a node spawned) or the "known" one.
+var _filtered: Dictionary[MultiplayerSynchronizer, bool] = {}
 
 
 ## True on the pilot's own client: a client, not the server, where the player
@@ -176,10 +181,12 @@ func _ready():
 	if galaxy:
 		destroyed.connect(galaxy._on_ship_destroyed)
 		snapshot_clock = galaxy.snapshot_clock
+		if multiplayer.is_server():
+			galaxy.refresh_interest()  # A new ship: tell the clients that should know it now.
 	# A client that now has this ship asks for its snapshots (see snapshot_recipients).
 	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server() \
 			and multiplayer.multiplayer_peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED:
-		_want_snapshots.rpc_id(1)
+		_have_ship.rpc_id(1)
 
 
 
@@ -208,6 +215,8 @@ func spawn_crew(data: Dictionary) -> Character:
 		return null
 	var pilot: Character = $CrewMultiplayerSpawner.spawn(data)
 	Log.log(["Crew ", pilot.name, " spawned on ", name], Log.MessageType.INFO)
+	if galaxy:
+		galaxy.refresh_interest()  # Their client may only now know this ship (N5a2).
 	if pilot.is_player():
 		set_camera.rpc_id(pilot.multiplayer_id)
 		set_capital_ui.rpc_id(pilot.multiplayer_id)
@@ -264,6 +273,99 @@ func _integrate_forces(state: PhysicsDirectBodyState3D):
 func _enter_tree() -> void:
 	NetworkTime.on_tick.connect(_on_tick)
 	NetworkTime.after_tick_loop.connect(_after_tick_loop)
+	# Before the ship's spawner sees it, so the first spawn already asks Interest.
+	if multiplayer.is_server():
+		_follow_interest(self)
+		var crew := get_node_or_null("Crew")
+		if crew and not crew.child_entered_tree.is_connected(_follow_interest):
+			crew.child_entered_tree.connect(_follow_interest)
+
+
+# Interest management (netcode N5a2): this ship exists on a client, and is
+# synced to it, only while Interest says so. Godot spawns a node on a peer while
+# the synchronizers rooted at that node are visible to it, and sends each
+# synchronizer's data only to peers it is visible to, so every one in the ship,
+# its helms' and its crew's too, gets a filter. Two kinds, for the two steps of
+# leaving (see Interest): the ship's own and its crew's keep them spawned while
+# the client still holds the ship; the rest (helms, Babylon 5's rotation) stop
+# as soon as it stops knowing it, along with the snapshots.
+
+## Server: gives every synchronizer under [param node] (the ship, or a crew
+## member as it boards) its interest filter, once each. Their visibility is then
+## updated only when Interest changes (update_interest), not every frame.
+func _follow_interest(node: Node) -> void:
+	var syncs := node.find_children("*", "MultiplayerSynchronizer", true, false)
+	if node is MultiplayerSynchronizer:
+		syncs.append(node)
+	for sync: MultiplayerSynchronizer in syncs:
+		if _filtered.has(sync):
+			continue
+		var root := sync.get_node_or_null(sync.root_path)
+		var held := root == self or root is Character
+		_filtered[sync] = held
+		sync.add_visibility_filter(is_held_by if held else is_known_to)
+		sync.visibility_update_mode = MultiplayerSynchronizer.VISIBILITY_PROCESS_NONE
+
+
+## Server: whether client [param peer] is told about this ship and has
+## confirmed it has it (_have_ship): it gets its snapshots and the syncs that
+## aren't part of the spawn. Unreliable, they would overtake the spawn itself.
+func is_known_to(peer: int) -> bool:
+	var source := _interest()
+	return _peers_with_ship.has(peer) and (source == null or source.knows(peer, self))
+
+
+## Server: whether this ship exists on client [param peer]'s machine (known,
+## or leaving).
+func is_held_by(peer: int) -> bool:
+	var source := _interest()
+	return source == null or source.holds(peer, self)
+
+
+## The Interest that decides, or null for a ship on its own (tools): then
+## every client knows it.
+func _interest() -> Interest:
+	if interest_override:
+		return interest_override
+	var g := galaxy if galaxy else Galaxy.find_for(self)
+	return g.interest if g else null
+
+
+## Server: this ship's synchronizers in the order to update them when a client
+## starts ([param shown]) or stops knowing it: the ship's own first when shown,
+## so it spawns before anything inside it, and last when hidden, after its crew
+## have despawned (a client must never hold crew without their ship).
+func synchronizers_in_order(shown: bool) -> Array[MultiplayerSynchronizer]:
+	var root: MultiplayerSynchronizer = $MultiplayerSynchronizer
+	var crew: Array[MultiplayerSynchronizer] = []
+	var others: Array[MultiplayerSynchronizer] = []
+	for sync: MultiplayerSynchronizer in find_children("*", "MultiplayerSynchronizer", true, false):
+		if sync == root:
+			continue
+		if has_node("Crew") and $Crew.is_ancestor_of(sync):
+			crew.append(sync)
+		else:
+			others.append(sync)
+	var out: Array[MultiplayerSynchronizer] = []
+	if shown:
+		out.append(root)
+		out.append_array(others)
+		out.append_array(crew)
+	else:
+		out.append_array(crew)
+		out.append_array(others)
+		out.append(root)
+	return out
+
+
+## Server: [param peer] now knows this ship, or no longer does ([param shown]);
+## Godot spawns or despawns it there and starts or stops syncing. When it is
+## [param despawned] there, the client's next copy must confirm itself again.
+func update_interest(peer: int, shown: bool, despawned := false) -> void:
+	if despawned:
+		forget_peer_with_ship(peer)
+	for sync in synchronizers_in_order(shown):
+		sync.update_visibility(peer)
 
 
 func _exit_tree() -> void:
@@ -316,24 +418,34 @@ func _snapshot_due(last_tick: int) -> bool:
 ## (netcode N5). Peers that left are forgotten.
 func snapshot_recipients(connected: Array, pilot_peer: int, knows := Callable()) -> Array[int]:
 	var out: Array[int] = []
-	for peer in _snapshot_peers.keys():
+	for peer in _peers_with_ship.keys():
 		if not peer in connected:
-			_snapshot_peers.erase(peer)
+			_peers_with_ship.erase(peer)
 		elif peer != pilot_peer and (not knows.is_valid() or knows.call(peer)):
 			out.append(peer)
 	return out
 
 
-func _add_snapshot_peer(peer: int) -> void:
-	_snapshot_peers[peer] = true
+func _add_peer_with_ship(peer: int) -> void:
+	_peers_with_ship[peer] = true
 
 
-## Server: a client has this ship now and wants its snapshots. The peer comes
-## from the sender, never from arguments.
+## Server: the ship was despawned on [param peer]'s client.
+func forget_peer_with_ship(peer: int) -> void:
+	_peers_with_ship.erase(peer)
+
+
+## Server: a client has this ship now (sent from its _ready there), so its
+## snapshots and the syncs that aren't part of the spawn can start (N5a2). The
+## peer comes from the sender, never from arguments.
 @rpc("any_peer", "call_remote", "reliable")
-func _want_snapshots() -> void:
-	if multiplayer.is_server():
-		_add_snapshot_peer(multiplayer.get_remote_sender_id())
+func _have_ship() -> void:
+	if not multiplayer.is_server():
+		return
+	var peer := multiplayer.get_remote_sender_id()
+	_add_peer_with_ship(peer)
+	if _interest():
+		update_interest(peer, true)
 
 
 ## Clients: this ship's state after server tick [param tick]. Unreliable and
