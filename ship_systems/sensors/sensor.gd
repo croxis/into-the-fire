@@ -8,3 +8,7 @@ class_name Sensor
 @export var em_sensitive := 1.0
 @export var neutrino_sensitive := 1.0
 @export var gravametric_sensitive := 1.0
+## Visual: a ship is seen when it looks wider than this many degrees (2 x
+## atan(radius / distance)). At 1, a 50 m ship is seen within about 5.7 km.
+## 0: no visual sensor.
+@export var visual_acuity_degrees := 1.0

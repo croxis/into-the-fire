@@ -97,7 +97,7 @@ script = ExtResource("4_jdg3x")
 content_id = &"b5:hyperion"
 ship_name = "Narn Cruiser (stand-in)"
 system = &"b5:test_system"
-position = Vector3(-15000, 0, 0)
+position = Vector3(-80000, 0, 0)
 faction = "Narn Regime"
 
 [resource]

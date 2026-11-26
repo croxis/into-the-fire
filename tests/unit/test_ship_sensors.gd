@@ -93,6 +93,54 @@ func test_a_starfury_sees_a_capital_ship_well_before_it_is_close() -> void:
 	assert_false(fury.sensor_check(capital), "11 km")
 
 
+## Visual detection: a ship is seen when it looks bigger than the sensor's
+## visual acuity (degrees), whatever it emits.
+
+func _silent_ball(at: Vector3, radius: float) -> Ship:
+	var ship := _ship(at)
+	ship.em_output = 0.0
+	ship.neutron_output = 0.0
+	var body := CollisionShape3D.new()
+	var ball := SphereShape3D.new()
+	ball.radius = radius
+	body.shape = ball
+	ship.add_child(body)
+	return ship
+
+
+func test_a_ships_size_comes_from_its_own_collision_shapes() -> void:
+	# Not the areas it carries (docks, escort range): only what it is made of.
+	var ball := _silent_ball(Vector3.ZERO, 50.0)
+	var dock := Area3D.new()
+	var reach := CollisionShape3D.new()
+	var big := SphereShape3D.new()
+	big.radius = 500.0
+	reach.shape = big
+	dock.add_child(reach)
+	ball.add_child(dock)
+	assert_almost_eq(ball.visual_radius(), 50.0, 1e-6, "the 500 m area isn't counted")
+
+
+func test_a_ship_is_seen_once_it_looks_big_enough() -> void:
+	# Radius 50 m at 1 degree: seen out to 50 / tan(0.5 deg), about 5.7 km.
+	var a := _ship(Vector3.ZERO)
+	var b := _silent_ball(Vector3(5000, 0, 0), 50.0)
+	assert_true(a.sensor_check(b), "5 km: over 1 degree")
+	b.global_position = Vector3(6500, 0, 0)
+	assert_false(a.sensor_check(b), "6.5 km: under")
+	a.sensor.visual_acuity_degrees = 0.5
+	assert_true(a.sensor_check(b), "sharper optics see further")
+	a.sensor.visual_acuity_degrees = 0.0
+	b.global_position = Vector3(10, 0, 0)
+	assert_false(a.sensor_check(b), "acuity 0: no visual sensor")
+
+
+func test_a_real_starfury_has_a_size() -> void:
+	var fury: Ship = Content.instantiate(&"b5:aurora_starfury")
+	add_child_autofree(fury)
+	assert_between(fury.visual_radius(), 3.0, 30.0, "a fighter, metres across")
+
+
 func test_system_sensor_scan_timer_runs_on_server() -> void:
 	var system: System = SystemScene.instantiate()
 	add_child_autofree(system)

@@ -236,13 +236,13 @@ func test_playtest_has_an_enemy_its_players_cannot_see_at_first() -> void:
 		else:
 			enemies.append(s)
 	assert_false(enemies.is_empty(), "an enemy")
+	# The real ships at their places: every signature, and how big they look.
 	for enemy in enemies:
-		var target: Ship = autofree(load(registry.path_of(enemy.content_id)).instantiate())
+		var target: Ship = load(registry.path_of(enemy.content_id)).instantiate()
+		add_child_autofree(target)
+		target.global_position = enemy.position
 		for own in ours:
-			var watcher: Ship = autofree(load(registry.path_of(own.content_id)).instantiate())
-			if watcher.sensor == null:
-				continue
-			var km_squared := own.position.distance_squared_to(enemy.position) / 1e6
-			var best := maxf(target.em_output_base * watcher.sensor.em_sensitive,
-					target.neutron_output_base * watcher.sensor.neutrino_sensitive)
-			assert_lt(best / km_squared, 1.0, "%s can't see %s" % [own.content_id, enemy.ship_name])
+			var watcher: Ship = load(registry.path_of(own.content_id)).instantiate()
+			add_child_autofree(watcher)
+			watcher.global_position = own.position
+			assert_false(watcher.sensor_check(target), "%s can't see %s" % [own.content_id, enemy.ship_name])

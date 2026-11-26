@@ -19,8 +19,9 @@ setting) is a new scenario file, with no change to Galaxy.
 
 The Babylon 5 playtest is `content/scenarios/playtest.tres`, registered as `b5:playtest` in
 `content/babylon5.cfg` under `[scenario]`. It holds Babylon 5 and the EASS Hyperion (Earth Alliance, whose wings
-players join) and a Narn cruiser (a Hyperion hull standing in, faction Narn Regime, closed to players) 15 km
-out, beyond every Earth Alliance sensor at the start, so fog of war has something to hide.
+players join) and a Narn cruiser (a Hyperion hull standing in, faction Narn Regime, closed to players) 80 km
+out, beyond every Earth Alliance sensor at the start (a Hyperion-sized hull is seen at 1 degree from about
+59 km), so fog of war has something to hide.
 `test_playtest_has_an_enemy_its_players_cannot_see_at_first` checks that.
 
 ## How things refer to each other
