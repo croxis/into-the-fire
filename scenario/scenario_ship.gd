@@ -12,3 +12,5 @@ extends Resource
 ## Owning faction's name, or empty for no faction.
 @export var faction := ""
 @export var crew: Array[ScenarioCrew] = []
+## Kept out of its side's shared picture (see Ship).
+@export var excluded_from_picture := false

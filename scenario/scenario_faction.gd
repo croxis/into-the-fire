@@ -11,3 +11,5 @@ extends Resource
 ## AI settings for the faction. Copied into the world, so play never changes
 ## the scenario resource.
 @export var doctrine: FactionDoctrine
+## Kept out of its top-level faction's shared picture (see Faction).
+@export var excluded_from_picture := false

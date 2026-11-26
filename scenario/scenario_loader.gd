@@ -78,6 +78,7 @@ static func build_factions(scenario: Scenario) -> FactionRegistry:
 					f.accept_children, parent)
 			if f.doctrine:
 				faction.doctrine = f.doctrine.duplicate()
+			faction.excluded_from_picture = f.excluded_from_picture
 			pending.erase(f)
 	return registry
 
@@ -97,6 +98,7 @@ static func populate(scenario: Scenario, content: ContentRegistry, registry: Fac
 			ship.name = entry.ship_name
 		ship.ship_id = ids.next_ship()
 		ship.position = entry.position
+		ship.excluded_from_picture = entry.excluded_from_picture
 		var system: Node = systems[entry.system]
 		if ship.is_station:
 			system.add_station(ship)

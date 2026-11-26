@@ -216,3 +216,91 @@ func test_a_ghost_marker_drifts_fades_and_goes() -> void:
 	marker._process(0.0)
 	assert_true(marker.is_queued_for_deletion(), "faded out: gone, though still on record")
 	assert_false(contacts.get_contact(9).is_empty())
+
+
+## Exclusions: a ship, wing or station kept out of its side's shared picture,
+## withholding its position and what it detects. One-way: an excluded wing
+## still sees the shared picture.
+
+func _covert(w: Dictionary) -> Dictionary:
+	var g: Galaxy = w.galaxy
+	var ea := g.factions.find_by_name("Earth Alliance")
+	var covert := g.factions.create("Covert Wing", true, true, false, ea)
+	covert.excluded_from_picture = true
+	var black: Ship = Content.instantiate(&"b5:aurora_starfury")
+	(w.system as System).add_ship(black)
+	black.faction_id = covert.faction_id
+	black.position = Vector3(0, 0, 40000)  # Out of the carrier's sight.
+	var spook := black.get_node("CrewMultiplayerSpawner").spawn(
+			Character.pilot_data("Spook", covert.faction_id, 1, 2, 4)) as Character
+	w["covert"] = covert
+	w["black"] = black
+	w["spook"] = spook
+	return w
+
+
+func test_an_excluded_wings_ships_are_not_in_the_shared_picture() -> void:
+	var w := _covert(_world())
+	var seen: Dictionary = (w.galaxy as Galaxy).view_of(w.player)  # A Zeta Wing pilot.
+	assert_false((seen["picture"] as Dictionary).has(w.black), "the covert ship is withheld")
+	assert_true((seen["picture"] as Dictionary).has(w.carrier), "the rest of the side is shared")
+
+
+func test_an_excluded_wing_still_sees_the_shared_picture() -> void:
+	var w := _covert(_world())
+	var seen: Dictionary = (w.galaxy as Galaxy).view_of(w.spook)
+	assert_true((seen["picture"] as Dictionary).has(w.carrier), "one-way: it gets the fleet's picture")
+	assert_true((seen["picture"] as Dictionary).has(w.black), "and its own ships")
+
+
+func test_what_an_excluded_ship_detects_is_withheld_too() -> void:
+	var w := _covert(_world())
+	(w.raider as Ship).position = (w.black as Ship).position + Vector3(300, 0, 0)  # Next to the covert ship.
+	(w.system as System).ship_scanner_check()
+	var zeta: Dictionary = (w.galaxy as Galaxy).view_of(w.player)
+	assert_false((zeta["picture"] as Dictionary).has(w.raider), "only the covert ship saw it")
+	var spook: Dictionary = (w.galaxy as Galaxy).view_of(w.spook)
+	assert_true((spook["picture"] as Dictionary).has(w.raider))
+
+
+func test_a_single_excluded_ship_is_seen_only_by_its_own_crew() -> void:
+	var w := _world()
+	var carrier: Ship = w.carrier
+	carrier.excluded_from_picture = true
+	var g: Galaxy = w.galaxy
+	var zeta := g.factions.find_by_name("Zeta Wing")
+	var other: Ship = Content.instantiate(&"b5:aurora_starfury")
+	(w.system as System).add_ship(other)
+	other.faction_id = zeta.faction_id
+	var outsider := other.get_node("CrewMultiplayerSpawner").spawn(
+			Character.pilot_data("Outsider", zeta.faction_id, 1, 5, 6)) as Character
+	assert_false((g.view_of(outsider)["picture"] as Dictionary).has(carrier), "withheld from the side")
+	assert_true(g.view_of(w.player)["aboard"] == carrier, "its own crew are aboard, so they know it")
+
+
+## Galaxy.check_exclusion_change: only a leader of the owning faction, or of one
+## above it, may change an exclusion (no UI yet; this is the server's check).
+
+func test_only_leaders_above_may_change_an_exclusion() -> void:
+	var w := _covert(_world())
+	var g: Galaxy = w.galaxy
+	var ea := g.factions.find_by_name("Earth Alliance")
+	var player: Character = w.player  # pilot_id 1, Zeta Wing.
+	assert_ne(Galaxy.check_exclusion_change(player, w.black), "", "not a leader")
+	ea.leader_id = player.pilot_id
+	assert_eq(Galaxy.check_exclusion_change(player, w.black), "", "leads a faction above it")
+	assert_eq(Galaxy.check_exclusion_change(player, w.covert), "", "and above the wing")
+	var narn := g.factions.find_by_name("Narn Regime")
+	assert_ne(Galaxy.check_exclusion_change(player, w.raider), "", "not over another side's ships")
+	narn.leader_id = 99
+	(w.spook as Character).faction.leader_id = (w.spook as Character).pilot_id
+	assert_eq(Galaxy.check_exclusion_change(w.spook, w.covert), "", "a wing's own leader")
+	assert_ne(Galaxy.check_exclusion_change(w.spook, w.carrier), "", "but not the rest of the fleet")
+
+
+func test_exclusions_are_not_sent_to_clients() -> void:
+	# Which wings are covert is the server's to know.
+	var w := _covert(_world())
+	var data: Dictionary = (w.galaxy as Galaxy).factions.to_data()
+	for entry: Dictionary in data["factions"]:
+		assert_false(entry.has("excluded_from_picture"), entry["name"])

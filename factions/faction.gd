@@ -20,6 +20,11 @@ var top_faction: Faction:
 		return self
 
 @export var doctrine: FactionDoctrine
+## Kept out of its top-level faction's shared picture (fog of war): its ships
+## and what they detect are seen by this faction and those below it, not by the
+## rest of the side. One-way: it still sees the shared picture. Server only
+## (not sent to clients); changed through Galaxy.check_exclusion_change.
+@export var excluded_from_picture := false
 
 ## The FactionRegistry this faction belongs to (set by the registry).
 ## Weak because the registry already holds the faction: two strong references to

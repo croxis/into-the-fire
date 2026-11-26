@@ -465,31 +465,87 @@ func contact_regained(ship_id: int) -> void:
 
 
 ## Server: what [param character]'s player may know (Interest.view): their
-## system, the ship they are aboard, and their top-level faction's sensor
-## picture (fog of war, N5b3). [param pictures] caches pictures by top-level
-## faction across one refresh.
+## system, the ship they are aboard, and their side's sensor picture (fog of
+## war, N5b3): the top-level faction's shared picture, the pictures of excluded
+## factions they belong to (one-way: covert wings see the shared one too), and
+## what the ship they are aboard detects. [param pictures] caches pictures by
+## top-level faction across one refresh.
 func view_of(character: Character, pictures := {}) -> Dictionary:
 	var faction := character.faction
 	var top := faction.top_faction if faction else null
 	var picture := {}
 	if top:
 		if not pictures.has(top):
-			pictures[top] = picture_of(top)
-		picture = pictures[top]
-	return Interest.view(System.find_for(character), character.current_ship, picture)
+			pictures[top] = pictures_of(top)
+		var side: Dictionary = pictures[top]
+		picture = (side["shared"] as Dictionary).duplicate()
+		var f := faction
+		while f:
+			if side["groups"].has(f):
+				picture.merge(side["groups"][f])
+			f = f.parent_faction
+	var aboard := character.current_ship
+	if aboard:
+		picture.merge(Interest.picture([aboard], {aboard: aboard.detected_ships}))
+	return Interest.view(System.find_for(character), aboard, picture)
 
 
-## Server: [param top]'s sensor picture: every ship of its own (its factions
-## all keep their ships on the top-level one) and what their sensors detect
-## (Ship.detected_ships, from each system's sensor scan).
-## TODO: ships, wings and stations left out of the picture; sharing with others.
-static func picture_of(top: Faction) -> Dictionary:
-	# Untyped: a destroyed ship may still be listed until it is freed.
-	var own: Array = top.owned_ships.filter(func(s) -> bool: return is_instance_valid(s))
+## Server: [param top]'s sensor pictures: "shared", every ship of its own (its
+## factions all keep their ships on the top-level one) and what their sensors
+## detect (Ship.detected_ships, from each system's sensor scan); and "groups",
+## {excluded faction: picture} for the ships of each faction kept out of the
+## shared one (its nearest excluded faction). Ships excluded on their own are in
+## none: only their crew know them. TODO: sharing with other sides.
+static func pictures_of(top: Faction) -> Dictionary:
+	var shared: Array = []
+	var groups := {}  # Excluded faction -> its ships.
 	var detections := {}
-	for ship in own:
+	for ship in top.owned_ships:  # Untyped: a destroyed ship may be listed until freed.
+		if not is_instance_valid(ship) or (ship as Ship).excluded_from_picture:
+			continue
 		detections[ship] = (ship as Ship).detected_ships
-	return Interest.picture(own, detections)
+		var group := _excluded_group((ship as Ship).faction, top)
+		if group:
+			if not groups.has(group):
+				groups[group] = []
+			groups[group].append(ship)
+		else:
+			shared.append(ship)
+	var out := {"shared": Interest.picture(shared, detections), "groups": {}}
+	for group in groups:
+		out["groups"][group] = Interest.picture(groups[group], detections)
+	return out
+
+
+## The nearest faction from [param faction] up to (not including) [param top]
+## that is excluded from the shared picture, or null.
+static func _excluded_group(faction: Faction, top: Faction) -> Faction:
+	var f := faction
+	while f and f != top:
+		if f.excluded_from_picture:
+			return f
+		f = f.parent_faction
+	return null
+
+
+## Why [param requester] may not change whether [param target] (a Ship or a
+## Faction) is kept out of its side's shared picture, or "": only the leader of
+## the faction that owns the ship (for a faction: that faction), or of a
+## faction above it, may. Nothing a client sends is trusted: call this first.
+static func check_exclusion_change(requester: Character, target: Object) -> String:
+	var faction: Faction = null
+	if target is Ship:
+		faction = (target as Ship).faction
+	elif target is Faction:
+		faction = target
+	if faction == null:
+		return "no faction owns that"
+	var f := faction
+	while f:
+		if f.leader_id != 0 and f.leader_id == requester.pilot_id:
+			return ""
+		f = f.parent_faction
+	return "%s doesn't lead %s or a faction above it" % [requester.name, faction.resource_name]
 
 
 @rpc("authority", "call_remote", "unreliable_ordered")

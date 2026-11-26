@@ -76,7 +76,8 @@ func children_of(parent: Faction) -> Array[Faction]:
 ## Plain data describing every faction, safe to send over the network or save.
 ##
 ## Doctrine is left out: it is AI configuration that only the server uses.
-## Server-only runtime lists (owned and detected ships) are left out too.
+## Server-only runtime lists (owned and detected ships) are left out too, and
+## so is excluded_from_picture: which wings are covert is the server's to know.
 func to_data() -> Dictionary:
 	var list: Array[Dictionary] = []
 	for f in all():

@@ -84,8 +84,21 @@ Why it is built this way:
   players, and anything that isn't a direct child of `Systems`. (Without that last check, a name like
   `".."` would resolve to a node outside the systems.)
 
-Not sent to clients: the AI doctrine (only the server's AI uses it) and the server-only lists of
-owned and detected ships.
+Not sent to clients: the AI doctrine (only the server's AI uses it), the server-only lists of
+owned and detected ships, and `excluded_from_picture` (which wings are covert is the server's to know).
+
+## Fog of war
+
+A top-level faction's ships share one sensor picture: each player is told about the ships their side
+owns or detects (`Galaxy.view_of`, see the netcode notes in `CLAUDE.md`). A faction or a ship can be
+kept out of it (`excluded_from_picture`, in the scenario or changed in play once a leader is allowed:
+`Galaxy.check_exclusion_change`, only the leader of the owning faction or one above it):
+
+- **An excluded faction** (a covert wing): its ships, and what they detect, are seen by it and the
+  factions below it, not by the rest of the side. One-way: it still sees the shared picture.
+- **An excluded ship**: only its own crew know where it is and what it detects.
+
+Either way, another side's sensors (or the rest of its own side's) can still detect it.
 
 Changes after joining aren't sent yet, because nothing changes factions during play so far. When
 faction creation, reorganising or secession is added, the server should send the change (or a fresh

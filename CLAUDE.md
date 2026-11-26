@@ -99,10 +99,11 @@ Autoloads include netfox (`NetworkTime`, `NetworkRollback`, ...), `Log`, `LimboC
   `network.gd` `check_login` first and never logged (they hold passwords).
 - Interest management (N5, `network/interest.gd`, `Galaxy.interest`): the server decides which ships each
   client is told about; a ship a client doesn't know does not exist there. The rule is fog of war: the ships
-  in the player's system that are in their top-level faction's sensor picture (`Galaxy.picture_of`: its own
+  in the player's system that are in their top-level faction's sensor picture (`Galaxy.pictures_of`: its own
   ships and what their sensors detect, `Ship.detected_ships` from each system's 0.5 s scan), plus the ship
-  they are aboard; none before they have a character. Not yet: ships left out of the picture, sharing
-  pictures, and the host's own player (the server has everything).
+  they are aboard; none before they have a character. Factions and ships can be kept out of the shared
+  picture (`excluded_from_picture`; covert wings still see it, one-way; `documentation/factions.md`). Not
+  yet: sharing pictures between sides, and the host's own player (the server has everything).
   - With no character a client knows nothing, so the join menu asks the server for a faction's spawn points
     (`Galaxy._request_spawn_points`, own side only), and `first_spawn_player` checks the one picked
     (`Galaxy.check_spawn_point`).

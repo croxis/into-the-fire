@@ -121,6 +121,21 @@ func test_build_factions_keeps_tree_and_flags() -> void:
 			"a copy: the world must not change the scenario resource")
 
 
+func test_exclusions_from_the_shared_picture_are_loaded() -> void:
+	# Fog of war: covert wings and ships, set in the scenario.
+	var s := _scenario()
+	s.factions[2].excluded_from_picture = true  # Zeta Wing.
+	var covert := _ship("Black Omega", "Zeta Wing")
+	covert.excluded_from_picture = true
+	s.ships.assign([_ship("Picket", "Zeta Wing"), covert])
+	var registry := ScenarioLoader.build_factions(s)
+	assert_true(registry.find_by_name("Zeta Wing").excluded_from_picture)
+	assert_false(registry.find_by_name("Babylon 5").excluded_from_picture)
+	var ships := ScenarioLoader.populate(s, content, registry, {SYSTEM: _fake_system()}, WorldIds.new(), 1)
+	assert_false(ships[0].excluded_from_picture)
+	assert_true(ships[1].excluded_from_picture)
+
+
 func test_parent_may_be_listed_after_child() -> void:
 	var s := Scenario.new()
 	s.factions.assign([_faction("Zeta Wing", "Babylon 5", true), _faction("Babylon 5")])

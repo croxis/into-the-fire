@@ -77,6 +77,10 @@ var factions: FactionRegistry:
 @export var em_output_base: float = 1.0
 ## Neutrinos: esoteric ships only (Shadows, Vorlons). None today.
 @export var neutron_output_base: float = 0.0
+## Kept out of its side's shared picture (fog of war): where it is and what it
+## detects are known only to its own crew (and to sides that detect it).
+## Changed through Galaxy.check_exclusion_change.
+@export var excluded_from_picture := false
 ## Its engines: what thrust gives off. Chemical unless the ship says otherwise.
 @export var drive: DriveProfile = preload("res://ship_systems/drives/chemical.tres")
 var em_output := 1.0
