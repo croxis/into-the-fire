@@ -62,6 +62,22 @@ func test_a_client_whose_connection_ends_goes_offline() -> void:
 	get_tree().set_multiplayer(null, network.get_path())
 
 
+func test_a_player_can_join_again_after_a_refusal() -> void:
+	# Each join connected the client's signals again, which Godot refuses with
+	# an error ("already connected") on the second try.
+	var network: Node = add_child_autofree(Network.new())
+	var client := SceneMultiplayer.new()
+	client.multiplayer_peer = OfflineMultiplayerPeer.new()
+	get_tree().set_multiplayer(client, network.get_path())
+	network.join_game("127.0.0.1", 9, "Ivanova", "", "")  # Never connects.
+	network.on_server_disconnected()  # As after a refused login.
+	network.join_game("127.0.0.1", 9, "Ivanova", "", "")
+	assert_true(network.multiplayer.multiplayer_peer is ENetMultiplayerPeer, "joining again")
+	assert_eq(network.multiplayer.server_disconnected.get_connections().size(), 1)
+	network.multiplayer.multiplayer_peer.close()
+	get_tree().set_multiplayer(null, network.get_path())
+
+
 # Spawning -------------------------------------------------------------------
 
 func _system() -> System:

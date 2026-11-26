@@ -144,7 +144,9 @@ func _refuse_login(peer_id: int, message: String) -> void:
 	multiplayer.send_auth(peer_id, var_to_bytes({'error': message}))
 	Log.log(["Login refused for peer ", peer_id, ": ", message], Log.MessageType.ERROR)
 	await get_tree().create_timer(0.1).timeout
-	multiplayer.disconnect_peer(peer_id)
+	# The client usually hangs up first, on reading the refusal.
+	if peer_id in multiplayer.get_authenticating_peers():
+		multiplayer.disconnect_peer(peer_id)
 
 
 func _auth_failed(client_peer):
@@ -161,15 +163,21 @@ func join_game(ip, port, new_player_name, s_password, p_password):
 	peer = ENetMultiplayerPeer.new()
 	server_password = s_password
 	player_password = p_password
-	multiplayer.connected_to_server.connect(on_connected)
-	multiplayer.connection_failed.connect(on_connection_failed)
-	multiplayer.server_disconnected.connect(on_server_disconnected)
+	# A player may join again after a refusal; connect the signals only once.
+	_connect_once(multiplayer.connected_to_server, on_connected)
+	_connect_once(multiplayer.connection_failed, on_connection_failed)
+	_connect_once(multiplayer.server_disconnected, on_server_disconnected)
 	multiplayer.auth_callback = _client_auth_callback
 	var err = peer.create_client(ip, port)
 	if err != OK:
 		print("Failed to join Game: ", ip, ":", port, " as " , new_player_name)
 		return
 	multiplayer.multiplayer_peer = peer
+
+
+func _connect_once(sig: Signal, callable: Callable) -> void:
+	if not sig.is_connected(callable):
+		sig.connect(callable)
 
 
 func on_connected():
@@ -180,10 +188,19 @@ func on_connected():
 
 func on_connection_failed():
 	print("Failed to connect to server")
+	_go_offline()
 
 
 func on_server_disconnected():
 	print("Disconnected from server")
+	_go_offline()
+
+
+## A closed ENet peer left in place still counts as a peer, and asking it
+## anything (is_server, get_unique_id) logs an error. Back to how the game
+## boots: offline, where this machine is its own server (ID 1).
+func _go_offline() -> void:
+	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
 
 
 ## CLIENT GETS SERVER's QUERY and SENDS REPLY
