@@ -84,6 +84,15 @@ func test_test_player_can_pick_a_faction() -> void:
 			"no faction: wait in the join menu")
 
 
+func test_test_player_can_pick_a_spawn_point() -> void:
+	var o := LaunchOptions.parse(PackedStringArray(["--testplayer", "--faction=Zeta Wing",
+			"--spawn-at=EASS Hyperion"]))
+	assert_eq(o.spawn_at, "EASS Hyperion")
+	assert_eq(o.unknown.size(), 0)
+	assert_eq(LaunchOptions.parse(PackedStringArray(["--testplayer"])).spawn_at, "",
+			"none: the first spawn point")
+
+
 ## restart_args: the arguments for restarting the game with XR on or off.
 
 func test_restart_into_xr_adds_the_engine_flag() -> void:

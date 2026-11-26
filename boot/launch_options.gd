@@ -27,6 +27,9 @@ var xr := false
 ## --faction=NAME: a test player spawns in this faction as soon as it joins,
 ## instead of waiting in the join menu (for automated two-process tests).
 var faction := ""
+## --spawn-at=NAME: with --faction, the spawn point (a ship with launch bays,
+## e.g. "EASS Hyperion") to spawn at; empty means the first one offered.
+var spawn_at := ""
 ## --launch: once aboard, a test player presses Launch by itself (for automated
 ## two-process tests of a remote pilot flying).
 var launch := false
@@ -79,10 +82,11 @@ static func parse(args: PackedStringArray, headless := false, dedicated_feature 
 		options.host = flags["host"]
 	options.xr = flags.has("xr_mode")
 	options.faction = flags.get("faction", "")
+	options.spawn_at = flags.get("spawn-at", "")
 	options.launch = flags.has("launch")
 
 	for key in flags:
-		if key not in ["server", "testserver", "testplayer", "game", "password", "port", "host", "xr_mode", "faction", "launch"]:
+		if key not in ["server", "testserver", "testplayer", "game", "password", "port", "host", "xr_mode", "faction", "spawn-at", "launch"]:
 			options.unknown.append("--" + key)
 	return options
 

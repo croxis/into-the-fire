@@ -17,7 +17,7 @@ func before_each() -> void:
 	add_child_autofree(ship)
 	var here := RefCounted.new()  # Stand-ins for systems.
 	var elsewhere := RefCounted.new()
-	interest.update({7: here, 8: elsewhere}, {ship: here}, [])  # 7 knows the ship, 8 doesn't.
+	interest.update({7: here, 8: elsewhere}, {ship: here})  # 7 knows the ship, 8 doesn't.
 
 
 func _synchronizers(node: Node) -> Array[Node]:

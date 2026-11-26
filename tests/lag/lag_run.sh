@@ -3,7 +3,7 @@
 # prints the netcode reports: the server's "Input from" lines and the client's
 # "Prediction for" lines (which appear only when there were corrections).
 #
-#   GODOT=/path/to/custom/godot tests/lag/lag_run.sh [LATENCY_MS] [JITTER_MS] [LOSS_PERCENT] [SECONDS]
+#   GODOT=/path/to/custom/godot tests/lag/lag_run.sh [LATENCY_MS] [JITTER_MS] [LOSS_PERCENT] [SECONDS] [TEST PLAYER FLAGS...]
 #
 # LATENCY_MS is one way, so ping is twice it. Defaults: 50 ms, no jitter or loss, 60 s.
 # Needs ports 2258 (server) and 2259 (proxy) free. Logs stay in a temporary folder.
@@ -20,7 +20,7 @@ timeout $((seconds + 5)) "$GODOT" --headless --path . --server > "$logs/server.l
 server=$!
 sleep 3
 timeout "$seconds" "$GODOT" --headless --path . --testplayer --faction="Zeta Wing" --launch \
-	--port=2259 > "$logs/client.log" 2>&1
+	--port=2259 "${@:5}" > "$logs/client.log" 2>&1
 wait $server
 
 strip() { sed 's/\x1b\[[0-9;]*m//g'; }

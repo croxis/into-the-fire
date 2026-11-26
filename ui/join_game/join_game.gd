@@ -27,18 +27,23 @@ func build_faction_tree(parent_node, faction):
 		build_faction_tree(faction_child, child)
 			
 
-func show_spawn(spawn_points: Dictionary) -> void:
+## Lists [param faction_name]'s spawn points, {system name: [ship name, ...]}
+## from the server, if that faction is still the one picked.
+func show_spawn(faction_name: String, spawn_points: Dictionary) -> void:
+	var picked: TreeItem = faction_tree.get_selected()
+	if picked and picked.get_text(0) != faction_name:
+		return  # An answer for a faction picked before.
 	spawn_tree.clear()
 	var root = spawn_tree.create_item()
 	spawn_tree.set_column_title(0, "test")
 	root.set_text(0, "ROOT")
 	for system in spawn_points:
 		var system_child = spawn_tree.create_item(root)
-		system_child.set_text(0, system.name)
+		system_child.set_text(0, system)
 		system_child.set_selectable(0, false)
 		for point in spawn_points[system]:
 			var spawn_child = spawn_tree.create_item(system_child)
-			spawn_child.set_text(0, point.name)
+			spawn_child.set_text(0, point)
 	visible = true
 	queue_sort()
 

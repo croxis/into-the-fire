@@ -167,6 +167,42 @@ func test_spawn_request_unknown_system_refused() -> void:
 			"a path out of Systems is not a system")
 
 
+## Galaxy.spawn_points_for / check_spawn_point: the server lists where a
+## faction's players can spawn (the join menu asks it: a client may not know of
+## the ships at all, netcode N5b2), and checks the one a client picks.
+
+func _spawn_ship(faction: Faction, ship_name: String, spawn_points := true) -> Ship:
+	var ship: Ship = preload("res://ships/Ship.tscn").instantiate()
+	ship.name = ship_name
+	ship.faction_registry = registry
+	add_child_autofree(ship)
+	ship.has_spawn_points = spawn_points
+	ship.faction_id = faction.faction_id
+	return ship
+
+
+func test_spawn_points_are_on_the_players_own_side() -> void:
+	var t := _playtest_tree()
+	var narn := registry.create("Narn Regime")
+	var ships := {
+		"epsilon": [_spawn_ship(t.b5, "Babylon 5"), _spawn_ship(narn, "Gquan"),
+				_spawn_ship(t.zeta, "Starfury", false)],
+		"sol": [_spawn_ship(t.ea, "Hyperion")],
+		"narn": [_spawn_ship(narn, "Kha'Ri")],
+	}
+	var points := Galaxy.spawn_points_for(t.zeta, ships)
+	assert_eq(points, {"epsilon": ["Babylon 5"], "sol": ["Hyperion"]},
+			"own side (the wing's parents too), with launch bays; nothing about the Narn")
+
+
+func test_a_spawn_point_must_be_one_offered() -> void:
+	var points := {"epsilon": ["Babylon 5"], "sol": ["Hyperion"]}
+	assert_eq(Galaxy.check_spawn_point(points, "epsilon", "Babylon 5"), "")
+	assert_eq(Galaxy.check_spawn_point(points, "epsilon", ""), "", "none named: the first there")
+	assert_ne(Galaxy.check_spawn_point(points, "epsilon", "Hyperion"), "", "not in that system")
+	assert_ne(Galaxy.check_spawn_point(points, "narn", ""), "", "nowhere to spawn there")
+
+
 ## Galaxy.pick_respawn_ship: where a destroyed ship's crew respawn.
 
 func _ship_at(faction: Faction, x: float, capital := true) -> Ship:

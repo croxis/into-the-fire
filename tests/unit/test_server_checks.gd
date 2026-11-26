@@ -45,6 +45,23 @@ func test_player_names_must_be_safe_node_names() -> void:
 		assert_false(Network.valid_player_name(name), name)
 
 
+func test_a_client_whose_connection_ends_goes_offline() -> void:
+	# A refused login (or a server that goes away) closes the client's ENet
+	# peer. Kept as the multiplayer peer, it still counts as "a peer" and
+	# is_server() errors on it, every frame, in Galaxy._process.
+	var network: Node = add_child_autofree(Network.new())
+	var client := SceneMultiplayer.new()
+	var peer := ENetMultiplayerPeer.new()
+	peer.create_client("127.0.0.1", 9)  # Never connects.
+	client.multiplayer_peer = peer
+	get_tree().set_multiplayer(client, network.get_path())
+	peer.close()
+	network.on_server_disconnected()
+	assert_true(network.multiplayer.multiplayer_peer is OfflineMultiplayerPeer, "back to offline")
+	assert_true(network.multiplayer.is_server(), "offline counts as the server, without errors")
+	get_tree().set_multiplayer(null, network.get_path())
+
+
 # Spawning -------------------------------------------------------------------
 
 func _system() -> System:
@@ -91,6 +108,33 @@ func test_launch_takes_the_senders_own_character() -> void:
 	assert_eq(carrier.launch_player(3, WorldIds.new()), "")
 	assert_does_not_have(carrier.get_crew(), me, "I launched")
 	assert_has(carrier.get_crew(), someone_else, "they stayed aboard")
+
+
+func test_a_launched_craft_is_shown_to_clients_once_it_is_in_the_bay() -> void:
+	# Showing a ship sends its spawn at once, with its position then: shown as it
+	# entered the world (at the origin), it appeared on clients 5.8 km from the
+	# Hyperion and snapped over. Shown after it is placed, it starts in the bay.
+	var galaxy: Galaxy = load("res://Galaxy.tscn").instantiate()
+	add_child_autofree(galaxy)
+	var system := SystemScene.instantiate() as System
+	galaxy.get_node("Systems").add_child(system)
+	var carrier := _carrier(system)
+	carrier.position = Vector3(5800, 0, 0)
+	_player_aboard(carrier, 3)
+	var launched_at: Array[Vector3] = []
+	var player_in_world: Array[bool] = []
+	galaxy.interest_refreshed.connect(func() -> void:
+			player_in_world.append(Galaxy.find_player_character(galaxy.get_node("Systems"), 3) != null)
+			for ship in system.get_ships():
+				if ship.is_spawning:
+					launched_at.append(ship.global_position))
+	assert_eq(carrier.launch_player(3, WorldIds.new()), "")
+	assert_false(launched_at.is_empty(), "shown during the launch")
+	for at in launched_at:
+		assert_gt(at.x, 5000.0, "in the Hyperion's bay, not at the origin")
+	# Between leaving the carrier and boarding the craft the player has no
+	# character, and a client without one knows no ships at all.
+	assert_false(false in player_in_world, "never refreshed while the player was between ships")
 
 
 func test_launch_is_refused_for_a_player_who_is_not_aboard() -> void:

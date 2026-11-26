@@ -50,23 +50,42 @@ signal factions_synced()
 signal load_scenes(paths: PackedStringArray, callback: Callable)
 
 
-func get_spawn_points(faction: Faction) -> Dictionary:
-	# For now return spawn points in {system_name: [spawn_ship]} type format
-	# Eventually we will migrate to some other type of thing, such as checking
-	# Inventory for ships
-	# Also, eventually, we will also only launch from spawn points we are
-	# on the team of
-	var spawn_points = {}
+## Server: where [param faction]'s players can spawn, as names a client can be
+## sent: {system name: [ship name, ...]}. Ships with launch bays on its own side
+## (the faction or one above it, as for respawns): a client is told of no others
+## (netcode N5b2). [param ships_by_system]: {system name: [Ship, ...]}.
+## TODO: inventory, hyperspace, generated deep-space systems.
+static func spawn_points_for(faction: Faction, ships_by_system: Dictionary) -> Dictionary:
+	var points := {}
+	for system_name in ships_by_system:
+		for ship: Ship in ships_by_system[system_name]:
+			var side := ship.faction
+			if ship.has_spawn_points and side and (side == faction or faction.is_a_parent(side)):
+				if not points.has(system_name):
+					points[system_name] = []
+				points[system_name].append(String(ship.name))
+	return points
+
+
+## Why a client's pick of spawn point [param spawner_name] in [param system_name]
+## is refused, or "": it must be one of [param points] (spawn_points_for). No
+## name means the first one there.
+static func check_spawn_point(points: Dictionary, system_name: String, spawner_name: String) -> String:
+	var there: Array = points.get(system_name, [])
+	if there.is_empty():
+		return "nowhere to spawn in %s" % system_name
+	if spawner_name and not spawner_name in there:
+		return "no spawn point %s in %s" % [spawner_name, system_name]
+	return ""
+
+
+## Server: spawn_points_for this galaxy's systems.
+func _spawn_points(faction: Faction) -> Dictionary:
+	var ships_by_system := {}
 	for system in $Systems.get_children():
 		if system is System:
-			for ship in system.get_ships():
-				if ship.has_spawn_points:
-					if system not in spawn_points:
-						spawn_points[system] = []
-					spawn_points[system].append(ship)
-	# TODO: Add hyperspace here
-	# TODO: Add random generated deep space systems here
-	return spawn_points
+			ships_by_system[String(system.name)] = system.get_ships()
+	return spawn_points_for(faction, ships_by_system)
 
 
 func player_died(player_id: int) -> void:
@@ -303,7 +322,8 @@ func first_spawn_player(faction_id: int, system_name: String, spawner_name: Stri
 	# If the host is calling this function, remote id is 0, change to its actual id
 	if remote_id == 0:
 		remote_id = multiplayer.get_unique_id()
-	Log.log(["Attemping Created player pilot: in faction ", faction_id, " with mpid: ", remote_id], Log.MessageType.QUESTION)
+	Log.log(["Spawn request from peer ", remote_id, ": faction ", faction_id, " at ",
+			spawner_name if spawner_name else "(first)", " in ", system_name], Log.MessageType.QUESTION)
 	var player: Player = $Players.find_player_by_netid(remote_id)
 	if player == null:
 		Log.log(["Spawn refused for peer ", remote_id, ": not logged in"], Log.MessageType.WARNING)
@@ -315,9 +335,15 @@ func first_spawn_player(faction_id: int, system_name: String, spawner_name: Stri
 		Log.log(["Spawn refused for ", player.name, ": ", refusal], Log.MessageType.WARNING)
 		return
 	var faction: Faction = factions.get_by_id(faction_id)
-	#TODO: Change this to be via system_name and spawner_name
+	var points := _spawn_points(faction)
+	refusal = check_spawn_point(points, system_name, spawner_name)
+	if refusal:
+		Log.log(["Spawn refused for ", player.name, ": ", refusal], Log.MessageType.WARNING)
+		return
+	var at: String = spawner_name if spawner_name else points[system_name][0]
+	var spawn_ship: Ship = get_node("Systems/%s/ships" % system_name).get_node(at)
 	player_enter_system.rpc_id(remote_id, system_name)
-	var player_pilot := ($"Systems/test_system/ships/Babylon 5" as Ship).spawn_crew(
+	var player_pilot := spawn_ship.spawn_crew(
 			Character.pilot_data(player.name, faction_id, remote_id, ids.next_pilot(),
 				player.player_id))
 	if player_pilot == null:
@@ -350,7 +376,8 @@ func _process(delta: float) -> void:
 
 ## Server: works out again which ships each client knows (Interest), from where
 ## each client's player and each ship is now. Runs every INTEREST_SECONDS, and
-## at once when that changes: a client connects, a ship appears, a crew member
+## at once when that changes: a client connects, a ship is launched (once it is
+## in place: a ship's spawn goes with its place at that moment), a crew member
 ## boards (before any RPC to them: Godot refuses an RPC to a peer that can't
 ## see the node).
 func refresh_interest() -> void:
@@ -359,16 +386,13 @@ func refresh_interest() -> void:
 		if node is System:
 			systems.append(node)
 	var ships := {}
-	var spawn_systems: Array[System] = []
 	for system in systems:
 		for ship in system.get_ships():
 			ships[ship] = system
-			if ship.has_spawn_points and system not in spawn_systems:
-				spawn_systems.append(system)
 	var peers := {}
 	for peer in multiplayer.get_peers():
 		peers[peer] = _player_system(peer)
-	var changes := interest.update(peers, ships, spawn_systems)
+	var changes := interest.update(peers, ships)
 	# Spawn or despawn on each client (N5a2). A leaving ship stops its unreliable
 	# syncs now and is despawned at the next refresh (see Interest).
 	for peer in changes:
@@ -414,8 +438,35 @@ func _on_join_game_request_spawn(faction_name: String, system_name: String, spaw
 	$CanvasLayer/JoinGame.visible = false
 
 
+## The join menu picked a faction: ask the server where it can spawn (the client
+## may not know of those ships at all, netcode N5b2).
 func _on_join_game_request_faction(faction_name: String) -> void:
-	$CanvasLayer/JoinGame.show_spawn(get_spawn_points(factions.find_by_name(faction_name)))
+	var faction := factions.find_by_name(faction_name)
+	if faction == null:
+		return
+	if multiplayer.is_server():
+		$CanvasLayer/JoinGame.show_spawn(faction_name, _spawn_points(faction))
+	else:
+		_request_spawn_points.rpc_id(1, faction.faction_id)
+
+
+## Server: a client's join menu wants [param faction_id]'s spawn points. Only for
+## a faction that takes players; the answer goes to the sender.
+@rpc("any_peer", "call_remote", "reliable")
+func _request_spawn_points(faction_id: int) -> void:
+	if not multiplayer.is_server():
+		return
+	var faction := factions.get_by_id(faction_id)
+	if faction == null or not faction.accept_players:
+		return
+	_receive_spawn_points.rpc_id(multiplayer.get_remote_sender_id(), faction.resource_name,
+			_spawn_points(faction))
+
+
+## Client: the server's answer to _request_spawn_points.
+@rpc("authority", "call_remote", "reliable")
+func _receive_spawn_points(faction_name: String, points: Dictionary) -> void:
+	$CanvasLayer/JoinGame.show_spawn(faction_name, points)
 
 
 ## The nearest capital ship or station on [param pilot]'s side (its own faction

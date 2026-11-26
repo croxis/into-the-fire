@@ -181,8 +181,6 @@ func _ready():
 	if galaxy:
 		destroyed.connect(galaxy._on_ship_destroyed)
 		snapshot_clock = galaxy.snapshot_clock
-		if multiplayer.is_server():
-			galaxy.refresh_interest()  # A new ship: tell the clients that should know it now.
 	# A client that now has this ship asks for its snapshots (see snapshot_recipients).
 	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server() \
 			and multiplayer.multiplayer_peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED:
@@ -732,7 +730,12 @@ func find_free_spawner() -> Array:
 	return $Spawner.find_free_spawner()
 
 
+## Server only: a ship entering this one's dock area boards its crew here and is
+## freed (replicated as a despawn). A client docking its own copy would free a
+## ship the server still has.
 func _on_area_3d_dock_body_entered(body) -> void:
+	if not multiplayer.is_server():
+		return
 	if body == self:
 		#can't dock with self, silly
 		return
@@ -809,6 +812,12 @@ func launch_player(player_id: int, ids: WorldIds) -> String:
 	get_current_system().add_ship(new_ship)
 	new_ship.global_transform.origin = spawn[1]
 	spawn[0].spawn_ship(new_ship)
+	# Show it to clients now (N5a2): not as it entered the world, since its spawn
+	# goes with its place at that moment, and not after the pilot leaves this
+	# ship, since a player between ships has no character and knows nothing. The
+	# cockpit's RPCs below need the pilot's client to have it.
+	if galaxy:
+		galaxy.refresh_interest()
 	var old_pilot: Character = $Crew.remove_passenger_by_id(player_id)
 	new_ship.faction_id = old_pilot.faction_id
 	var pilot: Character = new_ship.get_node("CrewMultiplayerSpawner").spawn(old_pilot.serialize())

@@ -16,9 +16,9 @@ extends RefCounted
 ## overtake the reliable despawn, and would find no ship.
 ##
 ## The rule for now: a client knows the ships in its player's system, and a
-## client without a character yet knows the ships where it could spawn (the join
-## menu lists them). Fog of war will replace it with the sensor picture of the
-## player's faction (see the fog-of-war design: signatures, sensors, sharing).
+## client without a character knows none (the join menu asks the server for
+## spawn points, N5b2). Fog of war will replace it with the sensor picture of
+## the player's faction (see the fog-of-war design: signatures, sensors, sharing).
 
 var _known: Dictionary = {}  # Peer -> {ship: true}.
 var _leaving: Dictionary = {}  # Peer -> {ship: true}: still on the client, going.
@@ -26,19 +26,18 @@ var _leaving: Dictionary = {}  # Peer -> {ship: true}: still on the client, goin
 
 ## Works out who knows what now. [param peers]: each connected client's peer id
 ## and the system its player is in (null without a character). [param ships]:
-## each ship and its system. [param spawn_systems]: the systems a client without
-## a character knows. Returns, for each peer whose ships changed:
+## each ship and its system. Returns, for each peer whose ships changed:
 ## {peer: {"shown": [...], "leaving": [...], "hidden": [...]}}: ships it knows
 ## now (new, or back while leaving), ships it stopped knowing (still on the
 ## client), and ships to despawn there.
-func update(peers: Dictionary, ships: Dictionary, spawn_systems: Array) -> Dictionary:
+func update(peers: Dictionary, ships: Dictionary) -> Dictionary:
 	var changes := {}
 	for peer in _known.keys():
 		if not peers.has(peer):
 			_known.erase(peer)
 			_leaving.erase(peer)
 	for peer in peers:
-		var wanted := _wanted(peers[peer], ships, spawn_systems)
+		var wanted := _wanted(peers[peer], ships)
 		var known: Dictionary = _known.get(peer, {})
 		var was_leaving: Dictionary = _leaving.get(peer, {})
 		var shown := wanted.keys().filter(func(s: Object) -> bool: return not known.has(s))
@@ -74,11 +73,11 @@ func peers() -> Array:
 
 
 ## The ships a client in [param system] (null: no character yet) should know.
-func _wanted(system: Object, ships: Dictionary, spawn_systems: Array) -> Dictionary:
+func _wanted(system: Object, ships: Dictionary) -> Dictionary:
 	var out := {}
+	if system == null:
+		return out
 	for ship in ships:
-		var at: Object = ships[ship]
-		var seen := at == system if system != null else at in spawn_systems
-		if seen:
+		if ships[ship] == system:
 			out[ship] = true
 	return out
