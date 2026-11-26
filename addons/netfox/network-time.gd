@@ -520,10 +520,15 @@ func _exit_tree() -> void:
 func _get_tick_tag() -> String:
 	return "@%d" % tick
 
+## ITF patch (not in upstream netfox; reapply after updating netfox): how far
+## ahead of the synchronised server time this client's ticks run. The pilot's
+## client steers it (InputLead) so its inputs reach the server just in time.
+var lead_seconds := 0.0
+
 func _loop() -> void:
 	# Adjust local clock
 	_clock.step(_clock_stretch_factor)
-	var clock_diff := NetworkTimeSynchronizer.get_time() - _clock.get_time()
+	var clock_diff := NetworkTimeSynchronizer.get_time() + lead_seconds - _clock.get_time()  # ITF patch: + lead_seconds
 	
 	# Ignore diffs under 1ms
 	clock_diff = sign(clock_diff) * max(abs(clock_diff) - 0.001, 0.)
@@ -549,7 +554,7 @@ func _loop() -> void:
 	if _was_paused:
 		_was_paused = false
 		_next_tick_time += clock_step
-		_tick = seconds_to_ticks(NetworkTimeSynchronizer.get_time())
+		_tick = seconds_to_ticks(NetworkTimeSynchronizer.get_time() + lead_seconds)  # ITF patch: + lead_seconds
 	
 	# Run tick loop if needed
 	var ticks_in_loop := 0

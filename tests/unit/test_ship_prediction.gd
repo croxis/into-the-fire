@@ -462,6 +462,20 @@ func test_released_it_is_predicted_again() -> void:
 	assert_lt(ship.global_position.z, 0.0, "flies off the arm")
 
 
+func test_the_pilots_client_steers_its_lead_from_the_servers_queue() -> void:
+	# Time dilation: each state says how many of our inputs the server has
+	# queued, and its cushion; a short queue means run further ahead.
+	var ship := _predicted_starfury_in_a_zone()
+	var lead := InputLead.new(1.0 / 60.0)
+	ship.input_lead_override = lead
+	await Ticks.run(3)
+	for i in 30:
+		ship._receive_state(2, Transform3D(), Vector3.ZERO, Vector3.ZERO, false, 0, 4)
+	assert_gt(lead.lead_seconds, 0.0)
+	assert_eq(NetworkTime.lead_seconds, lead.lead_seconds, "netfox runs that far ahead")
+	NetworkTime.lead_seconds = 0.0
+
+
 func test_thrust_is_recorded_while_frozen() -> void:
 	# So the replay after release includes what the pilot did as the arm let
 	# go, which the server applied as soon as its ship was free.

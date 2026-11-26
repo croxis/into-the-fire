@@ -23,6 +23,9 @@ var hud := HudLayer.new()
 var zone_stepper := ZoneStepper.new()
 ## Client: when ships' snapshots arrive, so when to draw them (netcode N4c).
 var snapshot_clock := SnapshotClock.new()
+## Client: how far ahead of server time the pilot's inputs are sent (time
+## dilation; steered from the server's reports, see InputLead).
+var input_lead := InputLead.new(1.0 / 60.0)
 ## Client: ships this player's side lost contact with, and their ghosts (N5c).
 var contacts := ContactLog.new(1.0 / 60.0)
 ## Server: which ships each client is told about (netcode N5). Kept up to date

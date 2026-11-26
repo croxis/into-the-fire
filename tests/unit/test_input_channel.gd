@@ -134,18 +134,27 @@ func test_the_server_waits_for_a_cushion_before_starting() -> void:
 	assert_eq(server.next().tick, 10)
 
 
-func test_a_backlog_is_skipped_down_to_the_cushion() -> void:
-	# A burst (say the client caught up after a stall) leaves inputs waiting;
-	# applying one per tick would keep the server that far behind for good.
+func test_a_big_backlog_is_skipped_down_to_the_cushion() -> void:
+	# A safety net: a burst far past the cushion (the client stalled, or isn't
+	# steering its lead) would keep the server that far behind for good. A small
+	# excess is left for the client's lead to drain (InputLead).
 	var burst := []
-	for tick in range(10, 20):
+	for tick in range(10, 24):
 		burst.append(_rec(tick))
 	for i in range(0, burst.size(), InputChannel.REDUNDANCY):
 		server.receive(burst.slice(i, i + InputChannel.REDUNDANCY))
 	server.next()
 	assert_eq(server.queued(), InputChannel.JITTER_BUFFER, "back to the cushion")
 	assert_gt(server.skipped_ticks, 0, "counted, since each skip is a correction")
-	assert_eq(server.last_applied_tick, 19 - InputChannel.JITTER_BUFFER)
+	assert_eq(server.last_applied_tick, 23 - InputChannel.JITTER_BUFFER)
+
+
+func test_a_small_excess_is_not_skipped() -> void:
+	# Time dilation drains it: the client eases off its lead instead.
+	for tick in range(10, 16):
+		server.receive([_rec(tick)])
+	server.next()
+	assert_eq(server.skipped_ticks, 0)
 
 
 # Adaptive cushion -------------------------------------------------------------
@@ -208,7 +217,7 @@ func test_a_steady_link_shrinks_the_cushion_back() -> void:
 	var skipped := server.skipped_ticks
 	_feed(tick, InputChannel.SHRINK_AFTER)
 	assert_eq(server.cushion, InputChannel.JITTER_BUFFER)
-	assert_eq(server.skipped_ticks, skipped + 1, "one input dropped to get there")
+	assert_eq(server.skipped_ticks, skipped, "no input dropped: the client's lead drains the queue")
 
 
 func test_a_clumpy_link_keeps_its_cushion() -> void:
@@ -257,7 +266,7 @@ func test_the_wait_has_a_ceiling() -> void:
 
 func test_a_skipped_toggle_is_carried_to_the_next_input() -> void:
 	var burst := []
-	for tick in range(10, 20):
+	for tick in range(10, 24):
 		burst.append(_rec(tick))
 	burst[0] = InputChannel.make_record(10, Vector3.ZERO, Vector3.ZERO, true)  # Autospin pressed.
 	for i in range(0, burst.size(), InputChannel.REDUNDANCY):
@@ -270,7 +279,7 @@ func test_a_skipped_toggle_is_carried_to_the_next_input() -> void:
 
 func test_two_skipped_toggles_cancel_out() -> void:
 	var burst := []
-	for tick in range(10, 20):
+	for tick in range(10, 24):
 		burst.append(_rec(tick))
 	burst[0] = InputChannel.make_record(10, Vector3.ZERO, Vector3.ZERO, false, true)
 	burst[1] = InputChannel.make_record(11, Vector3.ZERO, Vector3.ZERO, false, true)

@@ -32,10 +32,11 @@ const MAX_CUSHION := 8
 const SHRINK_AFTER := 300
 const MAX_SHRINK_AFTER := SHRINK_AFTER * 8
 ## More inputs waiting than the cushion plus this and the server skips the
-## oldest, back to the cushion. Otherwise a burst (a client catching up after a
-## stall) would keep the server that many ticks behind the pilot for good, and
-## everyone else would see the ship late.
-const BACKLOG_SLACK := 3
+## oldest, back to the cushion: a safety net, for a burst after a stall or a
+## client not steering its lead, which would otherwise keep the server that many
+## ticks behind the pilot for good. A smaller excess is the client's to drain,
+## by easing off its lead (time dilation, InputLead): each skip is a correction.
+const BACKLOG_SLACK := 8
 const _VECTOR_FIELDS: Array[String] = ["throttle", "rotation_throttle"]
 const _BOOL_FIELDS: Array[String] = ["autospin_toggle", "autobreak_toggle", "debug_all_stop"]
 ## One-shot presses that switch a setting: a dropped one is carried to the next
@@ -131,10 +132,11 @@ func next() -> Dictionary:
 		return held
 	_fewest_queued = mini(_fewest_queued, _queue.size())
 	_steady_ticks += 1
-	# Never below 2 in a while: one tick less cushion still wouldn't run dry.
+	# Never below 2 in a while: one tick less cushion still wouldn't run dry. No
+	# input is dropped to get there: the client's lead drains the queue down to
+	# the new cushion (InputLead).
 	if _steady_ticks >= shrink_after and cushion > JITTER_BUFFER and _fewest_queued >= 2:
 		_set_cushion(cushion - 1)
-		_skip_oldest()
 		_ticks_since_shrink = 0
 	elif _steady_ticks >= shrink_after:
 		_set_cushion(cushion)  # Start a new window.

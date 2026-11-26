@@ -134,6 +134,9 @@ var _peers_with_ship: Dictionary[int, bool] = {}  # Server: clients that confirm
 var prediction_forced := false
 ## Set to treat this machine as a client that draws this ship (unit tests).
 var drawing_forced := false
+## The client's lead controller, instead of Galaxy.input_lead (unit tests).
+var input_lead_override: InputLead
+var _last_lead_usec := 0
 ## Who knows this ship, instead of Galaxy.interest (unit tests).
 var interest_override: Interest
 ## Server: synchronizers given an interest filter, and whether it is the
@@ -570,8 +573,11 @@ func _send_pilot_state() -> bool:
 		return false
 	if not pilot.multiplayer_id in multiplayer.get_peers():
 		return false
+	# With how many of their inputs are queued, and the cushion: their client
+	# steers how far ahead it runs from that (time dilation, InputLead).
 	_receive_state.rpc_id(pilot.multiplayer_id, pilot.input_channel.last_applied_tick,
-			global_transform, linear_velocity, angular_velocity, freeze)
+			global_transform, linear_velocity, angular_velocity, freeze,
+			pilot.input_channel.queued(), pilot.input_channel.cushion)
 	return true
 
 
@@ -580,14 +586,32 @@ func _send_pilot_state() -> bool:
 ## a lost state is made up for by the next one.
 @rpc("authority", "call_remote", "unreliable_ordered")
 func _receive_state(ack: int, server_transform: Transform3D, server_velocity: Vector3,
-		server_spin: Vector3, frozen := false) -> void:
+		server_spin: Vector3, frozen := false, queued := -1, cushion := 0) -> void:
 	if not is_predicted_here():
 		return
+	if queued >= 0:
+		_steer_lead(queued, cushion)
 	var server := FlightIntegrator.FlightState.new()
 	server.transform = server_transform
 	server.linear_velocity = server_velocity
 	server.angular_velocity = server_spin
 	reconcile_with(server, ack, NetworkTime.tick - 1, frozen)
+
+
+## The pilot's client: the server had [param queued] of our inputs waiting,
+## with a cushion of [param cushion]. Steer how far ahead of server time we run
+## so they arrive just in time (InputLead), and have netfox run that far ahead.
+func _steer_lead(queued: int, cushion: int) -> void:
+	var lead := input_lead_override
+	if lead == null:
+		lead = galaxy.input_lead if galaxy else null
+	if lead == null:
+		return
+	var now := Time.get_ticks_usec()
+	var dt := NetworkTime.ticktime if _last_lead_usec == 0 else minf((now - _last_lead_usec) / 1e6, 0.25)
+	_last_lead_usec = now
+	lead.observe(queued, cushion, dt)
+	NetworkTime.lead_seconds = lead.lead_seconds
 
 
 ## The pilot's client: start again from [param server] (the server's state

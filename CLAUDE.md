@@ -90,6 +90,8 @@ Autoloads include netfox (`NetworkTime`, `NetworkRollback`, ...), `Log`, `LimboC
 
 - ENet with Godot's high-level multiplayer (RPCs, `MultiplayerSpawner`, `MultiplayerSynchronizer`). Server
   authoritative. netfox 1.35 is installed, rollback disabled; own-ship prediction is our own (`ships/CLAUDE.md`).
+  `addons/netfox/network-time.gd` carries one ITF patch (`lead_seconds`, for time dilation; see
+  `characters/CLAUDE.md`): reapply it when updating netfox.
 - The simulation runs on netfox ticks, 60 Hz inside the physics frame, in a fixed order: `before_tick`
   characters hand input to their console's helm, `on_tick` ships run their helms then fly
   (`Ship._rollback_tick`), `after_tick` `ZoneStepper` steps each zone. Nothing ticks until a game is hosted or
