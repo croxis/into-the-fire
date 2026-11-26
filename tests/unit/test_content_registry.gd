@@ -104,3 +104,20 @@ func test_ship_scenes_are_loaded_in_the_background_and_kept() -> void:
 	for id in Content.registry.ids(&"ship"):
 		assert_true(ResourceLoader.has_cached(ResourceUID.ensure_path(Content.path_of(id))),
 				"%s is in memory: instantiating it reads nothing from disk" % id)
+
+
+func test_a_big_ship_is_quick_to_add_once_its_shapes_are_warmed() -> void:
+	# Jolt builds a concave hull shape the first time a body uses it: 277 ms for
+	# Babylon 5's, a stall wherever the station first appeared (a client's
+	# spawn, or fog of war revealing it mid-flight). Content builds them in the
+	# background of startup, so adding the ship later costs next to nothing.
+	var waited := 0.0
+	while not Content.ships_ready() and waited < 30.0:
+		await get_tree().process_frame
+		waited += get_process_delta_time()
+	assert_true(Content.ships_ready(), "warmed within 30 s")
+	var station: Node = Content.instantiate(&"b5:babylon_5")
+	var t0 := Time.get_ticks_usec()
+	add_child_autofree(station)
+	var ms := (Time.get_ticks_usec() - t0) / 1000.0
+	assert_lt(ms, 60.0, "added in %.1f ms" % ms)

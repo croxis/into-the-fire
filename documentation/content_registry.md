@@ -111,6 +111,11 @@ asked for while it is still loading is waited for with `ResourceLoader.load_thre
 (`ContentRegistry.load_scene`): a plain `load()` of a file in flight on a worker thread deadlocked
 the main thread. Load content scenes through `Content`, not with `load()`, for that reason.
 
+Once loaded, `Content` also has Jolt build each ship's collision shapes, one ship a frame
+(`Content.ships_ready()`). Jolt builds a concave hull shape the first time a body uses it: 277 ms
+for Babylon 5's, a stall wherever the station first appeared (a client's spawn, or fog of war
+revealing it mid-flight). Since `Content` keeps the scenes, their shapes stay built.
+
 Write IDs as `StringName` literals (`&"b5:omega"`). They are compared faster than Strings, and that
 is the type the registry uses.
 
