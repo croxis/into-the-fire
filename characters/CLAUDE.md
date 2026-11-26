@@ -15,7 +15,9 @@ Loaded when working in `characters/`. Project-wide rules are in the top-level `C
 - Time dilation (`InputLead`): each state the server sends the pilot says how many of their inputs are queued
   and the cushion; the client steers how far ahead of netfox's server time it runs (`NetworkTime.lead_seconds`,
   at most 1.5% faster or slower) to keep the queue one over the cushion. So the queue drains or fills
-  smoothly instead of by holds and skips; the server skips only a backlog over cushion + 8 (a stall).
+  smoothly instead of by holds and skips; the server skips only a backlog over cushion + 8 (a stall), checked
+  once per tick loop after its ticks (`Character._trim_input_backlog`): checked in the first tick of a
+  catch-up loop, the inputs that loop was about to use looked like a backlog.
   `lead_seconds` is an ITF patch in `addons/netfox/network-time.gd` (marked "ITF patch"): reapply it after
   updating netfox.
 - Log: server "Input from X: held, skipped, queued, cushion" every 5 s.

@@ -100,7 +100,15 @@ func load_scene(id: StringName) -> PackedScene:
 	var path := path_of(id)
 	if path.is_empty():
 		return null
-	var scene := load(path) as PackedScene
+	var scene: PackedScene
+	# Loading in the background already (Content preloads ships): wait for that
+	# load the documented way. A plain load() of a file in flight on a worker
+	# thread can deadlock the main thread.
+	var real_path := ResourceUID.ensure_path(path)
+	if ResourceLoader.load_threaded_get_status(real_path) == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+		scene = ResourceLoader.load_threaded_get(real_path) as PackedScene
+	else:
+		scene = load(path) as PackedScene
 	if scene == null:
 		push_error("Content: '%s' (%s) is not a scene" % [id, path])
 	return scene

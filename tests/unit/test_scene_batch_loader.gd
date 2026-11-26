@@ -59,3 +59,15 @@ func test_empty_batch_is_done_at_once() -> void:
 	var batch := SceneBatchLoader.new(PackedStringArray())
 	assert_true(batch.is_done())
 	assert_eq(batch.poll(), 1.0)
+
+
+func test_a_load_someone_else_collected_still_counts() -> void:
+	# ContentRegistry waits on a load in flight with load_threaded_get (a plain
+	# load() of it can deadlock), which takes the result away from the batch.
+	const STATION := "res://ships/earth alliance/hyperion/hyperion.tscn"
+	var batch := SceneBatchLoader.new(PackedStringArray([STATION]), false)
+	var taken: PackedScene = ResourceLoader.load_threaded_get(STATION)
+	taken = null  # Nothing keeps it: the batch must ask again.
+	await _finish(batch)
+	assert_eq(batch.failed, PackedStringArray(), "not a failure")
+	assert_true(batch.scenes[STATION] is PackedScene)

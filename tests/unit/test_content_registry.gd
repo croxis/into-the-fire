@@ -88,3 +88,19 @@ func test_babylon5_manifest_resolves() -> void:
 			assert_true(registry.load_scene(id) != null, "%s is a scene" % id)
 	for id in registry.ids(&"scenario"):
 		assert_true(load(registry.path_of(id)) is Scenario, "%s is a Scenario" % id)
+
+
+## Content preloads every ship scene in the background at startup: loading the
+## Starfury from disk the first time took about 300 ms, a stall that froze a
+## client's ticks at its first launch (its inputs then reached the server in a
+## clump) and the server's at the first launch it built.
+
+func test_ship_scenes_are_loaded_in_the_background_and_kept() -> void:
+	var waited := 0.0
+	while not Content.ships_preloaded() and waited < 20.0:
+		await get_tree().process_frame
+		waited += get_process_delta_time()
+	assert_true(Content.ships_preloaded(), "done within 20 s")
+	for id in Content.registry.ids(&"ship"):
+		assert_true(ResourceLoader.has_cached(ResourceUID.ensure_path(Content.path_of(id))),
+				"%s is in memory: instantiating it reads nothing from disk" % id)

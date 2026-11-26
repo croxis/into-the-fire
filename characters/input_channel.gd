@@ -140,14 +140,21 @@ func next() -> Dictionary:
 		_ticks_since_shrink = 0
 	elif _steady_ticks >= shrink_after:
 		_set_cushion(cushion)  # Start a new window.
-	if _queue.size() > cushion + BACKLOG_SLACK:
-		while _queue.size() > cushion + 1:
-			_skip_oldest()
 	var tick: int = _queue.keys().min()
 	_last = _with_carried(_queue[tick])
 	_queue.erase(tick)
 	last_applied_tick = tick
 	return _last
+
+
+## Server, once per tick loop, after its ticks: skips a backlog over the cushion
+## plus BACKLOG_SLACK, back to the cushion. Not in next(): a server that fell a
+## little behind runs several ticks in one frame, with what arrived meanwhile
+## already queued, and the first of them would take that for a backlog.
+func trim_backlog() -> void:
+	if _queue.size() > cushion + BACKLOG_SLACK:
+		while _queue.size() > cushion + 1:
+			_skip_oldest()
 
 
 func _set_cushion(size: int) -> void:

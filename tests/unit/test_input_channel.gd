@@ -144,9 +144,25 @@ func test_a_big_backlog_is_skipped_down_to_the_cushion() -> void:
 	for i in range(0, burst.size(), InputChannel.REDUNDANCY):
 		server.receive(burst.slice(i, i + InputChannel.REDUNDANCY))
 	server.next()
-	assert_eq(server.queued(), InputChannel.JITTER_BUFFER, "back to the cushion")
+	server.trim_backlog()  # After the tick loop.
+	assert_eq(server.queued(), InputChannel.JITTER_BUFFER + 1, "back to one over the cushion")
 	assert_gt(server.skipped_ticks, 0, "counted, since each skip is a correction")
-	assert_eq(server.last_applied_tick, 23 - InputChannel.JITTER_BUFFER)
+	assert_eq(server.next().tick, 23 - InputChannel.JITTER_BUFFER, "the oldest went")
+
+
+func test_a_catch_up_loop_is_not_mistaken_for_a_backlog() -> void:
+	# A server that fell a little behind runs several ticks in one frame, with
+	# the inputs that arrived meanwhile already queued: checked before those
+	# ticks ran, they looked like a backlog and were skipped.
+	for tick in range(10, 12):
+		server.receive([_rec(tick)])
+	server.next()
+	for tick in range(12, 12 + InputChannel.BACKLOG_SLACK + 6):  # Arrived during a hiccup.
+		server.receive([_rec(tick)])
+	for i in InputChannel.BACKLOG_SLACK + 4:  # The catch-up loop.
+		server.next()
+	server.trim_backlog()
+	assert_eq(server.skipped_ticks, 0)
 
 
 func test_a_small_excess_is_not_skipped() -> void:
@@ -154,6 +170,7 @@ func test_a_small_excess_is_not_skipped() -> void:
 	for tick in range(10, 16):
 		server.receive([_rec(tick)])
 	server.next()
+	server.trim_backlog()
 	assert_eq(server.skipped_ticks, 0)
 
 
@@ -271,7 +288,8 @@ func test_a_skipped_toggle_is_carried_to_the_next_input() -> void:
 	burst[0] = InputChannel.make_record(10, Vector3.ZERO, Vector3.ZERO, true)  # Autospin pressed.
 	for i in range(0, burst.size(), InputChannel.REDUNDANCY):
 		server.receive(burst.slice(i, i + InputChannel.REDUNDANCY))
-	var applied := server.next()  # Skips 10 and others to catch up.
+	server.trim_backlog()  # Skips 10 and others to catch up.
+	var applied := server.next()
 	assert_gt(server.skipped_ticks, 0)
 	assert_true(applied.autospin_toggle, "the toggle from tick 10 comes with it")
 	assert_false(server.next().autospin_toggle, "once")
@@ -285,6 +303,7 @@ func test_two_skipped_toggles_cancel_out() -> void:
 	burst[1] = InputChannel.make_record(11, Vector3.ZERO, Vector3.ZERO, false, true)
 	for i in range(0, burst.size(), InputChannel.REDUNDANCY):
 		server.receive(burst.slice(i, i + InputChannel.REDUNDANCY))
+	server.trim_backlog()
 	assert_false(server.next().autobreak_toggle, "pressed twice: back as it was")
 
 

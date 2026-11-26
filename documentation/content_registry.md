@@ -104,6 +104,13 @@ if Content.has(&"b5:omega"):
 	...
 ```
 
+Every `ship` is loaded in the background from startup, on server and clients, and kept in memory
+(`Content.ships_preloaded()`): the first instantiate of a ship would otherwise read it from disk,
+about 300 ms for a Starfury, a stall that froze the game's ticks at a first launch. A ship scene
+asked for while it is still loading is waited for with `ResourceLoader.load_threaded_get`
+(`ContentRegistry.load_scene`): a plain `load()` of a file in flight on a worker thread deadlocked
+the main thread. Load content scenes through `Content`, not with `load()`, for that reason.
+
 Write IDs as `StringName` literals (`&"b5:omega"`). They are compared faster than Strings, and that
 is the type the registry uses.
 

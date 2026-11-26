@@ -16,16 +16,21 @@ var scenes := {}
 var failed := PackedStringArray()
 
 var _pending := {}  # path -> progress 0..1
+var _sub_threads := true
 
 
-func _init(p_paths: PackedStringArray) -> void:
+## [param sub_threads]: let each scene's meshes, textures and scripts load in
+## parallel too (fast, for a loading screen). Off for loads in the background
+## of play: main-thread loads of the same files then wait on it safely.
+func _init(p_paths: PackedStringArray, sub_threads := true) -> void:
+	_sub_threads = sub_threads
 	for path in p_paths:
 		if path in paths:
 			continue
 		paths.append(path)
 		# Checked first: requesting a missing file prints engine errors.
 		if not ResourceLoader.exists(path, "PackedScene") \
-				or ResourceLoader.load_threaded_request(path, "PackedScene", true) != OK:
+				or ResourceLoader.load_threaded_request(path, "PackedScene", sub_threads) != OK:
 			_fail(path)
 		else:
 			_pending[path] = 0.0
@@ -50,8 +55,15 @@ func poll() -> float:
 			ResourceLoader.THREAD_LOAD_IN_PROGRESS:
 				_pending[path] = progress[0]
 			_:
-				_pending.erase(path)
-				_fail(path)
+				# Someone else collected it (ContentRegistry waits on a load in
+				# flight rather than load() it). Take it from the cache, or, if
+				# nothing kept it, ask for it again.
+				if ResourceLoader.has_cached(path):
+					_pending.erase(path)
+					scenes[path] = ResourceLoader.load(path) as PackedScene
+				elif ResourceLoader.load_threaded_request(path, "PackedScene", _sub_threads) != OK:
+					_pending.erase(path)
+					_fail(path)
 	if paths.is_empty():
 		return 1.0
 	var total := float(paths.size() - _pending.size())

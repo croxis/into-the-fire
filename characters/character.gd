@@ -191,11 +191,13 @@ func _enter_tree() -> void:
 	_resolve_seat.call_deferred()  # The console may enter the tree after us.
 	NetworkTime.before_tick_loop.connect(_read_input)
 	NetworkTime.before_tick.connect(_apply_input)
+	NetworkTime.after_tick_loop.connect(_trim_input_backlog)
 
 
 func _exit_tree() -> void:
 	NetworkTime.before_tick_loop.disconnect(_read_input)
 	NetworkTime.before_tick.disconnect(_apply_input)
+	NetworkTime.after_tick_loop.disconnect(_trim_input_backlog)
 
 
 ## Once per tick loop: the player on this machine reads their controls into
@@ -205,6 +207,13 @@ func _exit_tree() -> void:
 func _read_input() -> void:
 	if multiplayer.multiplayer_peer == null or multiplayer.get_unique_id() == multiplayer_id:
 		inputs.update()
+
+
+## Server, after each tick loop: a real backlog of this player's input is
+## skipped (InputChannel.trim_backlog), once the loop's ticks have used theirs.
+func _trim_input_backlog() -> void:
+	if input_source(multiplayer.is_server(), is_player(), _plays_here()) == InputSource.CHANNEL:
+		input_channel.trim_backlog()
 
 
 ## Tick-stamped input (netcode slice N3a). On the pilot's own client it builds
