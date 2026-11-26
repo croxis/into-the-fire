@@ -466,9 +466,9 @@ func refresh_interest() -> void:
 		for key in ["leaving", "hidden"]:
 			for ship in changes[peer][key]:  # Untyped: a hidden one may have been freed.
 				if is_instance_valid(ship) and (ship as Ship).is_inside_tree():
-					(ship as Ship).update_interest(peer, false, key == "hidden")
+					(ship as Ship).interest.update(peer, false, key == "hidden")
 		for ship: Ship in changes[peer]["shown"]:
-			ship.update_interest(peer, true)
+			ship.interest.update(peer, true)
 	for peer in changes:
 		Log.log(["Interest: peer ", peer, " now knows ", ships.keys().filter(
 				func(s: Ship) -> bool: return interest.knows(peer, s)).size(), " ships (",

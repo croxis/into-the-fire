@@ -215,9 +215,9 @@ func test_snapshots_go_only_to_peers_that_have_the_ship() -> void:
 	# state instead, and peers that left are forgotten.
 	var ship := _starfury()
 	assert_eq(ship.snapshot_recipients([7, 8, 9], 0), [] as Array[int], "nobody asked yet")
-	ship._add_peer_with_ship(7)
-	ship._add_peer_with_ship(8)
-	ship._add_peer_with_ship(9)
+	ship.interest.confirm(7)
+	ship.interest.confirm(8)
+	ship.interest.confirm(9)
 	assert_eq(ship.snapshot_recipients([7, 8, 9], 8), [7, 9] as Array[int], "not the pilot")
 	assert_eq(ship.snapshot_recipients([9], 0), [9] as Array[int], "7 and 8 left")
 	assert_eq(ship.snapshot_recipients([7, 8, 9], 0), [9] as Array[int], "and are forgotten")
@@ -227,8 +227,8 @@ func test_snapshots_go_only_to_peers_told_about_the_ship() -> void:
 	# Interest management (N5): a client that isn't told about a ship gets none
 	# of its snapshots.
 	var ship := _starfury()
-	ship._add_peer_with_ship(7)
-	ship._add_peer_with_ship(9)
+	ship.interest.confirm(7)
+	ship.interest.confirm(9)
 	var knows := func(peer: int) -> bool: return peer == 9
 	assert_eq(ship.snapshot_recipients([7, 9], 0, knows), [9] as Array[int])
 

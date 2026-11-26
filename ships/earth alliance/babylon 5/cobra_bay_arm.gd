@@ -47,7 +47,7 @@ func spawn_ship(_newship: Ship):
 	var station := _station()
 	if multiplayer.has_multiplayer_peer() and station:
 		for peer in multiplayer.get_peers():
-			if station.is_known_to(peer):
+			if station.interest.is_known_to(peer):
 				_deploy.rpc_id(peer, deploy_start_tick, String(ship.name))
 	Log.log(["Spawn Ship:", _newship], Log.MessageType.INFO)
 

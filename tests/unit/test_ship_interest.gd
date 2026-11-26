@@ -13,7 +13,7 @@ var ship: Ship
 func before_each() -> void:
 	interest = Interest.new()
 	ship = Content.instantiate(&"b5:aurora_starfury")
-	ship.interest_override = interest
+	ship.interest.override = interest
 	add_child_autofree(ship)
 	var here := RefCounted.new()  # Stand-ins for systems.
 	var elsewhere := RefCounted.new()
@@ -26,47 +26,47 @@ func _synchronizers(node: Node) -> Array[Node]:
 
 
 func test_the_filter_says_who_knows_the_ship() -> void:
-	ship._add_peer_with_ship(7)
-	ship._add_peer_with_ship(8)
-	assert_true(ship.is_known_to(7))
-	assert_false(ship.is_known_to(8))
-	assert_true(ship.is_held_by(7))
+	ship.interest.confirm(7)
+	ship.interest.confirm(8)
+	assert_true(ship.interest.is_known_to(7))
+	assert_false(ship.interest.is_known_to(8))
+	assert_true(ship.interest.is_held_by(7))
 
 
 func test_nothing_but_the_spawn_goes_before_the_client_has_the_ship() -> void:
 	# Snapshots and the helms' syncs are unreliable: sent at once, they overtook
 	# the (larger, reliable) spawn and found no ship. They wait for the client's
 	# _have_ship, which it sends from the ship's _ready.
-	assert_false(ship.is_known_to(7), "spawned, not yet confirmed")
-	assert_true(ship.is_held_by(7), "but the spawn goes")
-	ship._add_peer_with_ship(7)
-	assert_true(ship.is_known_to(7))
+	assert_false(ship.interest.is_known_to(7), "spawned, not yet confirmed")
+	assert_true(ship.interest.is_held_by(7), "but the spawn goes")
+	ship.interest.confirm(7)
+	assert_true(ship.interest.is_known_to(7))
 
 
 func test_a_despawn_forgets_that_the_client_had_the_ship() -> void:
 	# Its next copy there confirms itself again.
-	ship._add_peer_with_ship(7)
-	ship.forget_peer_with_ship(7)  # update_interest(peer, false, true) does this.
-	assert_false(ship.is_known_to(7))
+	ship.interest.confirm(7)
+	ship.interest.forget(7)  # interest.update(peer, false, true) does this.
+	assert_false(ship.interest.is_known_to(7))
 
 
 func test_synchronizers_that_keep_a_node_spawned_last_until_it_goes() -> void:
 	# A leaving ship (Interest.holds, not knows) stays on the client: its own
 	# and its crew's synchronizers decide that. The rest stop at once.
 	var npc := ship.spawn_crew(Character.pilot_data("Karren", 0, 1, 1))
-	assert_true(ship._filtered[ship.get_node("MultiplayerSynchronizer") as MultiplayerSynchronizer], "the ship's own: held")
-	assert_true(ship._filtered[npc.get_node("CharacterSync") as MultiplayerSynchronizer], "crew: held")
+	assert_true(ship.interest.filtered[ship.get_node("MultiplayerSynchronizer") as MultiplayerSynchronizer], "the ship's own: held")
+	assert_true(ship.interest.filtered[npc.get_node("CharacterSync") as MultiplayerSynchronizer], "crew: held")
 	var helm_sync: MultiplayerSynchronizer = ship.get_node("Consoles/Cockpit").find_children(
 			"*", "MultiplayerSynchronizer", true, false)[0]
-	assert_false(ship._filtered[helm_sync], "the helm's: known only")
+	assert_false(ship.interest.filtered[helm_sync], "the helm's: known only")
 
 
 func test_held_synchronizers_send_nothing_unreliable() -> void:
 	# While a ship is leaving they still send; anything unreliable could arrive
 	# after the despawn and find no node. On change is sent reliably.
 	var npc := ship.spawn_crew(Character.pilot_data("Karren", 0, 1, 1))
-	for sync: MultiplayerSynchronizer in ship._filtered:
-		if not ship._filtered[sync]:
+	for sync: MultiplayerSynchronizer in ship.interest.filtered:
+		if not ship.interest.filtered[sync]:
 			continue
 		var config := sync.replication_config
 		for path in config.get_properties():
@@ -85,13 +85,13 @@ func test_every_synchronizer_in_the_ship_follows_interest() -> void:
 	var syncs := _synchronizers(ship)
 	assert_gt(syncs.size(), 1, "the ship's own and its helm's at least")
 	for sync: MultiplayerSynchronizer in syncs:
-		assert_true(ship._filtered.has(sync), String(ship.get_path_to(sync)))
+		assert_true(ship.interest.filtered.has(sync), String(ship.get_path_to(sync)))
 
 
 func test_crew_that_board_later_follow_it_too() -> void:
 	var npc := ship.spawn_crew(Character.pilot_data("Karren", 0, 1, 1))  # Server-owned inputs.
 	for sync: MultiplayerSynchronizer in _synchronizers(npc):
-		assert_true(ship._filtered.has(sync), String(sync.name))
+		assert_true(ship.interest.filtered.has(sync), String(sync.name))
 
 
 func test_hidden_crew_go_before_their_ship_and_come_back_after_it() -> void:
@@ -100,8 +100,8 @@ func test_hidden_crew_go_before_their_ship_and_come_back_after_it() -> void:
 	var npc := ship.spawn_crew(Character.pilot_data("Karren", 0, 1, 1))
 	var root: Node = ship.get_node("MultiplayerSynchronizer")
 	var crew_sync: Node = npc.get_node("CharacterSync")
-	var hiding: Array[MultiplayerSynchronizer] = ship.synchronizers_in_order(false)
-	var showing: Array[MultiplayerSynchronizer] = ship.synchronizers_in_order(true)
+	var hiding: Array[MultiplayerSynchronizer] = ship.interest.synchronizers_in_order(false)
+	var showing: Array[MultiplayerSynchronizer] = ship.interest.synchronizers_in_order(true)
 	assert_eq(hiding[-1], root, "the ship last when hiding")
 	assert_lt(hiding.find(crew_sync), hiding.find(root))
 	assert_eq(showing[0], root, "the ship first when showing")

@@ -2,7 +2,8 @@
 
 Loaded when working in `network/`. Project-wide rules are in the top-level `CLAUDE.md`. Interest management
 also lives in `Galaxy.gd` (`interest`, `pictures_of`, `refresh_interest`, contacts) and `ships/Ship.gd`
-(`_follow_interest`, `update_interest`, `sensor_check`), the detection maths in `ships/ship_sensors.gd`.
+(`sensor_check`), with each ship's side in `ships/ship_interest.gd` (`ShipInterest`, `Ship.interest`) and
+the detection maths in `ships/ship_sensors.gd`.
 
 ## Interest management (fog of war)
 
@@ -32,8 +33,8 @@ yet: sharing pictures between sides, and the host's own player (the server has e
   after the ghost fades, with when it was last seen) and draws a `GhostMarker` (`contacts/`) in that system:
   it drifts on the last course and fades over `ContactLog.fade_seconds` (30 s); stations stay put for good.
   The ship's next spawn there ends the ghost (`Galaxy.contact_regained`). Client log "Lost contact with X".
-- Every synchronizer in a ship, crew included, has a visibility filter (`Ship._follow_interest`) and is
-  updated only when interest changes (`visibility_update_mode` none; `Ship.update_interest`, the ship's own
+- Every synchronizer in a ship, crew included, has a visibility filter (`ShipInterest.follow`) and is
+  updated only when interest changes (`visibility_update_mode` none; `ShipInterest.update`, the ship's own
   synchronizer first when shown, last when hidden). Godot spawns a node on a peer while the synchronizers
   rooted at it are visible there.
 - A ship a client stops knowing is "leaving" for one refresh (snapshots and its other syncs stop; it stays
