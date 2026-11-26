@@ -134,10 +134,15 @@ Tests need the custom engine binary (`GODOT` below); stock Godot lacks LimboAI a
   ```bash
   GODOT=$GODOT tests/smoke/server_smoke.sh
   ```
+- Join test: a headless server and a `--testplayer --launch` client over ENet (port 2270); fails on a missing
+  join step in either log or an error not in `tests/smoke/known_issues.txt` / `known_client_issues.txt`.
+  ```bash
+  GODOT=$GODOT tests/smoke/join_smoke.sh
+  ```
 - Write a failing test first when fixing a bug. No game state in statics; tests make their own (e.g. a fresh
   `FactionRegistry` in `before_each`).
 - `test_ship_flight.gd` run on its own fails on a known Jolt warning (`zones/CLAUDE.md`); the full suite passes.
-- CI (`.gitlab-ci.yml`): import, `unit-tests` (JUnit) and `server-smoke`, then Linux and Windows debug exports.
+- CI (`.gitlab-ci.yml`): import, `unit-tests` (JUnit), `server-smoke` and `join-smoke`, then Linux and Windows debug exports.
 
 ## godot-ai MCP
 

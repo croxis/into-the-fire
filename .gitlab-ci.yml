@@ -55,6 +55,20 @@ server-smoke:
     paths:
       - smoke.log
 
+# A dedicated server and a test player that joins, picks a faction and launches,
+# both headless over a real ENet connection. Fails on a missing join step or an
+# unexpected error in either log.
+join-smoke:
+  stage: test
+  before_script:
+    - godot --headless --import
+  script:
+    - JOIN_LOGS=join-logs GODOT=godot tests/smoke/join_smoke.sh
+  artifacts:
+    when: always
+    paths:
+      - join-logs/
+
 linux:
   stage: export
   script:

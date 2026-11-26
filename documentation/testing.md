@@ -1,13 +1,14 @@
 # Testing
 
-The project has two kinds of automated test:
+The project has three kinds of automated test:
 
 | Kind | What it checks | Where | Speed |
 | --- | --- | --- | --- |
 | **Unit tests** (GUT) | One class or scene at a time, with known inputs and expected outputs. | `tests/unit/test_*.gd` | A few seconds for all of them |
 | **Smoke test** | The whole dedicated server boots and runs for 30 seconds without errors. | `tests/smoke/` | About 30 to 60 seconds |
+| **Join test** | A real client joins a real server, spawns and launches, with no errors on either side. | `tests/smoke/join_smoke.sh` | About 15 seconds |
 
-Both run in CI on every push. Both need the **custom engine build**: stock Godot has no LimboAI
+All three run in CI on every push. All need the **custom engine build**: stock Godot has no LimboAI
 classes and no double precision, so scripts fail to parse.
 
 In the commands below, `$GODOT` is the custom editor binary, for example:
@@ -90,6 +91,42 @@ It boots `--server` headless for 1800 frames, then fails if:
 
 Environment variables: `SMOKE_FRAMES` (default 1800) and `SMOKE_LOG` (keep the log at a known path
 instead of a temp file).
+
+### Join test
+
+```bash
+GODOT=$GODOT tests/smoke/join_smoke.sh
+```
+
+The unit tests run in one process with no real connection, so they can't catch a client and server
+that disagree: a spawn arriving after the packets about it, an RPC to a peer that doesn't have the
+node, a login the handshake drops. The join test runs a headless dedicated server and a headless
+`--testplayer --faction="Zeta Wing" --launch`, both over ENet on port 2270, and waits for every step
+of a join to appear in the logs:
+
+| Server log | Client log |
+| --- | --- |
+| Server hosted, Test Player authenticated, pilot created in Zeta Wing | Connection succeeded, factions received |
+| Interest: the peer knows some ships | First snapshot for EASS Hyperion |
+| Launching Test Player, first input applied, spawn complete | Asking to launch, the Starfury spawned |
+
+"First input from Test Player applied" is the strongest check: it means the client spawned its new
+ship, its pilot sat in the cockpit, and the client's input reached the server.
+
+After the last marker both keep running for 5 more seconds, then the test stops them and fails if:
+
+- a marker didn't appear within 90 seconds, or either process exited early, or
+- an error line appears that isn't in `tests/smoke/known_issues.txt` (both logs) or
+  `tests/smoke/known_client_issues.txt` (client log only; headless clients log errors from the
+  options menu).
+
+It waits for log lines, not a number of frames, because headless frames aren't capped: 600 frames
+can take 5 seconds on one machine and 10 on another. Environment variables: `JOIN_PORT` (default
+2270, so a game on 2258 can stay running), `JOIN_TIMEOUT` (90), `JOIN_LINGER` (5) and `JOIN_LOGS`
+(a directory to keep `server.log` and `client.log` in; default a temp directory).
+
+To add a step, add its log line to `server_markers` or `client_markers` in the script. A marker
+should be a line the game logs once, when the step succeeds.
 
 ## Writing a unit test
 
@@ -273,7 +310,8 @@ Good candidates:
 Leave to play-testing for now:
 
 - How flight *feels*, visuals, UI layout and audio.
-- Full client-and-server sessions. These need two processes, which the unit tests don't run.
+- Full client-and-server sessions beyond what the join test checks (several players, combat,
+  moving between systems). These need two processes, which the unit tests don't run.
 
 Design new code so the logic can be tested without nodes where possible. `LaunchOptions` takes the
 command line as a parameter instead of reading `OS.get_cmdline_args()` itself, which is why it can be
@@ -324,6 +362,7 @@ exported:
   that report on merge requests, test by test. The full GUT log is kept as `test-results/gut.log`.
 - **`server-smoke`** runs the smoke test and keeps `smoke.log` as a job artifact. Download it from
   the job page when the smoke test fails.
+- **`join-smoke`** runs the join test and keeps both logs in `join-logs/`.
 
 A failing test stops the pipeline before the export jobs run, so a broken build isn't exported.
 
@@ -332,5 +371,5 @@ A failing test stops the pipeline before the export jobs run, so a broken build 
 - [ ] New logic has a unit test; a bug fix has a test that failed before the fix.
 - [ ] Tests create their own state (such as a `FactionRegistry`) instead of sharing statics.
 - [ ] The unit suite passes.
-- [ ] The smoke test passes.
+- [ ] The smoke test and the join test pass.
 - [ ] Any `known_issues.txt` line whose cause you fixed is removed.

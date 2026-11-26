@@ -1,0 +1,6 @@
+# Errors the join test tolerates in the client's log, on top of known_issues.txt.
+# One extended regex per line. Remove a line as soon as its cause is fixed.
+
+# The options menu addon (maaacks_options_menus input_helper.gd) asks the display
+# server for key names while building the input list; headless has none.
+^ERROR: Not supported by this display server\.$

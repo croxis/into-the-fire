@@ -13,6 +13,8 @@ godot="${GODOT:-godot}"
 frames="${SMOKE_FRAMES:-1800}"
 log="${SMOKE_LOG:-$(mktemp)}"
 known="$here/known_issues.txt"
+# shellcheck source=common.sh
+. "$here/common.sh"
 
 echo "Smoke: booting dedicated server for $frames frames (log: $log)"
 timeout 600 "$godot" --headless --path "$project" --quit-after "$frames" --server >"$log" 2>&1
@@ -33,16 +35,11 @@ for marker in "Server hosted on port" "Galaxy setup complete" "Added station" "A
 	fi
 done
 
-# Every error line, minus the known ones. Known patterns are extended regexes,
-# one per line; lines starting with # are comments.
-patterns="$(grep -vE '^\s*(#|$)' "$known" || true)"
-errors="$(grep -E '^(ERROR|SCRIPT ERROR|USER ERROR|USER SCRIPT ERROR):|Parse Error' "$log" || true)"
-if [ -n "$patterns" ] && [ -n "$errors" ]; then
-	errors="$(printf '%s\n' "$errors" | grep -vEf <(printf '%s\n' "$patterns") || true)"
-fi
+# Every error line, minus the known ones.
+errors="$(unexpected_errors "$log" "$known")"
 if [ -n "$errors" ]; then
 	echo "FAIL: unexpected errors:"
-	printf '%s\n' "$errors" | sort | uniq -c | sort -rn
+	printf '%s\n' "$errors"
 	failed=1
 fi
 
