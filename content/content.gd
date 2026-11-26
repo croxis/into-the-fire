@@ -10,52 +10,52 @@ const MANIFESTS: PackedStringArray = [
 ]
 
 var registry := ContentRegistry.new()
-## Every ship scene, loading on worker threads from startup and then kept (in
-## Godot's resource cache, while this holds them): the first instantiate of a
-## ship would otherwise read it from disk, about 300 ms for a Starfury, a stall
-## that froze a client's ticks at its first launch and the server's at the
-## first launch it built. Server and clients alike.
-var _ships: SceneBatchLoader
-var _ships_logged := false
-## Ship scenes whose collision shapes are still to be built, one a frame:
-## Jolt builds a concave hull shape the first time a body uses it (277 ms for
-## Babylon 5's), a stall wherever the ship first appeared (a client's spawn,
-## fog of war revealing it mid-flight). Built here, while the scenes are kept
-## the shapes stay built, and adding the ship later costs next to nothing.
+## Every ship scene, loaded and then kept, on the server and on clients: the
+## first instantiate of a ship would otherwise read it from disk, about 300 ms
+## for a Starfury, a stall that froze a client's ticks at its first launch and
+## the server's at the first launch it built. Then each one's collision shapes
+## are built: Jolt builds a concave hull shape the first time a body uses it
+## (277 ms for Babylon 5's), a stall wherever the ship first appeared (a
+## client's spawn, fog of war revealing it mid-flight). While the scenes are
+## kept their shapes stay built, and adding the ship later costs next to nothing.
+##
+## One ship a frame, on the main thread, from the first frames after startup
+## (the title screen, or a dedicated server starting). Not on worker threads:
+## those raced the main thread for the same scripts as the game and the test
+## runner started, and deadlocked or failed to parse a scene.
+var _ships: Dictionary[StringName, PackedScene] = {}
+var _to_load: Array[StringName] = []
 var _to_warm: Array[PackedScene] = []
-var _warmed := false
+var _started := false
+var _ready_logged := false
 
 
 func _enter_tree() -> void:
 	for manifest in MANIFESTS:
 		var count := registry.load_manifest(manifest)
 		Log.log(["Content: ", count, " entries from ", manifest], Log.MessageType.INFO)
-	var paths := PackedStringArray()
-	for id in registry.ids(&"ship"):
-		# Resolved paths: ContentRegistry.load_scene looks a load in flight up by it.
-		paths.append(ResourceUID.ensure_path(registry.path_of(id)))
-	_ships = SceneBatchLoader.new(paths, false)  # One worker: it is in no hurry.
 
 
 func _process(_delta: float) -> void:
-	if _warmed:
+	if _ready_logged:
 		return
-	if not _ships_logged:
-		_ships.poll()
-		if not _ships.is_done():
-			return
-		_ships_logged = true
-		Log.log(["Content: ", _ships.paths.size() - _ships.failed.size(), " ship scenes preloaded"],
-				Log.MessageType.INFO)
-		for scene in _ships.scenes.values():
-			if scene:
-				_to_warm.append(scene)
+	if not _started:
+		_started = true
+		_to_load = registry.ids(&"ship")
 		return
-	if _to_warm.is_empty():
-		_warmed = true
-		Log.log(["Content: ship collision shapes built"], Log.MessageType.INFO)
+	if not _to_load.is_empty():
+		var id: StringName = _to_load.pop_back()
+		var scene := registry.load_scene(id)
+		if scene:
+			_ships[id] = scene
+			_to_warm.append(scene)
 		return
-	_warm_shapes(_to_warm.pop_back())
+	if not _to_warm.is_empty():
+		_warm_shapes(_to_warm.pop_back())
+		return
+	_ready_logged = true
+	Log.log(["Content: ", _ships.size(), " ship scenes loaded, collision shapes built"],
+			Log.MessageType.INFO)
 
 
 ## Has Jolt build every collision shape in [param scene]: each goes on a body in
@@ -77,12 +77,12 @@ static func _warm_shapes(scene: PackedScene) -> void:
 
 ## True once every ship scene is loaded and kept (see _ships).
 func ships_preloaded() -> bool:
-	return _ships != null and _ships.is_done()
+	return _started and _to_load.is_empty()
 
 
 ## True once every ship scene is loaded and its collision shapes built.
 func ships_ready() -> bool:
-	return _warmed
+	return _ready_logged
 
 
 ## Shorthands for the registry, so callers can write Content.instantiate(id).

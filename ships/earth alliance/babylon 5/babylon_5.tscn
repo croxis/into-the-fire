@@ -57,11 +57,8 @@ shadow_mesh = SubResource("ArrayMesh_1c47o")
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_rbc1i"]
 properties/0/path = NodePath(".:rpm")
-properties/0/spawn = false
-properties/0/replication_mode = 1
-properties/1/path = NodePath(".:rotation")
-properties/1/spawn = false
-properties/1/replication_mode = 1
+properties/0/spawn = true
+properties/0/replication_mode = 2
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ah7gn"]
 radius = 5000.0

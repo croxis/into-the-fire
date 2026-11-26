@@ -104,17 +104,18 @@ if Content.has(&"b5:omega"):
 	...
 ```
 
-Every `ship` is loaded in the background from startup, on server and clients, and kept in memory
-(`Content.ships_preloaded()`): the first instantiate of a ship would otherwise read it from disk,
-about 300 ms for a Starfury, a stall that froze the game's ticks at a first launch. A ship scene
-asked for while it is still loading is waited for with `ResourceLoader.load_threaded_get`
-(`ContentRegistry.load_scene`): a plain `load()` of a file in flight on a worker thread deadlocked
-the main thread. Load content scenes through `Content`, not with `load()`, for that reason.
+Every `ship` is loaded in the first frames after startup, one a frame on the main thread, on server
+and clients, and kept in memory (`Content.ships_preloaded()`): the first instantiate of a ship would
+otherwise read it from disk, about 300 ms for a Starfury, a stall that froze the game's ticks at a
+first launch. Then `Content` has Jolt build each ship's collision shapes (`Content.ships_ready()`):
+Jolt builds a concave hull shape the first time a body uses it, 277 ms for Babylon 5's, a stall
+wherever the station first appeared (a client's spawn, or fog of war revealing it mid-flight). Since
+`Content` keeps the scenes, their shapes stay built.
 
-Once loaded, `Content` also has Jolt build each ship's collision shapes, one ship a frame
-(`Content.ships_ready()`). Jolt builds a concave hull shape the first time a body uses it: 277 ms
-for Babylon 5's, a stall wherever the station first appeared (a client's spawn, or fog of war
-revealing it mid-flight). Since `Content` keeps the scenes, their shapes stay built.
+Not on worker threads: background loads of these scenes raced the main thread for the same scripts
+as the game or the test runner started, and deadlocked or failed to parse a scene. Where a
+`SceneBatchLoader` does load on threads (the loading screen), `ContentRegistry.load_scene` waits on
+a scene in flight with `ResourceLoader.load_threaded_get`; a plain `load()` of it can deadlock.
 
 Write IDs as `StringName` literals (`&"b5:omega"`). They are compared faster than Strings, and that
 is the type the registry uses.

@@ -134,6 +134,9 @@ var _peers_with_ship: Dictionary[int, bool] = {}  # Server: clients that confirm
 var prediction_forced := false
 ## Set to treat this machine as a client that draws this ship (unit tests).
 var drawing_forced := false
+## The pilot's client: a launch arm here holds this ship (it is placed on the
+## arm as drawn with the station, not at the server's frozen states).
+var held_by_local_arm := false
 ## The client's lead controller, instead of Galaxy.input_lead (unit tests).
 var input_lead_override: InputLead
 var _last_lead_usec := 0
@@ -627,7 +630,8 @@ func reconcile_with(server: FlightIntegrator.FlightState, ack: int, last_tick: i
 			return  # Older than a state already used.
 		freeze = true
 		smoother.reset()
-		place(server.transform)
+		if not held_by_local_arm:  # Else our own arm places it, drawn with the station.
+			place(server.transform)
 		return
 	if freeze:
 		freeze = false  # Released by the arm.

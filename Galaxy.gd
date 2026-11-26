@@ -421,6 +421,19 @@ func _process(delta: float) -> void:
 			_rpc_sync_time.rpc(_play_time)
 
 
+## The server tick [param node]'s machine shows things at now (fractional): the
+## server's own tick, or on a client the moment it draws remote ships at
+## (snapshot_clock), so clock-driven parts of a station (Babylon 5's rotation,
+## its launch arms) are where the server has them at that moment.
+static func shown_tick(node: Node) -> float:
+	if not node.multiplayer.has_multiplayer_peer() or node.multiplayer.is_server():
+		return NetworkTime.tick + NetworkTime.tick_factor
+	var galaxy := find_for(node)
+	if galaxy and galaxy.snapshot_clock.has_estimate():
+		return galaxy.snapshot_clock.render_tick(SnapshotClock.local_now())
+	return NetworkTime.tick + NetworkTime.tick_factor
+
+
 ## Server: works out again which ships each client knows (Interest), from where
 ## each client's player and each ship is now. Runs every INTEREST_SECONDS, and
 ## at once when that changes: a client connects, a ship is launched (once it is

@@ -31,8 +31,13 @@ Our own reconciler, not netfox rollback. The pilot's input reaches the server th
   jumps over 100 m snap, since thrust follows the way the ship points.
 - Corrections go through `Ship.place`, which sets the transform in Jolt directly: Godot only sends a node's new
   transform to physics at the start of the next physics frame, after our ticks have stepped the zone.
-- While the server holds the ship frozen (a launch arm), its state says so and the client freezes the ship too
-  and follows it exactly, still recording input for the replay after release.
+- While the server holds the ship frozen (a launch arm), its state says so and the client freezes the ship too,
+  still recording input for the replay after release. A Babylon 5 arm holds it on the client's own arm
+  (`held_by_local_arm`), drawn with the station; otherwise it follows the server's states exactly.
+- Babylon 5 runs on the clock: its rotating section's angle (`rotation.gd`, not synced) and its arms' poses
+  (`cobra_bay_arm.gd`, the deploy's start tick sent to clients) come from `Galaxy.shown_tick`: the server's
+  tick, or the moment a client draws the station. The release from the arm costs one eased correction of
+  roughly speed x (render delay + latency), as prediction takes over from the drawn arm.
 - The host never predicts.
 - Logs: client "Prediction for X: N corrections" every 5 s.
 - Not done yet: under lag the client logs "SYS_COMMAND_AUTH" errors while joining (game packets arrive before
