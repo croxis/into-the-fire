@@ -33,11 +33,26 @@ Our own reconciler, not netfox rollback. The pilot's input reaches the server th
   transform to physics at the start of the next physics frame, after our ticks have stepped the zone.
 - While the server holds the ship frozen (a launch arm), its state says so and the client freezes the ship too
   and follows it exactly, still recording input for the replay after release.
-- The shared ship sync goes through `sync_*` proxies that the predicting client ignores. The host never predicts.
+- The host never predicts.
 - Logs: client "Prediction for X: N corrections" every 5 s.
 - Not done yet: under lag the client logs "SYS_COMMAND_AUTH" errors while joining (game packets arrive before
   its login finishes), and a late `InputsSync` delta for the pilot's freed pre-launch character logs
-  "Node not found" on the server; remote ships aren't smoothed (N4).
+  "Node not found" on the server.
+
+## Snapshots (other ships)
+
+- Motion reaches clients as tick-stamped snapshots, not through the `MultiplayerSynchronizer`: after each tick
+  loop the server sends every ship's transform and velocities every `SNAPSHOT_TICKS` (2, so 30 a second;
+  `Ship._receive_snapshot`, unreliable ordered). The synchronizer sends motion only when a ship appears
+  (`transform`, velocities: spawn only), so a new ship starts in the right place.
+- Each client asks for a ship's snapshots from that ship's `_ready` (`_want_snapshots`): a snapshot sent before
+  the ship exists on a joining client would fail ("node not found"). `snapshot_recipients` skips peers that
+  left and the pilot predicting the ship, who gets its own state. Interest management (N5) will narrow it.
+- Clients keep them in `Ship.snapshots` (`SnapshotBuffer`: in tick order, samples between them on a Hermite
+  curve with slerped rotation, extrapolates up to 15 ticks past the newest). For now the newest is applied
+  through `Ship.place` and the client still flies the ship between snapshots; drawing remote ships a little in
+  the past from the buffer is N4c. A client's netfox tick runs behind the server's by about the latency, so
+  that needs an estimate of the server's tick. Log: client "First snapshot for X".
 - Test lag with `tests/lag/lag_run.sh` (a UDP delay proxy between `--server` and `--testplayer`; see
   `documentation/testing.md`).
 

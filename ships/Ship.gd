@@ -101,33 +101,15 @@ var start_velocity := Vector3(0, 0, 0)
 
 var is_spawning := false
 
-## Motion as the MultiplayerSynchronizer sends it, server to clients. On the
-## pilot's own client this ship is predicted (ShipPrediction), so incoming
-## values are ignored there; the server sends that client its own state instead.
-var sync_position: Vector3:
-	get:
-		return position
-	set(value):
-		if not is_predicted_here():
-			position = value
-var sync_rotation: Vector3:
-	get:
-		return rotation
-	set(value):
-		if not is_predicted_here():
-			rotation = value
-var sync_linear_velocity: Vector3:
-	get:
-		return linear_velocity
-	set(value):
-		if not is_predicted_here():
-			linear_velocity = value
-var sync_angular_velocity: Vector3:
-	get:
-		return angular_velocity
-	set(value):
-		if not is_predicted_here():
-			angular_velocity = value
+## Motion reaches clients as tick-stamped snapshots (netcode slice N4b), not
+## through the MultiplayerSynchronizer (it sends motion only when a ship
+## appears): the server sends them every SNAPSHOT_TICKS, clients keep them here.
+## The pilot's own client predicts its ship instead and ignores them.
+var snapshots := SnapshotBuffer.new(1.0 / 60.0)
+## Ticks between snapshots: 2 at 60 Hz, so 30 a second.
+const SNAPSHOT_TICKS := 2
+var _last_snapshot_tick := -SNAPSHOT_TICKS  # Server: the tick of the last snapshot sent.
+var _snapshot_peers: Dictionary[int, bool] = {}  # Server: peers that have this ship.
 ## Set to treat this ship as predicted on this machine (unit tests).
 var prediction_forced := false
 
@@ -183,6 +165,10 @@ func _ready():
 	galaxy = Galaxy.find_for(self)
 	if galaxy:
 		destroyed.connect(galaxy._on_ship_destroyed)
+	# A client that now has this ship asks for its snapshots (see snapshot_recipients).
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server() \
+			and multiplayer.multiplayer_peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED:
+		_want_snapshots.rpc_id(1)
 
 
 
@@ -288,6 +274,12 @@ const PREDICTION_REPORT_TICKS := 300  # Every 5 s at 60 Hz.
 func _after_tick_loop() -> void:
 	if multiplayer.is_server():
 		_send_pilot_state()
+		var last_tick := NetworkTime.tick - 1  # The last tick just run.
+		if _snapshot_due(last_tick):
+			_last_snapshot_tick = last_tick
+			var pilot := remote_pilot()
+			for peer in snapshot_recipients(multiplayer.get_peers(), pilot.multiplayer_id if pilot else 0):
+				_receive_snapshot.rpc_id(peer, last_tick, global_transform, linear_velocity, angular_velocity)
 	elif is_predicted_here() and NetworkTime.tick >= _next_report_tick:
 		_next_report_tick = NetworkTime.tick + PREDICTION_REPORT_TICKS
 		if _corrections:
@@ -295,6 +287,67 @@ func _after_tick_loop() -> void:
 					"%.3f m" % _largest_correction], Log.MessageType.INFO)
 		_corrections = 0
 		_largest_correction = 0.0
+
+
+## Server: whether a snapshot goes out after [param last_tick]. Counted from
+## the last one sent, since a loop can run several ticks at once.
+func _snapshot_due(last_tick: int) -> bool:
+	return last_tick - _last_snapshot_tick >= SNAPSHOT_TICKS
+
+
+## Server: the peers a snapshot goes to: those that asked for this ship's
+## (they have it, so the RPC finds it) and are still [param connected], except
+## [param pilot_peer], who predicts the ship and gets its own state. Peers that
+## left are forgotten.
+func snapshot_recipients(connected: Array, pilot_peer: int) -> Array[int]:
+	var out: Array[int] = []
+	for peer in _snapshot_peers.keys():
+		if not peer in connected:
+			_snapshot_peers.erase(peer)
+		elif peer != pilot_peer:
+			out.append(peer)
+	return out
+
+
+func _add_snapshot_peer(peer: int) -> void:
+	_snapshot_peers[peer] = true
+
+
+## Server: a client has this ship now and wants its snapshots. The peer comes
+## from the sender, never from arguments.
+@rpc("any_peer", "call_remote", "reliable")
+func _want_snapshots() -> void:
+	if multiplayer.is_server():
+		_add_snapshot_peer(multiplayer.get_remote_sender_id())
+
+
+## Clients: this ship's state after server tick [param tick]. Unreliable and
+## ordered per sender, but a later packet can still be lost and an earlier one
+## arrive; SnapshotBuffer sorts that out.
+@rpc("authority", "call_remote", "unreliable_ordered")
+func _receive_snapshot(tick: int, server_transform: Transform3D, server_velocity: Vector3,
+		server_spin: Vector3) -> void:
+	if multiplayer.is_server():
+		return
+	var s := FlightIntegrator.FlightState.new()
+	s.transform = server_transform
+	s.linear_velocity = server_velocity
+	s.angular_velocity = server_spin
+	take_snapshot(tick, s)
+
+
+## Keeps a snapshot and, when it is the newest, puts the ship there (through
+## Jolt, as corrections are). Ignored for the ship this client predicts.
+func take_snapshot(tick: int, s: FlightIntegrator.FlightState) -> void:
+	if is_predicted_here():
+		return
+	if not snapshots.push(tick, s) or tick != snapshots.newest_tick():
+		return
+	if snapshots.size() == 1:
+		Log.log(["First snapshot for ", name, " (server tick ", tick, ")"], Log.MessageType.INFO)
+	place(s.transform)
+	linear_velocity = s.linear_velocity
+	angular_velocity = s.angular_velocity
 
 
 ## Server: tell the remote pilot where their ship is after the ticks just run,

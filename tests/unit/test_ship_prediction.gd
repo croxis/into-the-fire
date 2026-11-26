@@ -105,7 +105,7 @@ func test_history_is_bounded() -> void:
 	assert_eq(prediction.size(), ShipPrediction.MAX_HISTORY)
 
 
-# The ship's shared sync must not drag a predicted ship back. -----------------
+# Snapshots: every other ship's state, tick-stamped (netcode slice N4b). ------
 
 func _starfury() -> Ship:
 	var ship: Ship = Content.instantiate(&"b5:aurora_starfury")
@@ -113,33 +113,80 @@ func _starfury() -> Ship:
 	return ship
 
 
-func test_synced_motion_moves_ships_nobody_here_predicts() -> void:
+func _snapshot(origin: Vector3, velocity := Vector3.ZERO) -> FlightIntegrator.FlightState:
+	var s := FlightIntegrator.FlightState.new()
+	s.transform = Transform3D(Basis(Vector3.UP, 0.3), origin)
+	s.linear_velocity = velocity
+	s.angular_velocity = Vector3(0, 0.1, 0)
+	return s
+
+
+func test_a_snapshot_moves_a_ship_nobody_here_predicts() -> void:
 	var ship := _starfury()
-	ship.sync_position = Vector3(1, 2, 3)
-	ship.sync_linear_velocity = Vector3(0, 0, -5)
-	assert_eq(ship.position, Vector3(1, 2, 3))
+	ship.take_snapshot(5, _snapshot(Vector3(1, 2, 3), Vector3(0, 0, -5)))
+	assert_almost_eq(ship.global_position, Vector3(1, 2, 3), Vector3.ONE * 1e-9)
 	assert_eq(ship.linear_velocity, Vector3(0, 0, -5))
+	assert_eq(ship.angular_velocity, Vector3(0, 0.1, 0))
+	var in_jolt: Transform3D = PhysicsServer3D.body_get_state(ship.get_rid(), PhysicsServer3D.BODY_STATE_TRANSFORM)
+	assert_almost_eq(in_jolt.origin, Vector3(1, 2, 3), Vector3.ONE * 1e-9, "in the physics engine too")
 
 
-func test_synced_motion_is_ignored_for_the_ship_we_predict() -> void:
+func test_a_late_snapshot_doesnt_move_the_ship_back() -> void:
 	var ship := _starfury()
-	ship.prediction_forced = true  # As on the pilot's own client.
-	ship.sync_position = Vector3(1, 2, 3)
-	ship.sync_rotation = Vector3(0, 1, 0)
-	ship.sync_linear_velocity = Vector3(0, 0, -5)
-	ship.sync_angular_velocity = Vector3(0, 1, 0)
-	assert_eq(ship.position, Vector3.ZERO)
-	assert_eq(ship.rotation, Vector3.ZERO)
+	ship.take_snapshot(8, _snapshot(Vector3(8, 0, 0)))
+	ship.take_snapshot(6, _snapshot(Vector3(6, 0, 0)))  # Arrived after 8.
+	assert_almost_eq(ship.global_position, Vector3(8, 0, 0), Vector3.ONE * 1e-9)
+	assert_eq(ship.snapshots.size(), 2, "kept, for drawing between them later")
+
+
+func test_snapshots_are_ignored_for_the_ship_we_predict() -> void:
+	var ship := _starfury()
+	ship.prediction_forced = true  # As on the pilot's own client: it gets its own state.
+	ship.take_snapshot(5, _snapshot(Vector3(1, 2, 3), Vector3(0, 0, -5)))
+	assert_eq(ship.global_position, Vector3.ZERO)
 	assert_eq(ship.linear_velocity, Vector3.ZERO)
-	assert_eq(ship.angular_velocity, Vector3.ZERO)
+	assert_eq(ship.snapshots.size(), 0)
 
 
-func test_the_ship_syncs_motion_through_the_proxies() -> void:
+func test_snapshots_go_out_every_other_tick() -> void:
+	# 30 a second at 60 Hz. Loops can run two ticks at once, so it counts ticks
+	# since the last snapshot rather than looking at even ticks.
+	var ship := _starfury()
+	assert_true(ship._snapshot_due(10), "the first")
+	ship._last_snapshot_tick = 10
+	assert_false(ship._snapshot_due(11))
+	assert_true(ship._snapshot_due(12))
+	assert_true(ship._snapshot_due(15), "after a skipped loop too")
+
+
+func test_snapshots_go_only_to_peers_that_have_the_ship() -> void:
+	# A joining client gets ships after it connects; a snapshot sent before the
+	# ship exists there is an error ("node not found"). Each client asks for a
+	# ship's snapshots once it has the ship. The pilot predicting it gets its own
+	# state instead, and peers that left are forgotten.
+	var ship := _starfury()
+	assert_eq(ship.snapshot_recipients([7, 8, 9], 0), [] as Array[int], "nobody asked yet")
+	ship._add_snapshot_peer(7)
+	ship._add_snapshot_peer(8)
+	ship._add_snapshot_peer(9)
+	assert_eq(ship.snapshot_recipients([7, 8, 9], 8), [7, 9] as Array[int], "not the pilot")
+	assert_eq(ship.snapshot_recipients([9], 0), [9] as Array[int], "7 and 8 left")
+	assert_eq(ship.snapshot_recipients([7, 8, 9], 0), [9] as Array[int], "and are forgotten")
+
+
+func test_motion_is_synchronised_only_when_a_ship_appears() -> void:
+	# Snapshots carry motion from then on. Position and velocity still come with
+	# the spawn, so a new ship is in the right place before its first snapshot.
 	var config: SceneReplicationConfig = _starfury().get_node("MultiplayerSynchronizer").replication_config
+	for prop in ["transform", "linear_velocity", "angular_velocity"]:
+		var path := NodePath(".:" + prop)
+		assert_true(config.has_property(path), prop)
+		if config.has_property(path):
+			assert_true(config.property_get_spawn(path), prop + " at spawn")
+			assert_eq(config.property_get_replication_mode(path), SceneReplicationConfig.REPLICATION_MODE_NEVER,
+					prop + " not after")
 	for prop in ["sync_position", "sync_rotation", "sync_linear_velocity", "sync_angular_velocity"]:
-		assert_true(config.has_property(NodePath(".:" + prop)), prop)
-	for prop in ["position", "rotation", "linear_velocity", "angular_velocity"]:
-		assert_false(config.has_property(NodePath(".:" + prop)), prop + " directly")
+		assert_false(config.has_property(NodePath(".:" + prop)), prop + " is gone")
 
 
 # Who flies the ship from where. ---------------------------------------------
