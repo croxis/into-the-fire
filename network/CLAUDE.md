@@ -2,7 +2,7 @@
 
 Loaded when working in `network/`. Project-wide rules are in the top-level `CLAUDE.md`. Interest management
 also lives in `Galaxy.gd` (`interest`, `pictures_of`, `refresh_interest`, contacts) and `ships/Ship.gd`
-(`_follow_interest`, `update_interest`, `sensor_check`).
+(`_follow_interest`, `update_interest`, `sensor_check`), the detection maths in `ships/ship_sensors.gd`.
 
 ## Interest management (fog of war)
 
@@ -20,12 +20,12 @@ yet: sharing pictures between sides, and the host's own player (the server has e
 - `Galaxy.refresh_interest` runs every 0.5 s and at once when a client connects, a ship is launched (after
   it is placed: showing a ship sends its spawn with its transform at that moment) or crew board (Godot
   refuses an RPC to a peer that can't see the node).
-- Detection (`Ship.sensor_check`, `Sensor`): EM, neutrino and gravimetric fall off with distance squared
+- Detection (`Ship.sensor_check` calls `ShipSensors.detects`; `Sensor`): EM, neutrino and gravimetric fall off with distance squared
   (sensitivity S picks up signals down to 1/S). A ship gives off its base (EM: its subsystems' power use,
   no power system yet) plus what its drive gives off with thrust each tick (`Ship.drive`, `DriveProfile`
   in `ship_systems/drives/`: chemical EM, the default; gravitic gravimetric; esoteric neutrinos). It is
   also seen when it looks wider than the sensor's `visual_acuity_degrees` (default 1); its size comes from
-  its own and inner physics bodies' shapes (`Ship.visual_radius`, never areas). At 1 degree a Starfury is
+  its own and inner physics bodies' shapes (`ShipSensors.reach`, never areas). At 1 degree a Starfury is
   seen within ~1.4 km, a Hyperion hull ~59 km, Babylon 5 ~510 km.
 - Lost contacts (N5c): when a ship leaves a client's picture while still in the world, the server sends
   `Galaxy._contact_lost` (its last state); the client records it in `Galaxy.contacts` (`ContactLog`, kept
