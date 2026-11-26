@@ -46,8 +46,8 @@ Our own reconciler, not netfox rollback. The pilot's input reaches the server th
   `Ship._receive_snapshot`, unreliable ordered). The synchronizer sends motion only when a ship appears
   (`transform`, velocities: spawn only), so a new ship starts in the right place.
 - Each client confirms it has a ship from that ship's `_ready` (`_have_ship`): a snapshot sent before the ship
-  exists there would fail ("node not found"). A despawn forgets it (interest management, see the top-level
-  `CLAUDE.md`). `snapshot_recipients` skips peers that left, the pilot predicting the ship, who gets its own
+  exists there would fail ("node not found"). A despawn forgets it (interest management, see
+  `network/CLAUDE.md`). `snapshot_recipients` skips peers that left, the pilot predicting the ship, who gets its own
   state, and clients that `Galaxy.interest` says don't know the ship.
 - Snapshots are plain `unreliable`, not `unreliable_ordered`: ENet drops an ordered packet that a later one on
   the same channel overtook, and every ship's snapshots and the pilot's state share it, so under jitter half

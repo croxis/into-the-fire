@@ -6,8 +6,9 @@ or stubbed.
 
 Docs: `documentation/` (`testing.md`, `content_registry.md`, `factions.md`, `scenarios.md`, `command_line.md`).
 Design doc (target architecture, decisions, open questions): https://claude.ai/artifact/SbiKWXHGRsfhgvoeBBGW7J
-Folders with their own `CLAUDE.md` (loaded when you work there): `ships/` (flight, own-ship prediction),
-`characters/` (pilot input, jitter buffer), `zones/` (Jolt job pool warning).
+Folders with their own `CLAUDE.md` (loaded when you work there): `ships/` (flight, own-ship prediction,
+snapshots), `characters/` (pilot input, jitter buffer, disconnect and rejoin), `network/` (interest
+management, fog of war), `zones/` (Jolt job pool warning).
 
 ## Working agreements
 
@@ -21,6 +22,8 @@ Folders with their own `CLAUDE.md` (loaded when you work there): `ships/` (fligh
 - The README says no vibe coding; keep changes reviewable and small.
 - Search with `rg`, which honours `.ignore` (addons, `demo/`, `*.import`, `*.uid` and the action maps are
   skipped). To search an addon, name its path: `rg NetworkTime addons/netfox`.
+- This file holds only what applies everywhere; it loads in every session. A feature's detail goes in the
+  `CLAUDE.md` of the folder its code lives in (create one if needed), with at most a one-line pointer here.
 
 ## Engine: custom Godot 4.7.2 build (required)
 
@@ -94,52 +97,12 @@ Autoloads include netfox (`NetworkTime`, `NetworkRollback`, ...), `Log`, `LimboC
 - Spawners only track nodes they spawned; reparenting across spawn paths is not replicated. Spawn with
   `spawn_function` and data dictionaries: crew via
   `ship.spawn_crew(Character.pilot_data(..., galaxy.ids.next_pilot()))`, never `add_child`.
-- A player who disconnects keeps their character in the world (`Galaxy._on_peer_disconnected`,
-  `Character.pilot_disconnected`): controls go neutral and a one-seat craft brakes to a stop. Logging back in
-  with the same name resumes it (`Galaxy._resume`: new peer id and input authority, a fresh `InputChannel`,
-  camera and HUD again, no join menu).
 - Never trust IDs sent by clients: validate every `any_peer` RPC on the server, and get the sender from
   `multiplayer.get_remote_sender_id()`, not arguments (see `Ship.request_launch`). Logins are checked by
   `network.gd` `check_login` first and never logged (they hold passwords).
-- Interest management (N5, `network/interest.gd`, `Galaxy.interest`): the server decides which ships each
-  client is told about; a ship a client doesn't know does not exist there. The rule is fog of war: the ships
-  in the player's system that are in their top-level faction's sensor picture (`Galaxy.pictures_of`: its own
-  ships and what their sensors detect, `Ship.detected_ships` from each system's 0.5 s scan), plus the ship
-  they are aboard; none before they have a character. Factions and ships can be kept out of the shared
-  picture (`excluded_from_picture`; covert wings still see it, one-way; `documentation/factions.md`). Not
-  yet: sharing pictures between sides, and the host's own player (the server has everything).
-  - With no character a client knows nothing, so the join menu asks the server for a faction's spawn points
-    (`Galaxy._request_spawn_points`, own side only), and `first_spawn_player` checks the one picked
-    (`Galaxy.check_spawn_point`).
-  - `Galaxy.refresh_interest` runs every 0.5 s and at once when a client connects, a ship is launched (after
-    it is placed: showing a ship sends its spawn with its transform at that moment) or crew board (Godot
-    refuses an RPC to a peer that can't see the node).
-  - Detection (`Ship.sensor_check`, `Sensor`): EM, neutrino and gravimetric fall off with distance squared
-    (sensitivity S picks up signals down to 1/S). A ship gives off its base (EM: its subsystems' power use,
-    no power system yet) plus what its drive gives off with thrust each tick (`Ship.drive`, `DriveProfile`
-    in `ship_systems/drives/`: chemical EM, the default; gravitic gravimetric; esoteric neutrinos). It is
-    also seen when it looks wider than the sensor's `visual_acuity_degrees` (default 1); its size comes from
-    its own and inner physics bodies' shapes (`Ship.visual_radius`, never areas). At 1 degree a Starfury is
-    seen within ~1.4 km, a Hyperion hull ~59 km, Babylon 5 ~510 km.
-  - Lost contacts (N5c): when a ship leaves a client's picture while still in the world, the server sends
-    `Galaxy._contact_lost` (its last state); the client records it in `Galaxy.contacts` (`ContactLog`, kept
-    after the ghost fades, with when it was last seen) and draws a `GhostMarker` (`contacts/`) in that system:
-    it drifts on the last course and fades over `ContactLog.fade_seconds` (30 s); stations stay put for good.
-    The ship's next spawn there ends the ghost (`Galaxy.contact_regained`). Client log "Lost contact with X".
-  - Every synchronizer in a ship, crew included, has a visibility filter (`Ship._follow_interest`) and is
-    updated only when interest changes (`visibility_update_mode` none; `Ship.update_interest`, the ship's own
-    synchronizer first when shown, last when hidden). Godot spawns a node on a peer while the synchronizers
-    rooted at it are visible there.
-  - A ship a client stops knowing is "leaving" for one refresh (snapshots and its other syncs stop; it stays
-    on the client), then despawned: unreliable packets sent just before would otherwise arrive after it went.
-    Synchronizers that keep a node spawned (the ship's own, crew's) must send nothing unreliable.
-  - Snapshots and the syncs that aren't part of the spawn start only once the client confirms it has the ship
-    (`Ship._have_ship`, from its `_ready` there); a despawn forgets that. Sent at once they overtook the spawn.
-  - A player's own client sends its `InputsSync` to nobody (`Character.keep_inputs_local`): its input goes
-    through `InputChannel`. New broadcast RPCs (`.rpc()`) on ship
-    nodes would reach clients that don't have the ship: send to the clients that know it. (`Gun.fire_sound`
-    does; fix it when weapons are restored.)
-  - Server log "Interest: peer X now knows N ships (+ more, leaving, gone)".
+- Interest management (N5): the server tells each client only about the ships its side's sensors see (fog
+  of war); a ship a client doesn't know does not exist there. Read `network/CLAUDE.md` before changing
+  spawning, synchronizers, RPCs to ship nodes, sensors or `Galaxy.interest`.
 
 ## Tests and CI
 

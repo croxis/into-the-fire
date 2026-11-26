@@ -15,6 +15,9 @@ Loaded when working in `characters/`. Project-wide rules are in the top-level `C
 - Log: server "Input from X: held, skipped, queued, cushion" every 5 s.
 - A player's own client keeps its `InputsSync` to itself (`keep_inputs_local`): nobody reads a remote
   pilot's, and its last packet used to reach a character the server had just freed at launch.
-- When the player disconnects, the server gives the character neutral input (`player_connected` false);
-  on rejoin `pilot_rejoined` starts a fresh channel for the new client's ticks.
+- A player who disconnects keeps their character in the world (`Galaxy._on_peer_disconnected`,
+  `Character.pilot_disconnected`): the server gives it neutral input (`player_connected` false) and a
+  one-seat craft brakes to a stop. Logging back in with the same name resumes it (`Galaxy._resume`: new peer
+  id and input authority, camera and HUD again, no join menu); `pilot_rejoined` starts a fresh channel for
+  the new client's ticks.
 - The client side of this (prediction, replay, corrections) is in `ships/CLAUDE.md`.
