@@ -1,37 +1,45 @@
 extends Control
 
-# Replace with your Discord Application ID
-var APPLICATION_ID: int = 1356458511122567168
+## Discord rich presence: shows "Playing Into The Fire" and how long, on the
+## player's Discord profile.
+##
+## Presence only, so no Discord sign-in: while the client is not connected to a
+## Discord account, update_rich_presence goes through the Discord app running on
+## the player's computer (see Client::UpdateRichPresence in the SDK's
+## discordpp.h). Without that app nothing is shown, and nothing breaks. Signing
+## in (authorize, get_token, connect_discord) is only needed for friends,
+## lobbies or messages, and connecting would clear this presence.
+##
+## entry.gd adds this node only for players on a screen whose Discord extension
+## loaded (LaunchOptions.wants_discord).
 
-# Created when Discord starts, not when the node is: entry.gd only adds this
-# node for players on a screen (LaunchOptions.wants_discord).
+## The Into The Fire application in the Discord developer portal.
+const APPLICATION_ID: int = 1356458511122567168
+
 var client: DiscordClient
-var args: DiscordAuthorizationArgs
-var code_verifier: DiscordAuthorizationCodeVerifier = null
+var _started_ms: int
 
 
 func _ready() -> void:
-	set_process(false)  # No callbacks to run until the client exists.
-	return
-	print("🚀 Initializing Discord SDK...")
+	_started_ms = int(Time.get_unix_time_from_system() * 1000.0)
 	client = DiscordClient.new()
-	args = DiscordAuthorizationArgs.new()
-	set_process(true)
-
-	client.add_log_callback(_on_log_message, DiscordLoggingSeverity.INFO)
-	client.set_status_changed_callback(_on_status_changed)
-
-	code_verifier = client.create_authorization_code_verifier()
-
-	args.set_client_id(APPLICATION_ID)
-	args.set_scopes(DiscordClient.get_default_presence_scopes())
-	args.set_code_challenge(code_verifier.challenge())
+	client.add_log_callback(_on_log_message, DiscordLoggingSeverity.WARNING)
 	client.set_application_id(APPLICATION_ID)
-	client.authorize(args, _on_authorized)
-	
+	show_presence("In the menus")
+
+
+## Replaces the presence. [param details] is the first line under the game's
+## name, [param state] the second (optional). The play timer keeps running from
+## when the game started.
+func show_presence(details: String, state := "") -> void:
 	var activity := DiscordActivity.new()
 	activity.set_type(DiscordActivityTypes.PLAYING)
-
+	activity.set_details(details)
+	if not state.is_empty():
+		activity.set_state(state)
+	var timestamps := DiscordActivityTimestamps.new()
+	timestamps.set_start(_started_ms)
+	activity.set_timestamps(timestamps)
 	client.update_rich_presence(activity, _on_rich_presence_updated)
 
 
@@ -40,57 +48,11 @@ func _process(_delta: float) -> void:
 
 
 func _on_log_message(message: String, severity: DiscordLoggingSeverity.Enum) -> void:
-	print("[%s] %s" % [Discord.enum_to_string(severity, DiscordLoggingSeverity.id), message])
-
-
-func _on_status_changed(status: DiscordClientStatus.Enum, error: DiscordClientError.Enum, error_detail: int) -> void:
-	print("🔄 Status changed: %s" % status)
-
-	if status == DiscordClientStatus.READY:
-		print("✅ Client is ready! You can now call SDK functions.")
-		print("👥 Friends Count: %s" % client.get_relationships().size())
-
-		var activity := DiscordActivity.new()
-		activity.set_type(DiscordActivityTypes.PLAYING)
-		activity.set_state("In Competitive Match")
-		activity.set_details("Rank: Diamond II")
-
-		client.update_rich_presence(activity, _on_rich_presence_updated)
-	elif error != DiscordClientError.NONE:
-		print("❌ Connection Error: %s - Details: %s" % [error, error_detail])
+	Log.log(["Discord ", Discord.enum_to_string(severity, DiscordLoggingSeverity.id), ": ", message],
+			Log.MessageType.WARNING)
 
 
 func _on_rich_presence_updated(result: DiscordClientResult) -> void:
-	if result.successful():
-		print("🎮 Rich Presence updated successfully!")
-	else:
-		print("❌ Rich Presence update failed")
-
-
-func _on_authorized(result: DiscordClientResult, code: String, redirect_uri: String) -> void:
 	if not result.successful():
-		print("❌ Authentication Error: %s" % result.error())
-	else:
-		print("✅ Authorization successful! Getting access token...")
-
-		client.get_token(APPLICATION_ID, code, code_verifier.verifier(), redirect_uri, _on_token_received)
-
-
-func _on_token_received(
-		_result: DiscordClientResult,
-		access_token: String,
-		_refresh_token: String,
-		_token_type: DiscordAuthorizationTokenType.Enum,
-		_expires_in: int,
-		_scopes: String
-) -> void:
-	print("🔓 Access token received! Establishing connection...")
-
-	client.update_token(DiscordAuthorizationTokenType.BEARER, access_token, _on_token_updated)
-
-
-func _on_token_updated(result: DiscordClientResult) -> void:
-	if result.successful():
-		print("🔑 Token updated, connecting to Discord...")
-
-		client.connect_discord()
+		# Expected when Discord isn't running, so a warning, not an error.
+		Log.log(["Discord presence not set: ", result.error()], Log.MessageType.WARNING)
