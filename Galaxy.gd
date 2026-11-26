@@ -23,6 +23,8 @@ var hud := HudLayer.new()
 var zone_stepper := ZoneStepper.new()
 ## Client: when ships' snapshots arrive, so when to draw them (netcode N4c).
 var snapshot_clock := SnapshotClock.new()
+## Client: ships this player's side lost contact with, and their ghosts (N5c).
+var contacts := ContactLog.new(1.0 / 60.0)
 ## Server: which ships each client is told about (netcode N5). Kept up to date
 ## every INTEREST_SECONDS and when a ship appears (refresh_interest).
 var interest := Interest.new()
@@ -399,6 +401,10 @@ func refresh_interest() -> void:
 	# Spawn or despawn on each client (N5a2). A leaving ship stops its unreliable
 	# syncs now and is despawned at the next refresh (see Interest).
 	for peer in changes:
+		# Lost contact (still in the world, no longer known): the client leaves a
+		# ghost where it was last seen (N5c). Freed ones go as "hidden" only.
+		for ship: Ship in changes[peer]["leaving"]:
+			_contact_lost.rpc_id(peer, ship.ship_id, contact_data(ship, NetworkTime.tick))
 		for key in ["leaving", "hidden"]:
 			for ship in changes[peer][key]:  # Untyped: a hidden one may have been freed.
 				if is_instance_valid(ship) and (ship as Ship).is_inside_tree():
@@ -412,6 +418,50 @@ func refresh_interest() -> void:
 				changes[peer]["hidden"].size(), " gone)"],
 				Log.MessageType.INFO)
 	interest_refreshed.emit()
+
+
+## Server: what a client is told about [param ship] when its side loses contact
+## (N5c), as last seen at server tick [param tick]. Stations are immobile: their
+## ghosts don't drift or fade.
+static func contact_data(ship: Ship, tick: int) -> Dictionary:
+	var system := System.find_for(ship)
+	return {
+		"name": String(ship.name), "faction_id": ship.faction_id,
+		"system": String(system.name) if system else "",
+		"transform": ship.global_transform, "velocity": ship.linear_velocity,
+		"immobile": ship.is_station, "tick": tick,
+	}
+
+
+## Client: the server says this player's side lost contact with [param ship_id]
+## (it is about to be despawned here). Record it and put a ghost where it was.
+@rpc("authority", "call_remote", "reliable")
+func _contact_lost(ship_id: int, data: Dictionary) -> void:
+	contacts.lost(ship_id, data)
+	var system := get_node_or_null(NodePath("Systems/" + String(data.get("system", ""))))
+	if not system is System:
+		return
+	var ghosts: Node = system.get_node_or_null("Ghosts")
+	if ghosts == null:
+		ghosts = Node3D.new()
+		ghosts.name = "Ghosts"
+		system.add_child(ghosts)
+	var old := ghosts.get_node_or_null("Ghost%d" % ship_id)
+	if old:
+		old.free()
+	var marker := GhostMarker.new()
+	marker.setup(contacts, ship_id, func() -> float:
+			return snapshot_clock.server_tick(SnapshotClock.local_now()))
+	ghosts.add_child(marker)
+	Log.log(["Lost contact with ", data.get("name", ship_id)], Log.MessageType.INFO)
+
+
+## Client: ship [param ship_id] exists here again (Ship._ready): contact regained.
+func contact_regained(ship_id: int) -> void:
+	if contacts.get_contact(ship_id).is_empty() or contacts.get_contact(ship_id)["in_contact"]:
+		return
+	contacts.regained(ship_id)
+	Log.log(["Contact regained with ", contacts.get_contact(ship_id)["name"]], Log.MessageType.INFO)
 
 
 ## Server: what [param character]'s player may know (Interest.view): their

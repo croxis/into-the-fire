@@ -32,6 +32,13 @@ var _offset := 0.0  # Server tick minus local tick.
 var _has_estimate := false
 
 
+## This machine's steady clock in ticks (real time, not the netfox tick, which
+## netfox speeds up and slows down): what [method observe] and
+## [method render_tick] expect.
+static func local_now() -> float:
+	return Time.get_ticks_usec() / 1e6 / NetworkTime.ticktime
+
+
 ## A snapshot from server tick [param server_tick] arrived at [param local_now]
 ## (this machine's steady clock, in ticks).
 func observe(server_tick: int, local_now: float) -> void:

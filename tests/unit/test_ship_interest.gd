@@ -175,3 +175,44 @@ func test_once_detected_an_enemy_is_in_the_picture() -> void:
 	(w.system as System).ship_scanner_check()
 	var seen: Dictionary = (w.galaxy as Galaxy).view_of(w.player)
 	assert_true((seen["picture"] as Dictionary).has(w.raider))
+
+
+## Ghosts of lost contacts (N5c): what the server tells a client about a ship
+## its side has lost, and the marker the client draws.
+
+func test_a_lost_contact_is_reported_as_last_seen() -> void:
+	var w := _world()
+	var raider: Ship = w.raider
+	raider.ship_id = 9
+	raider.linear_velocity = Vector3(0, 0, -40)
+	var data := Galaxy.contact_data(raider, 1234)
+	assert_eq(data["name"], String(raider.name))
+	assert_eq(data["faction_id"], raider.faction_id)
+	assert_eq(data["system"], String((w.system as System).name))
+	assert_almost_eq((data["transform"] as Transform3D).origin, raider.global_position, Vector3.ONE * 1e-6)
+	assert_eq(data["velocity"], raider.linear_velocity)
+	assert_false(data["immobile"], "a ship moves")
+	assert_eq(data["tick"], 1234)
+	assert_true(Galaxy.contact_data(w.carrier, 0)["immobile"] == (w.carrier as Ship).is_station)
+
+
+func test_a_ghost_marker_drifts_fades_and_goes() -> void:
+	var contacts := ContactLog.new(1.0 / 60.0)
+	contacts.fade_seconds = 1.0
+	contacts.lost(9, {"name": "Raider", "faction_id": 7, "system": "s", "velocity": Vector3(60, 0, 0),
+			"transform": Transform3D(), "immobile": false, "tick": 0})
+	var now := [0.0]
+	var marker := GhostMarker.new()
+	marker.setup(contacts, 9, func() -> float: return now[0])
+	add_child_autofree(marker)
+	marker._process(0.0)
+	assert_almost_eq(marker.position, Vector3.ZERO, Vector3.ONE * 1e-9)
+	assert_string_contains(marker.label_text(), "Raider")
+	now[0] = 30.0  # Half a second: half faded, 30 m on.
+	marker._process(0.0)
+	assert_almost_eq(marker.position, Vector3(30, 0, 0), Vector3.ONE * 1e-9)
+	assert_almost_eq(marker.alpha(), 0.5, 1e-6)
+	now[0] = 61.0
+	marker._process(0.0)
+	assert_true(marker.is_queued_for_deletion(), "faded out: gone, though still on record")
+	assert_false(contacts.get_contact(9).is_empty())

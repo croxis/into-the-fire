@@ -101,8 +101,13 @@ Autoloads include netfox (`NetworkTime`, `NetworkRollback`, ...), `Log`, `LimboC
   client is told about; a ship a client doesn't know does not exist there. The rule is fog of war: the ships
   in the player's system that are in their top-level faction's sensor picture (`Galaxy.picture_of`: its own
   ships and what their sensors detect, `Ship.detected_ships` from each system's 0.5 s scan), plus the ship
-  they are aboard; none before they have a character. Not yet: ghosts of lost contacts, ships left out of the
-  picture, sharing pictures, and the host's own player (the server has everything). So the join menu asks the server for a faction's spawn points (`Galaxy._request_spawn_points`, own side only), and
+  they are aboard; none before they have a character. Not yet: ships left out of the picture, sharing
+  pictures, and the host's own player (the server has everything).
+  - Lost contacts (N5c): when a ship leaves a client's picture while still in the world, the server sends
+    `Galaxy._contact_lost` (its last state); the client records it in `Galaxy.contacts` (`ContactLog`, kept
+    after the ghost fades, with when it was last seen) and draws a `GhostMarker` (`contacts/`) in that system:
+    it drifts on the last course and fades over `ContactLog.fade_seconds` (30 s); stations stay put for good.
+    The ship's next spawn there ends the ghost (`Galaxy.contact_regained`). Client log "Lost contact with X". So the join menu asks the server for a faction's spawn points (`Galaxy._request_spawn_points`, own side only), and
   `first_spawn_player` checks the one picked (`Galaxy.check_spawn_point`). `Galaxy.refresh_interest` runs
   every 0.5 s and at once when a client connects, a ship is launched (after it is placed: showing a ship sends
   its spawn with its transform at that moment) or crew board (Godot refuses an RPC to a peer that can't see

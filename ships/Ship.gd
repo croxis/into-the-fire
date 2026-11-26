@@ -188,6 +188,8 @@ func _ready():
 	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server() \
 			and multiplayer.multiplayer_peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED:
 		_have_ship.rpc_id(1)
+		if galaxy:
+			galaxy.contact_regained(ship_id)  # Its ghost, if any, goes (N5c).
 
 
 
@@ -493,7 +495,7 @@ func is_drawn_here() -> bool:
 ## does it tick before a game starts, so snapshots measured against it said the
 ## server was further ahead than it was and ships were drawn past their newest.
 func _local_clock() -> float:
-	return Time.get_ticks_usec() / 1e6 / NetworkTime.ticktime
+	return SnapshotClock.local_now()
 
 
 ## Client, each frame: a ship nobody here predicts is drawn from its snapshots
