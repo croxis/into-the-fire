@@ -123,9 +123,9 @@ func _snapshot(origin: Vector3, velocity := Vector3.ZERO) -> FlightIntegrator.Fl
 
 func test_a_snapshot_is_kept_and_sets_the_clock() -> void:
 	var ship := _starfury()
-	ship.take_snapshot(5, _snapshot(Vector3(1, 2, 3), Vector3(0, 0, -5)), 2.0)
-	assert_eq(ship.snapshots.size(), 1)
-	assert_almost_eq(ship.snapshot_clock.server_tick(2.0), 5.0, 1e-9, "server tick 5 arrived at our tick 2")
+	ship.snapshots.take(5, _snapshot(Vector3(1, 2, 3), Vector3(0, 0, -5)), 2.0)
+	assert_eq(ship.snapshots.buffer.size(), 1)
+	assert_almost_eq(ship.snapshots.clock.server_tick(2.0), 5.0, 1e-9, "server tick 5 arrived at our tick 2")
 	assert_eq(ship.global_position, Vector3.ZERO, "drawn later, not moved on arrival")
 
 
@@ -133,9 +133,9 @@ func test_a_remote_ship_is_drawn_between_snapshots() -> void:
 	# N4c: other ships are drawn a little in the past, between two snapshots,
 	# not flown here: kinematic, so Jolt neither moves nor pushes them.
 	var ship := _starfury()
-	ship.take_snapshot(10, _snapshot(Vector3(0, 0, 0), Vector3(60, 0, 0)), 0.0)
-	ship.take_snapshot(12, _snapshot(Vector3(2, 0, 0), Vector3(60, 0, 0)), 2.0)
-	ship.show_snapshots(11.0)
+	ship.snapshots.take(10, _snapshot(Vector3(0, 0, 0), Vector3(60, 0, 0)), 0.0)
+	ship.snapshots.take(12, _snapshot(Vector3(2, 0, 0), Vector3(60, 0, 0)), 2.0)
+	ship.snapshots.show(11.0)
 	assert_almost_eq(ship.global_position, Vector3(1, 0, 0), Vector3.ONE * 1e-6)
 	assert_true(ship.freeze)
 	assert_eq(ship.freeze_mode, RigidBody3D.FREEZE_MODE_KINEMATIC, "still something to collide with")
@@ -147,8 +147,8 @@ func test_jolt_moves_a_drawn_ship_to_where_it_is_drawn() -> void:
 	# (with the velocity that takes, so contacts see it moving), not a jump.
 	var ship := _predicted_starfury_in_a_zone()
 	ship.prediction_forced = false
-	ship.take_snapshot(2, _state_at(Vector3(3, 0, 0)), 0.0)
-	ship.show_snapshots(2.0)
+	ship.snapshots.take(2, _state_at(Vector3(3, 0, 0)), 0.0)
+	ship.snapshots.show(2.0)
 	await Ticks.run(1)
 	var in_jolt: Transform3D = PhysicsServer3D.body_get_state(ship.get_rid(), PhysicsServer3D.BODY_STATE_TRANSFORM)
 	assert_almost_eq(in_jolt.origin, Vector3(3, 0, 0), Vector3.ONE * 1e-6)
@@ -157,10 +157,10 @@ func test_jolt_moves_a_drawn_ship_to_where_it_is_drawn() -> void:
 
 func test_drawing_uses_the_clock() -> void:
 	var ship := _starfury()
-	ship.take_snapshot(20, _snapshot(Vector3(0, 0, 0), Vector3(60, 0, 0)), 0.0)
-	ship.take_snapshot(30, _snapshot(Vector3(10, 0, 0), Vector3(60, 0, 0)), 10.0)
-	ship.drawing_forced = true  # As on a client.
-	ship.draw_remote(10.0)  # Server tick 30 here, drawn DELAY_TICKS behind it.
+	ship.snapshots.take(20, _snapshot(Vector3(0, 0, 0), Vector3(60, 0, 0)), 0.0)
+	ship.snapshots.take(30, _snapshot(Vector3(10, 0, 0), Vector3(60, 0, 0)), 10.0)
+	ship.snapshots.drawing_forced = true  # As on a client.
+	ship.snapshots.draw(10.0)  # Server tick 30 here, drawn DELAY_TICKS behind it.
 	var drawn := 30.0 - SnapshotClock.DELAY_TICKS
 	assert_almost_eq(ship.global_position.x, drawn - 20.0, 0.05)
 
@@ -168,8 +168,8 @@ func test_drawing_uses_the_clock() -> void:
 func test_a_drawn_ship_we_start_piloting_is_released_by_its_first_state() -> void:
 	var ship := _predicted_starfury_in_a_zone()
 	ship.prediction_forced = false
-	ship.take_snapshot(2, _state_at(Vector3(3, 0, 0)), 0.0)
-	ship.show_snapshots(2.0)
+	ship.snapshots.take(2, _state_at(Vector3(3, 0, 0)), 0.0)
+	ship.snapshots.show(2.0)
 	assert_true(ship.freeze)
 	ship.prediction_forced = true  # Our player sat at the helm.
 	await Ticks.run(5)
@@ -182,10 +182,10 @@ func test_a_drawn_ship_we_start_piloting_is_released_by_its_first_state() -> voi
 func test_snapshots_are_ignored_for_the_ship_we_predict() -> void:
 	var ship := _starfury()
 	ship.prediction_forced = true  # As on the pilot's own client: it gets its own state.
-	ship.take_snapshot(5, _snapshot(Vector3(1, 2, 3), Vector3(0, 0, -5)), 2.0)
+	ship.snapshots.take(5, _snapshot(Vector3(1, 2, 3), Vector3(0, 0, -5)), 2.0)
 	assert_eq(ship.global_position, Vector3.ZERO)
 	assert_eq(ship.linear_velocity, Vector3.ZERO)
-	assert_eq(ship.snapshots.size(), 0)
+	assert_eq(ship.snapshots.buffer.size(), 0)
 
 
 func test_snapshots_are_not_ordered_by_enet() -> void:
@@ -201,11 +201,11 @@ func test_snapshots_go_out_every_other_tick() -> void:
 	# 30 a second at 60 Hz. Loops can run two ticks at once, so it counts ticks
 	# since the last snapshot rather than looking at even ticks.
 	var ship := _starfury()
-	assert_true(ship._snapshot_due(10), "the first")
-	ship._last_snapshot_tick = 10
-	assert_false(ship._snapshot_due(11))
-	assert_true(ship._snapshot_due(12))
-	assert_true(ship._snapshot_due(15), "after a skipped loop too")
+	assert_true(ship.snapshots.is_due(10), "the first")
+	ship.snapshots.last_sent_tick = 10
+	assert_false(ship.snapshots.is_due(11))
+	assert_true(ship.snapshots.is_due(12))
+	assert_true(ship.snapshots.is_due(15), "after a skipped loop too")
 
 
 func test_snapshots_go_only_to_peers_that_have_the_ship() -> void:
@@ -214,13 +214,13 @@ func test_snapshots_go_only_to_peers_that_have_the_ship() -> void:
 	# ship's snapshots once it has the ship. The pilot predicting it gets its own
 	# state instead, and peers that left are forgotten.
 	var ship := _starfury()
-	assert_eq(ship.snapshot_recipients([7, 8, 9], 0), [] as Array[int], "nobody asked yet")
+	assert_eq(ship.snapshots.recipients([7, 8, 9], 0), [] as Array[int], "nobody asked yet")
 	ship.interest.confirm(7)
 	ship.interest.confirm(8)
 	ship.interest.confirm(9)
-	assert_eq(ship.snapshot_recipients([7, 8, 9], 8), [7, 9] as Array[int], "not the pilot")
-	assert_eq(ship.snapshot_recipients([9], 0), [9] as Array[int], "7 and 8 left")
-	assert_eq(ship.snapshot_recipients([7, 8, 9], 0), [9] as Array[int], "and are forgotten")
+	assert_eq(ship.snapshots.recipients([7, 8, 9], 8), [7, 9] as Array[int], "not the pilot")
+	assert_eq(ship.snapshots.recipients([9], 0), [9] as Array[int], "7 and 8 left")
+	assert_eq(ship.snapshots.recipients([7, 8, 9], 0), [9] as Array[int], "and are forgotten")
 
 
 func test_snapshots_go_only_to_peers_told_about_the_ship() -> void:
@@ -230,7 +230,7 @@ func test_snapshots_go_only_to_peers_told_about_the_ship() -> void:
 	ship.interest.confirm(7)
 	ship.interest.confirm(9)
 	var knows := func(peer: int) -> bool: return peer == 9
-	assert_eq(ship.snapshot_recipients([7, 9], 0, knows), [9] as Array[int])
+	assert_eq(ship.snapshots.recipients([7, 9], 0, knows), [9] as Array[int])
 
 
 func test_motion_is_synchronised_only_when_a_ship_appears() -> void:

@@ -48,23 +48,24 @@ Our own reconciler, not netfox rollback. The pilot's input reaches the server th
 
 ## Snapshots (other ships)
 
-- Motion reaches clients as tick-stamped snapshots, not through the `MultiplayerSynchronizer`: after each tick
-  loop the server sends every ship's transform and velocities every `SNAPSHOT_TICKS` (2, so 30 a second;
-  `Ship._receive_snapshot`, unreliable ordered). The synchronizer sends motion only when a ship appears
+- Motion reaches clients as tick-stamped snapshots, not through the `MultiplayerSynchronizer`. Each ship's
+  `ShipSnapshots` (`ship_snapshots.gd`, `Ship.snapshots`) holds both sides: after each tick loop the server
+  sends its transform and velocities every `INTERVAL_TICKS` (2, so 30 a second; `send`, through the RPC
+  `Ship._receive_snapshot`, which stays on the ship). The synchronizer sends motion only when a ship appears
   (`transform`, velocities: spawn only), so a new ship starts in the right place.
 - Each client confirms it has a ship from that ship's `_ready` (`_have_ship`): a snapshot sent before the ship
   exists there would fail ("node not found"). A despawn forgets it (interest management, see
-  `network/CLAUDE.md`). `snapshot_recipients` skips peers that left, the pilot predicting the ship, who gets its own
+  `network/CLAUDE.md`). `ShipSnapshots.recipients` skips peers that left, the pilot predicting the ship, who gets its own
   state, and clients that `Galaxy.interest` says don't know the ship.
 - Snapshots are plain `unreliable`, not `unreliable_ordered`: ENet drops an ordered packet that a later one on
   the same channel overtook, and every ship's snapshots and the pilot's state share it, so under jitter half
   were lost. `SnapshotBuffer` orders them itself.
-- Clients keep them in `Ship.snapshots` (`SnapshotBuffer`: in tick order, samples between them on a Hermite
+- Clients keep them in `Ship.snapshots.buffer` (`SnapshotBuffer`: in tick order, samples between them on a Hermite
   curve with slerped rotation, extrapolates up to 15 ticks past the newest).
 - Drawing (N4c): on a client, every ship it doesn't predict (stations too) is kinematic and drawn each frame
-  from its buffer (`Ship.draw_remote`), `SnapshotClock.DELAY_TICKS` (6, 100 ms) behind the newest snapshot.
+  from its buffer (`ShipSnapshots.draw`), `SnapshotClock.DELAY_TICKS` (6, 100 ms) behind the newest snapshot.
   `SnapshotClock` (one per `Galaxy`) estimates the newest server tick from when snapshots arrive, averaged
-  against this machine's real time (`Ship._local_clock`), not the netfox tick: netfox speeds up and slows a
+  against this machine's real time (`SnapshotClock.local_now`), not the netfox tick: netfox speeds up and slows a
   client's ticks to catch the server, and doesn't tick before a game starts. Jolt moves a kinematic body to
   its new transform during the next step, with the velocity that takes, so contacts see it moving; velocities
   set on it would be a surface velocity, so they are zeroed. When our player takes the helm the ship stays
