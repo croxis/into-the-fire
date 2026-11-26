@@ -4,9 +4,10 @@ Loaded when working in `ships/`. Project-wide rules are in the top-level `CLAUDE
 
 ## Flight
 
-`Ship.gd` (RigidBody3D), `Engines.gd` (per-thruster forces), `crew.gd`, `PID.gd`, `ship_sensors.gd`
-(emissions, size and detection maths for fog of war), `ship_interest.gd` (which clients a ship exists on;
-both in `network/CLAUDE.md`). `FlightIntegrator`
+`Ship.gd` (RigidBody3D), `Engines.gd` (per-thruster forces), `crew.gd`, `PID.gd`. Split out of `Ship.gd`:
+`ship_sensors.gd` (emissions, size and detection maths for fog of war), `ship_interest.gd` (which clients a
+ship exists on; both in `network/CLAUDE.md`), `ship_snapshots.gd` and `ship_reconciler.gd` (below),
+`ship_launch.gd` (server: a player launching from a carrier, `request_launch`). `FlightIntegrator`
 (`flight_integrator.gd`) is ship motion without nodes: ships set `custom_integrator` and take their
 velocities from it each tick (`Ship._fly`), using Jolt's mass and inertia; Jolt still moves them and handles
 contacts. Stations keep Jolt's own integration. It clamps to Jolt's speed limits

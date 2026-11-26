@@ -121,7 +121,7 @@ func test_launch_takes_the_senders_own_character() -> void:
 	var carrier := _carrier(system)
 	var me := _player_aboard(carrier, 3)
 	var someone_else := _player_aboard(carrier, 4)
-	assert_eq(carrier.launch_player(3, WorldIds.new()), "")
+	assert_eq(ShipLaunch.launch_player(carrier, 3, WorldIds.new()), "")
 	assert_does_not_have(carrier.get_crew(), me, "I launched")
 	assert_has(carrier.get_crew(), someone_else, "they stayed aboard")
 
@@ -147,7 +147,7 @@ func test_a_launched_craft_is_shown_to_clients_once_it_is_in_the_bay() -> void:
 				if ship.is_spawning:
 					launched_at.append(ship.global_position)
 					launched_sides.append(ship.faction_id))
-	assert_eq(carrier.launch_player(3, WorldIds.new()), "")
+	assert_eq(ShipLaunch.launch_player(carrier, 3, WorldIds.new()), "")
 	assert_false(launched_at.is_empty(), "shown during the launch")
 	for at in launched_at:
 		assert_gt(at.x, 5000.0, "in the Hyperion's bay, not at the origin")
@@ -164,7 +164,7 @@ func test_launch_is_refused_for_a_player_who_is_not_aboard() -> void:
 	var carrier := _carrier(system)
 	_player_aboard(carrier, 4)
 	var ships_before := system.get_ships().size()
-	assert_ne(carrier.launch_player(3, WorldIds.new()), "")
+	assert_ne(ShipLaunch.launch_player(carrier, 3, WorldIds.new()), "")
 	assert_eq(system.get_ships().size(), ships_before, "no fighter is built")
 
 
@@ -173,7 +173,7 @@ func test_launch_is_refused_from_a_ship_without_launch_bays() -> void:
 	var fighter: Ship = Content.instantiate(&"b5:aurora_starfury")
 	system.add_ship(fighter)
 	_aboard_quietly(fighter, 3, 1)
-	assert_ne(fighter.launch_player(3, WorldIds.new()), "")
+	assert_ne(ShipLaunch.launch_player(fighter, 3, WorldIds.new()), "")
 
 
 # Debug commands -------------------------------------------------------------
