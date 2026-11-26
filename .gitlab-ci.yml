@@ -1,4 +1,5 @@
-image: registry.gitlab.com/croxis/itf:4.7.2.custom
+# godot-custom's CI image for this release: the engine, export templates and GDExtension API.
+image: registry.gitlab.com/croxis/godot-custom:4.7.2-itf.1
 
 # NOTE: the `cd` command in each build stage is not necessary if your
 # project.godot is at the repo root
