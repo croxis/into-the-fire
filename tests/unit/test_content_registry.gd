@@ -121,3 +121,12 @@ func test_a_big_ship_is_quick_to_add_once_its_shapes_are_warmed() -> void:
 	add_child_autofree(station)
 	var ms := (Time.get_ticks_usec() - t0) / 1000.0
 	assert_lt(ms, 60.0, "added in %.1f ms" % ms)
+
+
+func test_no_ship_carries_a_voxel_gi() -> void:
+	# Every instance allocates and uploads its own GI volume: the Starfury's
+	# froze any machine that drew it for about 0.7 s each time one appeared
+	# (on a listen server, the whole game). Bake light into the meshes instead.
+	for id in Content.registry.ids(&"ship"):
+		var ship: Node = autofree(Content.instantiate(id))
+		assert_eq(ship.find_children("*", "VoxelGI", true, false).size(), 0, String(id))
