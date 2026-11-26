@@ -24,6 +24,7 @@ management, fog of war), `zones/` (Jolt job pool warning).
   skipped). To search an addon, name its path: `rg NetworkTime addons/netfox`.
 - This file holds only what applies everywhere; it loads in every session. A feature's detail goes in the
   `CLAUDE.md` of the folder its code lives in (create one if needed), with at most a one-line pointer here.
+  `tests/unit/test_claude_md_budget.gd` fails past 10 KB here or 8 KB in a folder: move detail, don't raise it.
 
 ## Engine: custom Godot 4.7.2 build (required)
 
@@ -38,9 +39,12 @@ Jolt physics, zero gravity and damping. Speed cap raised to 10 km/s, spin cap 13
 (`physics/jolt_physics_3d/limits/*`). Zone spaces are inactive and stepped by `ZoneStepper`; a space created
 outside a zone is still stepped by the engine.
 
-Engine changes, the build image and export templates live in the separate godot-ci repo (usually
-`../godot-ci`; its `Dockerfile` pins `GODOT_VERSION`, the LimboAI commit and `patches/`). `.gitlab-ci.yml`
-uses `registry.gitlab.com/croxis/itf:<version>.custom`; keep the tag in step with the engine version.
+Engine changes live in the godot-custom repo (usually `../godot-custom`, https://gitlab.com/croxis/godot-custom):
+`versions.env` pins the Godot release and LimboAI commit, `patches/` the engine patches. Its tagged
+releases (`<godot version>-itf.<n>`) publish editors, export templates (`.tpz`), Tracy templates,
+`extension_api.json` and the CI image (`ci-image/Dockerfile`). `.gitlab-ci.yml` uses
+`registry.gitlab.com/croxis/godot-custom:<release>`; bump it to move CI to a new release. godot-ci is no
+longer used.
 
 ## Running
 
