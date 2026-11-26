@@ -128,6 +128,13 @@ can take 5 seconds on one machine and 10 on another. Environment variables: `JOI
 To add a step, add its log line to `server_markers` or `client_markers` in the script. A marker
 should be a line the game logs once, when the step succeeds.
 
+## CLAUDE.md size budget
+
+`tests/unit/test_claude_md_budget.gd` fails when the top-level `CLAUDE.md` is over 10 KB, or a folder's
+`CLAUDE.md` over 8 KB. Claude loads the top-level file into every session and a folder's whenever it works
+there, so their size is a cost paid in every session. When the test fails, move feature detail into the
+folder its code lives in (or trim) rather than raising the budget.
+
 ## Writing a unit test
 
 ### The shape of a test file
