@@ -72,6 +72,27 @@ func test_a_ship_without_sensors_sees_nothing() -> void:
 	assert_false(a.sensor_check(b), "sensitivity 0: blind")
 
 
+func test_a_ship_emits_its_base_output_to_begin_with() -> void:
+	# Power use will vary it later; until then a Starfury emits what its scene
+	# says (EM 2, neutrino 0.1), not the default 1.0.
+	var fury: Ship = Content.instantiate(&"b5:aurora_starfury")
+	add_child_autofree(fury)
+	assert_eq(fury.em_output, fury.em_output_base)
+	assert_eq(fury.neutron_output, fury.neutron_output_base)
+	assert_ne(fury.em_output, 1.0, "the Starfury's own value, not the default")
+
+
+func test_a_starfury_sees_a_capital_ship_well_before_it_is_close() -> void:
+	# Its sensor suite (sensitivity 100) picks up EM 1, a capital ship's, out to
+	# 10 km: with sensitivity 1 it was 1 km, gone in a moment at fighter speed.
+	var fury: Ship = Content.instantiate(&"b5:aurora_starfury")
+	add_child_autofree(fury)
+	var capital := _ship(Vector3(9000, 0, 0))
+	assert_true(fury.sensor_check(capital), "9 km")
+	capital.global_position = Vector3(11000, 0, 0)
+	assert_false(fury.sensor_check(capital), "11 km")
+
+
 func test_system_sensor_scan_timer_runs_on_server() -> void:
 	var system: System = SystemScene.instantiate()
 	add_child_autofree(system)

@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="Sensor" format=3]
+
+[ext_resource type="Script" uid="uid://dd2r64u2pov0l" path="res://ship_systems/sensors/sensor.gd" id="1_sensor"]
+
+[resource]
+script = ExtResource("1_sensor")
+name = "Starfury sensor suite"
+em_sensitive = 100.0
+neutrino_sensitive = 100.0
+gravametric_sensitive = 100.0

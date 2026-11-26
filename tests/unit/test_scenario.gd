@@ -213,3 +213,36 @@ func test_playtest_scenario_is_valid() -> void:
 func test_world_ids_start_at_one_and_never_repeat() -> void:
 	var ids := WorldIds.new()
 	assert_eq([ids.next_ship(), ids.next_ship(), ids.next_pilot()], [1, 2, 1])
+
+
+func test_playtest_has_an_enemy_its_players_cannot_see_at_first() -> void:
+	# Fog of war (netcode N5b3) needs something to hide: a ship of another
+	# top-level faction, out of every Earth Alliance sensor's range at the start.
+	var registry := ContentRegistry.new()
+	registry.load_manifest("res://content/babylon5.cfg")
+	var playtest := load(registry.path_of(&"b5:playtest")) as Scenario
+	var tops := {}  # Faction name -> its top-level faction's name.
+	for f in playtest.factions:
+		tops[f.name] = f.parent
+	var top_of := func(name: String) -> String:
+		while tops.get(name, "") != "":
+			name = tops[name]
+		return name
+	var ours: Array[ScenarioShip] = []
+	var enemies: Array[ScenarioShip] = []
+	for s in playtest.ships:
+		if top_of.call(s.faction) == "Earth Alliance":
+			ours.append(s)
+		else:
+			enemies.append(s)
+	assert_false(enemies.is_empty(), "an enemy")
+	for enemy in enemies:
+		var target: Ship = autofree(load(registry.path_of(enemy.content_id)).instantiate())
+		for own in ours:
+			var watcher: Ship = autofree(load(registry.path_of(own.content_id)).instantiate())
+			if watcher.sensor == null:
+				continue
+			var km_squared := own.position.distance_squared_to(enemy.position) / 1e6
+			var best := maxf(target.em_output_base * watcher.sensor.em_sensitive,
+					target.neutron_output_base * watcher.sensor.neutrino_sensitive)
+			assert_lt(best / km_squared, 1.0, "%s can't see %s" % [own.content_id, enemy.ship_name])

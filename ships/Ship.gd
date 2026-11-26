@@ -174,6 +174,9 @@ func _ready():
 	# Ships move by FlightIntegrator, not Jolt's force integration (see _fly).
 	# Stations don't fly; Jolt keeps them as they are.
 	custom_integrator = not is_station
+	# What it gives off to others' sensors (fog of war); power use will vary it.
+	em_output = em_output_base
+	neutron_output = neutron_output_base
 	#target_rot = rotation_degrees
 	
 	# No Galaxy when a ship runs on its own (tests, tools).
