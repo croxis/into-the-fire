@@ -19,15 +19,16 @@ a ship, as Jolt does.
 
 ## Own-ship prediction
 
-Our own reconciler, not netfox rollback. The pilot's input reaches the server through `InputChannel`
+Our own reconciler, not netfox rollback: `ShipReconciler` (`ship_reconciler.gd`, `Ship.reconciler`; the
+RPC `Ship._receive_state` stays on the ship). The pilot's input reaches the server through `InputChannel`
 (see `characters/CLAUDE.md`).
 
 - The pilot's client flies its ship at once and records each helm's input every tick (`ShipPrediction`,
   `HelmCapability.input_record`).
 - After each tick loop the server sends that client its ship's state and the last input tick it applied
-  (`Ship._send_pilot_state`).
+  (`ShipReconciler.send_state`).
 - The client replays its input since then, working thrust out again from the replayed state
-  (`Ship._replay_thrust`, `HelmCapability.assist`: flight assist depends on the current spin and speed; its
+  (`ShipReconciler.reconcile`, `Ship.replay_thrust`, `HelmCapability.assist`: flight assist depends on the current spin and speed; its
   PIDs are proportional only, so replays can re-run them).
 - It eases a correction of its position in over about 100 ms (`CorrectionSmoother`); rotation, velocity and
   jumps over 100 m snap, since thrust follows the way the ship points.
@@ -69,7 +70,7 @@ Our own reconciler, not netfox rollback. The pilot's input reaches the server th
   client's ticks to catch the server, and doesn't tick before a game starts. Jolt moves a kinematic body to
   its new transform during the next step, with the velocity that takes, so contacts see it moving; velocities
   set on it would be a surface velocity, so they are zeroed. When our player takes the helm the ship stays
-  frozen until the server's first state releases it (`reconcile_with`).
+  frozen until the server's first state releases it (`ShipReconciler.reconcile`).
 - Logs: client "First snapshot for X"; every 5 s "Drawing X: N ticks behind the newest snapshot, M of F frames
   past it" (about 5 behind is right: 6, less the time since the last arrival; frames past it were
   extrapolated, from late or lost snapshots).

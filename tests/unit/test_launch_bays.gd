@@ -155,7 +155,7 @@ func test_server_states_dont_pull_it_off_the_arm() -> void:
 	var on_arm := fighter.global_position
 	var server := FlightIntegrator.FlightState.new()
 	server.transform = Transform3D(Basis(), on_arm + Vector3(40, 0, 0))  # The server's arm, an instant apart.
-	fighter.reconcile_with(server, 5, 10, true)
+	fighter.reconciler.reconcile(server, 5, 10, true)
 	assert_eq(fighter.global_position, on_arm, "still on its arm here")
 	assert_true(fighter.freeze)
 

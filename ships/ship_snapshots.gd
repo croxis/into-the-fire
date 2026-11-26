@@ -96,7 +96,7 @@ func is_drawn_here() -> bool:
 ## at the clock's moment, [constant SnapshotClock.DELAY_TICKS] behind the newest
 ## (netcode slice N4c), instead of being flown here. When this client starts
 ## predicting it (our player took the helm), it stays frozen until the server's
-## first state for the pilot lets it go (Ship.reconcile_with), as on a launch
+## first state for the pilot lets it go (ShipReconciler.reconcile), as on a launch
 ## arm.
 ##
 ## [param local_now] is this machine's steady clock in ticks

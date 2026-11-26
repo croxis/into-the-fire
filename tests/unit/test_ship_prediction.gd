@@ -173,7 +173,7 @@ func test_a_drawn_ship_we_start_piloting_is_released_by_its_first_state() -> voi
 	assert_true(ship.freeze)
 	ship.prediction_forced = true  # Our player sat at the helm.
 	await Ticks.run(5)
-	ship.reconcile_with(_state_at(Vector3(3, 0, 0), Vector3(0, 0, -30)), 4, 4, false)
+	ship.reconciler.reconcile(_state_at(Vector3(3, 0, 0), Vector3(0, 0, -30)), 4, 4, false)
 	assert_false(ship.freeze)
 	await Ticks.run(1, 5)
 	assert_lt(ship.global_position.z, 0.0, "flies")
@@ -291,7 +291,7 @@ func test_no_state_is_sent_to_a_pilot_who_left() -> void:
 	pilot.input_channel.receive([InputChannel.make_record(1, Vector3.ZERO, Vector3.ZERO),
 			InputChannel.make_record(2, Vector3.ZERO, Vector3.ZERO)])
 	pilot.input_channel.next()
-	assert_false(ship._send_pilot_state(), "nothing sent")
+	assert_false(ship.reconciler.send_state(), "nothing sent")
 
 
 # A replay must land where Jolt really flew the ship. -------------------------
@@ -320,7 +320,7 @@ func test_a_replay_lands_where_jolt_flew_the_ship() -> void:
 	start.linear_velocity = ship.linear_velocity
 	start.angular_velocity = ship.angular_velocity
 	await Ticks.run(15, 30)
-	var replayed := ship.prediction.reconcile(start, 29, 44, ship.flight, Ticks.DT, ship._replay_thrust)
+	var replayed := ship.reconciler.prediction.reconcile(start, 29, 44, ship.flight, Ticks.DT, ship.replay_thrust)
 	assert_gt(ship.angular_velocity.length(), 0.5, "it really is turning")
 	assert_almost_eq(replayed.transform.origin, ship.global_position, Vector3.ONE * 1e-3, "position")
 	assert_almost_eq(replayed.transform.basis.z, ship.global_basis.z, Vector3.ONE * 1e-5, "heading")
@@ -382,8 +382,8 @@ func _corrections_after_a_knock(autospin: bool, latency := 6) -> int:
 		s.angular_velocity = server.angular_velocity
 		sent[tick] = s
 		if tick >= latency:
-			client.reconcile_with(sent[tick - latency], tick - latency, tick)
-			if tick > 30 + latency + 1 and client.smoother.last_correction > 1e-4:
+			client.reconciler.reconcile(sent[tick - latency], tick - latency, tick)
+			if tick > 30 + latency + 1 and client.reconciler.smoother.last_correction > 1e-4:
 				corrections += 1
 	return corrections
 
@@ -403,7 +403,7 @@ func test_a_correction_moves_the_physics_body_too() -> void:
 	await Ticks.run(5)
 	var server := FlightIntegrator.FlightState.new()
 	server.transform = ship.global_transform.translated(Vector3(CorrectionSmoother.SNAP_DISTANCE * 2, 0, 0))
-	ship.reconcile_with(server, 4, 4)  # Nothing to replay; a big jump, so it snaps.
+	ship.reconciler.reconcile(server, 4, 4)  # Nothing to replay; a big jump, so it snaps.
 	await Ticks.run(1, 5)
 	assert_almost_eq(ship.global_position.x, CorrectionSmoother.SNAP_DISTANCE * 2, 1.0)
 
@@ -444,19 +444,19 @@ func _state_at(origin: Vector3, velocity := Vector3.ZERO) -> FlightIntegrator.Fl
 func test_a_frozen_ship_goes_exactly_where_the_server_has_it() -> void:
 	var ship := _predicted_starfury_in_a_zone()
 	await Ticks.run(5)
-	ship.reconcile_with(_state_at(Vector3(3, 0, 0)), 2, 4, true)  # No easing, no replay.
+	ship.reconciler.reconcile(_state_at(Vector3(3, 0, 0)), 2, 4, true)  # No easing, no replay.
 	assert_eq(ship.global_position, Vector3(3, 0, 0))
 	assert_true(ship.freeze, "frozen here too, so it doesn't fly off between states")
 	await Ticks.run(1, 5)
 	assert_eq(ship.global_position, Vector3(3, 0, 0))
-	assert_eq(ship._corrections, 0, "following the arm isn't a correction")
+	assert_eq(ship.reconciler.corrections, 0, "following the arm isn't a correction")
 
 
 func test_released_it_is_predicted_again() -> void:
 	var ship := _predicted_starfury_in_a_zone()
 	await Ticks.run(5)
-	ship.reconcile_with(_state_at(Vector3(3, 0, 0)), 2, 4, true)
-	ship.reconcile_with(_state_at(Vector3(3, 0, 0), Vector3(0, 0, -30)), 4, 4, false)
+	ship.reconciler.reconcile(_state_at(Vector3(3, 0, 0)), 2, 4, true)
+	ship.reconciler.reconcile(_state_at(Vector3(3, 0, 0), Vector3(0, 0, -30)), 4, 4, false)
 	assert_false(ship.freeze)
 	await Ticks.run(1, 5)
 	assert_lt(ship.global_position.z, 0.0, "flies off the arm")
@@ -467,7 +467,7 @@ func test_the_pilots_client_steers_its_lead_from_the_servers_queue() -> void:
 	# queued, and its cushion; a short queue means run further ahead.
 	var ship := _predicted_starfury_in_a_zone()
 	var lead := InputLead.new(1.0 / 60.0)
-	ship.input_lead_override = lead
+	ship.reconciler.input_lead_override = lead
 	await Ticks.run(3)
 	for i in 30:
 		ship._receive_state(2, Transform3D(), Vector3.ZERO, Vector3.ZERO, false, 0, 4)
@@ -483,5 +483,5 @@ func test_thrust_is_recorded_while_frozen() -> void:
 	ship.freeze = true
 	(ship.get_node("Consoles/Cockpit") as Console).get_capability(HelmCapability).throttle = Vector3(0, 0, -1)
 	await Ticks.run(3)
-	assert_eq(ship.prediction.size(), 3)
+	assert_eq(ship.reconciler.prediction.size(), 3)
 	assert_eq(ship.global_position, Vector3.ZERO, "but it doesn't fly")

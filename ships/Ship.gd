@@ -118,13 +118,13 @@ var prediction_forced := false
 ## The pilot's client: a launch arm here holds this ship (it is placed on the
 ## arm as drawn with the station, not at the server's frozen states).
 var held_by_local_arm := false
-## The client's lead controller, instead of Galaxy.input_lead (unit tests).
-var input_lead_override: InputLead
-var _last_lead_usec := 0
 ## Server: which clients this ship exists on and is synced to (netcode N5a2).
 var interest := ShipInterest.new(self)
 ## Its motion as snapshots: sent by the server, drawn on clients (N4b/N4c).
 var snapshots := ShipSnapshots.new(self)
+## Own-ship prediction: the server's states to the pilot, the pilot's client
+## replaying its input from them (N3b/N3c).
+var reconciler := ShipReconciler.new(self)
 
 
 ## True on the pilot's own client: a client, not the server, where the player
@@ -286,28 +286,12 @@ func _exit_tree() -> void:
 	NetworkTime.after_tick_loop.disconnect(_after_tick_loop)
 
 
-## Own-ship prediction (netcode N3b/N3c): the pilot's client records its thrust
-## here and replays it when the server's state arrives.
-var prediction := ShipPrediction.new()
-## Eases the server's corrections in over a few ticks instead of jumping (N4a).
-var smoother := CorrectionSmoother.new()
-var _corrections := 0  # Since the last prediction report.
-var _largest_correction := 0.0
-var _next_report_tick := 0
-const PREDICTION_REPORT_TICKS := 300  # Every 5 s at 60 Hz.
-
-
 func _after_tick_loop() -> void:
 	if multiplayer.is_server():
-		_send_pilot_state()
+		reconciler.send_state()
 		snapshots.send(NetworkTime.tick - 1)  # The last tick just run.
-	elif is_predicted_here() and NetworkTime.tick >= _next_report_tick:
-		_next_report_tick = NetworkTime.tick + PREDICTION_REPORT_TICKS
-		if _corrections:
-			Log.log(["Prediction for ", name, ": ", _corrections, " corrections, largest ",
-					"%.3f m" % _largest_correction], Log.MessageType.INFO)
-		_corrections = 0
-		_largest_correction = 0.0
+	elif is_predicted_here():
+		reconciler.report()
 
 
 ## Server: a client has this ship now (sent from its _ready there), so its
@@ -340,86 +324,19 @@ func _receive_snapshot(tick: int, server_transform: Transform3D, server_velocity
 	snapshots.take(tick, s, SnapshotClock.local_now())
 
 
-## Server: tell the remote pilot where their ship is after the ticks just run,
-## and which of their inputs that includes. Returns true when sent. A player who
-## disconnected can still be seated here, so only connected peers are sent to.
-func _send_pilot_state() -> bool:
-	var pilot := remote_pilot()
-	if pilot == null or pilot.input_channel.last_applied_tick < 0:
-		return false
-	if not pilot.multiplayer_id in multiplayer.get_peers():
-		return false
-	# With how many of their inputs are queued, and the cushion: their client
-	# steers how far ahead it runs from that (time dilation, InputLead).
-	_receive_state.rpc_id(pilot.multiplayer_id, pilot.input_channel.last_applied_tick,
-			global_transform, linear_velocity, angular_velocity, freeze,
-			pilot.input_channel.queued(), pilot.input_channel.cushion)
-	return true
-
-
 ## The pilot's client: the server's state after applying input [param ack].
-## Start again from it and replay our own thrust since. Unreliable but ordered:
-## a lost state is made up for by the next one.
+## ShipReconciler starts again from it and replays our own thrust since.
+## Unreliable but ordered: a lost state is made up for by the next one.
 @rpc("authority", "call_remote", "unreliable_ordered")
 func _receive_state(ack: int, server_transform: Transform3D, server_velocity: Vector3,
 		server_spin: Vector3, frozen := false, queued := -1, cushion := 0) -> void:
 	if not is_predicted_here():
 		return
-	if queued >= 0:
-		_steer_lead(queued, cushion)
 	var server := FlightIntegrator.FlightState.new()
 	server.transform = server_transform
 	server.linear_velocity = server_velocity
 	server.angular_velocity = server_spin
-	reconcile_with(server, ack, NetworkTime.tick - 1, frozen)
-
-
-## The pilot's client: the server had [param queued] of our inputs waiting,
-## with a cushion of [param cushion]. Steer how far ahead of server time we run
-## so they arrive just in time (InputLead), and have netfox run that far ahead.
-func _steer_lead(queued: int, cushion: int) -> void:
-	var lead := input_lead_override
-	if lead == null:
-		lead = galaxy.input_lead if galaxy else null
-	if lead == null:
-		return
-	var now := Time.get_ticks_usec()
-	var dt := NetworkTime.ticktime if _last_lead_usec == 0 else minf((now - _last_lead_usec) / 1e6, 0.25)
-	_last_lead_usec = now
-	lead.observe(queued, cushion, dt)
-	NetworkTime.lead_seconds = lead.lead_seconds
-
-
-## The pilot's client: start again from [param server] (the server's state
-## after applying input [param ack]) and replay our own ticks up to
-## [param last_tick], the last one this client ran. While the server holds the
-## ship [param frozen] (on a launch arm), the arm moves it, not the pilot: the
-## client freezes it too and puts it exactly where the server has it, with no
-## replay. Released, it is predicted again.
-func reconcile_with(server: FlightIntegrator.FlightState, ack: int, last_tick: int,
-		frozen := false) -> void:
-	if frozen:
-		if not prediction.confirm(ack):
-			return  # Older than a state already used.
-		freeze = true
-		smoother.reset()
-		if not held_by_local_arm:  # Else our own arm places it, drawn with the station.
-			place(server.transform)
-		return
-	if freeze:
-		freeze = false  # Released by the arm.
-	if flight == null:
-		flight = FlightIntegrator.from_body(PhysicsServer3D.body_get_direct_state(get_rid()))
-	var now := prediction.reconcile(server, ack, last_tick, flight, NetworkTime.ticktime, _replay_thrust)
-	if now == null:
-		return  # Older than a state already used.
-	place(smoother.apply(global_transform, now.transform))
-	var error := smoother.last_correction
-	if error > 0.001:
-		_corrections += 1
-		_largest_correction = maxf(_largest_correction, error)
-	linear_velocity = now.linear_velocity
-	angular_velocity = now.angular_velocity
+	reconciler.receive(ack, server, frozen, queued, cushion)
 
 
 ## Moves the ship to [param to] now, in Jolt as well as on the node. Setting
@@ -446,7 +363,7 @@ func _rollback_tick(dt, tick, is_fresh):
 	if is_predicted_here() and not is_station:
 		# Recorded before the helms run (they write assisted throttle back), and
 		# while frozen too: the server may already have let go of the ship.
-		prediction.record(tick, helms.map(func(h: HelmCapability) -> Dictionary: return h.input_record()))
+		reconciler.prediction.record(tick, helms.map(func(h: HelmCapability) -> Dictionary: return h.input_record()))
 	for helm in helms:
 		helm._rollback_tick(dt, tick, is_fresh)
 	if is_station:
@@ -494,7 +411,7 @@ func _helms() -> Array[HelmCapability]:
 ## Replays (ShipPrediction): [force, torque] for the helms' recorded
 ## [param inputs] with the ship in [param s], worked out as a live tick does:
 ## flight assist from the replayed spin and speed, then the thrusters.
-func _replay_thrust(inputs: Variant, s: FlightIntegrator.FlightState) -> Array[Vector3]:
+func replay_thrust(inputs: Variant, s: FlightIntegrator.FlightState) -> Array[Vector3]:
 	var helms := _helms()
 	var to_ship := s.transform.basis.transposed()
 	var local_velocity := to_ship * s.linear_velocity
