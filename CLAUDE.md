@@ -98,9 +98,11 @@ Autoloads include netfox (`NetworkTime`, `NetworkRollback`, ...), `Log`, `LimboC
   `multiplayer.get_remote_sender_id()`, not arguments (see `Ship.request_launch`). Logins are checked by
   `network.gd` `check_login` first and never logged (they hold passwords).
 - Interest management (N5, `network/interest.gd`, `Galaxy.interest`): the server decides which ships each
-  client is told about; a ship a client doesn't know does not exist there. For now: the ships in its player's
-  system, and none before it has a character. It is to grow into fog of war (faction sensor pictures). So the
-  join menu asks the server for a faction's spawn points (`Galaxy._request_spawn_points`, own side only), and
+  client is told about; a ship a client doesn't know does not exist there. The rule is fog of war: the ships
+  in the player's system that are in their top-level faction's sensor picture (`Galaxy.picture_of`: its own
+  ships and what their sensors detect, `Ship.detected_ships` from each system's 0.5 s scan), plus the ship
+  they are aboard; none before they have a character. Not yet: ghosts of lost contacts, ships left out of the
+  picture, sharing pictures, and the host's own player (the server has everything). So the join menu asks the server for a faction's spawn points (`Galaxy._request_spawn_points`, own side only), and
   `first_spawn_player` checks the one picked (`Galaxy.check_spawn_point`). `Galaxy.refresh_interest` runs
   every 0.5 s and at once when a client connects, a ship is launched (after it is placed: showing a ship sends
   its spawn with its transform at that moment) or crew board (Godot refuses an RPC to a peer that can't see

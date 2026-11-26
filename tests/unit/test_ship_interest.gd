@@ -17,7 +17,8 @@ func before_each() -> void:
 	add_child_autofree(ship)
 	var here := RefCounted.new()  # Stand-ins for systems.
 	var elsewhere := RefCounted.new()
-	interest.update({7: here, 8: elsewhere}, {ship: here})  # 7 knows the ship, 8 doesn't.
+	interest.update({7: Interest.view(here, null, {ship: true}),
+			8: Interest.view(elsewhere, null, {ship: true})}, {ship: here})  # 7 knows the ship, 8 doesn't.
 
 
 func _synchronizers(node: Node) -> Array[Node]:
@@ -133,3 +134,44 @@ func test_boarding_a_ship_refreshes_interest_at_once() -> void:
 	galaxy.interest_refreshed.connect(func() -> void: crew_then.append(aboard.get_crew().size()))
 	aboard.spawn_crew(Character.pilot_data("Susan", 0, 1, 1))
 	assert_eq(crew_then, [1] as Array[int], "refreshed once, with her aboard")
+
+
+## Galaxy.view_of: what a player's client may know (fog of war, N5b3): the
+## sensor picture of their top-level faction (its ships and what they detect),
+## in their system, and the ship they are aboard.
+
+func _world() -> Dictionary:
+	var galaxy: Galaxy = load("res://Galaxy.tscn").instantiate()
+	add_child_autofree(galaxy)
+	var system: System = load("res://systems/system_template.tscn").instantiate()
+	galaxy.get_node("Systems").add_child(system)
+	var ea := galaxy.factions.create("Earth Alliance")
+	var zeta := galaxy.factions.create("Zeta Wing", true, true, false, ea)
+	var narn := galaxy.factions.create("Narn Regime")
+	var carrier: Ship = Content.instantiate(&"b5:hyperion")  # Sensitivity 10 (EM).
+	system.add_ship(carrier)
+	carrier.faction_id = ea.faction_id
+	var raider: Ship = Content.instantiate(&"b5:aurora_starfury")
+	system.add_ship(raider)
+	raider.faction_id = narn.faction_id
+	raider.position = Vector3(50000, 0, 0)  # 50 km: far out of sensor range.
+	var player := carrier.get_node("CrewMultiplayerSpawner").spawn(
+			Character.pilot_data("Player", zeta.faction_id, 1, 1, 3)) as Character
+	return {"galaxy": galaxy, "system": system, "carrier": carrier, "raider": raider, "player": player}
+
+
+func test_a_player_knows_their_own_sides_ships_and_not_an_unseen_enemy() -> void:
+	var w := _world()
+	var seen: Dictionary = (w.galaxy as Galaxy).view_of(w.player)
+	assert_eq(seen["system"], w.system)
+	assert_eq(seen["aboard"], w.carrier)
+	assert_true((seen["picture"] as Dictionary).has(w.carrier), "Earth Alliance's own: a wing sees its parents'")
+	assert_false((seen["picture"] as Dictionary).has(w.raider), "the Narn, unseen")
+
+
+func test_once_detected_an_enemy_is_in_the_picture() -> void:
+	var w := _world()
+	(w.raider as Ship).position = Vector3(300, 0, 0)  # Within the carrier's sensors.
+	(w.system as System).ship_scanner_check()
+	var seen: Dictionary = (w.galaxy as Galaxy).view_of(w.player)
+	assert_true((seen["picture"] as Dictionary).has(w.raider))

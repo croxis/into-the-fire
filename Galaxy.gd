@@ -390,8 +390,11 @@ func refresh_interest() -> void:
 		for ship in system.get_ships():
 			ships[ship] = system
 	var peers := {}
+	var pictures := {}  # One per top-level faction this refresh.
 	for peer in multiplayer.get_peers():
-		peers[peer] = _player_system(peer)
+		var player: Player = $Players.find_player_by_netid(peer)
+		var character := find_player_character($Systems, player.player_id) if player else null
+		peers[peer] = view_of(character, pictures) if character else null
 	var changes := interest.update(peers, ships)
 	# Spawn or despawn on each client (N5a2). A leaving ship stops its unreliable
 	# syncs now and is despawned at the next refresh (see Interest).
@@ -411,14 +414,32 @@ func refresh_interest() -> void:
 	interest_refreshed.emit()
 
 
-## Server: the system [param peer]'s player character is in, or null (no
-## character yet, or not logged in).
-func _player_system(peer: int) -> System:
-	var player: Player = $Players.find_player_by_netid(peer)
-	if player == null:
-		return null
-	var character := find_player_character($Systems, player.player_id)
-	return System.find_for(character) if character else null
+## Server: what [param character]'s player may know (Interest.view): their
+## system, the ship they are aboard, and their top-level faction's sensor
+## picture (fog of war, N5b3). [param pictures] caches pictures by top-level
+## faction across one refresh.
+func view_of(character: Character, pictures := {}) -> Dictionary:
+	var faction := character.faction
+	var top := faction.top_faction if faction else null
+	var picture := {}
+	if top:
+		if not pictures.has(top):
+			pictures[top] = picture_of(top)
+		picture = pictures[top]
+	return Interest.view(System.find_for(character), character.current_ship, picture)
+
+
+## Server: [param top]'s sensor picture: every ship of its own (its factions
+## all keep their ships on the top-level one) and what their sensors detect
+## (Ship.detected_ships, from each system's sensor scan).
+## TODO: ships, wings and stations left out of the picture; sharing with others.
+static func picture_of(top: Faction) -> Dictionary:
+	# Untyped: a destroyed ship may still be listed until it is freed.
+	var own: Array = top.owned_ships.filter(func(s) -> bool: return is_instance_valid(s))
+	var detections := {}
+	for ship in own:
+		detections[ship] = (ship as Ship).detected_ships
+	return Interest.picture(own, detections)
 
 
 @rpc("authority", "call_remote", "unreliable_ordered")

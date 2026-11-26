@@ -15,18 +15,42 @@ extends RefCounted
 ## In between, anything sent just before has arrived: unreliable packets can
 ## overtake the reliable despawn, and would find no ship.
 ##
-## The rule for now: a client knows the ships in its player's system, and a
-## client without a character knows none (the join menu asks the server for
-## spawn points, N5b2). Fog of war will replace it with the sensor picture of
-## the player's faction (see the fog-of-war design: signatures, sensors, sharing).
+## The rule (fog of war, N5b3): a client knows the ships in its player's
+## faction's sensor picture that are in the player's system, and the ship the
+## player is aboard. A top-level faction's picture is its own ships and what
+## their sensors detect (picture); every faction under it shares it. A client
+## without a character knows none (the join menu asks the server for spawn
+## points, N5b2). Still to come: ghosts of lost contacts, ships left out of the
+## picture, and sharing pictures between factions.
 
 var _known: Dictionary = {}  # Peer -> {ship: true}.
 var _leaving: Dictionary = {}  # Peer -> {ship: true}: still on the client, going.
 
 
+## What a client's player can know (view): [param system], the system they are
+## in; [param aboard], the ship they are on (or null); [param picture], their
+## faction's sensor picture, {ship: true}.
+static func view(system: Object, aboard: Object, picture: Dictionary) -> Dictionary:
+	return {"system": system, "aboard": aboard, "picture": picture}
+
+
+## A faction's sensor picture: its [param own] ships and every ship they detect,
+## [param detections] being {ship: [ships it detects]}. {ship: true}.
+static func picture(own: Array, detections: Dictionary) -> Dictionary:
+	var out := {}
+	for ship in own:
+		if not is_instance_valid(ship):
+			continue
+		out[ship] = true
+		for seen in detections.get(ship, []):
+			if is_instance_valid(seen):
+				out[seen] = true
+	return out
+
+
 ## Works out who knows what now. [param peers]: each connected client's peer id
-## and the system its player is in (null without a character). [param ships]:
-## each ship and its system. Returns, for each peer whose ships changed:
+## and its player's view (null without a character). [param ships]: each ship
+## in the world and its system. Returns, for each peer whose ships changed:
 ## {peer: {"shown": [...], "leaving": [...], "hidden": [...]}}: ships it knows
 ## now (new, or back while leaving), ships it stopped knowing (still on the
 ## client), and ships to despawn there.
@@ -72,12 +96,17 @@ func peers() -> Array:
 	return _known.keys()
 
 
-## The ships a client in [param system] (null: no character yet) should know.
-func _wanted(system: Object, ships: Dictionary) -> Dictionary:
+## The ships a client with [param seen] (a view, or null: no character yet)
+## should know, of [param ships].
+func _wanted(seen: Variant, ships: Dictionary) -> Dictionary:
 	var out := {}
-	if system == null:
+	if seen == null:
 		return out
-	for ship in ships:
-		if ships[ship] == system:
+	var picture: Dictionary = seen["picture"]
+	for ship in picture:
+		if ships.has(ship) and ships[ship] == seen["system"]:
 			out[ship] = true
+	var aboard: Object = seen["aboard"]
+	if aboard != null and ships.has(aboard):
+		out[aboard] = true
 	return out

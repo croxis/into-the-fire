@@ -136,14 +136,17 @@ func test_a_launched_craft_is_shown_to_clients_once_it_is_in_the_bay() -> void:
 	galaxy.get_node("Systems").add_child(system)
 	var carrier := _carrier(system)
 	carrier.position = Vector3(5800, 0, 0)
-	_player_aboard(carrier, 3)
+	var wing := galaxy.factions.create("Zeta Wing", true, true)
+	carrier.spawn_crew(Character.pilot_data("Player 3", wing.faction_id, 1, 3, 3))
 	var launched_at: Array[Vector3] = []
+	var launched_sides: Array[int] = []
 	var player_in_world: Array[bool] = []
 	galaxy.interest_refreshed.connect(func() -> void:
 			player_in_world.append(Galaxy.find_player_character(galaxy.get_node("Systems"), 3) != null)
 			for ship in system.get_ships():
 				if ship.is_spawning:
-					launched_at.append(ship.global_position))
+					launched_at.append(ship.global_position)
+					launched_sides.append(ship.faction_id))
 	assert_eq(carrier.launch_player(3, WorldIds.new()), "")
 	assert_false(launched_at.is_empty(), "shown during the launch")
 	for at in launched_at:
@@ -151,6 +154,9 @@ func test_a_launched_craft_is_shown_to_clients_once_it_is_in_the_bay() -> void:
 	# Between leaving the carrier and boarding the craft the player has no
 	# character, and a client without one knows no ships at all.
 	assert_false(false in player_in_world, "never refreshed while the player was between ships")
+	# Fog of war (N5b3): the pilot's client knows it through their faction's
+	# picture, so it must be theirs already.
+	assert_false(FactionRegistry.NO_FACTION in launched_sides, "the pilot's side's when shown")
 
 
 func test_launch_is_refused_for_a_player_who_is_not_aboard() -> void:

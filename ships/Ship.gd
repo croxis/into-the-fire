@@ -812,6 +812,7 @@ func launch_player(player_id: int, ids: WorldIds) -> String:
 	get_current_system().add_ship(new_ship)
 	new_ship.global_transform.origin = spawn[1]
 	spawn[0].spawn_ship(new_ship)
+	new_ship.faction_id = passenger.faction_id  # Before it is shown: the pilot knows it through their side.
 	# Show it to clients now (N5a2): not as it entered the world, since its spawn
 	# goes with its place at that moment, and not after the pilot leaves this
 	# ship, since a player between ships has no character and knows nothing. The
@@ -819,7 +820,6 @@ func launch_player(player_id: int, ids: WorldIds) -> String:
 	if galaxy:
 		galaxy.refresh_interest()
 	var old_pilot: Character = $Crew.remove_passenger_by_id(player_id)
-	new_ship.faction_id = old_pilot.faction_id
 	var pilot: Character = new_ship.get_node("CrewMultiplayerSpawner").spawn(old_pilot.serialize())
 	#TODO: Genealize this to a multicrew craft
 	var cockpit: Console = new_ship.get_node("Consoles/Cockpit") as Console
