@@ -126,6 +126,20 @@ func test_no_discord_when_headless() -> void:
 	assert_false(LaunchOptions.parse(PackedStringArray(), true).wants_discord())
 
 
+func test_no_discord_when_its_extension_did_not_load() -> void:
+	# A missing system library (CI lacked libatomic) leaves the Discord classes undefined.
+	assert_false(LaunchOptions.parse(PackedStringArray()).wants_discord(false))
+
+
+func test_entry_does_not_need_discord_to_compile() -> void:
+	# A preload makes entry.gd fail to compile, and nothing boots, when Discord is missing.
+	var preloaded: Array[String] = []
+	for value in (load("res://entry.gd") as Script).get_script_constant_map().values():
+		if value is Resource:
+			preloaded.append(value.resource_path)
+	assert_does_not_have(preloaded, "res://discord.gd")
+
+
 func test_launch_flag_for_automated_flight_tests() -> void:
 	# --testplayer --faction=X --launch: board, then launch, with no menu clicks.
 	var options := LaunchOptions.parse(PackedStringArray(["--testplayer", "--faction=Zeta Wing", "--launch"]))

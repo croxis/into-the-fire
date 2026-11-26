@@ -7,7 +7,6 @@ var interface : XRInterface
 var VR_DEBUG := false
 
 const MainMenuScene := preload("res://ui/main_menu/main_menu.tscn")
-const DiscordScript := preload("res://discord.gd")
 
 var options: LaunchOptions
 ## Only exists when this process has a UI (not on a dedicated server).
@@ -69,10 +68,13 @@ func _add_main_menu() -> void:
 ## Discord rich presence, only where someone plays on a screen. (The Discord
 ## GDExtension itself is loaded by the engine at startup in every mode; this
 ## keeps its client and per-frame callbacks off servers and headless runs.)
+## discord.gd is loaded here, not preloaded: it uses the extension's classes, so
+## a preload would stop this script compiling, and the game booting, whenever
+## the extension fails to load.
 func _add_discord() -> void:
 	var discord := Control.new()
 	discord.name = "Discord"
-	discord.set_script(DiscordScript)
+	discord.set_script(load("res://discord.gd"))
 	add_child(discord)
 
 

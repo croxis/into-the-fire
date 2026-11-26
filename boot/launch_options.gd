@@ -112,9 +112,11 @@ func has_ui() -> bool:
 
 
 ## True when Discord rich presence should run: someone is playing on a screen.
-## Not on servers or headless runs (tests, the smoke test, test players).
-func wants_discord() -> bool:
-	return has_ui() and not headless
+## Not on servers or headless runs (tests, the smoke test, test players), nor
+## when the Discord GDExtension failed to load ([param extension_loaded]), e.g.
+## because a system library it links against is missing.
+func wants_discord(extension_loaded := ClassDB.class_exists(&"DiscordClient")) -> bool:
+	return extension_loaded and has_ui() and not headless
 
 
 ## The game window's title once this process hosts or joins: [param app] with
