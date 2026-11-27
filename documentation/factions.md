@@ -71,7 +71,8 @@ Only the server creates or changes factions. Clients get a copy:
    `factions.to_data()` to that client with the `_rpc_receive_factions` RPC.
 2. The client replaces its registry with `FactionRegistry.from_data(data)` and emits
    `factions_synced`.
-3. The faction picker (`JoinGame`) is shown only once the copy has arrived.
+3. The faction picker (`JoinFlow`, client-only, `ui/join_game/`) is shown only once the copy has arrived
+   (`Galaxy.factions_ready()`).
 
 Why it is built this way:
 

@@ -11,6 +11,9 @@ const MainMenuScene := preload("res://ui/main_menu/main_menu.tscn")
 var options: LaunchOptions
 ## Only exists when this process has a UI (not on a dedicated server).
 var main_menu: Control
+## The faction and spawn picker; only with a UI, and not for a test player
+## given --faction (it spawns without the menu).
+var join_flow: JoinFlow
 
 
 func _input(event):
@@ -32,6 +35,9 @@ func _ready():
 		add_child(RenderWarmup.new())  # Draws every ship once behind the title screen.
 	if options.has_ui():
 		_add_main_menu()
+		if not options.faction:
+			join_flow = JoinFlow.new($Galaxy)
+			add_child(join_flow)
 	if options.wants_discord():
 		_add_discord()
 
@@ -57,7 +63,6 @@ func _add_main_menu() -> void:
 	# Order matters: entry hosts the server before Galaxy checks is_server.
 	main_menu.join_game.connect(func(_ip, _port, player_name, _s, _p) -> void:
 			_show_role("Client", player_name))
-	main_menu.join_game.connect($Galaxy._on_main_menu_join_game)
 	main_menu.join_game.connect($network._on_main_menu_join_game)
 	main_menu.new_game.connect(_on_main_menu_new_game)
 	main_menu.new_game.connect($Galaxy._on_main_menu_new_game)
@@ -113,7 +118,7 @@ func _start_test_player() -> void:
 	if options.faction:
 		# Spawn as soon as the server's factions arrive, as if picked in the menu.
 		$Galaxy.factions_synced.connect(func() -> void:
-				$Galaxy._on_join_game_request_spawn(options.faction, "test_system", options.spawn_at),
+				$Galaxy.request_spawn(options.faction, "test_system", options.spawn_at),
 				CONNECT_ONE_SHOT)
 	if options.launch:
 		_launch_when_aboard()

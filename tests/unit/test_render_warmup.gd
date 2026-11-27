@@ -25,9 +25,27 @@ func test_graphics_settings_apply_from_the_start() -> void:
 	var before := [window.msaa_3d, window.use_taa]
 	window.msaa_3d = Viewport.MSAA_DISABLED
 	window.use_taa = false
+	var display: Node = preload("res://DisplayManager.gd").new()
+	add_child_autofree(display)  # Reads the player's settings, whatever they are.
+	assert_eq(window.msaa_3d, display.msaa as Viewport.MSAA)
+	assert_eq(window.use_taa, bool(display.taa))
+
+
+func test_a_menu_change_survives_joining() -> void:
+	# Galaxy used to keep its own copy of the settings from startup and put it
+	# back on the window when a client joined, undoing changes made in the menu.
+	var window := get_viewport()
+	var before := [window.msaa_3d, window.use_taa]
+	var display: Node = preload("res://DisplayManager.gd").new()
+	add_child_autofree(display)
+	display._on_main_menu_set_msaa(Viewport.MSAA_4X)
 	var galaxy: Galaxy = preload("res://Galaxy.tscn").instantiate()
-	add_child_autofree(galaxy)  # Reads the player's settings, whatever they are.
-	assert_eq(window.msaa_3d, galaxy.msaa as Viewport.MSAA)
-	assert_eq(window.use_taa, bool(galaxy.taa))
+	add_child_autofree(galaxy)
+	assert_eq(window.msaa_3d, Viewport.MSAA_4X)
+	assert_eq(display.msaa, Viewport.MSAA_4X, "kept for the next time settings apply")
+	for setting in ["msaa", "taa", "render_resolution"]:
+		assert_false(setting in galaxy, "Galaxy keeps no copy of %s to put back" % setting)
+	window.msaa_3d = before[0]
+	window.use_taa = before[1]
 	window.msaa_3d = before[0]
 	window.use_taa = before[1]

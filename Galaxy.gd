@@ -2,9 +2,6 @@ class_name Galaxy
 extends Node
 
 var game_name := "default"
-var render_resolution := Vector2i(0, 0)
-@onready var msaa = PlayerConfig.get_config("graphics", "msaa", 0)
-@onready var taa = PlayerConfig.get_config("graphics", "taa", 0)
 var active_galaxy := false
 
 ## The scenario a new game starts from (content ID, kind "scenario").
@@ -47,10 +44,17 @@ signal interest_refreshed()
 ## from client data.
 var factions := FactionRegistry.new()
 var _factions_synced := false  # Client: a faction copy has arrived from the server.
-var _join_menu_wanted := false  # Client: show the join menu once factions arrive.
 
 ## Emitted on clients when a faction copy arrives from the server.
 signal factions_synced()
+## This machine's player has entered the world (joined, or hosts it) and may
+## pick where to spawn, once factions_ready(). The join UI (JoinFlow) listens.
+signal ready_to_spawn()
+## Client: the server put this player back in their character (they never left
+## the world), so they pick no spawn point.
+signal resumed()
+## The spawn points request_spawn_points asked for, {system name: [ship name, ...]}.
+signal spawn_points_received(faction_name: String, points: Dictionary)
 ## Asks the loading screen to load [param paths] in the background; it calls
 ## [param callback] with the finished SceneBatchLoader.
 signal load_scenes(paths: PackedStringArray, callback: Callable)
@@ -106,31 +110,6 @@ func player_enter_system(system_name) -> void:
 	LocalGameManager.player_id = player.player_id
 
 
-func set_render_resolution(resolution: Vector2i) -> void:
-	print_debug("Galaxy: Setting render resolution: ", resolution)
-	render_resolution = resolution
-	update_graphics()
-
-
-func set_msaa(status):
-	msaa = status
-	update_graphics()
-
-
-func set_taa(status):
-	taa = status
-	update_graphics()
-
-
-## Graphics settings apply to the main window, which draws the viewed zone
-## (ZoneView). Zone SubViewports don't render, so they need none.
-func update_graphics():
-	var window := get_viewport()
-	window.msaa_3d = msaa
-	window.use_taa = taa
-	window.scaling_3d_scale = ZoneView.render_scale(render_resolution, window.get_visible_rect().size)
-
-
 ## The Galaxy that [param node] lives under, or null when there is none (the
 ## node isn't in the tree yet, or it is running alone in a unit test).
 static func find_for(node: Node) -> Galaxy:
@@ -143,11 +122,6 @@ static func find_for(node: Node) -> Galaxy:
 
 
 func _ready():
-	# The player's graphics settings from the start, not only once a client
-	# joins: the title screen's render warm-up (RenderWarmup) must build the
-	# pipelines for the settings the game will draw with (MSAA changes them
-	# all), and a host never joins.
-	update_graphics()
 	multiplayer.peer_connected.connect(_on_peer_connected)
 	multiplayer.peer_disconnected.connect(_on_peer_disconnected)
 	zone_view.name = "ZoneView"
@@ -209,8 +183,7 @@ func _resume(character: Character, peer: int) -> void:
 ## Client: the server put us back in our character: no join menu.
 @rpc("authority", "call_remote", "reliable")
 func _rpc_resume(_system_name: String) -> void:
-	_join_menu_wanted = false
-	$CanvasLayer/JoinGame.visible = false
+	resumed.emit()
 
 
 ## Client: replace the local copy with the server's.
@@ -222,18 +195,12 @@ func _rpc_receive_factions(data: Dictionary) -> void:
 	_factions_synced = true
 	Log.log(["Received ", factions.size(), " factions from server"], Log.MessageType.INFO)
 	factions_synced.emit()
-	_try_show_join_menu()
 
 
-## Shows the faction picker once it is wanted and there are factions to pick from.
-func _try_show_join_menu() -> void:
-	if not _join_menu_wanted:
-		return
-	if not multiplayer.is_server() and not _factions_synced:
-		return  # Still waiting for the server's factions.
-	_join_menu_wanted = false
-	$CanvasLayer/JoinGame.build_faction_menu(factions)
-	$CanvasLayer/JoinGame.visible = true
+## True once there are factions to pick from: the server's own, or on a client
+## the copy the server sent.
+func factions_ready() -> bool:
+	return multiplayer.is_server() or _factions_synced
 
 
 func setup_new_galaxy(dedicated=false, callback = null):
@@ -299,10 +266,6 @@ func _on_main_menu_new_game(g_name, _player_name, _port, _server_password, _play
 	setup_new_galaxy(false, callback)
 
 
-func _on_main_menu_join_game(_ip, _port, _player_name, _server_password, _player_password):
-	pass
-
-
 func finish_setup_galaxy_all() -> void:
 	if not get_tree().root.get_node("entry").is_server:
 		_scenario_scenes = null
@@ -316,9 +279,7 @@ func finish_setup_galaxy_all() -> void:
 
 
 func finish_setup_galaxy_client():
-	update_graphics()
-	_join_menu_wanted = true
-	_try_show_join_menu()
+	ready_to_spawn.emit()
 	finish_setup_galaxy_all()
 
 
@@ -416,22 +377,23 @@ func _on_network_connection_succeeded() -> void:
 	finish_setup_galaxy_client()
 
 
-func _on_join_game_request_spawn(faction_name: String, system_name: String, spawner_name: String) -> void:
+## Asks the server to spawn this machine's player for [param faction_name] at
+## [param spawner_name] in [param system_name] (no name: the first there).
+func request_spawn(faction_name: String, system_name: String, spawner_name: String) -> void:
 	var faction := factions.find_by_name(faction_name)
 	if faction == null:
 		return
 	first_spawn_player.rpc_id(1, faction.faction_id, system_name, spawner_name)  # The server only (the host: itself).
-	$CanvasLayer/JoinGame.visible = false
 
 
-## The join menu picked a faction: ask the server where it can spawn (the client
-## may not know of those ships at all, netcode N5b2).
-func _on_join_game_request_faction(faction_name: String) -> void:
+## Asks the server where [param faction_name]'s players can spawn (a client may
+## not know of those ships at all, netcode N5b2); spawn_points_received answers.
+func request_spawn_points(faction_name: String) -> void:
 	var faction := factions.find_by_name(faction_name)
 	if faction == null:
 		return
 	if multiplayer.is_server():
-		$CanvasLayer/JoinGame.show_spawn(faction_name, _spawn_points(faction))
+		spawn_points_received.emit(faction_name, _spawn_points(faction))
 	else:
 		_request_spawn_points.rpc_id(1, faction.faction_id)
 
@@ -493,7 +455,7 @@ func inputs_from(sender: int, packet: Variant) -> String:
 ## Client: the server's answer to _request_spawn_points.
 @rpc("authority", "call_remote", "reliable")
 func _receive_spawn_points(faction_name: String, points: Dictionary) -> void:
-	$CanvasLayer/JoinGame.show_spawn(faction_name, points)
+	spawn_points_received.emit(faction_name, points)
 
 
 func _on_ship_destroyed(ship: Ship):

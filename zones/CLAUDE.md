@@ -17,5 +17,5 @@ run on their own fail on this warning (the full suite passes). The fix belongs i
 its own passenger camera for 2 frames, in the main window, under a black "Loading" cover, once Content has
 loaded them. Without it a client's first look at a station cost a ~670 ms frame (the renderer building
 pipelines: 19 surface, 8 draw, 14 specialisation), which also started the launch input stall. It only works
-with the final graphics settings: MSAA changes every pipeline, so `Galaxy._ready` applies the player's
-settings (`update_graphics`) before it runs. Startup gains about 0.8 s (one ~1 s frame, covered).
+with the final graphics settings: MSAA changes every pipeline, so `DisplayManager._ready` applies the
+player's settings (`apply`) before it runs. Startup gains about 0.8 s (one ~1 s frame, covered).
