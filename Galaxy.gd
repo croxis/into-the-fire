@@ -20,6 +20,8 @@ var hud := HudLayer.new()
 var zone_stepper := ZoneStepper.new()
 ## This world's zones (star systems): which exist and who is in each.
 @onready var zones: Zones = $Zones
+## Where players come in and where crews go when their ship is destroyed.
+var spawns := SpawnService.new(self)
 ## Server: how far back players' shots are checked (favour the shooter), in
 ## ticks; given to each system's ShotField. From --max-rewind.
 var max_rewind_ticks := ShotField.DEFAULT_REWIND_TICKS
@@ -52,43 +54,14 @@ signal factions_synced()
 ## This machine's player has entered the world (joined, or hosts it) and may
 ## pick where to spawn, once factions_ready(). The join UI (JoinFlow) listens.
 signal ready_to_spawn()
-## Client: the server put this player back in their character (they never left
-## the world), so they pick no spawn point.
-signal resumed()
-## The spawn points request_spawn_points asked for, {system name: [ship name, ...]}.
-signal spawn_points_received(faction_name: String, points: Dictionary)
 ## Asks the loading screen to load [param paths] in the background; it calls
 ## [param callback] with the finished SceneBatchLoader.
 signal load_scenes(paths: PackedStringArray, callback: Callable)
 
 
-## Why a client's pick of spawn point [param spawner_name] in [param system_name]
-## is refused, or "": it must be one of [param points] (_spawn_points). No
-## name means the first one there.
-static func check_spawn_point(points: Dictionary, system_name: String, spawner_name: String) -> String:
-	var there: Array = points.get(system_name, [])
-	if there.is_empty():
-		return "nowhere to spawn in %s" % system_name
-	if spawner_name and not spawner_name in there:
-		return "no spawn point %s in %s" % [spawner_name, system_name]
-	return ""
-
-
-## Server: where [param faction]'s players can spawn, as names a client can be
-## sent: {system name: [ship name, ...]} (System.spawn_points_for).
-func _spawn_points(faction: Faction) -> Dictionary:
-	var points := {}
-	for system in zones.systems():
-		var here := system.spawn_points_for(faction)
-		if not here.is_empty():
-			points[String(system.name)] = here
-	return points
-
-
-## Sent by the server to the player who just spawned. "authority": only the
-## server may move a player's view to a system.
-@rpc("authority", "call_local")
-func player_enter_system(system_name) -> void:
+## Client: shows [param system_name], the system this machine's player is now
+## in (SpawnService tells it), and notes who the local player is.
+func view_system(system_name: String) -> void:
 	var system := zones.get_system(system_name)
 	if system == null:
 		Log.log(["No system ", system_name, " here to enter"], Log.MessageType.WARNING)
@@ -124,6 +97,7 @@ func _ready():
 	add_child(zone_view)
 	add_child(hud)
 	add_child(zone_stepper)
+	add_child(spawns)
 	zones.stepper = zone_stepper
 	zones.zone_added.connect(func(system: System) -> void:
 			system.shots.max_rewind_ticks = max_rewind_ticks)
@@ -137,7 +111,7 @@ func _on_peer_connected(peer_id: int) -> void:
 		var player: Player = $Players.find_player_by_netid(peer_id)
 		var character := zones.player_character(player.player_id) if player else null
 		if character:
-			_resume(character, peer_id)
+			spawns.resume(character, peer_id)
 		else:
 			fog.refresh()  # So its ships spawn there now, not up to 0.5 s later.
 
@@ -150,30 +124,6 @@ func _on_peer_disconnected(peer_id: int) -> void:
 	for character in zones.characters_of_peer(peer_id):
 		character.pilot_disconnected()
 		Log.log([character.name, " left; their character stays"], Log.MessageType.INFO)
-
-
-## Server: a player whose character is still in the world logged back in from
-## [param peer]: they take it over again, where it is, with its camera and HUD.
-func _resume(character: Character, peer: int) -> void:
-	character.pilot_rejoined(peer)
-	fog.refresh()  # Their ship and its system spawn there before the RPCs below.
-	var system := System.find_for(character)
-	_rpc_resume.rpc_id(peer, String(system.name) if system else "")
-	player_enter_system.rpc_id(peer, String(system.name))
-	var console := character.current_console
-	if console:
-		console.set_camera.rpc_id(peer)
-		console._show_hud.rpc_id(peer)
-	elif character.current_ship:
-		character.current_ship.set_camera.rpc_id(peer)
-		character.current_ship.set_capital_ui.rpc_id(peer)
-	Log.log(["Resumed ", character.name, " for peer ", peer], Log.MessageType.SUCCESS)
-
-
-## Client: the server put us back in our character: no join menu.
-@rpc("authority", "call_remote", "reliable")
-func _rpc_resume(_system_name: String) -> void:
-	resumed.emit()
 
 
 ## Client: replace the local copy with the server's.
@@ -264,71 +214,6 @@ func finish_setup_galaxy_client():
 	finish_setup_galaxy_all()
 
 
-## Why a spawn request is refused, or "" if it is acceptable. Everything here
-## comes from a client, so nothing is trusted: the faction must exist and take
-## players, and the system must be one of ours. A plain name check isn't enough
-## for the system, since a path such as "../.." would also resolve to a node.
-static func check_spawn_request(registry: FactionRegistry, systems: Node,
-		faction_id: int, system_name: String) -> String:
-	var faction := registry.get_by_id(faction_id)
-	if faction == null:
-		return "unknown faction %d" % faction_id
-	if not faction.accept_players:
-		return "faction %s does not accept players" % faction.resource_name
-	var system := systems.get_node_or_null(NodePath(system_name))
-	if system == null or system.get_parent() != systems:
-		return "unknown system %s" % system_name
-	return ""
-
-
-## The living character of player [param player_id] anywhere under
-## [param systems], or null. A player has at most one.
-static func find_player_character(systems: Node, player_id: int) -> Character:
-	for node in systems.find_children("*", "", true, false):
-		var c := node as Character
-		if c and c._player_pilot_id == player_id and not c.is_queued_for_deletion():
-			return c
-	return null
-
-
-@rpc("any_peer", "call_local")
-func first_spawn_player(faction_id: int, system_name: String, spawner_name: String) -> void:
-	if not multiplayer.is_server():
-		return
-	var remote_id := multiplayer.get_remote_sender_id()
-	# If the host is calling this function, remote id is 0, change to its actual id
-	if remote_id == 0:
-		remote_id = multiplayer.get_unique_id()
-	Log.log(["Spawn request from peer ", remote_id, ": faction ", faction_id, " at ",
-			spawner_name if spawner_name else "(first)", " in ", system_name], Log.MessageType.QUESTION)
-	var player: Player = $Players.find_player_by_netid(remote_id)
-	if player == null:
-		Log.log(["Spawn refused for peer ", remote_id, ": not logged in"], Log.MessageType.WARNING)
-		return
-	var refusal := check_spawn_request(factions, zones, faction_id, system_name)
-	if not refusal and zones.player_character(player.player_id):
-		refusal = "already in the world"
-	if refusal:
-		Log.log(["Spawn refused for ", player.name, ": ", refusal], Log.MessageType.WARNING)
-		return
-	var faction: Faction = factions.get_by_id(faction_id)
-	var points := _spawn_points(faction)
-	refusal = check_spawn_point(points, system_name, spawner_name)
-	if refusal:
-		Log.log(["Spawn refused for ", player.name, ": ", refusal], Log.MessageType.WARNING)
-		return
-	var at: String = spawner_name if spawner_name else points[system_name][0]
-	var spawn_ship: Ship = zones.get_system(system_name).get_node("ships").get_node(at)
-	player_enter_system.rpc_id(remote_id, system_name)
-	var player_pilot := spawn_ship.spawn_crew(
-			Character.pilot_data(player.name, faction_id, remote_id, ids.next_pilot(),
-				player.player_id))
-	if player_pilot == null:
-		return
-	faction.add_member(player_pilot)
-	Log.log(["Created pilot: ", player_pilot, " in faction ", faction.resource_name, " with mpid: ", player_pilot.multiplayer_id], Log.MessageType.SUCCESS)
-
-
 func _process(delta: float) -> void:
 	if multiplayer.has_multiplayer_peer() and multiplayer.is_server():
 		fog.process(delta)
@@ -356,40 +241,6 @@ func _contact_lost(ship_id: int, data: Dictionary) -> void:
 
 func _on_network_connection_succeeded() -> void:
 	finish_setup_galaxy_client()
-
-
-## Asks the server to spawn this machine's player for [param faction_name] at
-## [param spawner_name] in [param system_name] (no name: the first there).
-func request_spawn(faction_name: String, system_name: String, spawner_name: String) -> void:
-	var faction := factions.find_by_name(faction_name)
-	if faction == null:
-		return
-	first_spawn_player.rpc_id(1, faction.faction_id, system_name, spawner_name)  # The server only (the host: itself).
-
-
-## Asks the server where [param faction_name]'s players can spawn (a client may
-## not know of those ships at all, netcode N5b2); spawn_points_received answers.
-func request_spawn_points(faction_name: String) -> void:
-	var faction := factions.find_by_name(faction_name)
-	if faction == null:
-		return
-	if multiplayer.is_server():
-		spawn_points_received.emit(faction_name, _spawn_points(faction))
-	else:
-		_request_spawn_points.rpc_id(1, faction.faction_id)
-
-
-## Server: a client's join menu wants [param faction_id]'s spawn points. Only for
-## a faction that takes players; the answer goes to the sender.
-@rpc("any_peer", "call_remote", "reliable")
-func _request_spawn_points(faction_id: int) -> void:
-	if not multiplayer.is_server():
-		return
-	var faction := factions.get_by_id(faction_id)
-	if faction == null or not faction.accept_players:
-		return
-	_receive_spawn_points.rpc_id(multiplayer.get_remote_sender_id(), faction.resource_name,
-			_spawn_points(faction))
 
 
 ## Server: [param pilot] now plays from [param peer] (it entered the world, or
@@ -431,26 +282,3 @@ func inputs_from(sender: int, packet: Variant) -> String:
 	if pilot == null or not is_instance_valid(pilot) or not (pilot as Character).is_inside_tree():
 		return NO_PILOT
 	return (pilot as Character).receive_inputs_from(sender, InputChannel.decode(packet))
-
-
-## Client: the server's answer to _request_spawn_points.
-@rpc("authority", "call_remote", "reliable")
-func _receive_spawn_points(faction_name: String, points: Dictionary) -> void:
-	spawn_points_received.emit(faction_name, points)
-
-
-func _on_ship_destroyed(ship: Ship):
-	## This is ONLY for respawning characters. The destruction of the ship itself
-	## is handled elsewhere.
-	#TODO: Find closest faction capital or station with capacity and the player respawns there
-	#This has to be done at the galaxy level, for now, incase we have to hop to other systems
-	#Depending on gamemode we might want something like allegiance with lifepods,
-	#X4 with spacesuits (or starfury escape pods), or insta-respawn
-	
-	# This will also respawn npcs for now
-	var system: System = ship.get_current_system()
-	for old_pilot: Character in ship.get_crew():
-		var proposed_ship := system.nearest_carrier_for(old_pilot, ship)
-		if proposed_ship:
-			#TODO: Genealize this to a multicrew craft
-			proposed_ship.spawn_crew(old_pilot.serialize())

@@ -188,7 +188,7 @@ func _ready():
 	# No Galaxy when a ship runs on its own (tests, tools).
 	galaxy = Galaxy.find_for(self)
 	if galaxy:
-		destroyed.connect(galaxy._on_ship_destroyed)
+		destroyed.connect(galaxy.spawns.on_ship_destroyed)
 		snapshots.clock = galaxy.snapshot_clock
 	# A client that now has this ship asks for its snapshots (ShipSnapshots.recipients).
 	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server() \

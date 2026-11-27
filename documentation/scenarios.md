@@ -77,6 +77,7 @@ reviewed, merged and shipped by mods.
 
 ## Current limitations
 
-- Players still spawn on the Babylon 5 station by node path (`first_spawn_player`).
+- Players spawn aboard any ship of their side with launch bays (`SpawnService.spawn_points`); a scenario
+  can't choose spawn points or death rules (`RespawnRules`) yet.
 - Scenarios hold no player spawn rules, economy or orders yet.
 - Ship and pilot IDs restart at 1 each new game; saves will need to store `WorldIds`.

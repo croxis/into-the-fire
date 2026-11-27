@@ -65,8 +65,8 @@ moment.
    differs and can't join, rather than breaking later on content IDs it doesn't have.
 2. **Factions.** The server sends the faction tree as plain data (`FactionRegistry.to_data`).
 3. **Nothing else, yet.** A client with no character is told about no ships at all (fog of war). The
-   join menu asks the server for a faction's spawn points (`Galaxy._request_spawn_points`, names
-   only, own side only) and the server checks the pick (`Galaxy.check_spawn_point`).
+   join menu asks the server for a faction's spawn points (`SpawnService._request_spawn_points`, names
+   only, own side only) and the server checks the pick (`SpawnService.check_spawn_point`).
 4. **Spawning in.** The server puts the player's character aboard; their client is then told about
    the ships its side can see, and they spawn there.
 
@@ -75,7 +75,7 @@ Ship scenes are loaded, and their collision shapes built, in the first frames af
 have Jolt build its hull shapes, half a second of frozen ticks.
 
 A player who disconnects keeps their character in the world with neutral controls (a one-seat craft
-brakes to a stop). Logging back in with the same name resumes it (`Galaxy._resume`).
+brakes to a stop). Logging back in with the same name resumes it (`SpawnService.resume`).
 
 ## Your own ship
 
@@ -184,7 +184,7 @@ How a ship appears and disappears on a client:
 - The server validates every request a client makes against what that player's character may do.
 - Never trust an ID a client sends: the sender is `multiplayer.get_remote_sender_id()`.
 - What a client can send (audited 2026-11-27): five `any_peer` RPCs and its own `InputsSync`.
-  - `Galaxy.first_spawn_player` and `_request_spawn_points` (logged in, a faction that takes players, a
+  - `SpawnService._request_spawn` and `_request_spawn_points` (logged in, a faction that takes players, a
     valid spawn point, not already in the world), `Ship.request_launch` (aboard that carrier),
     `Galaxy._submit_inputs` (to the sender's own pilot; size, shape and ticks checked; the rewind a
     client claims is capped), `Ship._have_ship` (only for a ship the server has it hold).

@@ -81,7 +81,7 @@ Why it is built this way:
 - **The RPC is marked `"authority"`.** Only the server can call it, so a modified client can't push
   its own factions to other players.
 - **Clients send IDs, the server checks them.** A spawn request carries a faction ID and a system
-  name. `Galaxy.check_spawn_request()` refuses unknown factions, factions that don't accept
+  name. `SpawnService.check_spawn_request()` refuses unknown factions, factions that don't accept
   players, and anything that isn't a direct child of `Zones`
   (`Zones.get_system` checks names the same way). (Without that last check, a name like
   `".."` would resolve to a node outside the systems.)

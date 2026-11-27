@@ -125,7 +125,7 @@ func test_galaxy_spawn_points_list_each_system_with_any() -> void:
 	_ship_in(by_name.sol, galaxy.factions, t.ea, "Hyperion").has_spawn_points = true
 	_ship_in(by_name.narn, galaxy.factions, narn, "KhaRi").has_spawn_points = true
 	assert_eq(galaxy.zones.systems().size(), 3)
-	assert_eq(galaxy._spawn_points(t.zeta), {"epsilon": ["Babylon5"], "sol": ["Hyperion"]},
+	assert_eq(galaxy.spawns.spawn_points(t.zeta), {"epsilon": ["Babylon5"], "sol": ["Hyperion"]},
 			"no entry for a system with nowhere to spawn")
 
 

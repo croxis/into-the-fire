@@ -23,12 +23,12 @@ func _ready() -> void:
 	menu = JoinGameScene.instantiate()
 	menu.visible = false
 	add_child(menu)
-	menu.request_faction.connect(galaxy.request_spawn_points)
+	menu.request_faction.connect(galaxy.spawns.request_spawn_points)
 	menu.request_spawn.connect(_on_request_spawn)
 	galaxy.ready_to_spawn.connect(_on_ready_to_spawn)
 	galaxy.factions_synced.connect(_try_show)
-	galaxy.resumed.connect(_on_resumed)
-	galaxy.spawn_points_received.connect(menu.show_spawn)
+	galaxy.spawns.resumed.connect(_on_resumed)
+	galaxy.spawns.spawn_points_received.connect(menu.show_spawn)
 
 
 func _on_ready_to_spawn() -> void:
@@ -47,7 +47,7 @@ func _try_show() -> void:
 
 
 func _on_request_spawn(faction_name: String, system_name: String, spawner_name: String) -> void:
-	galaxy.request_spawn(faction_name, system_name, spawner_name)
+	galaxy.spawns.request_spawn(faction_name, system_name, spawner_name)
 	menu.visible = false
 
 

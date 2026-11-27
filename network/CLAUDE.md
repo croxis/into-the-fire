@@ -16,8 +16,8 @@ picture (`excluded_from_picture`; covert wings still see it, one-way; `documenta
 yet: sharing pictures between sides, and the host's own player (the server has everything).
 
 - With no character a client knows nothing, so the join menu asks the server for a faction's spawn points
-  (`Galaxy._request_spawn_points`, own side only), and `first_spawn_player` checks the one picked
-  (`Galaxy.check_spawn_point`).
+  (`SpawnService._request_spawn_points`, own side only), and `SpawnService._request_spawn` checks the one picked
+  (`SpawnService.check_spawn_point`).
 - `FogOfWar.refresh` runs every 0.5 s and at once when a client connects, a ship is launched (after
   it is placed: showing a ship sends its spawn with its transform at that moment) or crew board (Godot
   refuses an RPC to a peer that can't see the node).

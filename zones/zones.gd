@@ -63,7 +63,7 @@ func system_for_content(content_id: StringName) -> System:
 
 ## The living character of player [param player_id] in any zone, or null.
 func player_character(player_id: int) -> Character:
-	return Galaxy.find_player_character(self, player_id)
+	return SpawnService.find_player_character(self, player_id)
 
 
 ## Every player character played from [param peer], in any zone (a character

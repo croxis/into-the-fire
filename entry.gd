@@ -115,7 +115,7 @@ func _start_test_player() -> void:
 	if options.faction:
 		# Spawn as soon as the server's factions arrive, as if picked in the menu.
 		$Galaxy.factions_synced.connect(func() -> void:
-				$Galaxy.request_spawn(options.faction, "test_system", options.spawn_at),
+				$Galaxy.spawns.request_spawn(options.faction, "", options.spawn_at),
 				CONNECT_ONE_SHOT)
 	if options.launch:
 		_launch_when_aboard()

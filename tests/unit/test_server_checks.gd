@@ -136,8 +136,8 @@ func test_a_player_already_in_the_world_is_found() -> void:
 	systems.add_child(system)
 	var carrier := _carrier(system)
 	var me := _player_aboard(carrier, 3)
-	assert_eq(Galaxy.find_player_character(systems, 3), me)
-	assert_null(Galaxy.find_player_character(systems, 4), "player 4 has no character yet")
+	assert_eq(SpawnService.find_player_character(systems, 3), me)
+	assert_null(SpawnService.find_player_character(systems, 4), "player 4 has no character yet")
 
 
 # Launching ------------------------------------------------------------------

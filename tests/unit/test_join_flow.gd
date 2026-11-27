@@ -31,17 +31,17 @@ func test_the_menu_waits_until_the_player_may_pick() -> void:
 
 func test_a_resumed_player_gets_no_menu() -> void:
 	galaxy.ready_to_spawn.emit()
-	galaxy.resumed.emit()
+	galaxy.spawns.resumed.emit()
 	assert_false(flow.menu.visible)
 
 
 func test_a_host_gets_its_spawn_points_without_the_network() -> void:
-	watch_signals(galaxy)
-	galaxy.request_spawn_points("Earth Alliance")
-	assert_signal_emitted_with_parameters(galaxy, "spawn_points_received", ["Earth Alliance", {}])
+	watch_signals(galaxy.spawns)
+	galaxy.spawns.request_spawn_points("Earth Alliance")
+	assert_signal_emitted_with_parameters(galaxy.spawns, "spawn_points_received", ["Earth Alliance", {}])
 
 
 func test_unknown_factions_get_no_spawn_points() -> void:
-	watch_signals(galaxy)
-	galaxy.request_spawn_points("Psi Corps")
-	assert_signal_not_emitted(galaxy, "spawn_points_received")
+	watch_signals(galaxy.spawns)
+	galaxy.spawns.request_spawn_points("Psi Corps")
+	assert_signal_not_emitted(galaxy.spawns, "spawn_points_received")

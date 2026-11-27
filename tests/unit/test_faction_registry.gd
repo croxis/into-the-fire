@@ -133,7 +133,7 @@ func test_ship_joins_owned_ships_of_its_faction() -> void:
 	assert_does_not_have(t.b5.owned_ships, ship)
 
 
-## Galaxy.check_spawn_request: spawn requests come from clients and are not trusted.
+## SpawnService.check_spawn_request: spawn requests come from clients and are not trusted.
 
 func _systems() -> Node:
 	var systems: Node = add_child_autofree(Node.new())
@@ -145,34 +145,34 @@ func _systems() -> Node:
 
 func test_spawn_request_accepted() -> void:
 	var t := _playtest_tree()
-	assert_eq(Galaxy.check_spawn_request(registry, _systems(), t.zeta.faction_id, "test_system"), "")
+	assert_eq(SpawnService.check_spawn_request(registry, _systems(), t.zeta.faction_id, "test_system"), "")
 
 
 func test_spawn_request_unknown_faction_refused() -> void:
 	_playtest_tree()
-	assert_ne(Galaxy.check_spawn_request(registry, _systems(), 42, "test_system"), "")
+	assert_ne(SpawnService.check_spawn_request(registry, _systems(), 42, "test_system"), "")
 
 
 func test_spawn_request_closed_faction_refused() -> void:
 	var t := _playtest_tree()
-	assert_ne(Galaxy.check_spawn_request(registry, _systems(), t.b5.faction_id, "test_system"), "",
+	assert_ne(SpawnService.check_spawn_request(registry, _systems(), t.b5.faction_id, "test_system"), "",
 			"Babylon 5 itself doesn't accept players, only its wings")
 
 
 func test_spawn_request_unknown_system_refused() -> void:
 	var t := _playtest_tree()
 	var systems := _systems()
-	assert_ne(Galaxy.check_spawn_request(registry, systems, t.zeta.faction_id, "Narn"), "")
-	assert_ne(Galaxy.check_spawn_request(registry, systems, t.zeta.faction_id, ".."), "",
+	assert_ne(SpawnService.check_spawn_request(registry, systems, t.zeta.faction_id, "Narn"), "")
+	assert_ne(SpawnService.check_spawn_request(registry, systems, t.zeta.faction_id, ".."), "",
 			"a path out of Systems is not a system")
 
 
-## Galaxy.check_spawn_point: the server checks the spawn point a client picks
+## SpawnService.check_spawn_point: the server checks the spawn point a client picks
 ## against those it offered (System.spawn_points_for, in test_system.gd).
 
 func test_a_spawn_point_must_be_one_offered() -> void:
 	var points := {"epsilon": ["Babylon 5"], "sol": ["Hyperion"]}
-	assert_eq(Galaxy.check_spawn_point(points, "epsilon", "Babylon 5"), "")
-	assert_eq(Galaxy.check_spawn_point(points, "epsilon", ""), "", "none named: the first there")
-	assert_ne(Galaxy.check_spawn_point(points, "epsilon", "Hyperion"), "", "not in that system")
-	assert_ne(Galaxy.check_spawn_point(points, "narn", ""), "", "nowhere to spawn there")
+	assert_eq(SpawnService.check_spawn_point(points, "epsilon", "Babylon 5"), "")
+	assert_eq(SpawnService.check_spawn_point(points, "epsilon", ""), "", "none named: the first there")
+	assert_ne(SpawnService.check_spawn_point(points, "epsilon", "Hyperion"), "", "not in that system")
+	assert_ne(SpawnService.check_spawn_point(points, "narn", ""), "", "nowhere to spawn there")
