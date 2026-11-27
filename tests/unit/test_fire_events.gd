@@ -104,3 +104,26 @@ func test_a_told_shot_has_its_guns_bolt_size() -> void:
 	var told: Shot = system.shots.all()[0]
 	assert_eq(told.radius, gun.bolt_radius)
 	assert_eq(told.growth, gun.growth)
+
+
+func test_a_shot_plays_its_guns_sound_where_sound_is_played() -> void:
+	var ship := _starfury()
+	var gun := ship.get_node("Guns").get_child(2) as Gun
+	var player := gun.get_node("AudioStreamPlayer3D") as AudioStreamPlayer3D
+	system.shots.plays_sounds = true  # Tests run headless, where nothing is heard.
+	var shot := gun.shot_from(Vector3.ZERO, Vector3(0, 0, 900), 5)
+	shot.gun_index = 2
+	system.shots.add(shot)
+	assert_true(player.playing, "the gun that fired it")
+	assert_false((ship.get_node("Guns").get_child(0).get_node("AudioStreamPlayer3D") as AudioStreamPlayer3D).playing)
+
+
+func test_guns_overlap_their_own_sounds() -> void:
+	# A Starfury gun fires every 0.25 s; its sound lasts about a second.
+	var gun := _starfury().get_node("Guns").get_child(0) as Gun
+	var player := gun.get_node("AudioStreamPlayer3D") as AudioStreamPlayer3D
+	assert_gte(player.max_polyphony * gun.cooldown, player.stream.get_length(), "no shot cuts off the last one's sound")
+
+
+func test_headless_machines_play_no_sounds() -> void:
+	assert_eq(ShotField.new(system).plays_sounds, DisplayServer.get_name() != "headless")

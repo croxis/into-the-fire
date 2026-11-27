@@ -60,6 +60,11 @@ func _transform_at(ship: Ship, tick: int) -> Transform3D:
 	return h.get(tick, ship.global_transform)
 
 
+## Shots play their gun's sound as they are added: on machines that make sound
+## (not headless ones: a dedicated server, the tests).
+var plays_sounds := DisplayServer.get_name() != "headless"
+
+
 ## [param hits_allowed] false: this field never decides hits, even on a server.
 func _init(system: System, hits_allowed := true) -> void:
 	_system = system
@@ -74,6 +79,20 @@ func add(shot: Shot) -> void:
 		bolt.shot = shot
 		_system.get_node("bolts").add_child(bolt)
 		_bolts[shot] = bolt
+	if plays_sounds:
+		var gun := _gun_of(shot)
+		if gun:
+			gun.play_fire_sound()
+
+
+## The gun that fired [param shot] (its shooter's gun at Shot.gun_index), or null.
+static func _gun_of(shot: Shot) -> Gun:
+	if shot.shooter == null or not is_instance_valid(shot.shooter):
+		return null
+	var guns := shot.shooter.get_node_or_null(^"Guns")
+	if guns == null or shot.gun_index >= guns.get_child_count():
+		return null
+	return guns.get_child(shot.gun_index) as Gun
 
 
 ## "N fired, M hits" since the last report, or "" if nothing fired (System

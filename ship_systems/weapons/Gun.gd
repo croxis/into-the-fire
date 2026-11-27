@@ -53,6 +53,14 @@ func fire_at(tick: int, rewind := 0, client_tick := -1) -> bool:
 	return true
 
 
+## Plays this gun's firing sound, if it has one (ShotField.add calls it as each
+## shot is added, on machines that make sound).
+func play_fire_sound() -> void:
+	var player := get_node_or_null(^"AudioStreamPlayer3D") as AudioStreamPlayer3D
+	if player and player.stream:
+		player.play()
+
+
 ## A shot from the muzzle at [param tick]: along the gun's +z at its speed,
 ## plus its ship's own velocity. Guns fire along +z, not Godot's -z forward:
 ## the scenes are built that way (the Starfury's Guns node is turned half a

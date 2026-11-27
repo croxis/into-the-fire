@@ -9,8 +9,7 @@ owner's design choices: favour the shooter, fire events (not networked bolt node
   `Character._apply_input` hands it to the console's `WeaponsCapability.trigger(pressed, tick)`, which fires
   its system (a `Guns` node: `Guns.fire_at`, each `Gun.fire_at`). Not in replays: guns fire once per real tick.
 - Cooldowns count ticks (`Gun.cooldown_ticks`), so server and shooter agree on when a gun fires.
-- The Starfury cockpit's Weapons points at `../../../Guns`. Gun values (bolt speed 30 m/s, 2 s cooldown) look
-  like placeholders; the owner decides tuning.
+- The Starfury cockpit's Weapons points at `../../../Guns`. The owner decides gun tuning (values under Shots).
 
 ## Shots (W2)
 
@@ -57,4 +56,7 @@ owner's design choices: favour the shooter, fire events (not networked bolt node
   (the pilot's input tick) for the pilot, the server's fire tick for others. Clients drop it
   (`ShotField.remove_named`) and flash (`HitFlash`). Clients that know the target but not the shooter see no flash.
 - Server log `Shots in SYSTEM: N fired, M hits` every 5 s (`ShotField.report`). `--fire` (test player) holds
-  the trigger once flying. The guns have no sound yet (their AudioStreamPlayer3D has no stream).
+  the trigger once flying.
+- Sound: `ShotField.add` plays the firing gun's `AudioStreamPlayer3D` (`Gun.play_fire_sound`) for every shot
+  it gets (server, predicted or fire event), unless headless (`plays_sounds`). `ZoneView` lets the window's
+  camera hear the viewed zone. Polyphony x cooldown must cover the sound (Starfury: 5 x 0.25 s, 1.08 s).
