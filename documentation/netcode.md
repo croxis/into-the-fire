@@ -52,9 +52,12 @@ moment.
 
 ## Joining
 
-1. **Login.** `network.gd`: the server sends its protocol details; the client checks them and sends
-   a login; the server checks it (`check_login`, never logged: it holds passwords) and completes
-   the handshake.
+1. **Login.** `network.gd`: the server sends its protocol details and its content signature; the
+   client checks them (`check_server_info`) and sends a login with its own; the server checks that
+   (`check_login`, never logged: it holds passwords) and completes the handshake. The content
+   signature (`ContentRegistry.signature`) lists each manifest loaded, in order, with a hash of the
+   file: a client with other mods, other versions of them or another load order is told what
+   differs and can't join, rather than breaking later on content IDs it doesn't have.
 2. **Factions.** The server sends the faction tree as plain data (`FactionRegistry.to_data`).
 3. **Nothing else, yet.** A client with no character is told about no ships at all (fog of war). The
    join menu asks the server for a faction's spawn points (`Galaxy._request_spawn_points`, names
@@ -184,5 +187,5 @@ Each of these cost a debugging session; the code and its tests now guard against
 - **A VoxelGI node in a ship froze every machine that drew one,** each time one appeared. Ships carry
   none.
 
-What is planned but not built (weapons and lag compensation, moving between systems, login security)
+What is planned but not built (weapons and lag compensation, moving between systems, password security)
 is in the design doc linked from `CLAUDE.md`.

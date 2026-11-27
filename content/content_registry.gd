@@ -13,6 +13,8 @@ extends RefCounted
 
 const _ID_PATTERN := "^[a-z0-9_]+:[a-z0-9_]+$"
 
+## The manifests loaded, in order (signature).
+var _manifests: Array[Dictionary] = []
 ## id (StringName) -> {"kind": StringName, "path": String, "source": String}
 var _entries := {}
 var _id_regex := RegEx.create_from_string(_ID_PATTERN)
@@ -65,7 +67,44 @@ func load_manifest(manifest_path: String) -> int:
 			var id := StringName(namespace_name + ":" + content_name)
 			if register(id, StringName(kind), str(config.get_value(kind, content_name)), manifest_path):
 				count += 1
+	_manifests.append({"namespace": namespace_name, "hash": FileAccess.get_md5(manifest_path)})
 	return count
+
+
+## The manifests loaded, in order, as plain data a server and a client compare
+## at login (network.gd): [{"namespace", "hash" (the manifest file's MD5)}].
+## Other mods, other versions of them or another load order (later mods
+## override earlier ones) all give a different signature.
+func signature() -> Array:
+	return _manifests.duplicate(true)
+
+
+## Why [param theirs] (another machine's signature, from the network, so
+## anything at all) doesn't match [param ours], or "" when it does. Named by
+## namespace, for the player to read.
+static func compare_signatures(ours: Array, theirs: Variant) -> String:
+	if not theirs is Array:
+		return "no content list"
+	for entry in theirs:
+		if not entry is Dictionary or not (entry as Dictionary).get("namespace") is String \
+				or not (entry as Dictionary).get("hash") is String:
+			return "a malformed content list"
+	var our_names: Array = ours.map(func(e: Dictionary) -> String: return e["namespace"])
+	var their_names: Array = (theirs as Array).map(func(e: Dictionary) -> String: return e["namespace"])
+	var problems: PackedStringArray = []
+	for n in our_names:
+		if not n in their_names:
+			problems.append("%s is missing" % n)
+	for n in their_names:
+		if not n in our_names:
+			problems.append("%s is extra" % n)
+	for e: Dictionary in ours:
+		for t: Dictionary in theirs:
+			if t["namespace"] == e["namespace"] and t["hash"] != e["hash"]:
+				problems.append("%s is a different version" % e["namespace"])
+	if problems.is_empty() and our_names != their_names:
+		problems.append("mods load in a different order")
+	return "Content differs: " + ", ".join(problems) if problems else ""
 
 
 func has(id: StringName) -> bool:

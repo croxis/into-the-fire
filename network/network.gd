@@ -72,6 +72,7 @@ func _authenticating(peer_id):
 		&'protocol_version' : SUPPORTED_PROTOCOL_VERSION,
 		&'hostname' : server_name,
 		&'host_token' : "bruh im legit",
+		&'content' : Content.registry.signature(),  # The client checks it matches its own.
 		}
 
 	var buf:PackedByteArray = var_to_bytes(dict)
@@ -94,6 +95,11 @@ static func check_login(login: Variant) -> String:
 	if not valid_player_name(login.player_name):
 		return "Player names are 1 to %d characters, without . : @ / \" %% or spaces at either end" \
 				% MAX_PLAYER_NAME
+	if not (login as Dictionary).has("content"):
+		return "Client too old: it sends no content list"
+	var content := ContentRegistry.compare_signatures(Content.registry.signature(), login.content)
+	if content:
+		return content
 	return ""
 
 
@@ -203,33 +209,46 @@ func _go_offline() -> void:
 	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
 
 
+## Client: why the server's details [param info] (from the network, so
+## anything at all) rule out joining, or "": a refusal it sent, another
+## protocol or version, or other content than [param our_content]
+## (ContentRegistry.signature).
+static func check_server_info(info: Variant, our_content: Array) -> String:
+	if not info is Dictionary:
+		return "Malformed server details"
+	var dict: Dictionary = info
+	if dict.has("error"):
+		return str(dict["error"])
+	if dict.get("protocol") != PROTOCOL:
+		return "Server protocol mismatch"
+	if not dict.get("protocol_version") is int:
+		return "Malformed server details"
+	if dict["protocol_version"] > SUPPORTED_PROTOCOL_VERSION:
+		return "Server protocol version too new"
+	if dict["protocol_version"] < SUPPORTED_PROTOCOL_VERSION:
+		return "Server protocol version too old"
+	if dict.get("host_token") != "bruh im legit":
+		return "Server untrustworthy"
+	return ContentRegistry.compare_signatures(our_content, dict.get("content"))
+
+
 ## CLIENT GETS SERVER's QUERY and SENDS REPLY
 func _client_auth_callback(client_id: int, buf : PackedByteArray):
-	var dict:Dictionary = bytes_to_var(buf)
-	Log.log(["_auth_callback recieved data ", str(dict), "from PID", client_id, "or", multiplayer.get_remote_sender_id()], Log.MessageType.QUESTION)
-	var error_msg:= ""
-	if dict.has('error'):
-		error_msg = dict['error']
-	elif dict.protocol != PROTOCOL:
-		error_msg = "Server protocol mismatch"
-	elif dict.protocol_version > SUPPORTED_PROTOCOL_VERSION:
-		error_msg = "Server protocol version too new"
-	elif dict.protocol_version < SUPPORTED_PROTOCOL_VERSION:
-		error_msg = "Server protocol version too old"
-	elif dict.host_token != 'bruh im legit':
-		error_msg = "Server untrustworthy"
-	
+	var info: Variant = bytes_to_var(buf)  # From the network: anything at all, checked below.
+	Log.log(["_auth_callback recieved data ", str(info), "from PID", client_id, "or", multiplayer.get_remote_sender_id()], Log.MessageType.QUESTION)
+	var error_msg := check_server_info(info, Content.registry.signature())
 	if error_msg.length() > 0:
 		Log.log(error_msg, Log.MessageType.PANIC)
 		peer.disconnect_peer(1)
 		auth_failed.emit(1, error_msg)
 		return
 
-	dict = {
+	var dict := {
 			'client_token' : "me2",
 			'server_password': server_password,
 			'player_name' : player_name,
-			'player_password': player_password
+			'player_password': player_password,
+			'content': Content.registry.signature(),  # The server checks it matches its own.
 		}
 
 	buf = var_to_bytes(dict)

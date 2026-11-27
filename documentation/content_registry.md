@@ -148,6 +148,14 @@ pulse_cannon="uid://..."
 That gives you `b5:pulse_cannon` with kind `weapon`. `Content.instantiate()` only works for scenes;
 for other resources use `load(Content.path_of(id))`.
 
+## Server and clients must match
+
+At login the server and the client compare their content signatures (`ContentRegistry.signature`):
+each manifest loaded, in order, with an MD5 of the file. Any difference (a mod one side lacks, a
+changed manifest, another load order) refuses the join with a message naming the namespaces that
+differ (`ContentRegistry.compare_signatures`). A manifest change that only reorders or rewords
+comments still counts: the hash is of the whole file.
+
 ## Overriding content (how mods will work)
 
 If an ID is registered twice, the later registration wins, and the replacement is logged. Manifests

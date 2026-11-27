@@ -14,6 +14,7 @@ func _login(overrides := {}) -> Dictionary:
 		"server_password": "",
 		"player_name": "Ivanova",
 		"player_password": "secret",
+		"content": Content.registry.signature(),
 	}
 	login.merge(overrides, true)
 	return login
@@ -21,6 +22,25 @@ func _login(overrides := {}) -> Dictionary:
 
 func test_a_well_formed_login_is_accepted() -> void:
 	assert_eq(Network.check_login(_login()), "")
+
+
+func test_a_login_with_other_content_is_refused() -> void:
+	# Other mods, or another version of them: the client would break on IDs.
+	var other := [{"namespace": "b5", "hash": "not ours"}]
+	assert_string_contains(Network.check_login(_login({"content": other})), "b5")
+	var no_list := _login()
+	no_list.erase("content")
+	assert_ne(Network.check_login(no_list), "", "a client too old to send its content")
+
+
+func test_the_client_checks_the_servers_content_too() -> void:
+	var server := {"protocol": Network.PROTOCOL, "protocol_version": Network.SUPPORTED_PROTOCOL_VERSION,
+			"host_token": "bruh im legit", "content": Content.registry.signature()}
+	assert_eq(Network.check_server_info(server, Content.registry.signature()), "")
+	server["content"] = [{"namespace": "b5", "hash": "theirs"}]
+	assert_string_contains(Network.check_server_info(server, Content.registry.signature()), "b5")
+	server["protocol_version"] = Network.SUPPORTED_PROTOCOL_VERSION + 1
+	assert_string_contains(Network.check_server_info(server, Content.registry.signature()), "too new")
 
 
 func test_a_login_that_is_not_a_dictionary_is_refused() -> void:

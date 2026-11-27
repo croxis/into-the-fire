@@ -130,3 +130,43 @@ func test_no_ship_carries_a_voxel_gi() -> void:
 	for id in Content.registry.ids(&"ship"):
 		var ship: Node = autofree(Content.instantiate(id))
 		assert_eq(ship.find_children("*", "VoxelGI", true, false).size(), 0, String(id))
+
+
+## The content signature: what a server and a client compare at login, so a
+## client with other mods (or other versions of them, or loaded in another
+## order) is told why it can't join, instead of breaking on unknown IDs.
+
+func test_the_signature_lists_each_manifest_in_load_order() -> void:
+	registry.load_manifest(_write_manifest("a.cfg", '[meta]\nnamespace="b5"\n[ship]\nfury="res://x.tscn"\n'))
+	registry.load_manifest(_write_manifest("b.cfg", '[meta]\nnamespace="narn"\n[ship]\ngquan="res://y.tscn"\n'))
+	var sig := registry.signature()
+	assert_eq(sig.size(), 2)
+	assert_eq(sig[0]["namespace"], "b5")
+	assert_eq(sig[1]["namespace"], "narn")
+	assert_false((sig[0]["hash"] as String).is_empty())
+	for entry: Dictionary in sig:
+		for key in entry:
+			assert_false(entry[key] is Object, "plain data: it crosses the network")
+
+
+func test_matching_signatures_have_nothing_to_say() -> void:
+	var sig := [{"namespace": "b5", "hash": "abc"}]
+	assert_eq(ContentRegistry.compare_signatures(sig, sig.duplicate(true)), "")
+
+
+func test_differences_are_named() -> void:
+	var server := [{"namespace": "b5", "hash": "abc"}, {"namespace": "narn", "hash": "def"}]
+	assert_string_contains(ContentRegistry.compare_signatures(server, [{"namespace": "b5", "hash": "abc"}]),
+			"narn", "a mod the server has and this machine doesn't")
+	assert_string_contains(ContentRegistry.compare_signatures([server[0]],
+			[server[0], {"namespace": "minbari", "hash": "x"}]), "minbari", "one only this machine has")
+	assert_string_contains(ContentRegistry.compare_signatures(server,
+			[{"namespace": "b5", "hash": "zzz"}, server[1]]), "b5", "a different version")
+	assert_ne(ContentRegistry.compare_signatures(server, [server[1], server[0]]), "",
+			"another load order: later mods override earlier ones")
+
+
+func test_a_signature_from_the_network_is_checked_not_trusted() -> void:
+	var sig := [{"namespace": "b5", "hash": "abc"}]
+	for bad in [null, "b5", [1], [{"namespace": 3}], [{}]]:
+		assert_ne(ContentRegistry.compare_signatures(sig, bad), "", str(bad))
