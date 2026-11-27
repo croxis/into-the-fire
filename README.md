@@ -14,8 +14,8 @@ Open and forward port 2258 to have others join your game.
 | Ctrl | Thrust backward |
 | Left / Right arrow | Slide left / right |
 | Up / Down arrow | Slide up / down |
-| [ | Toggle auto spin stabilize (still needs tuning) |
-| ] | Toggle auto brake (still needs tuning) |
+| [ | Toggle auto spin stabilize |
+| ] | Toggle auto brake |
 | Backslash \ | Debug all stop |
 | Space | Fire primary weapons |
 
