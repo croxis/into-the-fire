@@ -8,8 +8,17 @@ extends RefCounted
 ## its ship instead and ignores them. The RPC itself, Ship._receive_snapshot,
 ## stays on the ship: Godot routes RPCs by node path.
 
-## Ticks between snapshots: 2 at 60 Hz, so 30 a second.
+## Ticks between snapshots: 2 at 60 Hz, so 30 a second. That is for a ship near
+## the client's player; further out each client gets them less often (interest
+## tiers, interval_for), which a crowded system's bandwidth needs. Clients draw a
+## distant ship between sparser snapshots, and past the newest for a little.
 const INTERVAL_TICKS := 2
+## Within this, full rate (metres from the ship the client's player is aboard).
+const NEAR_METRES := 5000.0
+## Within this, MID_TICKS (10 a second); beyond it, FAR_TICKS (under 4).
+const MID_METRES := 25000.0
+const MID_TICKS := 6
+const FAR_TICKS := 16  # Multiples of INTERVAL_TICKS, the pace sends are checked at.
 const REPORT_TICKS := 300  # Every 5 s at 60 Hz.
 
 ## Client: this ship's snapshots, in tick order.
@@ -21,6 +30,8 @@ var clock := SnapshotClock.new()
 var drawing_forced := false
 ## Server: the tick of the last snapshot sent.
 var last_sent_tick := -INTERVAL_TICKS
+## Server: peer -> the tick of the last snapshot sent to it.
+var _last_sent_to: Dictionary[int, int] = {}
 
 var _ship: Ship
 var _drawn := false  # Client: drawn from snapshots, kinematic.
@@ -46,8 +57,35 @@ func send(last_tick: int) -> void:
 	if galaxy:
 		knows = func(peer: int) -> bool: return galaxy.interest.knows(peer, _ship)
 	for peer in recipients(_ship.multiplayer.get_peers(), pilot.multiplayer_id if pilot else 0, knows):
-		_ship._receive_snapshot.rpc_id(peer, last_tick, _ship.global_transform,
-				_ship.linear_velocity, _ship.angular_velocity)
+		if due_for(peer, last_tick, _interval_to(peer, galaxy)):
+			_ship._receive_snapshot.rpc_id(peer, last_tick, _ship.global_transform,
+					_ship.linear_velocity, _ship.angular_velocity)
+
+
+## Server: ticks between this ship's snapshots for a ship [param distance]
+## metres from the client's player (interest tiers).
+static func interval_for(distance: float) -> int:
+	if distance < NEAR_METRES:
+		return INTERVAL_TICKS
+	return MID_TICKS if distance < MID_METRES else FAR_TICKS
+
+
+## Server: whether [param peer], sent one every [param interval] ticks, is due
+## a snapshot after [param last_tick]; if so it is counted as sent.
+func due_for(peer: int, last_tick: int, interval: int) -> bool:
+	if last_tick - _last_sent_to.get(peer, -interval) < interval:
+		return false
+	_last_sent_to[peer] = last_tick
+	return true
+
+
+## Server: the interval for [param peer], from how far this ship is from the
+## ship its player is aboard (full rate when that isn't known).
+func _interval_to(peer: int, galaxy: Galaxy) -> int:
+	var viewpoint: Node3D = galaxy.interest.viewpoint(peer) as Node3D if galaxy else null
+	if viewpoint == null or not is_instance_valid(viewpoint):
+		return INTERVAL_TICKS
+	return interval_for(viewpoint.global_position.distance_to(_ship.global_position))
 
 
 ## Server: whether a snapshot goes out after [param last_tick]. Counted from
@@ -66,6 +104,7 @@ func recipients(connected: Array, pilot_peer: int, knows := Callable()) -> Array
 	for peer in _ship.interest.confirmed.keys():
 		if not peer in connected:
 			_ship.interest.forget(peer)
+			_last_sent_to.erase(peer)
 		elif peer != pilot_peer and (not knows.is_valid() or knows.call(peer)):
 			out.append(peer)
 	return out

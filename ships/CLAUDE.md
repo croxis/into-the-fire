@@ -55,6 +55,10 @@ RPC `Ship._receive_state` stays on the ship). The pilot's input reaches the serv
   sends its transform and velocities every `INTERVAL_TICKS` (2, so 30 a second; `send`, through the RPC
   `Ship._receive_snapshot`, which stays on the ship). The synchronizer sends motion only when a ship appears
   (`transform`, velocities: spawn only), so a new ship starts in the right place.
+- Interest tiers: that rate is for a ship within 5 km of the ship the client's player is aboard
+  (`Galaxy.interest.viewpoint`); to 25 km every 6 ticks, further every 16 (`ShipSnapshots.interval_for`,
+  paced per client by `due_for`). Clients draw distant ships between sparser snapshots, extrapolating
+  past the newest when one is late.
 - Each client confirms it has a ship from that ship's `_ready` (`_have_ship`): a snapshot sent before the ship
   exists there would fail ("node not found"). A despawn forgets it (interest management, see
   `network/CLAUDE.md`). `ShipSnapshots.recipients` skips peers that left, the pilot predicting the ship, who gets its own

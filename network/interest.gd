@@ -25,6 +25,7 @@ extends RefCounted
 
 var _known: Dictionary = {}  # Peer -> {ship: true}.
 var _leaving: Dictionary = {}  # Peer -> {ship: true}: still on the client, going.
+var _viewpoints := {}  # Peer -> the ship its player is aboard.
 
 
 ## What a client's player can know (view): [param system], the system they are
@@ -60,7 +61,10 @@ func update(peers: Dictionary, ships: Dictionary) -> Dictionary:
 		if not peers.has(peer):
 			_known.erase(peer)
 			_leaving.erase(peer)
+	_viewpoints.clear()
 	for peer in peers:
+		if peers[peer] != null and peers[peer]["aboard"] != null:
+			_viewpoints[peer] = peers[peer]["aboard"]
 		var wanted := _wanted(peers[peer], ships)
 		var known: Dictionary = _known.get(peer, {})
 		var was_leaving: Dictionary = _leaving.get(peer, {})
@@ -79,6 +83,12 @@ func update(peers: Dictionary, ships: Dictionary) -> Dictionary:
 		_known[peer] = wanted
 		_leaving[peer] = leaving
 	return changes
+
+
+## The ship [param peer]'s player is aboard, from the last update, or null:
+## where distances to other ships are measured from (interest tiers).
+func viewpoint(peer: int) -> Object:
+	return _viewpoints.get(peer)
 
 
 ## True when [param peer] is told about [param ship]: it gets its snapshots.
