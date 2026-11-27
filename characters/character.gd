@@ -255,7 +255,7 @@ func _apply_input(_dt: float, tick: int) -> void:
 			_skipped_at_last_report = input_channel.skipped_ticks
 	else:
 		r = InputChannel.make_record(tick, inputs.throttle, inputs.rotation_throttle,
-				inputs.autospin_toggle, inputs.autobreak_toggle, inputs.debug_all_stop)
+				inputs.autospin_toggle, inputs.autobreak_toggle, inputs.debug_all_stop, inputs.fire_primary)
 		# One-shot: used once, even if this frame runs another tick.
 		inputs.autobreak_toggle = false
 		inputs.autospin_toggle = false
@@ -269,7 +269,9 @@ func _apply_input(_dt: float, tick: int) -> void:
 	helm.throttle = r.throttle
 	if r.debug_all_stop and debug_commands_allowed():
 		helm._debug_all_stop()
-	# TODO: Weapons capability is found but firing is not wired to inputs yet.
+	var weapons := current_console.get_capability(WeaponsCapability) as WeaponsCapability
+	if weapons:
+		weapons.trigger(r.fire_primary, tick)
 
 
 enum InputSource {

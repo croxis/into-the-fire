@@ -7,34 +7,24 @@ class_name Gun
 @export var speed: float
 @export var bolt_resource: PackedScene
 
-# In seconds
-var cooldown_timer := 0.0
+## Fired at [param tick] (netcode ticks): what makes a bolt and its sound
+## listens to this.
+signal fired(gun: Gun, tick: int)
+
+## The first tick it may fire again.
+var _ready_tick := -1
 
 
-func can_fire() -> bool:
-	if cooldown_timer > 0:
+## The cooldown in netcode ticks, at least one.
+func cooldown_ticks() -> int:
+	return maxi(1, ceili(cooldown / NetworkTime.ticktime))
+
+
+## Fires at [param tick] if its cooldown has passed; true if it fired. Ticks,
+## not frames, so the server and the shooter's client agree on when it fires.
+func fire_at(tick: int) -> bool:
+	if tick < _ready_tick:
 		return false
+	_ready_tick = tick + cooldown_ticks()
+	fired.emit(self, tick)
 	return true
-
-func _physics_process(dt: float) -> void:
-	if (cooldown_timer > 0):
-		cooldown_timer -= dt
-	if (cooldown_timer < 0):
-		cooldown_timer = 0.0
-
-
-func fire(_damage_mod):
-	if ((multiplayer.multiplayer_peer == null or is_multiplayer_authority()) and can_fire()):
-		cooldown_timer = cooldown
-		var bolt_node: Bolt = bolt_resource.instantiate()
-		bolt_node.speed = get_parent().get_parent().linear_velocity.length() + speed
-		bolt_node.damage = damage
-		get_node('../../../../bolts').add_child(bolt_node, true)
-		bolt_node.global_transform.origin = global_transform.origin
-		bolt_node.global_transform.basis = Basis(global_transform.basis)
-		fire_sound.rpc()
-
-
-@rpc("call_local")
-func fire_sound():
-	$AudioStreamPlayer3D.play()

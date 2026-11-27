@@ -61,11 +61,7 @@ func test_a_gun_puts_its_bolt_in_the_system() -> void:
 	var system := _system()
 	var ship: Ship = ShipScene.instantiate()
 	system.add_ship(ship)
-	var gun: Gun = preload("res://ship_systems/weapons/Gun.tscn").instantiate()
-	gun.bolt_resource = preload("res://ship_systems/weapons/effects/bolt/Bolt.tscn")
-	ship.get_node("Guns").add_child(gun)
-	ship.get_node("Guns").fire()
-	assert_eq(system.get_node("bolts").get_child_count(), 1)
+	pending("Weapons netcode W1 fires guns on ticks without bolts; W2 brings tick-based bolts back")
 
 
 ## Spawn points and respawns: the ships in a system where a side's players can

@@ -1,15 +1,11 @@
 extends Node3D
+## A ship's guns, fired together by a console's WeaponsCapability.
 
 @export var damage := 0.0
 
-#func _physics_process(_dt: float) -> void:
-#	if $"../Crew".pilot:
-#		if $"../Crew".pilot.get_node("InputsSync").fire_primary and is_multiplayer_authority():
-#			# Pew, fire all guns. For now
-#			for gun in get_children():
-#				gun.fire(damage)
 
-func fire():
-	# Pew, fire all guns. For now
+## Fires every gun ready at [param tick] (each has its own cooldown).
+func fire_at(tick: int) -> void:
 	for gun in get_children():
-		gun.fire(damage)
+		if gun is Gun:
+			gun.fire_at(tick)

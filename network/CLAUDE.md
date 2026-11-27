@@ -44,6 +44,5 @@ yet: sharing pictures between sides, and the host's own player (the server has e
   (`Ship._have_ship`, from its `_ready` there); a despawn forgets that. Sent at once they overtook the spawn.
 - A player's own client sends its `InputsSync` to nobody (`Character.keep_inputs_local`): its input goes
   through `InputChannel`. New broadcast RPCs (`.rpc()`) on ship
-  nodes would reach clients that don't have the ship: send to the clients that know it. (`Gun.fire_sound`
-  does; fix it when weapons are restored.)
+  nodes would reach clients that don't have the ship: send to the clients that know it.
 - Server log "Interest: peer X now knows N ships (+ more, leaving, gone)".

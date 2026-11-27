@@ -38,7 +38,7 @@ const MAX_SHRINK_AFTER := SHRINK_AFTER * 8
 ## by easing off its lead (time dilation, InputLead): each skip is a correction.
 const BACKLOG_SLACK := 8
 const _VECTOR_FIELDS: Array[String] = ["throttle", "rotation_throttle"]
-const _BOOL_FIELDS: Array[String] = ["autospin_toggle", "autobreak_toggle", "debug_all_stop"]
+const _BOOL_FIELDS: Array[String] = ["autospin_toggle", "autobreak_toggle", "debug_all_stop", "fire_primary"]
 ## One-shot presses that switch a setting: a dropped one is carried to the next
 ## input used (two cancel out), or the server would fly with the other setting
 ## for good while the pilot's client flies with theirs.
@@ -77,8 +77,10 @@ const RECORD_BYTES := 29
 ## One tick's input. Its vectors are rounded to float32, as the wire carries
 ## them, so the client flies the same input the server will.
 static func make_record(tick: int, throttle: Vector3, rotation_throttle: Vector3,
-		autospin_toggle := false, autobreak_toggle := false, debug_all_stop := false) -> Dictionary:
+		autospin_toggle := false, autobreak_toggle := false, debug_all_stop := false,
+		fire_primary := false) -> Dictionary:
 	return {
+		"fire_primary": fire_primary,
 		"tick": tick,
 		"throttle": _float32(throttle),
 		"rotation_throttle": _float32(rotation_throttle),
@@ -108,7 +110,8 @@ static func encode(packet: Array) -> PackedByteArray:
 		for i in 3:
 			bytes.encode_float(at + 4 + i * 4, r.throttle[i])
 			bytes.encode_float(at + 16 + i * 4, r.rotation_throttle[i])
-		bytes[at + 28] = int(r.autospin_toggle) | int(r.autobreak_toggle) << 1 | int(r.debug_all_stop) << 2
+		bytes[at + 28] = int(r.autospin_toggle) | int(r.autobreak_toggle) << 1 | int(r.debug_all_stop) << 2 \
+				| int(r.fire_primary) << 3
 		at += RECORD_BYTES
 	return bytes
 
@@ -131,6 +134,7 @@ static func decode(bytes: Variant) -> Variant:
 			"autospin_toggle": flags & 1 != 0,
 			"autobreak_toggle": flags & 2 != 0,
 			"debug_all_stop": flags & 4 != 0,
+			"fire_primary": flags & 8 != 0,
 		})
 	return packet
 
