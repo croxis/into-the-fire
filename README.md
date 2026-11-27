@@ -4,27 +4,41 @@ A Godot Babylon 5 game.
 ## Play instructions
 Open and forward port 2258 to have others join your game.
 
-WASDQE rotates the ship
+### Flight
+| Key | Action |
+| --- | --- |
+| W / S | Pitch down / up |
+| A / D | Yaw left / right |
+| Q / E | Roll counter-clockwise / clockwise |
+| Shift | Thrust forward |
+| Ctrl | Thrust backward |
+| Left / Right arrow | Slide left / right |
+| Up / Down arrow | Slide up / down |
+| [ | Toggle auto spin stabilize (still needs tuning) |
+| ] | Toggle auto brake (still needs tuning) |
+| Backslash \ | Debug all stop |
+| Space | Fire primary weapons |
 
-Left shift moves forward
+### Cameras and menus
+| Key | Action |
+| --- | --- |
+| F5 | Switch between 1st and 3rd person camera |
+| F4 | Toggle the RTS camera |
+| W A S D (RTS camera) | Move the camera |
+| Q / E (RTS camera) | Rotate the camera |
+| Mouse wheel or = / - (RTS camera) | Zoom in / out |
+| Right mouse drag (RTS camera) | Rotate the camera |
+| ` (next to the 1 key) | Open the developer console and toggle performance metrics |
+| Esc | Show or hide the menu |
 
-Left control moves backwards
-
-Arrow keys are lateral motion
-
-[ and ] Turn on auto spin stabalize and auto break (still need tuning)
-
-Backslash \ is a debug all stop key
-
-Space Fire primary weapons
-
-F4 Switch to RTS camera
-
-F5 Switch 1st and 3rd Camera
-
-` (next to the 1 key) opens performance metrics
-
-Esc brings up the menu
+### Gamepad
+| Input | Action |
+| --- | --- |
+| Left stick | Pitch and yaw |
+| Right stick left / right | Thrust |
+| Right trigger | Roll |
+| D-pad | Slide up, down, left, right |
+| A (bottom face button) | Fire primary weapons |
 
 ## Build instructions
 Requires a custom build of godot: Doubles, LimboAI, and a patch for better control of the physics engine
