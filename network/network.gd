@@ -35,6 +35,19 @@ signal connection_succeeded()
 signal auth_failed(peer, reason)
 
 
+## Quitting: go offline before the world is freed. Freeing it online sends
+## each client a despawn for every spawned node, including nodes that client
+## was never told about (fog of war), and it logs an error for each. This node
+## comes after Galaxy in entry.tscn, so it leaves the tree first (Godot frees
+## children last first). Only detached here, not closed: the spawners would
+## still try to send through a closed peer, and closing the encrypted link
+## cleanly (or saying goodbye first) makes the client log TLS errors as the
+## link shuts while it sends. The peer closes as before, when it is freed.
+func _exit_tree() -> void:
+	if peer and multiplayer.multiplayer_peer == peer:
+		multiplayer.multiplayer_peer = null  # Offline: the spawners send nothing more.
+
+
 func _process(delta: float) -> void:
 	var enet := multiplayer.multiplayer_peer as ENetMultiplayerPeer
 	if enet == null or enet.get_connection_status() != MultiplayerPeer.CONNECTION_CONNECTED:

@@ -46,3 +46,11 @@ yet: sharing pictures between sides, and the host's own player (the server has e
   through `InputChannel`. New broadcast RPCs (`.rpc()`) on ship
   nodes would reach clients that don't have the ship: send to the clients that know it.
 - Server log "Interest: peer X now knows N ships (+ more, leaving, gone)".
+
+## Quitting
+
+- `network.gd` `_exit_tree` detaches the peer (`multiplayer_peer = null`) before Galaxy is freed (network comes
+  after Galaxy in `entry.tscn`; Godot frees children last first). Freed online, the server sent despawns for
+  nodes a client never had (fog of war): an error each. Not closed early: a clean DTLS shutdown makes the client
+  log TLS errors. Left: a server quitting first sometimes gives the client one `-0x6C00` (its UDP send hit the
+  closed port, `bio_send`), about 3 runs in 8.
