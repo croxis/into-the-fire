@@ -70,7 +70,8 @@ machines; nothing on the server path may depend on rendering.
   (`Content.instantiate(&"b5:aurora_starfury")`), never by `res://` path; IDs are in manifests such as
   `content/babylon5.cfg`.
 - `network/network.gd`: ENet host/join and the custom auth handshake.
-- `Galaxy.gd`: world state (factions, systems, players, `ids`); `start_new_world()` builds it from
+- `Galaxy.gd`: the root of one world. Its data is a `world/WorldState` record (`Galaxy.state`: factions,
+  `ids`, `game_name`, player logins), what saves will keep; `start_new_world()` builds it from
   scenario `scenario_id` (default `b5:playtest`) with `world/WorldBuilder`; `world/WorldReplicator`
   sends joining clients a world snapshot (factions). `world_ids.gd`: ship and pilot ID counters (never statics).
 - `spawning/`: `SpawnService` (`Galaxy.spawns`): first spawn, rejoin, respawn by `RespawnRules`.

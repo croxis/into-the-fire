@@ -1,7 +1,21 @@
 class_name Galaxy
 extends Node
 
-var game_name := "default"
+## This world's data as a record (WorldState): what saves will keep. The
+## properties below are its fields, here so callers don't need to know.
+var state := WorldState.new()
+var game_name: String:
+	get: return state.game_name
+	set(value): state.game_name = value
+## Ship and pilot IDs for this world (state.ids).
+var ids: WorldIds:
+	get: return state.ids
+	set(value): state.ids = value
+## Every faction in this world (state.factions). The server creates them;
+## clients receive a copy when they join (WorldReplicator), replaced as a whole.
+var factions: FactionRegistry:
+	get: return state.factions
+	set(value): state.factions = value
 ## A world has been (or is being) built here: start_new_world.
 var active_galaxy := false
 ## Loads a world's scenes: func(paths, done), calling done with an object whose
@@ -14,8 +28,6 @@ var _builder: WorldBuilder
 ## The scenario a new game starts from (content ID, kind "scenario").
 @export var scenario_id: StringName = &"b5:playtest"
 
-## Ship and pilot IDs for this world.
-var ids := WorldIds.new()
 
 ## Draws the zone the local player is in. Unused on a dedicated server.
 var zone_view := ZoneView.new()
@@ -48,10 +60,6 @@ var fog := FogOfWar.new(self)
 ## Server: FogOfWar.refresh has just run.
 signal interest_refreshed()
 
-## Every faction in this world. The server creates them; clients receive a copy
-## when they join (WorldReplicator). Replaced as a whole, never patched from
-## client data.
-var factions := FactionRegistry.new()
 ## Tells joining clients about the world (factions); they wait for it.
 var replicator := WorldReplicator.new(self)
 

@@ -75,7 +75,10 @@ system scene is needed.
 ## Relation to saves
 
 A scenario describes the same records a save will hold (see the design doc, *Saves*). A save is the
-scenario's records plus everything that changed since. Saving isn't built yet; when it is, it will
+scenario's records plus everything that changed since. The world's data records live in one
+`WorldState` (`world/world_state.gd`, `Galaxy.state`: factions, IDs, game name, player logins), apart
+from scene nodes, so a save can serialize it and a test can build it without nodes; systems, ships
+and crew are still nodes. Saving isn't built yet; when it is, it will
 store records through a storage interface (SQLite on servers), and scenarios stay text so they can be
 reviewed, merged and shipped by mods.
 
@@ -84,4 +87,5 @@ reviewed, merged and shipped by mods.
 - Players spawn aboard any ship of their side with launch bays (`SpawnService.spawn_points`); a scenario
   can't choose spawn points or death rules (`RespawnRules`) yet.
 - Scenarios hold no player spawn rules, economy or orders yet.
-- Ship and pilot IDs restart at 1 each new game; saves will need to store `WorldIds`.
+- Ship and pilot IDs restart at 1 each new game, and player IDs each server run: nothing saves
+  `WorldState` yet.
