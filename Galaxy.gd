@@ -94,6 +94,7 @@ func systems() -> Array[System]:
 func player_enter_system(system_name) -> void:
 	var system: System = get_node("Systems/" + system_name)
 	zone_view.view(system)
+	var w0 := get_viewport()
 	#Music Hack
 	system.get_node("AudioStreamPlayer").playing = true
 	# This runs on the spawning player's own machine, so look up the local peer
@@ -142,6 +143,11 @@ static func find_for(node: Node) -> Galaxy:
 
 
 func _ready():
+	# The player's graphics settings from the start, not only once a client
+	# joins: the title screen's render warm-up (RenderWarmup) must build the
+	# pipelines for the settings the game will draw with (MSAA changes them
+	# all), and a host never joins.
+	update_graphics()
 	multiplayer.peer_connected.connect(_on_peer_connected)
 	multiplayer.peer_disconnected.connect(_on_peer_disconnected)
 	zone_view.name = "ZoneView"

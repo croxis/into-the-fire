@@ -10,3 +10,12 @@ doesn't free Jolt's finished jobs (`JoltJobSystem::post_step`); only the engine'
 recovers, so it is left as is until a new symptom appears. Known symptom: `test_ship_flight.gd` and `test_rewind.gd`
 run on their own fail on this warning (the full suite passes). The fix belongs in godot-ci's stepping patch: wrap the call in
 `JoltPhysicsServer3D::space_step` with `job_system->pre_step()` / `job_system->post_step()`, as `step()` does.
+
+## Render warm-up
+
+`RenderWarmup` (`render_warmup.gd`, added by `entry.gd` on machines that render) draws each ship scene from
+its own passenger camera for 2 frames, in the main window, under a black "Loading" cover, once Content has
+loaded them. Without it a client's first look at a station cost a ~670 ms frame (the renderer building
+pipelines: 19 surface, 8 draw, 14 specialisation), which also started the launch input stall. It only works
+with the final graphics settings: MSAA changes every pipeline, so `Galaxy._ready` applies the player's
+settings (`update_graphics`) before it runs. Startup gains about 0.8 s (one ~1 s frame, covered).

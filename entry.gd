@@ -28,6 +28,8 @@ func _ready():
 	if not options.unknown.is_empty():
 		Log.log(["Ignored arguments: ", options.unknown], Log.MessageType.INFO)
 	$network.players = $Galaxy/Players
+	if not options.headless:
+		add_child(RenderWarmup.new())  # Draws every ship once behind the title screen.
 	if options.has_ui():
 		_add_main_menu()
 	if options.wants_discord():

@@ -29,7 +29,8 @@ Loaded when working in `characters/`. Project-wide rules are in the top-level `C
   throttle dropped unreliable inputs after the RTT spike (links are now `network.gd` `steady`), and a
   time-sync sample whose reply waited out that frame pulled netfox's clock 12% slow then fast for seconds
   (second ITF patch, `network-time-synchronizer.gd` `_discipline_clock`: samples over 2x the best RTT,
-  or best + 50 ms, are left out). Tests: `test_steady_link.gd`, `test_clock_sync.gd`.
+  or best + 50 ms, are left out). Tests: `test_steady_link.gd`, `test_clock_sync.gd`. The frame itself is
+  now paid at startup instead (`zones/CLAUDE.md`, render warm-up).
 - Log: server "Input from X: held, skipped, queued, cushion" every 5 s.
 - A player's own client keeps its `InputsSync` to itself (`keep_inputs_local`): nobody reads a remote
   pilot's, and its last packet used to reach a character the server had just freed at launch.
