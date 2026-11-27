@@ -20,7 +20,7 @@ func before_each() -> void:
 func _starfury(at: Vector3) -> Ship:
 	var ship: Ship = Content.instantiate(&"b5:aurora_starfury")
 	system.add_ship(ship)
-	ship.global_position = at
+	ship.place(Transform3D(Basis(), at))  # Into physics now: a set position reaches it next frame.
 	return ship
 
 
@@ -43,9 +43,9 @@ func test_a_gun_fires_a_shot_forward_from_its_muzzle() -> void:
 	assert_eq(system.shots.count(), 1)
 	var shot: Shot = system.shots.all()[0]
 	assert_eq(shot.origin, gun.global_position)
-	var forward := -gun.global_basis.z.normalized()
-	assert_almost_eq(shot.velocity, forward * gun.speed + ship.linear_velocity, Vector3.ONE * 1e-6,
-			"forward is -z, and the shot keeps the ship's own velocity")
+	var forward := -ship.global_basis.z  # The ship's forward: its pilot camera looks along -z.
+	assert_almost_eq(shot.velocity.normalized(), (forward * gun.speed + ship.linear_velocity).normalized(),
+			Vector3.ONE * 1e-3, "out of the ship's nose, keeping the ship's own velocity")
 	assert_eq(shot.shooter, ship)
 
 

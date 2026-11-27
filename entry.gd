@@ -127,6 +127,10 @@ func _launch_when_aboard() -> void:
 	await get_tree().create_timer(1.0).timeout
 	Log.log(["Test player launching"], Log.MessageType.INFO)
 	hud.passenger.request_launch.emit()
+	if options.fire:
+		await get_tree().create_timer(3.0).timeout  # Clear of the arm.
+		Log.log(["Test player holding the trigger"], Log.MessageType.INFO)
+		Input.action_press("fire_primary")
 
 
 func _start_client() -> void:

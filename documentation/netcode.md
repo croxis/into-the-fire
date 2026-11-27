@@ -126,6 +126,27 @@ that moment it follows a curve matching both positions and both velocities, so a
 not cut corners. Past the newest (a late or lost snapshot) it carries the ship on for up to 250 ms.
 The ship is kinematic on the client: physics doesn't fly it, but other bodies still hit it.
 
+## Weapons
+
+The server's shots are the real ones; clients only draw them. The design favours the shooter: what you
+saw when you fired is what the server checks. Detail for agents: `ship_systems/weapons/CLAUDE.md`.
+
+- **The trigger rides in your input.** It is a bit in each tick's input record, so the server fires your
+  guns on the tick it applies that input. Cooldowns count ticks, so both machines agree when a gun fires.
+- **Shots are data, not physics.** A shot is a straight line (origin, velocity, the tick it was fired),
+  moved by tick number. Every machine that knows a shot puts it in the same place for the same tick.
+- **Your own shots appear at once.** Your client fires its copy when you press the trigger, drawn with
+  your predicted ship. Other clients that know your ship get a 41-byte fire event and draw the shot at
+  the moment they draw your ship, so it leaves your guns as they see them.
+- **Hits are the server's, checked as you saw them.** With each input your client says how far behind
+  its own tick it was drawing other ships. The server rewinds targets to that moment for your shots (at
+  most 250 ms back), using the last 17 ticks of each ship's transform. The cost of favouring the shooter:
+  a target can be hit just after it reached cover on its own screen.
+- **A hit** lowers the target's health (synced; at zero the server destroys it) and goes as a 29-byte
+  hit event to the clients that know the shooter. Each drops that shot and shows a flash.
+- Server log: `Shots in SYSTEM: N fired, M hits` every 5 s while anything fired. `--testplayer --fire`
+  holds the trigger once flying, for lag runs.
+
 ## Who is told what: interest management and fog of war
 
 The server decides, per client, which ships exist on that client at all (`Interest`, refreshed by
@@ -207,5 +228,5 @@ Each of these cost a debugging session; the code and its tests now guard against
 - **A VoxelGI node in a ship froze every machine that drew one,** each time one appeared. Ships carry
   none.
 
-What is planned but not built (weapons and lag compensation, moving between systems)
+What is planned but not built (NPC and turret fire, moving between systems)
 is in the design doc linked from `CLAUDE.md`.

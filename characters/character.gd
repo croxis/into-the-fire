@@ -274,7 +274,7 @@ func _apply_input(_dt: float, tick: int) -> void:
 	if weapons:
 		# A remote player's shots are checked against what they saw (W4).
 		var rewind := ShotField.rewind_for(tick, r.tick, r.view_ticks) if source == InputSource.CHANNEL else 0
-		weapons.trigger(r.fire_primary, tick, rewind)
+		weapons.trigger(r.fire_primary, tick, rewind, r.tick if source == InputSource.CHANNEL else -1)
 
 
 ## Client: how many ticks behind [param tick] this machine is showing other

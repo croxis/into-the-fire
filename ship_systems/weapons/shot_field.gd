@@ -18,10 +18,18 @@ const HISTORY_TICKS := MAX_REWIND_TICKS + 2
 
 var _system: System
 var _hits_allowed: bool
+## Server: [param shot] hit [param target] at [param at] this tick.
+signal hit(shot: Shot, target: Ship, at: Vector3)
+
 var _shots: Array[Shot] = []
 var _bolts: Dictionary[Shot, Node3D] = {}
 ## Server: ship -> {tick: global transform}, the last HISTORY_TICKS ticks.
 var _history: Dictionary[Ship, Dictionary] = {}
+## Where the last hit _hit found struck (on the target as it is now).
+var _last_hit_at := Vector3.ZERO
+## Counted since the last report (report).
+var _fired := 0
+var _hits := 0
 
 
 ## Ticks back to check a remote player's shot fired at server tick
@@ -60,11 +68,23 @@ func _init(system: System, hits_allowed := true) -> void:
 
 func add(shot: Shot) -> void:
 	_shots.append(shot)
+	_fired += 1
 	if DisplayServer.get_name() != "headless" and _system.has_node("bolts"):
 		var bolt: Bolt = BoltScene.instantiate()
 		bolt.shot = shot
 		_system.get_node("bolts").add_child(bolt)
 		_bolts[shot] = bolt
+
+
+## "N fired, M hits" since the last report, or "" if nothing fired (System
+## logs it every 5 s).
+func report() -> String:
+	if _fired == 0 and _hits == 0:
+		return ""
+	var line := "%d fired, %d hits" % [_fired, _hits]
+	_fired = 0
+	_hits = 0
+	return line
 
 
 func count() -> int:
@@ -81,10 +101,15 @@ func step(tick: int) -> void:
 	var decides := _hits_allowed and (not _system.multiplayer.has_multiplayer_peer() or _system.multiplayer.is_server())
 	for shot in _shots.duplicate():
 		if decides:
-			var hit := _hit(shot, tick)
-			if hit:
-				hit.take_shot(shot.damage_at(tick), shot)
+			var target := _hit(shot, tick)
+			if target:
+				target.take_shot(shot.damage_at(tick), shot)
+				_hits += 1
 				_remove(shot)
+				show_hit(_last_hit_at)
+				hit.emit(shot, target, _last_hit_at)
+				if shot.shooter and is_instance_valid(shot.shooter) and _system.multiplayer.has_multiplayer_peer():
+					shot.shooter.announce_hit(shot, _last_hit_at)
 				continue
 		if shot.expired_at(tick):
 			_remove(shot)
@@ -108,9 +133,55 @@ func _hit(shot: Shot, tick: int) -> Ship:
 			return null
 		var ship := _ship_of(result.collider)
 		if ship and ship != shot.shooter:
+			_last_hit_at = result.position
 			return ship
 		exclude.append(result.rid)  # The shooter's own hull, or something not a ship.
 	return null
+
+
+## Client: drops [param shooter]'s shot from gun [param gun] fired at
+## [param tick] (a hit event names it so). False if there is none.
+func remove_named(shooter: Ship, gun: int, tick: int) -> bool:
+	for shot in _shots:
+		if shot.shooter == shooter and shot.gun_index == gun and shot.fire_tick == tick:
+			_remove(shot)
+			return true
+	return false
+
+
+## A brief flash at [param at], on machines that render.
+func show_hit(at: Vector3) -> void:
+	if DisplayServer.get_name() == "headless" or not _system.has_node("bolts"):
+		return
+	var flash := HitFlash.new()
+	_system.get_node("bolts").add_child(flash)
+	flash.global_position = at
+
+
+## Bytes of a hit event (encode_hit): gun index (u8), the shot's fire tick as
+## the receiving client knows it (s32), where it hit (3 doubles).
+const HIT_BYTES := 29
+
+
+static func encode_hit(gun: int, tick: int, at: Vector3) -> PackedByteArray:
+	var b := PackedByteArray()
+	b.resize(HIT_BYTES)
+	b[0] = gun
+	b.encode_s32(1, tick)
+	for i in 3:
+		b.encode_double(5 + i * 8, at[i])
+	return b
+
+
+## {"gun", "tick", "position"} from [param bytes] (encode_hit), or null.
+static func decode_hit(bytes: Variant) -> Variant:
+	if not bytes is PackedByteArray or (bytes as PackedByteArray).size() != HIT_BYTES:
+		return null
+	var b: PackedByteArray = bytes
+	var at := Vector3(b.decode_double(5), b.decode_double(13), b.decode_double(21))
+	if not at.is_finite():
+		return null
+	return {"gun": b[0], "tick": b.decode_s32(1), "position": at}
 
 
 ## Bytes of a fire event (encode_fire): gun index (u8), fire tick (s32),
@@ -152,6 +223,7 @@ func _rewound_hit(shot: Shot, tick: int, from: Vector3, to: Vector3) -> Ship:
 	var space := _system.find_world_3d().direct_space_state
 	var best: Ship = null
 	var best_fraction := INF
+	var best_at := Vector3.ZERO
 	for ship in _system.get_ships():
 		if ship == shot.shooter:
 			continue
@@ -168,6 +240,9 @@ func _rewound_hit(shot: Shot, tick: int, from: Vector3, to: Vector3) -> Ship:
 		if fraction < best_fraction:
 			best_fraction = fraction
 			best = ship
+			best_at = a.lerp(b, fraction)
+	if best:
+		_last_hit_at = best_at
 	return best
 
 

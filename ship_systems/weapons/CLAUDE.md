@@ -15,7 +15,8 @@ owner's design choices: favour the shooter, fire events (not networked bolt node
 ## Shots (W2)
 
 - A shot is data (`Shot`: origin, velocity, fire tick, damage, shooter), a straight line by tick number, not a
-  physics body. `Gun.make_shot`: from the muzzle, forward (-z) at the gun's speed plus the ship's velocity.
+  physics body. `Gun.make_shot`: from the muzzle along the gun's +z (the scenes' convention: the Starfury's `Guns` node is
+  turned half a turn, so +z is the ship's forward) at the gun's speed plus the ship's velocity.
 - Each system's `ShotField` (`System.shots`) is stepped after that system's physics step (`ZoneStepper` calls
   `System.after_step`), so hulls are where this tick put them. On the server each shot's stretch of path this
   tick is ray-tested (`_hit`, skipping the shooter's own hull) and a hit calls `Ship.take_shot`. Clients never
@@ -42,3 +43,13 @@ owner's design choices: favour the shooter, fire events (not networked bolt node
   `System.after_step`). A rewound shot's stretch this tick is moved with each nearby ship from then to now
   (now x then inverted) and ray-tested against that ship alone (`_rewound_hit`); the nearest hit wins.
 - Tests: place ships with `Ship.place`, not `global_position` (physics only learns a set position next frame).
+
+## Hits (W5)
+
+- On a hit the server's `ShotField` lowers health (`Ship.take_shot`), emits `hit(shot, target, at)` and the
+  shooter announces it (`Ship.announce_hit`: gun, tick, position, 29 bytes, unreliable) to clients that know
+  the shooter, its pilot too. Each names the shot by the tick that client knows it by: `Shot.client_tick`
+  (the pilot's input tick) for the pilot, the server's fire tick for others. Clients drop it
+  (`ShotField.remove_named`) and flash (`HitFlash`). Clients that know the target but not the shooter see no flash.
+- Server log `Shots in SYSTEM: N fired, M hits` every 5 s (`ShotField.report`). `--fire` (test player) holds
+  the trigger once flying. The guns have no sound yet (their AudioStreamPlayer3D has no stream).

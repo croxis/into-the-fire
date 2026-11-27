@@ -23,6 +23,10 @@ func _ready():
 func after_step(tick: int) -> void:
 	shots.record_history(tick)
 	shots.step(tick)
+	if tick % 300 == 0:  # Every 5 s at 60 Hz.
+		var line := shots.report()
+		if line:
+			Log.log(["Shots in ", name, ": ", line], Log.MessageType.INFO)
 
 
 func add_station(station: Ship):

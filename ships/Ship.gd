@@ -480,7 +480,37 @@ func _shot_fired(packet: PackedByteArray) -> void:
 	var gun := $Guns.get_child(fire.gun) as Gun
 	if gun == null:
 		return
-	system.shots.add(Shot.new(fire.origin, fire.velocity, fire.tick, gun.damage, self))
+	var shot := Shot.new(fire.origin, fire.velocity, fire.tick, gun.damage, self)
+	shot.gun_index = fire.gun
+	system.shots.add(shot)
+
+
+## Server: [param shot], fired by this ship, hit at [param at] (ShotField.hit).
+## Told to the clients that know this ship, its pilot's too: each names the shot
+## by the tick it knows it by (the pilot's client by its own input tick).
+func announce_hit(shot: Shot, at: Vector3) -> void:
+	var pilot := remote_pilot()
+	var pilot_peer := pilot.multiplayer_id if pilot else 0
+	var knows := Callable()
+	if galaxy:
+		knows = func(peer: int) -> bool: return galaxy.interest.knows(peer, self)
+	for peer in snapshots.recipients(multiplayer.get_peers(), 0, knows):
+		var tick := shot.client_tick if peer == pilot_peer and shot.client_tick >= 0 else shot.fire_tick
+		_shot_hit.rpc_id(peer, ShotField.encode_hit(shot.gun_index, tick, at))
+
+
+## Client: one of this ship's shots hit (Ship.announce_hit on the server):
+## drop it here and show the hit.
+@rpc("authority", "call_remote", "unreliable")
+func _shot_hit(packet: PackedByteArray) -> void:
+	if multiplayer.is_server():
+		return
+	var hit: Variant = ShotField.decode_hit(packet)
+	var system := System.find_for(self)
+	if hit == null or system == null:
+		return
+	system.shots.remove_named(self, hit.gun, hit.tick)
+	system.shots.show_hit(hit.position)
 
 
 ## Server: [param shot] hit this ship for [param damage] (ShotField).

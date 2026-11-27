@@ -23,7 +23,8 @@ func cooldown_ticks() -> int:
 ## Fires at [param tick] if its cooldown has passed; true if it fired. Ticks,
 ## not frames, so the server and the shooter's client agree on when it fires.
 ## [param rewind]: ticks back its shot is checked against targets (W4).
-func fire_at(tick: int, rewind := 0) -> bool:
+## [param client_tick]: the remote pilot's input tick that fired it (Shot.client_tick).
+func fire_at(tick: int, rewind := 0, client_tick := -1) -> bool:
 	if tick < _ready_tick:
 		return false
 	_ready_tick = tick + cooldown_ticks()
@@ -38,6 +39,8 @@ func fire_at(tick: int, rewind := 0) -> bool:
 		var shot := make_shot(tick)
 		shot.predicted = predicting
 		shot.rewind_ticks = rewind
+		shot.client_tick = client_tick
+		shot.gun_index = get_index()
 		system.shots.add(shot)
 		if serving and ship and multiplayer.has_multiplayer_peer():
 			ship.announce_shot(get_index(), shot)
@@ -45,11 +48,13 @@ func fire_at(tick: int, rewind := 0) -> bool:
 	return true
 
 
-## A shot from the muzzle at [param tick]: forward (-z) at the gun's speed,
-## plus its ship's own velocity.
+## A shot from the muzzle at [param tick]: along the gun's +z at its speed,
+## plus its ship's own velocity. Guns fire along +z, not Godot's -z forward:
+## the scenes are built that way (the Starfury's Guns node is turned half a
+## turn, so its guns' +z is the ship's forward).
 func make_shot(tick: int) -> Shot:
 	var ship := ShotField._ship_of(self)
-	var v := -global_basis.z.normalized() * speed
+	var v := global_basis.z.normalized() * speed
 	if ship:
 		v += ship.linear_velocity
 	return Shot.new(global_position, v, tick, damage, ship)

@@ -25,6 +25,12 @@ var predicted := false
 ## shooter saw them (favour the shooter, ShotField.rewind_for); 0 for NPCs and
 ## the host.
 var rewind_ticks := 0
+## Which gun of its ship fired it (its index under Guns): with the fire tick,
+## how a hit event names it.
+var gun_index := 0
+## Server: the tick of the input that fired it on its pilot's client (that
+## client knows its own copy by this tick), or -1 (an NPC's, the host's).
+var client_tick := -1
 
 
 func _init(from: Vector3, v: Vector3, tick: int, muzzle_damage: float, fired_by: Ship = null) -> void:

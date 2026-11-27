@@ -5,7 +5,7 @@ extends Node3D
 
 
 ## Fires every gun ready at [param tick] (each has its own cooldown).
-func fire_at(tick: int, rewind := 0) -> void:
+func fire_at(tick: int, rewind := 0, client_tick := -1) -> void:
 	for gun in get_children():
 		if gun is Gun:
-			gun.fire_at(tick, rewind)
+			gun.fire_at(tick, rewind, client_tick)

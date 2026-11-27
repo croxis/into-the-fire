@@ -6,7 +6,8 @@ class_name WeaponsCapability
 
 
 ## Each tick: fires the guns at [param tick] while [param pressed]. Their shots
-## are checked against targets [param rewind] ticks back (ShotField.rewind_for).
-func trigger(pressed: bool, tick: int, rewind := 0) -> void:
+## are checked against targets [param rewind] ticks back (ShotField.rewind_for);
+## [param client_tick] is the remote pilot's input tick (Shot.client_tick).
+func trigger(pressed: bool, tick: int, rewind := 0, client_tick := -1) -> void:
 	if pressed and is_available():
-		system.fire_at(tick, rewind)
+		system.fire_at(tick, rewind, client_tick)
