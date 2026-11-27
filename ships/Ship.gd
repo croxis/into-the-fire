@@ -454,10 +454,8 @@ func _process(_delta: float) -> void:
 	#DebugDraw2D.set_text("Frames drawn", Engine.get_frames_drawn())
 
 
-func bullet_hit(damage, bullet_global_trans):
-	var BASE_BULLET_BOOST = 1
-	var direction_vect = bullet_global_trans.basis.z.normalized() * BASE_BULLET_BOOST
-	apply_impulse((bullet_global_trans.origin - global_transform.origin).normalized(), direction_vect * damage)
+## Server: [param shot] hit this ship for [param damage] (ShotField).
+func take_shot(damage: float, _shot: Shot) -> void:
 	health -= damage
 
 

@@ -5,6 +5,8 @@ class_name System
 ## never shown itself: ZoneView draws the viewed zone in the main window.
 
 var ship_scan_timer := Timer.new()
+## The shots flying here (weapons netcode).
+var shots := ShotField.new(self)
 
 func _ready():
 	# The sky is placed by $StarField itself (anchor_star "Ran", 1.058 AU out:
@@ -14,6 +16,12 @@ func _ready():
 		ship_scan_timer.autostart = true
 		ship_scan_timer.timeout.connect(ship_scanner_check)
 		add_child(ship_scan_timer)  # A Timer only runs inside the scene tree.
+
+
+## After this system's physics step for [param tick] (ZoneStepper): shots
+## move on and, on the server, hit.
+func after_step(tick: int) -> void:
+	shots.step(tick)
 
 
 func add_station(station: Ship):

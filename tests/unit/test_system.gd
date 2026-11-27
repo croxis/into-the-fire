@@ -22,7 +22,7 @@ func test_system_is_a_zone_with_its_own_world() -> void:
 
 func test_zone_parts_sit_under_the_root() -> void:
 	var system := _system()
-	for part in ["ships", "bolts", "ShipSpawner", "BoltSpawner", "StarField", "RTSCameras"]:
+	for part in ["ships", "bolts", "ShipSpawner", "StarField", "RTSCameras"]:
 		assert_true(system.has_node(part), part)
 
 
@@ -55,13 +55,16 @@ func test_find_for_outside_a_system_is_null() -> void:
 	assert_null(System.find_for(node))
 
 
-func test_a_gun_puts_its_bolt_in_the_system() -> void:
-	# Gun.fire finds the system's bolts node by a relative path
-	# (Gun > Guns > ship > ships > system), so it depends on the system layout.
+func test_a_gun_puts_its_shot_in_the_system() -> void:
+	# Gun.fire_at finds its system (System.find_for), so it depends on the
+	# system layout (Gun > Guns > ship > ships > system).
 	var system := _system()
 	var ship: Ship = ShipScene.instantiate()
 	system.add_ship(ship)
-	pending("Weapons netcode W1 fires guns on ticks without bolts; W2 brings tick-based bolts back")
+	var gun: Gun = preload("res://ship_systems/weapons/Gun.tscn").instantiate()
+	ship.get_node("Guns").add_child(gun)
+	ship.get_node("Guns").fire_at(1)
+	assert_eq(system.shots.count(), 1)
 
 
 ## Spawn points and respawns: the ships in a system where a side's players can

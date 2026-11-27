@@ -26,5 +26,18 @@ func fire_at(tick: int) -> bool:
 	if tick < _ready_tick:
 		return false
 	_ready_tick = tick + cooldown_ticks()
+	var system := System.find_for(self)
+	if system:
+		system.shots.add(make_shot(tick))
 	fired.emit(self, tick)
 	return true
+
+
+## A shot from the muzzle at [param tick]: forward (-z) at the gun's speed,
+## plus its ship's own velocity.
+func make_shot(tick: int) -> Shot:
+	var ship := ShotField._ship_of(self)
+	var v := -global_basis.z.normalized() * speed
+	if ship:
+		v += ship.linear_velocity
+	return Shot.new(global_position, v, tick, damage, ship)

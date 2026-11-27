@@ -78,12 +78,15 @@ func set_mode(zone: SubViewport, mode: Mode) -> void:
 
 
 ## Steps every FULL zone by [param delta] seconds (one tick).
-func step_zones(delta: float, _tick := 0) -> void:
+## Then each zone's after_step(tick), if it has one (System: shots hit).
+func step_zones(delta: float, tick := 0) -> void:
 	for zone in _modes:
 		if _modes[zone] == Mode.FULL:
 			var space := _space(zone)
 			PhysicsServer3D.space_step(space, delta)
 			PhysicsServer3D.space_flush_queries(space)
+			if zone.has_method("after_step"):
+				zone.after_step(tick)
 
 
 func _apply_mode(zone: SubViewport, mode: Mode) -> void:

@@ -83,6 +83,7 @@ machines; nothing on the server path may depend on rendering.
 - `ships/`: `Ship`, `Engines`, `FlightIntegrator`, prediction (see `ships/CLAUDE.md`).
 - `ship_systems/workstations/`: `Console` plus capabilities (Helm, Weapons, Command), each with a behaviour
   tree run in the occupant's `BrainHSM`. Helm's part in prediction: `ships/CLAUDE.md`.
+- `ship_systems/weapons/`: guns and shots (weapons netcode, see its `CLAUDE.md`).
 - `characters/`: `Character` (crew, player or NPC), input, LimboAI state.
 - `factions/`: `Faction`, `FactionRegistry` (one per world, `Galaxy.factions`; found via
   `Galaxy.find_for(node)` or an explicit `faction_registry` in tests). ID 0 is "no faction".
