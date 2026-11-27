@@ -454,6 +454,35 @@ func _process(_delta: float) -> void:
 	#DebugDraw2D.set_text("Frames drawn", Engine.get_frames_drawn())
 
 
+## Server: tells the clients that know this ship that gun [param gun] (its
+## index under Guns) fired [param shot] (a fire event, ShotField.encode_fire).
+## Not its pilot's client: that one fired its own (prediction).
+func announce_shot(gun: int, shot: Shot) -> void:
+	var pilot := remote_pilot()
+	var knows := Callable()
+	if galaxy:
+		knows = func(peer: int) -> bool: return galaxy.interest.knows(peer, self)
+	var packet := ShotField.encode_fire(gun, shot)
+	for peer in snapshots.recipients(multiplayer.get_peers(), pilot.multiplayer_id if pilot else 0, knows):
+		_shot_fired.rpc_id(peer, packet)
+
+
+## Client: gun [param packet]'s gun fired (Ship.announce_shot on the server):
+## fly that shot here, drawn with this ship.
+@rpc("authority", "call_remote", "unreliable")
+func _shot_fired(packet: PackedByteArray) -> void:
+	if multiplayer.is_server():
+		return
+	var fire: Variant = ShotField.decode_fire(packet)
+	var system := System.find_for(self)
+	if fire == null or system == null or fire.gun >= $Guns.get_child_count():
+		return
+	var gun := $Guns.get_child(fire.gun) as Gun
+	if gun == null:
+		return
+	system.shots.add(Shot.new(fire.origin, fire.velocity, fire.tick, gun.damage, self))
+
+
 ## Server: [param shot] hit this ship for [param damage] (ShotField).
 func take_shot(damage: float, _shot: Shot) -> void:
 	health -= damage

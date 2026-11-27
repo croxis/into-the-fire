@@ -26,9 +26,19 @@ func fire_at(tick: int) -> bool:
 	if tick < _ready_tick:
 		return false
 	_ready_tick = tick + cooldown_ticks()
+	var ship := ShotField._ship_of(self)
 	var system := System.find_for(self)
-	if system:
-		system.shots.add(make_shot(tick))
+	# The server's shot is the real one, and it tells the clients that know the
+	# ship (Ship.announce_shot). The pilot's own client fires its copy at once
+	# (prediction). Any other client waits for the server's fire event.
+	var serving := not multiplayer.has_multiplayer_peer() or multiplayer.is_server()
+	var predicting := ship != null and ship.is_predicted_here()
+	if system and (serving or predicting):
+		var shot := make_shot(tick)
+		shot.predicted = predicting
+		system.shots.add(shot)
+		if serving and ship and multiplayer.has_multiplayer_peer():
+			ship.announce_shot(get_index(), shot)
 	fired.emit(self, tick)
 	return true
 

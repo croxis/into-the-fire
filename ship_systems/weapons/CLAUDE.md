@@ -22,3 +22,12 @@ owner's design choices: favour the shooter, fire events (not networked bolt node
   decide hits. Damage falls off as damage / (1 + 0.2 x seconds in flight); shots last 600 ticks.
 - `Bolt.tscn` only draws a shot (no collision, no synchronizer), at `Galaxy.shown_tick`; none on headless
   machines. The system's `BoltSpawner` node is gone (`systems/BoltSpawner.gd` is unused).
+
+## Fire events and prediction (W3)
+
+- The server's shot is the real one. `Gun.fire_at` on the server calls `Ship.announce_shot`: a fire event
+  (`ShotField.encode_fire`: gun index, tick, origin as doubles, velocity, 41 bytes, unreliable) to the clients
+  that know the ship (`ShipSnapshots.recipients`), except its pilot's. Those clients fly it (`Ship._shot_fired`).
+- The pilot's own client fires its copy at once (`Ship.is_predicted_here`): `Shot.predicted`, its tick this
+  client's, drawn at this machine's tick with the predicted ship (`Bolt.drawn_tick`). Other shots are drawn at
+  `Galaxy.shown_tick`, the moment the shooter is drawn. Clients fire no other guns (an NPC's synced trigger).

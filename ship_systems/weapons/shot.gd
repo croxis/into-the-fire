@@ -16,6 +16,11 @@ var fire_tick: int
 var damage: float
 ## The ship that fired it: never hit by its own shots.
 var shooter: Ship
+## Fired on this client by its own pilot (prediction): its fire_tick is this
+## machine's tick, and it is drawn on that timeline, with the predicted ship.
+## Otherwise drawn at the moment this machine shows other ships
+## (Galaxy.shown_tick), where its shooter is.
+var predicted := false
 
 
 func _init(from: Vector3, v: Vector3, tick: int, muzzle_damage: float, fired_by: Ship = null) -> void:

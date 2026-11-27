@@ -76,6 +76,36 @@ func _hit(shot: Shot, tick: int) -> Ship:
 	return null
 
 
+## Bytes of a fire event (encode_fire): gun index (u8), fire tick (s32),
+## origin (3 doubles: large world coordinates), velocity (3 float32).
+const FIRE_BYTES := 41
+
+
+## Server: a fire event for [param shot] from gun [param gun] of its ship.
+static func encode_fire(gun: int, shot: Shot) -> PackedByteArray:
+	var b := PackedByteArray()
+	b.resize(FIRE_BYTES)
+	b[0] = gun
+	b.encode_s32(1, shot.fire_tick)
+	for i in 3:
+		b.encode_double(5 + i * 8, shot.origin[i])
+		b.encode_float(29 + i * 4, shot.velocity[i])
+	return b
+
+
+## Client: {"gun", "tick", "origin", "velocity"} from [param bytes]
+## (encode_fire), or null when they aren't a fire event.
+static func decode_fire(bytes: Variant) -> Variant:
+	if not bytes is PackedByteArray or (bytes as PackedByteArray).size() != FIRE_BYTES:
+		return null
+	var b: PackedByteArray = bytes
+	var origin := Vector3(b.decode_double(5), b.decode_double(13), b.decode_double(21))
+	var velocity := Vector3(b.decode_float(29), b.decode_float(33), b.decode_float(37))
+	if not origin.is_finite() or not velocity.is_finite():
+		return null
+	return {"gun": b[0], "tick": b.decode_s32(1), "origin": origin, "velocity": velocity}
+
+
 static func _ship_of(node: Object) -> Ship:
 	var n := node as Node
 	while n and not n is Ship:

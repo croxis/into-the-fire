@@ -7,10 +7,18 @@ class_name Bolt
 var shot: Shot
 
 
+## The tick this machine draws the shot at: its own for a shot it predicted,
+## else the moment it shows other ships (Galaxy.shown_tick).
+func drawn_tick() -> float:
+	if shot and shot.predicted:
+		return NetworkTime.tick + NetworkTime.tick_factor
+	return Galaxy.shown_tick(self)
+
+
 func _process(_delta: float) -> void:
 	if shot == null:
 		return
-	var at := Galaxy.shown_tick(self)
+	var at := drawn_tick()
 	var grow := 1.0 + 0.2 * maxf(0.0, shot.seconds_at(at))
 	var along := shot.velocity.normalized() if shot.velocity else Vector3.FORWARD
 	var up := Vector3.UP if absf(along.dot(Vector3.UP)) < 0.99 else Vector3.RIGHT
