@@ -6,6 +6,11 @@ class_name Gun
 # If a projectile weapon, what is the speed of the bolt
 @export var speed: float
 @export var bolt_resource: PackedScene
+## The bolt's radius at the muzzle, in metres (Shot.radius).
+@export var bolt_radius := 0.0
+## How fast its bolts dissipate: growth in muzzle sizes per second, damage
+## spread over the larger bolt (Shot.growth).
+@export var growth := 0.2
 
 ## Fired at [param tick] (netcode ticks): what makes a bolt and its sound
 ## listens to this.
@@ -57,4 +62,14 @@ func make_shot(tick: int) -> Shot:
 	var v := global_basis.z.normalized() * speed
 	if ship:
 		v += ship.linear_velocity
-	return Shot.new(global_position, v, tick, damage, ship)
+	return shot_from(global_position, v, tick)
+
+
+## A shot of this gun's from [param origin] at [param velocity], fired at
+## [param tick]: the gun's damage and bolt size (a client builds the shots it
+## is told about this way; a fire event carries only the path).
+func shot_from(origin: Vector3, velocity: Vector3, tick: int) -> Shot:
+	var shot := Shot.new(origin, velocity, tick, damage, ShotField._ship_of(self))
+	shot.radius = bolt_radius
+	shot.growth = growth
+	return shot

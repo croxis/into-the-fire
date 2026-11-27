@@ -98,3 +98,43 @@ func test_only_the_server_decides_hits() -> void:
 	field.step(1)
 	field.step(2)
 	assert_eq(target.health, health)
+
+
+func test_a_bolt_grows_as_it_flies() -> void:
+	var shot := Shot.new(Vector3.ZERO, Vector3.ZERO, 0, 20.0)
+	shot.radius = 0.5
+	shot.growth = 0.5
+	assert_eq(shot.radius_at(0), 0.5)
+	assert_almost_eq(shot.radius_at(120), 1.0, 1e-6, "twice the size after 2 s at 0.5 a second")
+
+
+func test_a_bolt_weakens_as_it_grows() -> void:
+	var shot := Shot.new(Vector3.ZERO, Vector3.ZERO, 0, 20.0)
+	shot.growth = 0.5
+	assert_almost_eq(shot.damage_at(120), 10.0, 1e-6, "twice the size, half the damage: dissipating")
+
+
+func test_a_gun_gives_its_shot_its_bolt_size() -> void:
+	var ship := _starfury(Vector3.ZERO)
+	var gun := _gun(ship)
+	gun.bolt_radius = 0.7
+	gun.growth = 0.3
+	gun.fire_at(1)
+	var shot: Shot = system.shots.all()[0]
+	assert_eq(shot.radius, 0.7)
+	assert_eq(shot.growth, 0.3)
+
+
+func test_a_grown_bolt_hits_what_a_thin_one_would_pass() -> void:
+	var target := _starfury(Vector3(0, 0, -300))
+	var beside := target.visual_radius() + 2.0  # A line this far to the side misses the hull.
+	await Ticks.run(1)
+	var thin := Shot.new(Vector3(beside, 0, -100), Vector3(0, 0, -3000), 1, 20.0)
+	var wide := Shot.new(Vector3(-beside, 0, -100), Vector3(0, 0, -3000), 1, 20.0)
+	wide.radius = beside + target.visual_radius()  # Wide enough to take in the whole hull.
+	system.shots.add(thin)
+	system.shots.add(wide)
+	var health := target.health
+	await Ticks.run(8, 2)
+	assert_lt(target.health, health, "the wide one hit")
+	assert_eq(system.shots.all(), [thin], "the thin one flew past")

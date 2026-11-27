@@ -20,7 +20,12 @@ owner's design choices: favour the shooter, fire events (not networked bolt node
 - Each system's `ShotField` (`System.shots`) is stepped after that system's physics step (`ZoneStepper` calls
   `System.after_step`), so hulls are where this tick put them. On the server each shot's stretch of path this
   tick is ray-tested (`_hit`, skipping the shooter's own hull) and a hit calls `Ship.take_shot`. Clients never
-  decide hits. Damage falls off as damage / (1 + 0.2 x seconds in flight); shots last 600 ticks.
+  decide hits. Shots last 600 ticks.
+- Bolts dissipate: a gun's `bolt_radius` and `growth` go on each shot (`Gun.shot_from`, also used for fire
+  events, which carry only the path). Size is 1 + growth x seconds in flight; the radius grows with it and
+  damage is divided by it. The hit test sweeps a sphere of that radius (`ShotField._sweep`: `cast_motion`,
+  then `get_rest_info`; radius 0 is a ray), rewound shots too, and `Bolt` is drawn at that size.
+  Starfury: 1500 m/s, 0.25 s cooldown, damage 10, radius 0.5 m, growth 0.5/s (3 km out: 1 m, damage 5).
 - `Bolt.tscn` only draws a shot (no collision, no synchronizer), at `Galaxy.shown_tick`; none on headless
   machines. The system's `BoltSpawner` node is gone (`systems/BoltSpawner.gd` is unused).
 

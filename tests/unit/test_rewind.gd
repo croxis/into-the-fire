@@ -98,3 +98,18 @@ func test_a_rewound_shot_misses_where_the_target_was_not() -> void:
 	system.shots.add(shot)
 	await Ticks.run(3, 16)
 	assert_eq(target.health, health, "the shooter couldn't have aimed at it there")
+
+
+func test_a_rewound_wide_bolt_hits_beside_its_line() -> void:
+	var target := _starfury(Vector3(0, 0, -100))
+	var beside := target.visual_radius() + 2.0
+	await Ticks.run(5, 1)
+	target.place(Transform3D(Basis(), Vector3(500, 0, -100)))
+	await Ticks.run(10, 6)
+	var health := target.health
+	var shot := Shot.new(Vector3(beside, 0, -60), Vector3(0, 0, -3000), 15, 20.0)
+	shot.radius = beside + target.visual_radius()
+	shot.rewind_ticks = 12
+	system.shots.add(shot)
+	await Ticks.run(3, 16)
+	assert_lt(target.health, health, "its size counts where the shooter saw the target too")

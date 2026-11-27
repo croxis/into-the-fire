@@ -480,7 +480,7 @@ func _shot_fired(packet: PackedByteArray) -> void:
 	var gun := $Guns.get_child(fire.gun) as Gun
 	if gun == null:
 		return
-	var shot := Shot.new(fire.origin, fire.velocity, fire.tick, gun.damage, self)
+	var shot := gun.shot_from(fire.origin, fire.velocity, fire.tick)
 	shot.gun_index = fire.gun
 	system.shots.add(shot)
 

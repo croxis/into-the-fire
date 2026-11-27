@@ -124,11 +124,11 @@ func _hit(shot: Shot, tick: int) -> Ship:
 	if shot.rewind_ticks > 0:
 		return _rewound_hit(shot, tick, from, to)
 	var space := _system.find_world_3d().direct_space_state
-	var query := PhysicsRayQueryParameters3D.create(from, to)
 	var exclude: Array[RID] = []
+	if shot.shooter and is_instance_valid(shot.shooter):
+		exclude.append(shot.shooter.get_rid())  # A bolt starts inside its own ship's reach.
 	for i in MAX_RAY_RETRIES:
-		query.exclude = exclude
-		var result := space.intersect_ray(query)
+		var result := _sweep(space, from, to, shot.radius_at(tick), exclude)
 		if result.is_empty():
 			return null
 		var ship := _ship_of(result.collider)
@@ -229,14 +229,14 @@ func _rewound_hit(shot: Shot, tick: int, from: Vector3, to: Vector3) -> Ship:
 			continue
 		var then_from := _transform_at(ship, tick - 1 - shot.rewind_ticks)
 		var then_to := _transform_at(ship, tick - shot.rewind_ticks)
-		var radius := ship.visual_radius()
+		var radius := ship.visual_radius() + shot.radius_at(tick)  # Hull and bolt.
 		if Geometry3D.get_closest_point_to_segment(then_to.origin, from, to).distance_to(then_to.origin) \
 				> radius + from.distance_to(to):
 			continue
 		var now := ship.global_transform
 		var a := now * (then_from.affine_inverse() * from)
 		var b := now * (then_to.affine_inverse() * to)
-		var fraction := _ray_fraction(space, a, b, ship)
+		var fraction := _ray_fraction(space, a, b, ship, shot.radius_at(tick))
 		if fraction < best_fraction:
 			best_fraction = fraction
 			best = ship
@@ -246,20 +246,54 @@ func _rewound_hit(shot: Shot, tick: int, from: Vector3, to: Vector3) -> Ship:
 	return best
 
 
-## How far along [param a] to [param b] (0 to 1) a ray first hits
-## [param ship]'s own hull, or INF; other bodies in the way are passed through.
-static func _ray_fraction(space: PhysicsDirectSpaceState3D, a: Vector3, b: Vector3, ship: Ship) -> float:
-	var query := PhysicsRayQueryParameters3D.create(a, b)
+## How far along [param a] to [param b] (0 to 1) a bolt of [param radius]
+## first touches [param ship]'s own hull, or INF; other bodies in the way are
+## passed through.
+static func _ray_fraction(space: PhysicsDirectSpaceState3D, a: Vector3, b: Vector3, ship: Ship,
+		radius := 0.0) -> float:
 	var exclude: Array[RID] = []
 	for i in MAX_RAY_RETRIES:
-		query.exclude = exclude
-		var result := space.intersect_ray(query)
+		var result := _sweep(space, a, b, radius, exclude)
 		if result.is_empty():
 			return INF
 		if _ship_of(result.collider) == ship:
-			return a.distance_to(result.position) / maxf(a.distance_to(b), 1e-9)
+			return result.fraction
 		exclude.append(result.rid)
 	return INF
+
+
+## The first body a bolt of [param radius] touches going from [param a] to
+## [param b], skipping [param exclude]: {collider, rid, position, fraction
+## (0 to 1 along the way)}, or empty. Radius 0 is a ray; otherwise a sphere
+## swept along the way (cast_motion finds how far it gets, get_rest_info what
+## it touched there).
+static func _sweep(space: PhysicsDirectSpaceState3D, a: Vector3, b: Vector3, radius: float,
+		exclude: Array[RID]) -> Dictionary:
+	if radius <= 0.0:
+		var ray := PhysicsRayQueryParameters3D.create(a, b)
+		ray.exclude = exclude
+		var hit := space.intersect_ray(ray)
+		if hit.is_empty():
+			return {}
+		return {collider = hit.collider, rid = hit.rid, position = hit.position,
+				fraction = a.distance_to(hit.position) / maxf(a.distance_to(b), 1e-9)}
+	var sphere := SphereShape3D.new()
+	sphere.radius = radius
+	var query := PhysicsShapeQueryParameters3D.new()
+	query.shape = sphere
+	query.transform = Transform3D(Basis(), a)
+	query.motion = b - a
+	query.exclude = exclude
+	var reach := space.cast_motion(query)
+	if reach.size() < 2 or reach[0] >= 1.0:
+		return {}  # [1, 1]: nothing in the way.
+	query.transform.origin = a + (b - a) * reach[1]
+	query.motion = Vector3.ZERO
+	var info := space.get_rest_info(query)
+	if info.is_empty():
+		return {}
+	return {collider = instance_from_id(info.collider_id), rid = info.rid, position = info.point,
+			fraction = reach[1]}
 
 
 static func _ship_of(node: Object) -> Ship:

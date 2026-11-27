@@ -12,8 +12,15 @@ const LIFETIME_TICKS := 600
 var origin: Vector3
 var velocity: Vector3
 var fire_tick: int
-## Damage at the muzzle; it falls off with time in flight (damage_at).
+## Damage at the muzzle; it falls off as the bolt grows (damage_at).
 var damage: float
+## The bolt's radius at the muzzle, in metres: its hit test is a sphere this
+## size swept along the path (0: a thin line).
+var radius := 0.0
+## How fast the bolt dissipates: each second in flight it grows by this much
+## of its muzzle size, and its damage is spread over the larger bolt. 0.2 is
+## what the old bolts did.
+var growth := 0.2
 ## The ship that fired it: never hit by its own shots.
 var shooter: Ship
 ## Fired on this client by its own pilot (prediction): its fire_tick is this
@@ -50,10 +57,21 @@ func seconds_at(tick: float) -> float:
 	return (tick - fire_tick) * NetworkTime.ticktime
 
 
-## Damage on a hit at [param tick]: the muzzle damage / (1 + 0.2 x seconds in
-## flight), as the old bolts grew and weakened.
+## How many times its muzzle size the bolt is at [param tick]: 1 + growth x
+## seconds in flight.
+func size_at(tick: float) -> float:
+	return 1.0 + growth * maxf(0.0, seconds_at(tick))
+
+
+## The bolt's radius at [param tick] (its hit test and how it is drawn).
+func radius_at(tick: float) -> float:
+	return radius * size_at(tick)
+
+
+## Damage on a hit at [param tick]: the muzzle damage over the bolt's size,
+## so a bolt twice its muzzle size does half the damage (dissipating).
 func damage_at(tick: float) -> float:
-	return damage / (1.0 + 0.2 * seconds_at(tick))
+	return damage / size_at(tick)
 
 
 func expired_at(tick: int) -> bool:

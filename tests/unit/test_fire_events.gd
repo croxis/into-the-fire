@@ -94,3 +94,13 @@ func test_a_predicted_shot_is_drawn_at_this_machines_tick() -> void:
 	add_child_autofree(bolt)
 	bolt.shot = predicted
 	assert_eq(bolt.drawn_tick(), NetworkTime.tick + NetworkTime.tick_factor)
+
+
+func test_a_told_shot_has_its_guns_bolt_size() -> void:
+	var ship := _starfury()
+	_as_client()
+	var gun := ship.get_node("Guns").get_child(1) as Gun
+	ship._shot_fired(ShotField.encode_fire(1, Shot.new(Vector3.ZERO, Vector3(0, 0, -900), 5, 1.0)))
+	var told: Shot = system.shots.all()[0]
+	assert_eq(told.radius, gun.bolt_radius)
+	assert_eq(told.growth, gun.growth)
