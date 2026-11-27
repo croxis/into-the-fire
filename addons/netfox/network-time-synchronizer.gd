@@ -192,6 +192,15 @@ func _discipline_clock() -> void:
 		"\n".join(sorted_samples.map(func(it: NetworkClockSample): return "\t" + it.to_string() + " (%.4fs)" % [get_time() - it.ping_sent]))
 	])
 	
+	# ITF patch (not in upstream netfox; reapply after updating netfox): leave
+	# out samples far slower than the best. A long frame on this machine delays
+	# handling a reply, so its round trip looks like the whole frame and its
+	# offset is off by about half of it; weighted by log(1 + rtt) below, one
+	# such sample pulled the clock away for seconds after every stall.
+	var best_rtt := sorted_samples.front().get_rtt() as float
+	var rtt_limit := maxf(best_rtt * 2., best_rtt + 0.05)
+	sorted_samples = sorted_samples.filter(func(it): return it.get_rtt() <= rtt_limit)
+	
 	# Calculate rtt bounds
 	var rtt_min := sorted_samples.front().get_rtt() as float
 	var rtt_max := sorted_samples.back().get_rtt() as float

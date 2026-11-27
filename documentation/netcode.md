@@ -221,6 +221,13 @@ Each of these cost a debugging session; the code and its tests now guard against
   sharing the channel. Under jitter half the snapshots were lost; they are now unordered.
 - **netfox's client tick is not a steady clock.** Measuring snapshot arrivals against it drew ships
   ahead of their snapshots. Real time is used instead.
+- **ENet's packet throttle drops unreliable packets on purpose after one slow round trip.** A client's
+  long frame boarding a ship made it drop up to all of a pilot's inputs for seconds: holds, then skips.
+  Each link is now kept steady (`network.gd` `steady`).
+- **One time-sync sample taken across a long frame pulled netfox's clock for seconds.** Its reply waited
+  out the frame, so it looked 670 ms slow and 330 ms off, and netfox weighted slow samples most: the
+  client ran 12% slow, then fast. Samples far slower than the best are now left out (an ITF patch in
+  `addons/netfox/network-time-synchronizer.gd`).
 - **A spawn carries the node's state at the moment it is shown.** A ship shown as it entered the world
   appeared at the origin and snapped 5.8 km.
 - **A server that falls behind runs several ticks in one frame,** with what arrived meanwhile already

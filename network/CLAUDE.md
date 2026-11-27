@@ -54,3 +54,10 @@ yet: sharing pictures between sides, and the host's own player (the server has e
   nodes a client never had (fog of war): an error each. Not closed early: a clean DTLS shutdown makes the client
   log TLS errors. Left: a server quitting first sometimes gives the client one `-0x6C00` (its UDP send hit the
   closed port, `bio_send`), about 3 runs in 8.
+
+## Steady links
+
+- `network.gd` `steady(link)` turns off ENet's packet throttle for each connection (server: in
+  `_authenticating`, which also tells the client; client: `on_connected`). The throttle is bulk-traffic
+  congestion control: after one RTT spike it drops a share of unreliable packets on purpose for seconds,
+  down to all of them; our streams are small and carry their own redundancy.

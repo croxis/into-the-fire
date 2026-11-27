@@ -22,6 +22,12 @@ Loaded when working in `characters/`. Project-wide rules are in the top-level `C
   catch-up loop, the inputs that loop was about to use looked like a backlog.
   `lead_seconds` is an ITF patch in `addons/netfox/network-time.gd` (marked "ITF patch"): reapply it after
   updating netfox.
+- Launches used to cost 10-25 holds then 16-32 skips, the cushion growing to 7 for ~30 s. Two causes, both
+  from the client's ~670 ms frame boarding a ship (and the host's when it spawns things): ENet's packet
+  throttle dropped unreliable inputs after the RTT spike (links are now `network.gd` `steady`), and a
+  time-sync sample whose reply waited out that frame pulled netfox's clock 12% slow then fast for seconds
+  (second ITF patch, `network-time-synchronizer.gd` `_discipline_clock`: samples over 2x the best RTT,
+  or best + 50 ms, are left out). Tests: `test_steady_link.gd`, `test_clock_sync.gd`.
 - Log: server "Input from X: held, skipped, queued, cushion" every 5 s.
 - A player's own client keeps its `InputsSync` to itself (`keep_inputs_local`): nobody reads a remote
   pilot's, and its last packet used to reach a character the server had just freed at launch.

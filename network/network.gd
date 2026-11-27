@@ -96,12 +96,31 @@ func _player_disconnected(client_id):
 	players.player_disconnect(client_id)
 
 
+## ENet's own default throttle interval (ENET_PEER_PACKET_THROTTLE_INTERVAL; Godot
+## doesn't expose it).
+const THROTTLE_INTERVAL_MS := 5000
+
+
+## Keeps a link steady: ENet's packet throttle never slows it. The throttle is
+## congestion control for bulk traffic: after one round-trip spike (a long frame
+## boarding a ship, the host spawning something) it drops a share of unreliable
+## packets on purpose and takes seconds to recover. Our streams are small and
+## carry their own redundancy (each input packet repeats the last few), so it
+## only cost pilots inputs: holds and skips at every launch. ENet tells the other
+## end too, so the server's call covers both directions.
+static func steady(link: ENetPacketPeer) -> void:
+	if link:
+		link.throttle_configure(THROTTLE_INTERVAL_MS, ENetPacketPeer.PACKET_THROTTLE_SCALE, 0)
+
+
 func on_client_connected(client_id : int):
 	Log.log(["Client %d connected!" % [client_id]], Log.MessageType.SUCCESS)
 
 
 func _authenticating(peer_id):
 	Log.log(["Client %d authenticating!" % [peer_id]], Log.MessageType.QUESTION)
+	if peer and multiplayer.is_server():
+		steady(peer.get_peer(peer_id))
 
 	var dict : Dictionary = {
 		&'protocol' : PROTOCOL,
@@ -255,6 +274,8 @@ func _connect_once(sig: Signal, callable: Callable) -> void:
 
 func on_connected():
 	# We just connected to a server
+	if peer:
+		steady(peer.get_peer(1))
 	Log.log(["Emit connection_succeeded"], Log.MessageType.INFO)
 	connection_succeeded.emit()
 
