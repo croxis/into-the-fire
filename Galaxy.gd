@@ -50,25 +50,8 @@ signal factions_synced()
 signal load_scenes(paths: PackedStringArray, callback: Callable)
 
 
-## Server: where [param faction]'s players can spawn, as names a client can be
-## sent: {system name: [ship name, ...]}. Ships with launch bays on its own side
-## (the faction or one above it, as for respawns): a client is told of no others
-## (netcode N5b2). [param ships_by_system]: {system name: [Ship, ...]}.
-## TODO: inventory, hyperspace, generated deep-space systems.
-static func spawn_points_for(faction: Faction, ships_by_system: Dictionary) -> Dictionary:
-	var points := {}
-	for system_name in ships_by_system:
-		for ship: Ship in ships_by_system[system_name]:
-			var side := ship.faction
-			if ship.has_spawn_points and side and (side == faction or faction.is_a_parent(side)):
-				if not points.has(system_name):
-					points[system_name] = []
-				points[system_name].append(String(ship.name))
-	return points
-
-
 ## Why a client's pick of spawn point [param spawner_name] in [param system_name]
-## is refused, or "": it must be one of [param points] (spawn_points_for). No
+## is refused, or "": it must be one of [param points] (_spawn_points). No
 ## name means the first one there.
 static func check_spawn_point(points: Dictionary, system_name: String, spawner_name: String) -> String:
 	var there: Array = points.get(system_name, [])
@@ -79,13 +62,24 @@ static func check_spawn_point(points: Dictionary, system_name: String, spawner_n
 	return ""
 
 
-## Server: spawn_points_for this galaxy's systems.
+## Server: where [param faction]'s players can spawn, as names a client can be
+## sent: {system name: [ship name, ...]} (System.spawn_points_for).
 func _spawn_points(faction: Faction) -> Dictionary:
-	var ships_by_system := {}
-	for system in $Systems.get_children():
-		if system is System:
-			ships_by_system[String(system.name)] = system.get_ships()
-	return spawn_points_for(faction, ships_by_system)
+	var points := {}
+	for system in systems():
+		var here := system.spawn_points_for(faction)
+		if not here.is_empty():
+			points[String(system.name)] = here
+	return points
+
+
+## This galaxy's star systems.
+func systems() -> Array[System]:
+	var out: Array[System] = []
+	for node in $Systems.get_children():
+		if node is System:
+			out.append(node)
+	return out
 
 
 ## Sent by the server to the player who just spawned. "authority": only the
@@ -408,12 +402,8 @@ static func shown_tick(node: Node) -> float:
 ## boards (before any RPC to them: Godot refuses an RPC to a peer that can't
 ## see the node).
 func refresh_interest() -> void:
-	var systems: Array[System] = []
-	for node in $Systems.get_children():
-		if node is System:
-			systems.append(node)
 	var ships := {}
-	for system in systems:
+	for system in systems():
 		for ship in system.get_ships():
 			ships[ship] = system
 	var peers := {}
@@ -466,18 +456,10 @@ func _contact_lost(ship_id: int, data: Dictionary) -> void:
 	var system := get_node_or_null(NodePath("Systems/" + String(data.get("system", ""))))
 	if not system is System:
 		return
-	var ghosts: Node = system.get_node_or_null("Ghosts")
-	if ghosts == null:
-		ghosts = Node3D.new()
-		ghosts.name = "Ghosts"
-		system.add_child(ghosts)
-	var old := ghosts.get_node_or_null("Ghost%d" % ship_id)
-	if old:
-		old.free()
 	var marker := GhostMarker.new()
 	marker.setup(contacts, ship_id, func() -> float:
 			return snapshot_clock.server_tick(SnapshotClock.local_now()))
-	ghosts.add_child(marker)
+	(system as System).add_ghost(marker)
 	Log.log(["Lost contact with ", data.get("name", ship_id)], Log.MessageType.INFO)
 
 
@@ -616,28 +598,6 @@ func _receive_spawn_points(faction_name: String, points: Dictionary) -> void:
 	$CanvasLayer/JoinGame.show_spawn(faction_name, points)
 
 
-## The nearest capital ship or station on [param pilot]'s side (its own faction
-## or an ancestor), not counting [param destroyed], or null.
-## [param destroyed] is still in the ship list: it is only queued for freeing.
-static func pick_respawn_ship(pilot: Character, destroyed: Ship, ships: Array) -> Ship:
-	var own := pilot.faction
-	if own == null:
-		return null
-	var best: Ship = null
-	var best_distance := INF
-	for target: Ship in ships:
-		if target == destroyed or not (target.is_capital or target.is_station):
-			continue
-		var side := target.faction
-		if side == null or not (side == own or own.is_a_parent(side)):
-			continue
-		var d := target.global_position.distance_to(destroyed.global_position)
-		if d < best_distance:
-			best_distance = d
-			best = target
-	return best
-
-
 func _on_ship_destroyed(ship: Ship):
 	## This is ONLY for respawning characters. The destruction of the ship itself
 	## is handled elsewhere.
@@ -648,9 +608,8 @@ func _on_ship_destroyed(ship: Ship):
 	
 	# This will also respawn npcs for now
 	var system: System = ship.get_current_system()
-	var ships := system.get_ships()
 	for old_pilot: Character in ship.get_crew():
-		var proposed_ship := pick_respawn_ship(old_pilot, ship, ships)
+		var proposed_ship := system.nearest_carrier_for(old_pilot, ship)
 		if proposed_ship:
 			#TODO: Genealize this to a multicrew craft
 			proposed_ship.spawn_crew(old_pilot.serialize())

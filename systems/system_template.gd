@@ -46,6 +46,60 @@ func get_ships() -> Array[Ship]:
 	return ships
 
 
+## Server: names of the ships here with launch bays on [param faction]'s side,
+## where its players can spawn (Galaxy._spawn_points; a client is told of no
+## others, netcode N5b2). TODO: inventory, hyperspace, generated deep-space
+## systems.
+func spawn_points_for(faction: Faction) -> Array:
+	var names := []
+	for ship in get_ships():
+		if ship.has_spawn_points and _on_side(ship, faction):
+			names.append(String(ship.name))
+	return names
+
+
+## Server: the nearest capital ship or station here on [param pilot]'s side to
+## [param destroyed], not counting it, or null: where the crew of a destroyed
+## ship respawn. [param destroyed] is still listed here: it is only queued for
+## freeing.
+func nearest_carrier_for(pilot: Character, destroyed: Ship) -> Ship:
+	if pilot.faction == null:
+		return null
+	var best: Ship = null
+	var best_distance := INF
+	for target in get_ships():
+		if target == destroyed or not (target.is_capital or target.is_station):
+			continue
+		if not _on_side(target, pilot.faction):
+			continue
+		var d := target.global_position.distance_to(destroyed.global_position)
+		if d < best_distance:
+			best_distance = d
+			best = target
+	return best
+
+
+## Client: puts [param marker] (a lost contact, Galaxy._contact_lost) in this
+## system, replacing any ghost of the same ship.
+func add_ghost(marker: GhostMarker) -> void:
+	var ghosts: Node = get_node_or_null("Ghosts")
+	if ghosts == null:
+		ghosts = Node3D.new()
+		ghosts.name = "Ghosts"
+		add_child(ghosts)
+	var old := ghosts.get_node_or_null(NodePath(marker.name))
+	if old:
+		old.free()
+	ghosts.add_child(marker)
+
+
+## Whether [param ship] is on [param faction]'s side: its own faction or one
+## above it.
+static func _on_side(ship: Ship, faction: Faction) -> bool:
+	var side := ship.faction
+	return side != null and (side == faction or faction.is_a_parent(side))
+
+
 func ship_scanner_check():
 	for ship: Ship in $ships.get_children():
 		for other_ship: Ship in $ships.get_children():

@@ -167,33 +167,8 @@ func test_spawn_request_unknown_system_refused() -> void:
 			"a path out of Systems is not a system")
 
 
-## Galaxy.spawn_points_for / check_spawn_point: the server lists where a
-## faction's players can spawn (the join menu asks it: a client may not know of
-## the ships at all, netcode N5b2), and checks the one a client picks.
-
-func _spawn_ship(faction: Faction, ship_name: String, spawn_points := true) -> Ship:
-	var ship: Ship = preload("res://ships/Ship.tscn").instantiate()
-	ship.name = ship_name
-	ship.faction_registry = registry
-	add_child_autofree(ship)
-	ship.has_spawn_points = spawn_points
-	ship.faction_id = faction.faction_id
-	return ship
-
-
-func test_spawn_points_are_on_the_players_own_side() -> void:
-	var t := _playtest_tree()
-	var narn := registry.create("Narn Regime")
-	var ships := {
-		"epsilon": [_spawn_ship(t.b5, "Babylon 5"), _spawn_ship(narn, "Gquan"),
-				_spawn_ship(t.zeta, "Starfury", false)],
-		"sol": [_spawn_ship(t.ea, "Hyperion")],
-		"narn": [_spawn_ship(narn, "Kha'Ri")],
-	}
-	var points := Galaxy.spawn_points_for(t.zeta, ships)
-	assert_eq(points, {"epsilon": ["Babylon 5"], "sol": ["Hyperion"]},
-			"own side (the wing's parents too), with launch bays; nothing about the Narn")
-
+## Galaxy.check_spawn_point: the server checks the spawn point a client picks
+## against those it offered (System.spawn_points_for, in test_system.gd).
 
 func test_a_spawn_point_must_be_one_offered() -> void:
 	var points := {"epsilon": ["Babylon 5"], "sol": ["Hyperion"]}
@@ -201,41 +176,3 @@ func test_a_spawn_point_must_be_one_offered() -> void:
 	assert_eq(Galaxy.check_spawn_point(points, "epsilon", ""), "", "none named: the first there")
 	assert_ne(Galaxy.check_spawn_point(points, "epsilon", "Hyperion"), "", "not in that system")
 	assert_ne(Galaxy.check_spawn_point(points, "narn", ""), "", "nowhere to spawn there")
-
-
-## Galaxy.pick_respawn_ship: where a destroyed ship's crew respawn.
-
-func _ship_at(faction: Faction, x: float, capital := true) -> Ship:
-	var ship: Ship = preload("res://ships/Ship.tscn").instantiate()
-	ship.faction_registry = registry
-	add_child_autofree(ship)
-	ship.is_capital = capital
-	ship.position = Vector3(x, 0, 0)
-	ship.faction_id = faction.faction_id
-	return ship
-
-
-func test_respawn_skips_the_destroyed_ship() -> void:
-	var t := _playtest_tree()
-	var pilot: Character = autofree(preload("res://characters/character.tscn").instantiate())
-	pilot.faction_registry = registry
-	t.zeta.add_member(pilot)
-	var dying := _ship_at(t.b5, 0)
-	var hyperion := _ship_at(t.ea, 5800)
-	assert_eq(Galaxy.pick_respawn_ship(pilot, dying, [dying, hyperion] as Array[Ship]), hyperion,
-			"the destroyed ship is still listed until it is freed")
-
-
-func test_respawn_picks_nearest_own_side_capital() -> void:
-	var t := _playtest_tree()
-	var narn := registry.create("Narn Regime")
-	var pilot: Character = autofree(preload("res://characters/character.tscn").instantiate())
-	pilot.faction_registry = registry
-	t.zeta.add_member(pilot)
-	var dying := _ship_at(t.zeta, 0, false)
-	var far := _ship_at(t.ea, 9000)
-	var near := _ship_at(t.b5, 1000)
-	var hostile := _ship_at(narn, 10)
-	var fighter := _ship_at(t.zeta, 5, false)
-	assert_eq(Galaxy.pick_respawn_ship(pilot, dying, [far, hostile, fighter, near] as Array[Ship]), near)
-	assert_null(Galaxy.pick_respawn_ship(pilot, dying, [hostile, fighter] as Array[Ship]))
