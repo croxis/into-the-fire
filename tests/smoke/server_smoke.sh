@@ -28,7 +28,7 @@ fi
 failed=0
 
 # Things that must happen during a healthy boot.
-for marker in "Server hosted on port" "Galaxy setup complete" "Added station" "Added ship EASS Hyperion"; do
+for marker in "Server hosted on port" "World built." "Added station" "Added ship EASS Hyperion"; do
 	if ! grep -qF "$marker" "$log"; then
 		echo "FAIL: missing startup marker: $marker"
 		failed=1

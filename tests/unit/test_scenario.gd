@@ -145,6 +145,16 @@ func test_parent_may_be_listed_after_child() -> void:
 
 ## populate
 
+func test_populate_skips_ships_whose_system_did_not_load() -> void:
+	# The world builder leaves out a system whose scene failed to load (it logs
+	# that); its ships must not crash the rest of the world.
+	var s := _scenario()
+	s.ships.assign([_ship("Picket", "Zeta Wing")])
+	var ships := ScenarioLoader.populate(s, content, ScenarioLoader.build_factions(s), {},
+			WorldIds.new(), 1)
+	assert_eq(ships.size(), 0)
+
+
 func test_populate_places_ships_with_ids_and_factions() -> void:
 	var s := _scenario()
 	var hyperion := _ship("EASS Hyperion", "Earth Alliance")

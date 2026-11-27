@@ -75,6 +75,3 @@ func _poll_batch() -> void:
 	Log.log(["Scenes loaded"], Log.MessageType.INFO)
 	done.call(batch)
 
-
-func _on_galaxy_load_scenes(paths: PackedStringArray, done: Callable) -> void:
-	load_scenes(paths, done)

@@ -30,6 +30,7 @@ func _ready():
 	if not options.unknown.is_empty():
 		Log.log(["Ignored arguments: ", options.unknown], Log.MessageType.INFO)
 	$network.players = $Galaxy/Players
+	$Galaxy.scene_loader = $loading.load_scenes  # In the background, with a progress bar.
 	if not options.headless:
 		add_child(RenderWarmup.new())  # Draws every ship once behind the title screen.
 	if options.has_ui():
@@ -96,7 +97,10 @@ func _start_dedicated() -> void:
 		print("Failure to activate network. Is port in use?")
 		get_tree().quit(1)
 		return
-	$Galaxy.setup_new_galaxy(true)
+	$Galaxy.game_name = options.game_name
+	if not $Galaxy.start_new_world():
+		print("No world to serve: the scenario is missing or invalid (see the log).")
+		get_tree().quit(1)
 
 
 func _start_test_server() -> void:
@@ -106,9 +110,8 @@ func _start_test_server() -> void:
 		get_tree().quit(1)
 		return
 	_show_role("Host", "Test Host")
-	var callback := Callable($Galaxy, "finish_setup_galaxy_client")
 	$Galaxy.game_name = "Test Server"
-	$Galaxy.setup_new_galaxy(false, callback)
+	$Galaxy.start_new_world(true)
 
 
 func _start_test_player() -> void:
@@ -205,7 +208,8 @@ func _on_main_menu_new_game(game_name, player_name, port, server_password, playe
 	end_title_sequence()
 	# Only once hosting worked: offline, this machine would count as the server
 	# and start a world nobody can join.
-	$Galaxy._on_main_menu_new_game(game_name, player_name, port, server_password, player_password)
+	$Galaxy.game_name = game_name
+	$Galaxy.start_new_world(true)
 	
 
 

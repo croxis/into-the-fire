@@ -2,12 +2,17 @@ class_name Galaxy
 extends Node
 
 var game_name := "default"
+## A world has been (or is being) built here: start_new_world.
 var active_galaxy := false
+## Loads a world's scenes: func(paths, done), calling done with an object whose
+## [code]scenes[/code] maps path -> PackedScene. Entry sets the loading screen
+## (in the background, on worker threads); by default they load at once.
+var scene_loader: Callable = WorldBuilder.load_now
+## Held while a world is being built: scene loads call back into it later.
+var _builder: WorldBuilder
 
 ## The scenario a new game starts from (content ID, kind "scenario").
 @export var scenario_id: StringName = &"b5:playtest"
-var _scenario: Scenario
-var _scenario_scenes: SceneBatchLoader  # Held from loading until populate() runs.
 
 ## Ship and pilot IDs for this world.
 var ids := WorldIds.new()
@@ -54,9 +59,8 @@ signal factions_synced()
 ## This machine's player has entered the world (joined, or hosts it) and may
 ## pick where to spawn, once factions_ready(). The join UI (JoinFlow) listens.
 signal ready_to_spawn()
-## Asks the loading screen to load [param paths] in the background; it calls
-## [param callback] with the finished SceneBatchLoader.
-signal load_scenes(paths: PackedStringArray, callback: Callable)
+## Server: start_new_world has built the world.
+signal world_built()
 
 
 ## Client: shows [param system_name], the system this machine's player is now
@@ -143,75 +147,35 @@ func factions_ready() -> bool:
 	return multiplayer.is_server() or _factions_synced
 
 
-func setup_new_galaxy(dedicated=false, callback = null):
-	Log.log(["Setting up galaxy."], Log.MessageType.QUESTION)
-	if dedicated:
-		callback = Callable(self, "finish_setup_galaxy_all")
+## Server: builds this world from its scenario (scenario_id) through a
+## WorldBuilder, loading its scenes with scene_loader. [param host_plays]: this machine's own
+## player joins too (a host, not a dedicated server), once the world is built.
+## Returns false when there is nothing to build: a client, a world already
+## built, or a scenario that is missing or invalid.
+func start_new_world(host_plays := false) -> bool:
 	# Only the machine that runs the world builds it; clients get theirs from
 	# the server's spawners. Asked of this world's own multiplayer, not of entry.
-	if not active_galaxy and multiplayer.is_server():
-		if not _start_scenario(callback):
-			return
-		active_galaxy = true
-		Log.log(["Galaxy setup complete."], Log.MessageType.INFO)
-	else:
-		print("Galaxy already initalized")
-
-
-## Server: checks the scenario, creates its factions and starts loading its
-## systems. [param callback] runs once every system is in the tree.
-func _start_scenario(callback) -> bool:
-	_scenario = load(Content.path_of(scenario_id)) as Scenario
-	if _scenario == null:
+	if active_galaxy or not multiplayer.is_server():
+		Log.log(["No world to build here: ", "already built" if active_galaxy else "a client"],
+				Log.MessageType.WARNING)
+		return false
+	var scenario := load(Content.path_of(scenario_id)) as Scenario
+	if scenario == null:
 		Log.log(["Scenario ", scenario_id, " not found"], Log.MessageType.ERROR)
 		return false
-	var errors := ScenarioLoader.validate(_scenario, Content.registry)
-	if not errors.is_empty():
-		Log.log(["Scenario ", scenario_id, " is invalid: ", "; ".join(errors)], Log.MessageType.ERROR)
+	Log.log(["Building the world from ", scenario_id], Log.MessageType.QUESTION)
+	_builder = WorldBuilder.new(self)
+	_builder.built.connect(func() -> void:
+			_builder = null
+			Log.log(["World built."], Log.MessageType.INFO)
+			world_built.emit()
+			if host_plays:
+				ready_to_spawn.emit())
+	if not _builder.start_scenario(scenario, scene_loader):
+		_builder = null
 		return false
-	factions = ScenarioLoader.build_factions(_scenario)
-	ids = WorldIds.new()
-	# Every system and ship scene at once, on worker threads, so populate()
-	# later instantiates from the cache instead of reading files on this thread.
-	load_scenes.emit(ScenarioLoader.scene_paths(_scenario, Content.registry),
-			_on_scenario_scenes_loaded.bind(callback))
+	active_galaxy = true
 	return true
-
-
-## Adds the scenario's systems, in order, then runs [param callback].
-func _on_scenario_scenes_loaded(batch: SceneBatchLoader, callback) -> void:
-	_scenario_scenes = batch  # Keeps the ship scenes cached until populate().
-	for id in _scenario.systems:
-		var scene := batch.scenes.get(Content.path_of(id)) as PackedScene
-		if scene == null:
-			Log.log(["Scenario system ", id, " failed to load"], Log.MessageType.ERROR)
-			continue
-		zones.add_system(scene.instantiate())
-	if callback:
-		callback.call()
-
-
-func _on_main_menu_new_game(g_name, _player_name, _port, _server_password, _player_password):
-	game_name = g_name
-	var callback := Callable(self, "finish_setup_galaxy_client")
-	setup_new_galaxy(false, callback)
-
-
-func finish_setup_galaxy_all() -> void:
-	if not multiplayer.is_server():
-		_scenario_scenes = null
-		return
-	var systems := {}
-	for id in _scenario.systems:
-		systems[id] = zones.system_for_content(id)
-	ScenarioLoader.populate(_scenario, Content.registry, factions, systems, ids,
-			multiplayer.get_unique_id())
-	_scenario_scenes = null  # Placed ships hold their own references now.
-
-
-func finish_setup_galaxy_client():
-	ready_to_spawn.emit()
-	finish_setup_galaxy_all()
 
 
 func _process(delta: float) -> void:
@@ -239,8 +203,10 @@ func _contact_lost(ship_id: int, data: Dictionary) -> void:
 	fog.lost(ship_id, data)
 
 
+## Client: joined a server. Its world arrives from the server's spawners; the
+## player may pick where to spawn.
 func _on_network_connection_succeeded() -> void:
-	finish_setup_galaxy_client()
+	ready_to_spawn.emit()
 
 
 ## Server: [param pilot] now plays from [param peer] (it entered the world, or

@@ -47,17 +47,21 @@ narn_border="uid://<the uid of your .tres>"
 
 ## What happens at startup
 
-On the server, in `Galaxy.setup_new_galaxy`:
+On the server, `Galaxy.start_new_world()` hands the scenario to a `WorldBuilder`
+(`world/world_builder.gd`), the one path a world starts by (a save will feed it too):
 
 1. **Validate.** `ScenarioLoader.validate()` lists every problem: unknown or duplicate factions,
    unknown content IDs, ships in systems the scenario doesn't load. If there are any, the game logs
    them and does not start. A typo gives a clear error, not half a world.
 2. **Factions.** `build_factions()` makes a new `FactionRegistry`. Parents may be listed after their
    children. Doctrines are copied, so play never changes the scenario resource.
-3. **Systems.** Galaxy loads each system in order on the loading screen.
+3. **Systems.** Every system and ship scene loads at once through `Galaxy.scene_loader`: the loading
+   screen, on worker threads, in the game; at once (`WorldBuilder.load_now`) in unit tests. The
+   systems are then added in order. A system that fails to load is logged and its ships skipped.
 4. **Ships and crew.** `populate()` places each ship (stations with `add_station`), gives it an ID
    from `Galaxy.ids`, sets its faction, spawns its crew through `Ship.spawn_crew` so clients receive
-   them, and seats crew at their consoles.
+   them, and seats crew at their consoles. Then `Galaxy.world_built`; a host's own player may then
+   pick a spawn point (`ready_to_spawn`).
 
 Clients don't read scenarios. They receive factions on connect and ships and crew through the
 multiplayer spawners, like any other world state.

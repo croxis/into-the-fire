@@ -84,7 +84,7 @@ GODOT=$GODOT tests/smoke/server_smoke.sh
 
 It boots `--server` headless for 1800 frames, then fails if:
 
-- a startup marker is missing from the log ("Server hosted on port", "Galaxy setup complete",
+- a startup marker is missing from the log ("Server hosted on port", "World built.",
   "Added station", "Added ship EASS Hyperion"), or
 - any `ERROR`, `SCRIPT ERROR` or `Parse Error` line appears that isn't listed in
   `tests/smoke/known_issues.txt`.

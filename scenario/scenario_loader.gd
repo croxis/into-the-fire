@@ -91,6 +91,9 @@ static func populate(scenario: Scenario, content: ContentRegistry, registry: Fac
 		systems: Dictionary, ids: WorldIds, peer_id: int) -> Array[Ship]:
 	var placed: Array[Ship] = []
 	for entry in scenario.ships:
+		var system: Node = systems.get(entry.system)
+		if system == null:
+			continue  # Its system failed to load (logged where it was loaded).
 		var ship := content.instantiate(entry.content_id) as Ship
 		if ship == null:
 			continue
@@ -99,7 +102,6 @@ static func populate(scenario: Scenario, content: ContentRegistry, registry: Fac
 		ship.ship_id = ids.next_ship()
 		ship.position = entry.position
 		ship.excluded_from_picture = entry.excluded_from_picture
-		var system: Node = systems[entry.system]
 		if ship.is_station:
 			system.add_station(ship)
 		else:

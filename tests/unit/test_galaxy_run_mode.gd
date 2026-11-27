@@ -30,24 +30,21 @@ func _make_client() -> void:
 
 func test_the_server_starts_its_world_without_entry() -> void:
 	assert_null(get_tree().root.get_node_or_null("entry"))
-	watch_signals(galaxy)
-	galaxy.setup_new_galaxy(false, func() -> void: pass)
-	assert_signal_emitted(galaxy, "load_scenes", "the scenario's scenes are loading")
+	assert_true(galaxy.start_new_world())
 	assert_true(galaxy.active_galaxy)
 
 
 func test_a_client_starts_no_world() -> void:
 	_make_client()
-	watch_signals(galaxy)
-	galaxy.setup_new_galaxy(false, func() -> void: pass)
-	assert_signal_not_emitted(galaxy, "load_scenes")
+	assert_false(galaxy.start_new_world())
 	assert_false(galaxy.active_galaxy)
+	assert_eq(galaxy.zones.systems().size(), 0)
 
 
 func test_a_joining_client_populates_nothing() -> void:
 	# Its systems and ships come from the server's spawners.
 	_make_client()
 	watch_signals(galaxy)
-	galaxy.finish_setup_galaxy_client()
+	galaxy._on_network_connection_succeeded()
 	assert_signal_emitted(galaxy, "ready_to_spawn")
 	assert_eq(galaxy.zones.systems().size(), 0)
