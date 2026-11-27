@@ -4,7 +4,9 @@ Loaded when working in `characters/`. Project-wide rules are in the top-level `C
 
 ## Pilot input
 
-- Pilots on another machine send tick-stamped input (`InputChannel`, `Character._submit_inputs`, unreliable,
+- Pilots on another machine send tick-stamped input (`InputChannel`, `Galaxy._submit_inputs`: the server
+  finds the sender's pilot in `Galaxy._pilots`, which each player's Character joins on entering, so inputs
+  in flight when a ship is destroyed are dropped quietly; unreliable,
   each packet repeating the last 4 inputs, packed by `InputChannel.encode`, 29 bytes each; `make_record`
   rounds vectors to float32 so client and server fly the same values); the server checks it and applies
   one per tick, in order. The

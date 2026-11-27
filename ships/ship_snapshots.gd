@@ -158,7 +158,10 @@ func draw(local_now: float) -> void:
 ## Puts the ship where its snapshots have it at server tick [param at],
 ## kinematic: Jolt doesn't fly it, but other bodies still hit it. Its velocities
 ## are zeroed: on a kinematic body they would be a conveyor-belt surface
-## velocity. False with no snapshots of this ship yet (it stays as it spawned).
+## velocity. So on a client another ship's linear_velocity reads zero: code that
+## needs it there (a lead indicator, a target's speed) reads the snapshot,
+## buffer.sample(at). False with no snapshots of this ship yet (it stays as it
+## spawned).
 func show(at: float) -> bool:
 	var s := buffer.sample(at)
 	if s == null:

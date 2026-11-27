@@ -36,7 +36,9 @@ var factions: FactionRegistry:
 ## id (pilot_rejoined), and clients learn it from CharacterSync.
 @export var multiplayer_id: int:
 	set(id):
+		_unregister_pilot()
 		multiplayer_id = id
+		_register_pilot()
 		var sync := get_node_or_null("InputsSync")
 		if sync:
 			sync.set_multiplayer_authority(id)
@@ -188,6 +190,7 @@ func _resolve_seat() -> void:
 
 
 func _enter_tree() -> void:
+	_register_pilot()
 	_resolve_seat.call_deferred()  # The console may enter the tree after us.
 	NetworkTime.before_tick_loop.connect(_read_input)
 	NetworkTime.before_tick.connect(_apply_input)
@@ -195,6 +198,7 @@ func _enter_tree() -> void:
 
 
 func _exit_tree() -> void:
+	_unregister_pilot()
 	NetworkTime.before_tick_loop.disconnect(_read_input)
 	NetworkTime.before_tick.disconnect(_apply_input)
 	NetworkTime.after_tick_loop.disconnect(_trim_input_backlog)
@@ -261,7 +265,9 @@ func _apply_input(_dt: float, tick: int) -> void:
 		inputs.autobreak_toggle = false
 		inputs.autospin_toggle = false
 		if source == InputSource.LOCAL_AND_SEND:
-			_submit_inputs.rpc_id(1, InputChannel.encode(input_channel.record(r)))
+			var galaxy := Galaxy.find_for(self)
+			if galaxy:
+				galaxy._submit_inputs.rpc_id(1, InputChannel.encode(input_channel.record(r)))
 	if r.autobreak_toggle:
 		helm.toggle_autobreak()
 	if r.autospin_toggle:
@@ -309,16 +315,25 @@ func _plays_here() -> bool:
 	return multiplayer.multiplayer_peer == null or multiplayer_id == multiplayer.get_unique_id()
 
 
-## A pilot's client sends its latest inputs every tick. Unreliable: a lost
-## packet is covered by the next, which repeats the last few inputs.
-@rpc("any_peer", "call_remote", "unreliable")
-func _submit_inputs(packet: Variant) -> void:
-	if not multiplayer.is_server():
+## Server: registers this character as its player's pilot with the Galaxy
+## (Galaxy.inputs_from finds it by peer). A player's, played from another
+## machine: not NPCs, not the host's own.
+func _register_pilot() -> void:
+	if not is_inside_tree() or not multiplayer.has_multiplayer_peer() or not multiplayer.is_server():
 		return
-	var refusal := receive_inputs_from(multiplayer.get_remote_sender_id(), InputChannel.decode(packet))
-	if refusal:
-		Log.log(["Input from peer ", multiplayer.get_remote_sender_id(), " for ", name,
-				" refused: ", refusal], Log.MessageType.WARNING)
+	if multiplayer_id <= 0 or multiplayer_id == multiplayer.get_unique_id():
+		return
+	var galaxy := Galaxy.find_for(self)
+	if galaxy:
+		galaxy.register_pilot(multiplayer_id, self)
+
+
+func _unregister_pilot() -> void:
+	if not is_inside_tree():
+		return
+	var galaxy := Galaxy.find_for(self)
+	if galaxy:
+		galaxy.unregister_pilot(multiplayer_id, self)
 
 
 ## Server: queues [param packet] if [param sender] is this character's player.

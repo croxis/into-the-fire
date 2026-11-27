@@ -78,7 +78,10 @@ brakes to a stop). Logging back in with the same name resumes it (`Galaxy._resum
 
 Your client stamps each tick's input with its tick number and sends it unreliably, each packet
 repeating the last four inputs so a lost packet loses nothing (`InputChannel`,
-`Character._submit_inputs`). The server queues them and applies exactly one per tick, in order.
+`Galaxy._submit_inputs`). It goes to the Galaxy, not your character: the server finds your pilot from
+the connection (`Galaxy.inputs_from`), so inputs still in flight when your ship is destroyed are
+quietly dropped rather than sent to a node that's gone. The server queues them and applies exactly
+one per tick, in order.
 Each input is 29 bytes on the wire (`InputChannel.encode`: tick, two float32 vectors, a byte of
 toggles); sent as Dictionaries they were about 200, and the client uploaded 55 kB/s. Its vectors are
 rounded to float32 when made (`make_record`), so the client flies exactly what the server decodes.
@@ -178,7 +181,7 @@ How a ship appears and disappears on a client:
 - What a client can send (audited 2026-11-27): five `any_peer` RPCs and its own `InputsSync`.
   - `Galaxy.first_spawn_player` and `_request_spawn_points` (logged in, a faction that takes players, a
     valid spawn point, not already in the world), `Ship.request_launch` (aboard that carrier),
-    `Character._submit_inputs` (that character's player; size, shape and ticks checked; the rewind a
+    `Galaxy._submit_inputs` (to the sender's own pilot; size, shape and ticks checked; the rewind a
     client claims is capped), `Ship._have_ship` (only for a ship the server has it hold).
   - `InputsSync`: the pilot's client is its authority, so the server accepts what it syncs into the
     character's `Inputs`, and never acts on it: a remote player flies only from their input channel.

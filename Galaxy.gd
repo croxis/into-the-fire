@@ -24,6 +24,9 @@ var zone_stepper := ZoneStepper.new()
 ## Server: how far back players' shots are checked (favour the shooter), in
 ## ticks; given to each system's ShotField. From --max-rewind.
 var max_rewind_ticks := ShotField.DEFAULT_REWIND_TICKS
+## Server: each remote player's pilot by the peer they play from (Character
+## registers itself), so their inputs find it whatever ship it is in now.
+var _pilots: Dictionary = {}  # int -> Character. Untyped: a value may be freed.
 ## Client: when ships' snapshots arrive, so when to draw them (netcode N4c).
 var snapshot_clock := SnapshotClock.new()
 ## Client: how far ahead of server time the pilot's inputs are sent (time
@@ -438,6 +441,47 @@ func _request_spawn_points(faction_id: int) -> void:
 		return
 	_receive_spawn_points.rpc_id(multiplayer.get_remote_sender_id(), faction.resource_name,
 			_spawn_points(faction))
+
+
+## Server: [param pilot] now plays from [param peer] (it entered the world, or
+## its player rejoined on a new connection).
+func register_pilot(peer: int, pilot: Character) -> void:
+	_pilots[peer] = pilot
+
+
+## Server: [param pilot] no longer plays from [param peer] (it left the world:
+## its ship destroyed, docked, its player gone). Only if it is still the one.
+func unregister_pilot(peer: int, pilot: Character) -> void:
+	if _pilots.get(peer) == pilot:
+		_pilots.erase(peer)
+
+
+## A remote player's inputs (InputChannel.encode). Sent to the Galaxy, which
+## always exists, not to their Character: inputs still in flight when its ship
+## is destroyed would find no node there (an engine error each). The pilot is
+## the sender's, from the connection. Sent every tick, unreliable: a lost packet
+## is covered by the next, which repeats the last few inputs.
+@rpc("any_peer", "call_remote", "unreliable")
+func _submit_inputs(packet: Variant) -> void:
+	if not multiplayer.is_server():
+		return
+	var sender := multiplayer.get_remote_sender_id()
+	var refusal := inputs_from(sender, packet)
+	if refusal and refusal != NO_PILOT:
+		Log.log(["Input from peer ", sender, " refused: ", refusal], Log.MessageType.WARNING)
+
+
+const NO_PILOT := "no pilot"
+
+
+## Server: queues [param packet] for [param sender]'s pilot. Returns why not
+## ("" when queued). No pilot (not spawned yet, or just died with inputs in
+## flight) is not worth a warning: NO_PILOT.
+func inputs_from(sender: int, packet: Variant) -> String:
+	var pilot: Variant = _pilots.get(sender)
+	if pilot == null or not is_instance_valid(pilot) or not (pilot as Character).is_inside_tree():
+		return NO_PILOT
+	return (pilot as Character).receive_inputs_from(sender, InputChannel.decode(packet))
 
 
 ## Client: the server's answer to _request_spawn_points.
