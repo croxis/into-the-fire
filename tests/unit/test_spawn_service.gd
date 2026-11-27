@@ -35,7 +35,7 @@ func _crew_of(ship: Ship) -> Array:
 
 func test_spawn_points_list_each_system_with_any() -> void:
 	_ship(&"b5:hyperion", b5).has_spawn_points = true
-	var points := galaxy.spawns.spawn_points(zeta)
+	var points: Dictionary = galaxy.spawns.spawn_points(zeta)
 	assert_eq(points.keys(), ["epsilon"])
 
 

@@ -28,7 +28,7 @@ func test_a_new_world_is_built_from_its_scenario() -> void:
 
 func test_a_world_is_built_once() -> void:
 	galaxy.start_new_world()
-	var systems := galaxy.zones.systems().size()
+	var systems: int = galaxy.zones.systems().size()
 	assert_false(galaxy.start_new_world())
 	assert_eq(galaxy.zones.systems().size(), systems)
 

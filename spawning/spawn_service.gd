@@ -85,7 +85,7 @@ static func find_player_character(systems: Node, player_id: int) -> Character:
 func spawn_points(faction: Faction) -> Dictionary:
 	var points := {}
 	for system in _galaxy.zones.systems():
-		var here := system.spawn_points_for(faction)
+		var here: Array = system.spawn_points_for(faction)
 		if not here.is_empty():
 			points[String(system.name)] = here
 	return points
@@ -131,7 +131,7 @@ func _request_spawn(faction_id: int, system_name: String, spawner_name: String) 
 	if player == null:
 		Log.log(["Spawn refused for peer ", remote_id, ": not logged in"], Log.MessageType.WARNING)
 		return
-	var zones := _galaxy.zones
+	var zones: Zones = _galaxy.zones
 	var refusal := check_spawn_request(_galaxy.factions, zones, faction_id, system_name)
 	if not refusal and zones.player_character(player.player_id):
 		refusal = "already in the world"
