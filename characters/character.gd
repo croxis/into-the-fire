@@ -255,7 +255,8 @@ func _apply_input(_dt: float, tick: int) -> void:
 			_skipped_at_last_report = input_channel.skipped_ticks
 	else:
 		r = InputChannel.make_record(tick, inputs.throttle, inputs.rotation_throttle,
-				inputs.autospin_toggle, inputs.autobreak_toggle, inputs.debug_all_stop, inputs.fire_primary)
+				inputs.autospin_toggle, inputs.autobreak_toggle, inputs.debug_all_stop, inputs.fire_primary,
+				_view_ticks(tick))
 		# One-shot: used once, even if this frame runs another tick.
 		inputs.autobreak_toggle = false
 		inputs.autospin_toggle = false
@@ -271,7 +272,19 @@ func _apply_input(_dt: float, tick: int) -> void:
 		helm._debug_all_stop()
 	var weapons := current_console.get_capability(WeaponsCapability) as WeaponsCapability
 	if weapons:
-		weapons.trigger(r.fire_primary, tick)
+		# A remote player's shots are checked against what they saw (W4).
+		var rewind := ShotField.rewind_for(tick, r.tick, r.view_ticks) if source == InputSource.CHANNEL else 0
+		weapons.trigger(r.fire_primary, tick, rewind)
+
+
+## Client: how many ticks behind [param tick] this machine is showing other
+## ships (SnapshotClock), sent with the input so the server can check our shots
+## against what we saw. 0 before any snapshots.
+func _view_ticks(tick: int) -> int:
+	var galaxy := Galaxy.find_for(self)
+	if galaxy == null or not galaxy.snapshot_clock.has_estimate():
+		return 0
+	return clampi(roundi(tick - galaxy.snapshot_clock.render_tick(SnapshotClock.local_now())), 0, 255)
 
 
 enum InputSource {

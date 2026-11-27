@@ -10,11 +10,46 @@ extends RefCounted
 const BoltScene := preload("res://ship_systems/weapons/effects/bolt/Bolt.tscn")
 ## Retries past the shooter's own hull (the muzzle can sit inside it).
 const MAX_RAY_RETRIES := 4
+## The furthest back a shot is checked (250 ms): favouring the shooter past
+## this would let a target be hit long after it reached cover on its own screen.
+const MAX_REWIND_TICKS := 15
+## Ticks of ship transforms kept (server), for rewound checks.
+const HISTORY_TICKS := MAX_REWIND_TICKS + 2
 
 var _system: System
 var _hits_allowed: bool
 var _shots: Array[Shot] = []
 var _bolts: Dictionary[Shot, Node3D] = {}
+## Server: ship -> {tick: global transform}, the last HISTORY_TICKS ticks.
+var _history: Dictionary[Ship, Dictionary] = {}
+
+
+## Ticks back to check a remote player's shot fired at server tick
+## [param server_tick], from their input for client tick [param input_tick],
+## made while they showed other ships [param view_ticks] behind it: from now
+## to the server tick they were looking at, 0 to MAX_REWIND_TICKS.
+static func rewind_for(server_tick: int, input_tick: int, view_ticks: int) -> int:
+	return clampi(server_tick - (input_tick - view_ticks), 0, MAX_REWIND_TICKS)
+
+
+## Server, after each physics step: where every ship in the system is at
+## [param tick], for rewound checks.
+func record_history(tick: int) -> void:
+	if _system.multiplayer.has_multiplayer_peer() and not _system.multiplayer.is_server():
+		return
+	for ship in _system.get_ships():
+		var h: Dictionary = _history.get_or_add(ship, {})
+		h[tick] = ship.global_transform
+		h.erase(tick - HISTORY_TICKS)
+	for ship in _history.keys():
+		if not is_instance_valid(ship) or not ship.is_inside_tree():
+			_history.erase(ship)
+
+
+## Where [param ship] was at [param tick], or where it is now if that's not kept.
+func _transform_at(ship: Ship, tick: int) -> Transform3D:
+	var h: Dictionary = _history.get(ship, {})
+	return h.get(tick, ship.global_transform)
 
 
 ## [param hits_allowed] false: this field never decides hits, even on a server.
@@ -61,6 +96,8 @@ func _hit(shot: Shot, tick: int) -> Ship:
 	var to := shot.position_at(tick)
 	if from == to:
 		return null
+	if shot.rewind_ticks > 0:
+		return _rewound_hit(shot, tick, from, to)
 	var space := _system.find_world_3d().direct_space_state
 	var query := PhysicsRayQueryParameters3D.create(from, to)
 	var exclude: Array[RID] = []
@@ -104,6 +141,50 @@ static func decode_fire(bytes: Variant) -> Variant:
 	if not origin.is_finite() or not velocity.is_finite():
 		return null
 	return {"gun": b[0], "tick": b.decode_s32(1), "origin": origin, "velocity": velocity}
+
+
+## [param shot]'s hit from [param from] to [param to] (this tick's stretch)
+## against each ship where it was [member Shot.rewind_ticks] back. Physics only
+## knows hulls where they are now, so the stretch is moved with each ship from
+## then to now (its transform now x its transform then, inverted) and tested
+## against that ship alone. The nearest hit along the stretch wins.
+func _rewound_hit(shot: Shot, tick: int, from: Vector3, to: Vector3) -> Ship:
+	var space := _system.find_world_3d().direct_space_state
+	var best: Ship = null
+	var best_fraction := INF
+	for ship in _system.get_ships():
+		if ship == shot.shooter:
+			continue
+		var then_from := _transform_at(ship, tick - 1 - shot.rewind_ticks)
+		var then_to := _transform_at(ship, tick - shot.rewind_ticks)
+		var radius := ship.visual_radius()
+		if Geometry3D.get_closest_point_to_segment(then_to.origin, from, to).distance_to(then_to.origin) \
+				> radius + from.distance_to(to):
+			continue
+		var now := ship.global_transform
+		var a := now * (then_from.affine_inverse() * from)
+		var b := now * (then_to.affine_inverse() * to)
+		var fraction := _ray_fraction(space, a, b, ship)
+		if fraction < best_fraction:
+			best_fraction = fraction
+			best = ship
+	return best
+
+
+## How far along [param a] to [param b] (0 to 1) a ray first hits
+## [param ship]'s own hull, or INF; other bodies in the way are passed through.
+static func _ray_fraction(space: PhysicsDirectSpaceState3D, a: Vector3, b: Vector3, ship: Ship) -> float:
+	var query := PhysicsRayQueryParameters3D.create(a, b)
+	var exclude: Array[RID] = []
+	for i in MAX_RAY_RETRIES:
+		query.exclude = exclude
+		var result := space.intersect_ray(query)
+		if result.is_empty():
+			return INF
+		if _ship_of(result.collider) == ship:
+			return a.distance_to(result.position) / maxf(a.distance_to(b), 1e-9)
+		exclude.append(result.rid)
+	return INF
 
 
 static func _ship_of(node: Object) -> Ship:

@@ -70,17 +70,20 @@ var skipped_ticks := 0
 
 
 ## Bytes one input takes on the wire (encode): its tick (int32), throttle and
-## rotation throttle (3 float32 each) and a byte of toggles.
-const RECORD_BYTES := 29
+## rotation throttle (3 float32 each), a byte of toggles and the view delay
+## (view_ticks, a byte: how many ticks behind this one the client was showing
+## other ships, for favouring the shooter, ShotField.rewind_for).
+const RECORD_BYTES := 30
 
 
 ## One tick's input. Its vectors are rounded to float32, as the wire carries
 ## them, so the client flies the same input the server will.
 static func make_record(tick: int, throttle: Vector3, rotation_throttle: Vector3,
 		autospin_toggle := false, autobreak_toggle := false, debug_all_stop := false,
-		fire_primary := false) -> Dictionary:
+		fire_primary := false, view_ticks := 0) -> Dictionary:
 	return {
 		"fire_primary": fire_primary,
+		"view_ticks": view_ticks,
 		"tick": tick,
 		"throttle": _float32(throttle),
 		"rotation_throttle": _float32(rotation_throttle),
@@ -112,6 +115,7 @@ static func encode(packet: Array) -> PackedByteArray:
 			bytes.encode_float(at + 16 + i * 4, r.rotation_throttle[i])
 		bytes[at + 28] = int(r.autospin_toggle) | int(r.autobreak_toggle) << 1 | int(r.debug_all_stop) << 2 \
 				| int(r.fire_primary) << 3
+		bytes[at + 29] = clampi(r.view_ticks, 0, 255)
 		at += RECORD_BYTES
 	return bytes
 
@@ -135,6 +139,7 @@ static func decode(bytes: Variant) -> Variant:
 			"autobreak_toggle": flags & 2 != 0,
 			"debug_all_stop": flags & 4 != 0,
 			"fire_primary": flags & 8 != 0,
+			"view_ticks": b[at + 29],
 		})
 	return packet
 
@@ -265,4 +270,7 @@ static func _check(item: Variant) -> Dictionary:
 		if not item.get(field) is bool:
 			return {}
 		r[field] = item[field]
+	if not item.get("view_ticks", 0) is int:
+		return {}
+	r.view_ticks = clampi(item.get("view_ticks", 0), 0, 255)
 	return r

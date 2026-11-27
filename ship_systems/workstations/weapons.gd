@@ -5,7 +5,8 @@ class_name WeaponsCapability
 ## (system: a Guns node) as their cooldowns allow.
 
 
-## Each tick: fires the guns at [param tick] while [param pressed].
-func trigger(pressed: bool, tick: int) -> void:
+## Each tick: fires the guns at [param tick] while [param pressed]. Their shots
+## are checked against targets [param rewind] ticks back (ShotField.rewind_for).
+func trigger(pressed: bool, tick: int, rewind := 0) -> void:
 	if pressed and is_available():
-		system.fire_at(tick)
+		system.fire_at(tick, rewind)

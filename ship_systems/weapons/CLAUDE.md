@@ -31,3 +31,14 @@ owner's design choices: favour the shooter, fire events (not networked bolt node
 - The pilot's own client fires its copy at once (`Ship.is_predicted_here`): `Shot.predicted`, its tick this
   client's, drawn at this machine's tick with the predicted ship (`Bolt.drawn_tick`). Other shots are drawn at
   `Galaxy.shown_tick`, the moment the shooter is drawn. Clients fire no other guns (an NPC's synced trigger).
+
+## Favour the shooter (W4)
+
+- Each input record carries `view_ticks` (a byte): how far behind its own tick the client was showing other
+  ships (`Character._view_ticks`, from `SnapshotClock`). The server's rewind for a remote player's shot is
+  `ShotField.rewind_for(server tick, input tick, view_ticks)`, capped at `MAX_REWIND_TICKS` (15, 250 ms), kept
+  for the shot's flight (`Shot.rewind_ticks`); NPCs' and the host's shots have none.
+- The server keeps each ship's transform for the last 17 ticks (`ShotField.record_history`, from
+  `System.after_step`). A rewound shot's stretch this tick is moved with each nearby ship from then to now
+  (now x then inverted) and ray-tested against that ship alone (`_rewound_hit`); the nearest hit wins.
+- Tests: place ships with `Ship.place`, not `global_position` (physics only learns a set position next frame).

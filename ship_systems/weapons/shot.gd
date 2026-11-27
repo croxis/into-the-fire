@@ -21,6 +21,10 @@ var shooter: Ship
 ## Otherwise drawn at the moment this machine shows other ships
 ## (Galaxy.shown_tick), where its shooter is.
 var predicted := false
+## Server: ticks back its hits are checked against targets, to where its
+## shooter saw them (favour the shooter, ShotField.rewind_for); 0 for NPCs and
+## the host.
+var rewind_ticks := 0
 
 
 func _init(from: Vector3, v: Vector3, tick: int, muzzle_damage: float, fired_by: Ship = null) -> void:

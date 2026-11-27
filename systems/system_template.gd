@@ -21,6 +21,7 @@ func _ready():
 ## After this system's physics step for [param tick] (ZoneStepper): shots
 ## move on and, on the server, hit.
 func after_step(tick: int) -> void:
+	shots.record_history(tick)
 	shots.step(tick)
 
 
