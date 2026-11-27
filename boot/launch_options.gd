@@ -35,6 +35,9 @@ var spawn_at := ""
 var launch := false
 ## --fire: once flying, a test player holds the trigger (automated weapons tests).
 var fire := false
+## --fly: once flying, a test player thrusts and turns in a fixed pattern
+## (automated prediction tests: corrections while steering).
+var fly := false
 ## The display server is "headless": no window, nothing on screen.
 var headless := false
 ## Arguments that were not recognised, kept for logging.
@@ -87,9 +90,10 @@ static func parse(args: PackedStringArray, headless := false, dedicated_feature 
 	options.spawn_at = flags.get("spawn-at", "")
 	options.launch = flags.has("launch")
 	options.fire = flags.has("fire")
+	options.fly = flags.has("fly")
 
 	for key in flags:
-		if key not in ["server", "testserver", "testplayer", "game", "password", "port", "host", "xr_mode", "faction", "spawn-at", "launch", "fire"]:
+		if key not in ["server", "testserver", "testplayer", "game", "password", "port", "host", "xr_mode", "faction", "spawn-at", "launch", "fire", "fly"]:
 			options.unknown.append("--" + key)
 	return options
 

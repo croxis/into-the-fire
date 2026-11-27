@@ -42,6 +42,7 @@ A process also runs as a dedicated server, with no mode flag, when:
 | `--spawn-at=NAME` | `--testplayer` with `--faction` | (empty) | Spawn aboard this spawn point (a ship with launch bays, e.g. `--spawn-at="EASS Hyperion"`) instead of the first one offered. |
 | `--launch` | `--testplayer` with `--faction` | off | Once aboard, press Launch by itself, as a player would. Used by automated two-process tests of a remote pilot flying. |
 | `--fire` | `--testplayer` with `--launch` | off | Once flying (3 s after launch), hold the trigger. Used by automated lag runs of weapons. |
+| `--fly` | `--testplayer` with `--launch` | off | Once flying (3 s after launch), thrust and turn in a fixed pattern that changes every 2 s. Used by lag runs of own-ship prediction while steering. |
 
 Flags take their value after `=`. A space-separated value (`--port 3000`) is not read: `3000` is
 reported as an unknown argument. Unknown arguments are logged at startup ("Ignored arguments") and

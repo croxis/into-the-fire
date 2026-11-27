@@ -168,3 +168,9 @@ func test_window_title_names_the_role_and_player() -> void:
 
 func test_window_title_without_a_player_name() -> void:
 	assert_eq(LaunchOptions.window_title("Into The Fire", "Client", ""), "Into The Fire [Client]")
+
+
+func test_test_players_can_fly_a_pattern() -> void:
+	var options := LaunchOptions.parse(PackedStringArray(["--testplayer", "--faction=Zeta Wing", "--launch", "--fly"]))
+	assert_true(options.fly)
+	assert_false("--fly" in options.unknown)

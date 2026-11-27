@@ -50,16 +50,13 @@ func calculate_force() -> float:
 
 func calculate_vectors() -> void:
 	# https://github.com/XEonAX/PolitePonderous/blob/master/Assets/Scripts/Thruster.cs
-	# Called whenever 
+	# In the ship's own frame (Engines' transform x ours), never from the ship's
+	# world orientation: the server and a client add the same ship to the tree
+	# turned differently (the server places it in its bay first), and the push
+	# must come out the same on both, or own-ship prediction disagrees with the
+	# server on every tick of a turn.
 	var spaceship: RigidBody3D = get_parent().get_parent()
-	var force_forward := transform.basis.z.dot(spaceship.transform.basis.z)
-	var force_right := transform.basis.z.dot(spaceship.transform.basis.x)
-	var force_up := transform.basis.z.dot(spaceship.transform.basis.y)
-	
-	var torque_cross := (position - spaceship.center_of_mass).cross(global_transform.basis.z)
-	var torque_forward := torque_cross.dot(spaceship.global_transform.basis.z)
-	var torque_right := torque_cross.dot(spaceship.global_transform.basis.x)
-	var torque_up := torque_cross.dot(spaceship.global_transform.basis.y)
-	
-	max_force_vector = Vector3(force_right, force_up, force_forward) * max_force
-	max_torque_vector = Vector3(torque_right, torque_up, torque_forward) * max_force
+	var in_ship: Transform3D = (get_parent() as Node3D).transform * transform
+	var along := in_ship.basis.z  # Which way it pushes: (right, up, forward) in the ship's frame.
+	max_force_vector = along * max_force
+	max_torque_vector = (in_ship.origin - spaceship.center_of_mass).cross(along) * max_force

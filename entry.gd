@@ -127,10 +127,31 @@ func _launch_when_aboard() -> void:
 	await get_tree().create_timer(1.0).timeout
 	Log.log(["Test player launching"], Log.MessageType.INFO)
 	hud.passenger.request_launch.emit()
-	if options.fire:
+	if options.fire or options.fly:
 		await get_tree().create_timer(3.0).timeout  # Clear of the arm.
+	if options.fire:
 		Log.log(["Test player holding the trigger"], Log.MessageType.INFO)
 		Input.action_press("fire_primary")
+	if options.fly:
+		_fly_pattern()
+
+
+## --fly: full thrust, then turns that change every 2 s (yaw, pitch, roll and
+## combinations), as a pilot steering would; prediction tests count the
+## corrections this costs.
+func _fly_pattern() -> void:
+	Log.log(["Test player flying a pattern"], Log.MessageType.INFO)
+	Input.action_press("forward_full_thrust")
+	var turns: Array[Array] = [["rotate_left_full"], ["rotate_up_full"], ["rotate_right_full", "clockwise_full"],
+			[], ["rotate_down_full", "rotate_left_full"], ["counter_clockwise_full"]]
+	var i := 0
+	while is_inside_tree():
+		for action in turns[i % turns.size()]:
+			Input.action_press(action)
+		await get_tree().create_timer(2.0).timeout
+		for action in turns[i % turns.size()]:
+			Input.action_release(action)
+		i += 1
 
 
 func _start_client() -> void:

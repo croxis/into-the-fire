@@ -42,6 +42,10 @@ RPC `Ship._receive_state` stays on the ship). The pilot's input reaches the serv
   (`cobra_bay_arm.gd`, the deploy's start tick sent to clients) come from `Galaxy.shown_tick`: the server's
   tick, or the moment a client draws the station. The release from the arm costs one eased correction of
   roughly speed x (render delay + latency), as prediction takes over from the drawn arm.
+- Thrusters work out their push in the ship's own frame (`sfx/Thruster.gd` `calculate_vectors`), never from the
+  ship's world orientation: the server and a client add a ship to the tree turned differently, and a push
+  that depended on it mispredicted every tick of a turn (fixed 2026-11-27, `test_thrusters.gd`). Lag runs
+  with `--fly` steer, so they catch this kind of bug.
 - The host never predicts.
 - Logs: client "Prediction for X: N corrections" every 5 s.
 - How it all fits together, for people: `documentation/netcode.md`.
