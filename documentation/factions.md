@@ -90,9 +90,9 @@ owned and detected ships, and `excluded_from_picture` (which wings are covert is
 ## Fog of war
 
 A top-level faction's ships share one sensor picture: each player is told about the ships their side
-owns or detects (`Galaxy.view_of`, see the netcode notes in `CLAUDE.md`). A faction or a ship can be
+owns or detects (`FogOfWar.view_of`, see the netcode notes in `CLAUDE.md`). A faction or a ship can be
 kept out of it (`excluded_from_picture`, in the scenario or changed in play once a leader is allowed:
-`Galaxy.check_exclusion_change`, only the leader of the owning faction or one above it):
+`FogOfWar.check_exclusion_change`, only the leader of the owning faction or one above it):
 
 - **An excluded faction** (a covert wing): its ships, and what they detect, are seen by it and the
   factions below it, not by the rest of the side. One-way: it still sees the shared picture.

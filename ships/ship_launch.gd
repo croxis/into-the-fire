@@ -53,7 +53,7 @@ static func launch_player(carrier: Ship, player_id: int, ids: WorldIds) -> Strin
 	# carrier, since a player between ships has no character and knows nothing.
 	# The cockpit's RPCs below need the pilot's client to have it.
 	if carrier.galaxy:
-		carrier.galaxy.refresh_interest()
+		carrier.galaxy.fog.refresh()
 	var old_pilot: Character = carrier.get_node("Crew").remove_passenger_by_id(player_id)
 	var pilot: Character = new_ship.get_node("CrewMultiplayerSpawner").spawn(old_pilot.serialize())
 	#TODO: Genealize this to a multicrew craft

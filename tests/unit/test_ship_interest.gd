@@ -138,7 +138,7 @@ func test_boarding_a_ship_refreshes_interest_at_once() -> void:
 	assert_eq(crew_then, [1] as Array[int], "refreshed once, with her aboard")
 
 
-## Galaxy.view_of: what a player's client may know (fog of war, N5b3): the
+## FogOfWar.view_of: what a player's client may know (fog of war, N5b3): the
 ## sensor picture of their top-level faction (its ships and what they detect),
 ## in their system, and the ship they are aboard.
 
@@ -164,7 +164,7 @@ func _world() -> Dictionary:
 
 func test_a_player_knows_their_own_sides_ships_and_not_an_unseen_enemy() -> void:
 	var w := _world()
-	var seen: Dictionary = (w.galaxy as Galaxy).view_of(w.player)
+	var seen: Dictionary = (w.galaxy as Galaxy).fog.view_of(w.player)
 	assert_eq(seen["system"], w.system)
 	assert_eq(seen["aboard"], w.carrier)
 	assert_true((seen["picture"] as Dictionary).has(w.carrier), "Earth Alliance's own: a wing sees its parents'")
@@ -175,7 +175,7 @@ func test_once_detected_an_enemy_is_in_the_picture() -> void:
 	var w := _world()
 	(w.raider as Ship).position = Vector3(300, 0, 0)  # Within the carrier's sensors.
 	(w.system as System).ship_scanner_check()
-	var seen: Dictionary = (w.galaxy as Galaxy).view_of(w.player)
+	var seen: Dictionary = (w.galaxy as Galaxy).fog.view_of(w.player)
 	assert_true((seen["picture"] as Dictionary).has(w.raider))
 
 
@@ -187,7 +187,7 @@ func test_a_lost_contact_is_reported_as_last_seen() -> void:
 	var raider: Ship = w.raider
 	raider.ship_id = 9
 	raider.linear_velocity = Vector3(0, 0, -40)
-	var data := Galaxy.contact_data(raider, 1234)
+	var data := FogOfWar.contact_data(raider, 1234)
 	assert_eq(data["name"], String(raider.name))
 	assert_eq(data["faction_id"], raider.faction_id)
 	assert_eq(data["system"], String((w.system as System).name))
@@ -195,7 +195,7 @@ func test_a_lost_contact_is_reported_as_last_seen() -> void:
 	assert_eq(data["velocity"], raider.linear_velocity)
 	assert_false(data["immobile"], "a ship moves")
 	assert_eq(data["tick"], 1234)
-	assert_true(Galaxy.contact_data(w.carrier, 0)["immobile"] == (w.carrier as Ship).is_station)
+	assert_true(FogOfWar.contact_data(w.carrier, 0)["immobile"] == (w.carrier as Ship).is_station)
 
 
 func test_a_ghost_marker_drifts_fades_and_goes() -> void:
@@ -243,14 +243,14 @@ func _covert(w: Dictionary) -> Dictionary:
 
 func test_an_excluded_wings_ships_are_not_in_the_shared_picture() -> void:
 	var w := _covert(_world())
-	var seen: Dictionary = (w.galaxy as Galaxy).view_of(w.player)  # A Zeta Wing pilot.
+	var seen: Dictionary = (w.galaxy as Galaxy).fog.view_of(w.player)  # A Zeta Wing pilot.
 	assert_false((seen["picture"] as Dictionary).has(w.black), "the covert ship is withheld")
 	assert_true((seen["picture"] as Dictionary).has(w.carrier), "the rest of the side is shared")
 
 
 func test_an_excluded_wing_still_sees_the_shared_picture() -> void:
 	var w := _covert(_world())
-	var seen: Dictionary = (w.galaxy as Galaxy).view_of(w.spook)
+	var seen: Dictionary = (w.galaxy as Galaxy).fog.view_of(w.spook)
 	assert_true((seen["picture"] as Dictionary).has(w.carrier), "one-way: it gets the fleet's picture")
 	assert_true((seen["picture"] as Dictionary).has(w.black), "and its own ships")
 
@@ -259,9 +259,9 @@ func test_what_an_excluded_ship_detects_is_withheld_too() -> void:
 	var w := _covert(_world())
 	(w.raider as Ship).position = (w.black as Ship).position + Vector3(300, 0, 0)  # Next to the covert ship.
 	(w.system as System).ship_scanner_check()
-	var zeta: Dictionary = (w.galaxy as Galaxy).view_of(w.player)
+	var zeta: Dictionary = (w.galaxy as Galaxy).fog.view_of(w.player)
 	assert_false((zeta["picture"] as Dictionary).has(w.raider), "only the covert ship saw it")
-	var spook: Dictionary = (w.galaxy as Galaxy).view_of(w.spook)
+	var spook: Dictionary = (w.galaxy as Galaxy).fog.view_of(w.spook)
 	assert_true((spook["picture"] as Dictionary).has(w.raider))
 
 
@@ -276,11 +276,11 @@ func test_a_single_excluded_ship_is_seen_only_by_its_own_crew() -> void:
 	other.faction_id = zeta.faction_id
 	var outsider := other.get_node("CrewMultiplayerSpawner").spawn(
 			Character.pilot_data("Outsider", zeta.faction_id, 1, 5, 6)) as Character
-	assert_false((g.view_of(outsider)["picture"] as Dictionary).has(carrier), "withheld from the side")
-	assert_true(g.view_of(w.player)["aboard"] == carrier, "its own crew are aboard, so they know it")
+	assert_false((g.fog.view_of(outsider)["picture"] as Dictionary).has(carrier), "withheld from the side")
+	assert_true(g.fog.view_of(w.player)["aboard"] == carrier, "its own crew are aboard, so they know it")
 
 
-## Galaxy.check_exclusion_change: only a leader of the owning faction, or of one
+## FogOfWar.check_exclusion_change: only a leader of the owning faction, or of one
 ## above it, may change an exclusion (no UI yet; this is the server's check).
 
 func test_only_leaders_above_may_change_an_exclusion() -> void:
@@ -288,16 +288,16 @@ func test_only_leaders_above_may_change_an_exclusion() -> void:
 	var g: Galaxy = w.galaxy
 	var ea := g.factions.find_by_name("Earth Alliance")
 	var player: Character = w.player  # pilot_id 1, Zeta Wing.
-	assert_ne(Galaxy.check_exclusion_change(player, w.black), "", "not a leader")
+	assert_ne(FogOfWar.check_exclusion_change(player, w.black), "", "not a leader")
 	ea.leader_id = player.pilot_id
-	assert_eq(Galaxy.check_exclusion_change(player, w.black), "", "leads a faction above it")
-	assert_eq(Galaxy.check_exclusion_change(player, w.covert), "", "and above the wing")
+	assert_eq(FogOfWar.check_exclusion_change(player, w.black), "", "leads a faction above it")
+	assert_eq(FogOfWar.check_exclusion_change(player, w.covert), "", "and above the wing")
 	var narn := g.factions.find_by_name("Narn Regime")
-	assert_ne(Galaxy.check_exclusion_change(player, w.raider), "", "not over another side's ships")
+	assert_ne(FogOfWar.check_exclusion_change(player, w.raider), "", "not over another side's ships")
 	narn.leader_id = 99
 	(w.spook as Character).faction.leader_id = (w.spook as Character).pilot_id
-	assert_eq(Galaxy.check_exclusion_change(w.spook, w.covert), "", "a wing's own leader")
-	assert_ne(Galaxy.check_exclusion_change(w.spook, w.carrier), "", "but not the rest of the fleet")
+	assert_eq(FogOfWar.check_exclusion_change(w.spook, w.covert), "", "a wing's own leader")
+	assert_ne(FogOfWar.check_exclusion_change(w.spook, w.carrier), "", "but not the rest of the fleet")
 
 
 func test_exclusions_are_not_sent_to_clients() -> void:

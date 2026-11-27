@@ -79,7 +79,7 @@ var factions: FactionRegistry:
 @export var neutron_output_base: float = 0.0
 ## Kept out of its side's shared picture (fog of war): where it is and what it
 ## detects are known only to its own crew (and to sides that detect it).
-## Changed through Galaxy.check_exclusion_change.
+## Changed through FogOfWar.check_exclusion_change.
 @export var excluded_from_picture := false
 ## Its engines: what thrust gives off. Chemical unless the ship says otherwise.
 @export var drive: DriveProfile = preload("res://ship_systems/drives/chemical.tres")
@@ -186,7 +186,7 @@ func _ready():
 			and multiplayer.multiplayer_peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED:
 		_have_ship.rpc_id(1)
 		if galaxy:
-			galaxy.contact_regained(ship_id)  # Its ghost, if any, goes (N5c).
+			galaxy.fog.regained(ship_id)  # Its ghost, if any, goes (N5c).
 
 
 
@@ -216,7 +216,7 @@ func spawn_crew(data: Dictionary) -> Character:
 	var pilot: Character = $CrewMultiplayerSpawner.spawn(data)
 	Log.log(["Crew ", pilot.name, " spawned on ", name], Log.MessageType.INFO)
 	if galaxy:
-		galaxy.refresh_interest()  # Their client may only now know this ship (N5a2).
+		galaxy.fog.refresh()  # Their client may only now know this ship (N5a2).
 	if pilot.is_player():
 		set_camera.rpc_id(pilot.multiplayer_id)
 		set_capital_ui.rpc_id(pilot.multiplayer_id)

@@ -1,15 +1,15 @@
 # network/
 
-Loaded when working in `network/`. Project-wide rules are in the top-level `CLAUDE.md`. Interest management
-also lives in `Galaxy.gd` (`interest`, `pictures_of`, `refresh_interest`, contacts) and `ships/Ship.gd`
-(`sensor_check`), with each ship's side in `ships/ship_interest.gd` (`ShipInterest`, `Ship.interest`) and
-the detection maths in `ships/ship_sensors.gd`.
+Loaded when working in `network/`. Project-wide rules are in the top-level `CLAUDE.md`. Fog of war is
+`fog_of_war.gd` (`FogOfWar`, `Galaxy.fog`: refresh, pictures, contacts; the RPC `Galaxy._contact_lost` stays
+on the Galaxy), with `Galaxy.interest`, `Galaxy.contacts` and `Ship.sensor_check`, each ship's side in
+`ships/ship_interest.gd` (`ShipInterest`, `Ship.interest`) and the detection maths in `ships/ship_sensors.gd`.
 
 ## Interest management (fog of war)
 
 Interest management (N5, `network/interest.gd`, `Galaxy.interest`): the server decides which ships each
 client is told about; a ship a client doesn't know does not exist there. The rule is fog of war: the ships
-in the player's system that are in their top-level faction's sensor picture (`Galaxy.pictures_of`: its own
+in the player's system that are in their top-level faction's sensor picture (`FogOfWar.pictures_of`: its own
 ships and what their sensors detect, `Ship.detected_ships` from each system's 0.5 s scan), plus the ship
 they are aboard; none before they have a character. Factions and ships can be kept out of the shared
 picture (`excluded_from_picture`; covert wings still see it, one-way; `documentation/factions.md`). Not
@@ -18,7 +18,7 @@ yet: sharing pictures between sides, and the host's own player (the server has e
 - With no character a client knows nothing, so the join menu asks the server for a faction's spawn points
   (`Galaxy._request_spawn_points`, own side only), and `first_spawn_player` checks the one picked
   (`Galaxy.check_spawn_point`).
-- `Galaxy.refresh_interest` runs every 0.5 s and at once when a client connects, a ship is launched (after
+- `FogOfWar.refresh` runs every 0.5 s and at once when a client connects, a ship is launched (after
   it is placed: showing a ship sends its spawn with its transform at that moment) or crew board (Godot
   refuses an RPC to a peer that can't see the node).
 - Detection (`Ship.sensor_check` calls `ShipSensors.detects`; `Sensor`): EM, neutrino and gravimetric fall off with distance squared
@@ -32,7 +32,7 @@ yet: sharing pictures between sides, and the host's own player (the server has e
   `Galaxy._contact_lost` (its last state); the client records it in `Galaxy.contacts` (`ContactLog`, kept
   after the ghost fades, with when it was last seen) and draws a `GhostMarker` (`contacts/`) in that system:
   it drifts on the last course and fades over `ContactLog.fade_seconds` (30 s); stations stay put for good.
-  The ship's next spawn there ends the ghost (`Galaxy.contact_regained`). Client log "Lost contact with X".
+  The ship's next spawn there ends the ghost (`FogOfWar.regained`). Client log "Lost contact with X".
 - Every synchronizer in a ship, crew included, has a visibility filter (`ShipInterest.follow`) and is
   updated only when interest changes (`visibility_update_mode` none; `ShipInterest.update`, the ship's own
   synchronizer first when shown, last when hidden). Godot spawns a node on a peer while the synchronizers
