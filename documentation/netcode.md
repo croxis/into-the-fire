@@ -4,6 +4,11 @@ How the game keeps a server and its clients in step: what each machine simulates
 network, when, and why. For the per-folder detail an agent needs while editing, see the `CLAUDE.md`
 files in `ships/`, `characters/` and `network/`; this page is the overview.
 
+**Status:** the netcode step finished on 2026-11-27. Outside it: fog-of-war sharing, power-use signals and
+range tuning (paused); moving ships between systems and the map-level interest tier (waiting for more
+zones); the Jolt job pool warning after stalls and an occasional DTLS error when a host quits first (engine,
+godot-custom); `--max-rewind` moving into `server.cfg` (server hosting).
+
 ## The shape of it
 
 One machine is the **server**: it runs the real simulation, decides everything that matters and
