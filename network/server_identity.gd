@@ -2,9 +2,9 @@ class_name ServerIdentity
 extends RefCounted
 ## The server's private key and self-signed certificate, for encrypting ENet
 ## with DTLS (Network.secure_server). Made the first time a server starts and
-## kept in user:// after, so the certificate stays the same between runs: a
-## client could then remember it and notice if it changes (not yet: clients
-## don't check it, so this stops eavesdropping, not a machine in the middle).
+## kept in user:// after, so the certificate stays the same between runs:
+## clients remember it the first time they join (KnownServers) and refuse a
+## server that can't prove it holds it later.
 
 const KEY_FILE := "server_tls.key"
 const CERT_FILE := "server_tls.crt"

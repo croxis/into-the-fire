@@ -150,10 +150,14 @@ How a ship appears and disappears on a client:
 - Logins are never logged.
 - All traffic is encrypted with DTLS (ENet's own support: `Network.secure_server`, `secure_client`), so
   passwords and everything else are unreadable to anyone watching the network. The server's key and
-  self-signed certificate are made on its first start and kept in `user://` (`ServerIdentity`). Clients
-  don't check the certificate yet, so someone who can sit between a client and the server and pretend
-  to be it could still read a login; remembering the certificate the first time a client joins a
-  server (and warning if it changes) would close that.
+  self-signed certificate are made on its first start and kept in `user://` (`ServerIdentity`).
+- Clients check the server is the one they joined before, as SSH does (trust on first use): the server
+  sends its certificate with its details, and the first time a client joins a server (by address and
+  port) it remembers it in `user://known_servers.cfg` (`KnownServers`). Later joins hand it to DTLS,
+  which refuses a server that can't prove it holds that certificate's key, so someone pretending to be
+  the server can't read the login. The first join is trusted as it is. A refused join looks like an
+  unreachable server, so the player is told both and which line to remove if the server's owner set it
+  up again (a new `user://`, so a new certificate).
 - A client without encryption can't connect at all.
 
 ## Testing under lag
@@ -194,5 +198,5 @@ Each of these cost a debugging session; the code and its tests now guard against
 - **A VoxelGI node in a ship froze every machine that drew one,** each time one appeared. Ships carry
   none.
 
-What is planned but not built (weapons and lag compensation, moving between systems, checking the server's certificate)
+What is planned but not built (weapons and lag compensation, moving between systems)
 is in the design doc linked from `CLAUDE.md`.

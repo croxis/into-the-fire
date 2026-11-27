@@ -21,6 +21,13 @@ var player_password := ""
 var pending := {}
 var server_password := ""
 var server_name := ""
+## Server: its key and certificate (DTLS); the certificate goes to clients.
+var identity: ServerIdentity
+## Client: the server being joined, and the certificate it showed before (null
+## on a first join), for remembering it or explaining a failed join.
+var _joining_address := ""
+var _joining_port := 0
+var _joining_pin: X509Certificate
 
 signal connection_succeeded()
 signal auth_failed(peer, reason)
@@ -42,7 +49,7 @@ func start_server(new_game_name, s_password:="", port: int=DEFAULT_PORT) -> bool
 	if peer.get_connection_status() == MultiplayerPeer.CONNECTION_DISCONNECTED:
 		OS.alert("Failed to start multiplayer server.")
 		return false
-	var identity := ServerIdentity.new()
+	identity = ServerIdentity.new()
 	if not identity.load_or_create() or secure_server(peer, identity) != OK:
 		OS.alert("Failed to set up encryption for the multiplayer server.")
 		peer.close()
@@ -78,6 +85,7 @@ func _authenticating(peer_id):
 		&'hostname' : server_name,
 		&'host_token' : "bruh im legit",
 		&'content' : Content.registry.signature(),  # The client checks it matches its own.
+		&'certificate' : identity.certificate.save_to_string() if identity else "",  # KnownServers.
 		}
 
 	var buf:PackedByteArray = var_to_bytes(dict)
@@ -174,12 +182,21 @@ static func secure_server(server_peer: ENetMultiplayerPeer, identity: ServerIden
 
 
 ## The client's side of secure_server: call right after create_client, before
-## the connection is serviced. The server's certificate is self-signed, so it is
-## not checked (client_unsafe): this stops anyone reading the traffic, not
-## someone pretending to be the server. Pinning the certificate the first time
-## a client joins a server would close that.
-static func secure_client(client_peer: ENetMultiplayerPeer, server_address: String) -> Error:
-	return client_peer.host.dtls_client_setup(server_address, TLSOptions.client_unsafe())
+## the connection is serviced. With [param pin] (the certificate this server
+## showed before, KnownServers) the server must prove it holds that
+## certificate's key, or the connection fails. Without one, on a first join,
+## nothing is checked. The certificate is self-signed, so its name isn't
+## checked either (client_unsafe with a trusted chain still checks the chain).
+static func secure_client(client_peer: ENetMultiplayerPeer, server_address: String,
+		pin: X509Certificate = null) -> Error:
+	return client_peer.host.dtls_client_setup(server_address, TLSOptions.client_unsafe(pin))
+
+
+## The certificate in a server's details [param info] (checked by
+## check_server_info first), or "" when it sent none usable.
+static func certificate_in(info: Dictionary) -> String:
+	var pem: Variant = info.get("certificate", "")
+	return pem if pem is String else ""
 
 
 # Client
@@ -195,9 +212,12 @@ func join_game(ip, port, new_player_name, s_password, p_password):
 	_connect_once(multiplayer.connection_failed, on_connection_failed)
 	_connect_once(multiplayer.server_disconnected, on_server_disconnected)
 	multiplayer.auth_callback = _client_auth_callback
+	_joining_address = str(ip)
+	_joining_port = int(port)
+	_joining_pin = KnownServers.new().pinned(_joining_address, _joining_port)
 	var err = peer.create_client(ip, port)
 	if err == OK:
-		err = secure_client(peer, ip)
+		err = secure_client(peer, ip, _joining_pin)
 	if err != OK:
 		print("Failed to join Game: ", ip, ":", port, " as " , new_player_name)
 		return
@@ -218,6 +238,21 @@ func on_connected():
 func on_connection_failed():
 	print("Failed to connect to server")
 	_go_offline()
+	auth_failed.emit(1, connection_failed_reason(_joining_address, _joining_port, _joining_pin != null,
+			KnownServers.new().path))
+
+
+## What a player is told when joining [param address] fails before any reply.
+## A server whose certificate is pinned ([param pinned]) and that can't prove
+## it holds it fails the same way as one that isn't there, so both are named.
+static func connection_failed_reason(address: String, port: int, pinned: bool, known_path: String) -> String:
+	var reason := "Could not reach the server at %s." % KnownServers.key_for(address, port)
+	if pinned:
+		reason += (" If it is running, it may not be the server you joined before: its certificate"
+				+ " changed, so someone could be pretending to be it. If its owner set it up again, remove"
+				+ " the line for %s from %s and join again.") % [KnownServers.key_for(address, port),
+				ProjectSettings.globalize_path(known_path)]
+	return reason
 
 
 func on_server_disconnected():
@@ -258,13 +293,22 @@ static func check_server_info(info: Variant, our_content: Array) -> String:
 ## CLIENT GETS SERVER's QUERY and SENDS REPLY
 func _client_auth_callback(client_id: int, buf : PackedByteArray):
 	var info: Variant = bytes_to_var(buf)  # From the network: anything at all, checked below.
-	Log.log(["_auth_callback recieved data ", str(info), "from PID", client_id, "or", multiplayer.get_remote_sender_id()], Log.MessageType.QUESTION)
+	Log.log(["_auth_callback recieved data from PID ", client_id], Log.MessageType.QUESTION)
 	var error_msg := check_server_info(info, Content.registry.signature())
 	if error_msg.length() > 0:
 		Log.log(error_msg, Log.MessageType.PANIC)
 		peer.disconnect_peer(1)
 		auth_failed.emit(1, error_msg)
 		return
+	# First join: remember the certificate, so later joins check it. A pinned
+	# one was already checked by the DTLS handshake.
+	if _joining_pin == null and _joining_address:
+		if KnownServers.new().remember(_joining_address, _joining_port, certificate_in(info)):
+			Log.log(["Remembered the certificate of ", KnownServers.key_for(_joining_address, _joining_port)],
+					Log.MessageType.INFO)
+		else:
+			Log.log(["The server sent no usable certificate; it won't be checked next time"],
+					Log.MessageType.WARNING)
 
 	var dict := {
 			'client_token' : "me2",
