@@ -207,13 +207,6 @@ func _faction_label(f: Faction) -> String:
 	return "none" if faction_id == FactionRegistry.NO_FACTION else "not in world yet"
 
 
-func add_passenger(pilot: Character):
-	if $Crew.add_passenger(pilot) and pilot.multiplayer_id:
-		set_camera.rpc_id(pilot.multiplayer_id)
-		Log.log(["Passenger added to ", name, " ", ship_id, " id ", pilot.multiplayer_id], Log.MessageType.INFO)
-		set_capital_ui.rpc_id(pilot.multiplayer_id)
-
-
 ## Server only. Creates a crew member from [method Character.pilot_data] or
 ## [method Character.serialize] data. It goes through the CrewMultiplayerSpawner
 ## so every client gets the character too; a plain add_child() would exist only
@@ -571,7 +564,10 @@ func find_free_spawner() -> Array:
 
 ## Server only: a ship entering this one's dock area boards its crew here and is
 ## freed (replicated as a despawn). A client docking its own copy would free a
-## ship the server still has.
+## ship the server still has. The crew come aboard through this ship's
+## CrewMultiplayerSpawner (spawn_crew), as for respawns and launches: moving the
+## characters across would leave them untracked by any spawner, so clients would
+## lose them with the docked ship. A ship whose crew don't all fit stays outside.
 func _on_area_3d_dock_body_entered(body) -> void:
 	if not multiplayer.is_server():
 		return
@@ -582,16 +578,15 @@ func _on_area_3d_dock_body_entered(body) -> void:
 		return
 	if body.is_spawning:
 		return
+	var crew: Array[Character] = body.get_crew()
+	if $Crew.get_child_count() + crew.size() > $Crew.max_crew:
+		Log.log([body, " can't dock on ", name, ": no room for its ", crew.size(), " crew"],
+				Log.MessageType.WARNING)
+		return
 	Log.log([body, " ship entered dock on ", name], Log.MessageType.INFO)
-	for c in body.get_crew():
-		add_passenger(c)
-	body.queue_free()
-
-
-func _on_crew_child_exiting_tree(_node: Node) -> void:
-	return
-	Log.log(["_on_crew_child_exiting_tree"], Log.MessageType.INFO)
-	disable_capital_ui()
+	for c in crew:
+		spawn_crew(c.serialize())
+	body.queue_free()  # Its crew go with it, on every machine.
 
 
 func _on_capital_ui_request_launch() -> void:

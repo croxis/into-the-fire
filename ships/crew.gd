@@ -5,18 +5,10 @@ extends Node
 ## unless you want more stations than crew.
 
 
-func add_passenger(passenger: Character) -> bool:
-	if passenger in get_children():
-		return true
-	var max_capacity: int = max_crew
-	if get_child_count() >= max_capacity:
-		Log.log(["Too many passengers."], Log.MessageType.WARNING)
-		return false
-	if passenger.get_parent():
-		passenger.reparent(self)
-	else:
-		add_child(passenger)
-	return true
+## Crew only ever arrive through the ship's CrewMultiplayerSpawner
+## (Ship.spawn_crew), never by add_child or reparenting: a spawner only tracks
+## nodes it spawned, so a character moved in from elsewhere would not exist on
+## clients (docking did this until 2026-11-27).
 
 
 func remove_passenger_by_id(pilot_id: int) -> Character:
