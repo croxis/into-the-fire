@@ -41,7 +41,7 @@ Open and forward port 2258 to have others join your game.
 | A (bottom face button) | Fire primary weapons |
 
 ## Build instructions
-Requires a custom build of godot: Doubles, LimboAI, and a patch for better control of the physics engine
+Requires a [custom build of godot](https://gitlab.com/croxis/godot-custom/-/releases): Doubles, LimboAI, and a patch for better control of the physics engine
 
 
 ## Tutorials that helped me alot
