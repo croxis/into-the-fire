@@ -24,7 +24,6 @@ config/icon="res://icon.png"
 
 Log="*res://logger.gd"
 Debug="*res://ui/debug/debug_layer.tscn"
-SaveManager="*res://save_manager.gd"
 NetworkTime="*uid://cnqdxyjptkfvp"
 NetworkTimeSynchronizer="*uid://5rmn2ik3kjo8"
 NetworkRollback="*uid://gas743comroj"
