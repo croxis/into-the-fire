@@ -44,9 +44,7 @@ RPC `Ship._receive_state` stays on the ship). The pilot's input reaches the serv
   roughly speed x (render delay + latency), as prediction takes over from the drawn arm.
 - The host never predicts.
 - Logs: client "Prediction for X: N corrections" every 5 s.
-- Not done yet: under lag the client logs "SYS_COMMAND_AUTH" errors while joining (game packets arrive before
-  its login finishes), and a late `InputsSync` delta for the pilot's freed pre-launch character logs
-  "Node not found" on the server.
+- How it all fits together, for people: `documentation/netcode.md`.
 
 ## Snapshots (other ships)
 

@@ -4,7 +4,8 @@ A persistent, self-hosted 3D space combat and trading sandbox set in Babylon 5, 
 general sci-fi spaceship engine with Babylon 5 as the default mod. Early development: many systems are partial
 or stubbed.
 
-Docs: `documentation/` (`testing.md`, `content_registry.md`, `factions.md`, `scenarios.md`, `command_line.md`).
+Docs: `documentation/` (`netcode.md`, `testing.md`, `content_registry.md`, `factions.md`, `scenarios.md`,
+`command_line.md`).
 Design doc (target architecture, decisions, open questions): https://claude.ai/artifact/SbiKWXHGRsfhgvoeBBGW7J
 Folders with their own `CLAUDE.md` (loaded when you work there): `ships/` (flight, own-ship prediction,
 snapshots), `characters/` (pilot input, jitter buffer, disconnect and rejoin), `network/` (interest
