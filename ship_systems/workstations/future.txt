@@ -1,3 +1,6 @@
+Planned console and crew features (including the hangar console) are tracked in the design doc:
+https://claude.ai/artifact/SbiKWXHGRsfhgvoeBBGW7J
+
 In the future tthis will define the different stations a character can station at,
 what inputs are possible, and ui elements for that station.
 
