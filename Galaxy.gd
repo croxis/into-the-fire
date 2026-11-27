@@ -43,11 +43,6 @@ var factions := FactionRegistry.new()
 var _factions_synced := false  # Client: a faction copy has arrived from the server.
 var _join_menu_wanted := false  # Client: show the join menu once factions arrive.
 
-var _play_time: float = 0
-var _sync_interval: float = 10
-var _sync_timer: float = _sync_interval  # Countown in seconds for syncing network time
-
-signal enter_system(system_name)
 ## Emitted on clients when a faction copy arrives from the server.
 signal factions_synced()
 ## Asks the loading screen to load [param paths] in the background; it calls
@@ -93,11 +88,6 @@ func _spawn_points(faction: Faction) -> Dictionary:
 	return spawn_points_for(faction, ships_by_system)
 
 
-func player_died(player_id: int) -> void:
-	print_debug("Player died: ", player_id, " ", multiplayer.get_unique_id())
-	rpc_id(player_id, "show_spawn")
-
-
 ## Sent by the server to the player who just spawned. "authority": only the
 ## server may move a player's view to a system.
 @rpc("authority", "call_local")
@@ -113,13 +103,6 @@ func player_enter_system(system_name) -> void:
 		Log.log(["No Player for this peer yet; local player id not set"], Log.MessageType.WARNING)
 		return
 	LocalGameManager.player_id = player.player_id
-
-
-func find_pilot_by_network_id(id: int) -> Character:
-	for pilot in $Systems.find_children("*", "Pilot", true, false):
-		if pilot.multiplayer_id == id:
-			return pilot
-	return null
 
 
 func set_render_resolution(resolution: Vector2i) -> void:
@@ -159,8 +142,6 @@ static func find_for(node: Node) -> Galaxy:
 
 
 func _ready():
-	#TODO: Serialize from save
-	_play_time = 0
 	multiplayer.peer_connected.connect(_on_peer_connected)
 	multiplayer.peer_disconnected.connect(_on_peer_disconnected)
 	zone_view.name = "ZoneView"
@@ -399,26 +380,12 @@ func first_spawn_player(faction_id: int, system_name: String, spawner_name: Stri
 	Log.log(["Created pilot: ", player_pilot, " in faction ", faction.resource_name, " with mpid: ", player_pilot.multiplayer_id], Log.MessageType.SUCCESS)
 
 
-func pause_game():
-	get_tree().paused = true
-
-
-func unpause_game():
-	get_tree().paused = false
-
-
 func _process(delta: float) -> void:
-	_play_time += delta
 	if multiplayer.has_multiplayer_peer() and multiplayer.is_server():
 		_interest_timer -= delta
 		if _interest_timer <= 0:
 			_interest_timer = INTEREST_SECONDS
 			refresh_interest()
-	if get_tree().root.get_node("entry").is_server:
-		_sync_timer -= delta
-		if _sync_timer <= 0:
-			_sync_timer = _sync_interval
-			_rpc_sync_time.rpc(_play_time)
 
 
 ## The server tick [param node]'s machine shows things at now (fractional): the
@@ -605,11 +572,6 @@ static func check_exclusion_change(requester: Character, target: Object) -> Stri
 		f = f.parent_faction
 	return "%s doesn't lead %s or a faction above it" % [requester.name, faction.resource_name]
 
-
-@rpc("authority", "call_remote", "unreliable_ordered")
-func _rpc_sync_time(new_time: float) -> void:
-	_play_time = new_time
-	
 
 func _on_network_connection_succeeded() -> void:
 	finish_setup_galaxy_client()
