@@ -80,7 +80,7 @@ RPC `Ship._receive_state` stays on the ship). The pilot's input reaches the serv
 - Test lag with `tests/lag/lag_run.sh` (a UDP delay proxy between `--server` and `--testplayer`; see
   `documentation/testing.md`).
 
-## Known issues (from review, not yet fixed)
+## Health
 
-- Ship `health` setter calls `destroy()` on clients too, and can emit `destroyed` twice.
-- `Ship._on_button_launch_pressed` calls a `request_spawn` RPC that does not exist.
+`Ship.health` starts at the scene's `max_health` (set in `_ready`; a client's spawn carries the server's).
+Only the server destroys a ship at zero, once (`destroy`); clients see it despawn.

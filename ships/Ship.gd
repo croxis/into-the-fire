@@ -92,13 +92,20 @@ var _visual_radius := -1.0  # Worked out once, from the body's shapes.
 
 var galaxy: Galaxy
 
+## Set from max_health in _ready unless something set it first (a client's
+## spawn carries the server's): at declaration max_health is still the default,
+## not the scene's. Only the server destroys a ship at zero, once; clients see
+## the despawn.
 var health := max_health:
 	set(new_health):
 		health = new_health
+		_health_set = true
 		if has_node("SubViewportCenter"):
 			$SubViewportCenter/center_ui.set_health(health)
-		if (health <= 0.0):
+		if health <= 0.0 and not _destroyed and (not multiplayer.has_multiplayer_peer() or multiplayer.is_server()):
 			destroy()
+var _health_set := false
+var _destroyed := false
 var engine_length = 7.5
 #var thruster_force: Vector3 = Vector3(0, 0, 0)
 #var thruster_torque: Vector3 = Vector3(0, 0, 0)
@@ -168,6 +175,8 @@ func _ready():
 	# If in editor simply disable processing as it's not needed here
 	if (Engine.is_editor_hint()):
 		set_physics_process(false)	
+	if not _health_set:
+		health = max_health
 	can_sleep = false
 	# Ships move by FlightIntegrator, not Jolt's force integration (see _fly).
 	# Stations don't fly; Jolt keeps them as they are.
@@ -453,6 +462,9 @@ func bullet_hit(damage, bullet_global_trans):
 
 
 func destroy() -> void:
+	if _destroyed:
+		return
+	_destroyed = true
 	emit_signal("destroyed", self)
 	if faction:
 		faction.remove_ship(self)
@@ -488,12 +500,6 @@ func _on_crew_child_exiting_tree(_node: Node) -> void:
 	return
 	Log.log(["_on_crew_child_exiting_tree"], Log.MessageType.INFO)
 	disable_capital_ui()
-
-
-func _on_button_launch_pressed() -> void:
-	var system_name := get_current_system().name
-	galaxy.rpc("request_spawn", system_name, name)
-	$CapitalShipControl.visible = false
 
 
 func _on_capital_ui_request_launch() -> void:
