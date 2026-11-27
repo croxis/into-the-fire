@@ -5,7 +5,9 @@ Loaded when working in `characters/`. Project-wide rules are in the top-level `C
 ## Pilot input
 
 - Pilots on another machine send tick-stamped input (`InputChannel`, `Character._submit_inputs`, unreliable,
-  each packet repeating the last 4 inputs); the server checks it and applies one per tick, in order. The
+  each packet repeating the last 4 inputs, packed by `InputChannel.encode`, 29 bytes each; `make_record`
+  rounds vectors to float32 so client and server fly the same values); the server checks it and applies
+  one per tick, in order. The
   host's own input and NPCs still go through `InputsSync`.
 - The server keeps a cushion (jitter buffer) per pilot. Every hold (queue dry: the last input repeats) or skip
   (backlog: the oldest is dropped) is a tick of motion the client didn't predict, a correction of speed x

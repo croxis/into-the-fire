@@ -69,12 +69,19 @@ var held_ticks := 0
 var skipped_ticks := 0
 
 
+## Bytes one input takes on the wire (encode): its tick (int32), throttle and
+## rotation throttle (3 float32 each) and a byte of toggles.
+const RECORD_BYTES := 29
+
+
+## One tick's input. Its vectors are rounded to float32, as the wire carries
+## them, so the client flies the same input the server will.
 static func make_record(tick: int, throttle: Vector3, rotation_throttle: Vector3,
 		autospin_toggle := false, autobreak_toggle := false, debug_all_stop := false) -> Dictionary:
 	return {
 		"tick": tick,
-		"throttle": throttle,
-		"rotation_throttle": rotation_throttle,
+		"throttle": _float32(throttle),
+		"rotation_throttle": _float32(rotation_throttle),
 		"autospin_toggle": autospin_toggle,
 		"autobreak_toggle": autobreak_toggle,
 		"debug_all_stop": debug_all_stop,
@@ -87,6 +94,50 @@ func record(input_record: Dictionary) -> Array:
 	if _recent.size() > REDUNDANCY:
 		_recent.pop_front()
 	return _recent.duplicate()
+
+
+## Client: [param packet] (from record) as bytes for the network. A
+## Dictionary per input, sent as a Variant, was about 200 bytes (its keys are
+## strings, its vectors doubles); this is RECORD_BYTES.
+static func encode(packet: Array) -> PackedByteArray:
+	var bytes := PackedByteArray()
+	bytes.resize(packet.size() * RECORD_BYTES)
+	var at := 0
+	for r: Dictionary in packet:
+		bytes.encode_s32(at, r.tick)
+		for i in 3:
+			bytes.encode_float(at + 4 + i * 4, r.throttle[i])
+			bytes.encode_float(at + 16 + i * 4, r.rotation_throttle[i])
+		bytes[at + 28] = int(r.autospin_toggle) | int(r.autobreak_toggle) << 1 | int(r.debug_all_stop) << 2
+		at += RECORD_BYTES
+	return bytes
+
+
+## Server: the records in [param bytes] (from a client, so anything at all),
+## for receive to check, or null when it isn't a packet at all.
+static func decode(bytes: Variant) -> Variant:
+	if not bytes is PackedByteArray:
+		return null
+	var b: PackedByteArray = bytes
+	if b.size() % RECORD_BYTES != 0 or b.size() > REDUNDANCY * RECORD_BYTES:
+		return null
+	var packet: Array[Dictionary] = []
+	for at in range(0, b.size(), RECORD_BYTES):
+		var flags := b[at + 28]
+		packet.append({
+			"tick": b.decode_s32(at),
+			"throttle": Vector3(b.decode_float(at + 4), b.decode_float(at + 8), b.decode_float(at + 12)),
+			"rotation_throttle": Vector3(b.decode_float(at + 16), b.decode_float(at + 20), b.decode_float(at + 24)),
+			"autospin_toggle": flags & 1 != 0,
+			"autobreak_toggle": flags & 2 != 0,
+			"debug_all_stop": flags & 4 != 0,
+		})
+	return packet
+
+
+static func _float32(v: Vector3) -> Vector3:
+	var f := PackedFloat32Array([v.x, v.y, v.z])
+	return Vector3(f[0], f[1], f[2])
 
 
 ## Server: why [param packet] was refused ("" when accepted). Inputs already

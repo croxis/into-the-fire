@@ -79,6 +79,9 @@ brakes to a stop). Logging back in with the same name resumes it (`Galaxy._resum
 Your client stamps each tick's input with its tick number and sends it unreliably, each packet
 repeating the last four inputs so a lost packet loses nothing (`InputChannel`,
 `Character._submit_inputs`). The server queues them and applies exactly one per tick, in order.
+Each input is 29 bytes on the wire (`InputChannel.encode`: tick, two float32 vectors, a byte of
+toggles); sent as Dictionaries they were about 200, and the client uploaded 55 kB/s. Its vectors are
+rounded to float32 when made (`make_record`), so the client flies exactly what the server decodes.
 
 Packets arrive in clumps, so the server keeps a small **cushion** of inputs before using them (2 to
 8 ticks, growing when it runs dry and shrinking after a steady spell). Two things can go wrong, and
@@ -176,6 +179,12 @@ What the logs tell you:
 | `Prediction for X: N corrections, largest D m` | client, every 5 s, only when there were some | One at launch (the arm's release), then rare and small |
 | `Drawing X: N ticks behind the newest snapshot, M of F frames past it` | client, every 5 s | About 5 behind (6, less the time since the last arrival); few frames past it |
 | `Interest: peer X now knows N ships (+ more, leaving, gone)` | server, on change | Matches what that player's side can see |
+| `Traffic: sent S kB/s (P packets/s), received …; peer X: R ms, L% loss` | both, every 5 s (`TrafficReport`) | See below |
+
+Measured at 75 ms latency, 15 ms jitter and 2% loss, one client near Babylon 5 and two other ships
+(November 2026): the client sends 7.8 kB/s (66 packets/s, its input) and the server sends that client
+about 20 kB/s (snapshots, 30 a second for each nearby ship, still Variants of doubles: about 170 bytes
+each). These are ENet's bytes; DTLS adds about 30 a packet.
 
 ## Lessons learned
 

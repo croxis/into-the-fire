@@ -28,9 +28,9 @@ func test_the_server_applies_inputs_in_tick_order() -> void:
 	server.receive(client.record(_rec(10, -0.1)))
 	server.receive(client.record(_rec(11, -0.2)))
 	server.receive(client.record(_rec(12, -0.3)))
-	assert_eq(server.next().throttle, Vector3(0, 0, -0.1))
+	assert_eq(server.next().throttle, _rec(0, -0.1).throttle)
 	assert_eq(server.last_applied_tick, 10)
-	assert_eq(server.next().throttle, Vector3(0, 0, -0.2))
+	assert_eq(server.next().throttle, _rec(0, -0.2).throttle)
 	assert_eq(server.last_applied_tick, 11)
 
 
@@ -312,3 +312,37 @@ func test_a_toggle_dropped_by_a_flood_is_kept() -> void:
 	for tick in range(1, InputChannel.MAX_QUEUE + 5):
 		server.receive([_rec(tick)])
 	assert_true(server.next().autospin_toggle)
+
+
+# Wire format ------------------------------------------------------------------
+
+func test_a_packet_survives_encoding() -> void:
+	var channel := InputChannel.new()
+	channel.record(InputChannel.make_record(10, Vector3(0.1, -0.7, 1), Vector3(0.33, 0, -0.5), true))
+	var packet := channel.record(InputChannel.make_record(11, Vector3(0, 0, -1), Vector3.ZERO, false, true, true))
+	assert_eq(InputChannel.decode(InputChannel.encode(packet)), packet,
+			"make_record rounds to what the wire carries, so client and server fly the same input")
+
+
+func test_a_full_packet_is_small() -> void:
+	var channel := InputChannel.new()
+	var packet: Array
+	for tick in InputChannel.REDUNDANCY:
+		packet = channel.record(InputChannel.make_record(tick, Vector3(0.5, 0.5, 0.5), Vector3(0.5, 0.5, 0.5)))
+	assert_eq(InputChannel.encode(packet).size(), InputChannel.REDUNDANCY * InputChannel.RECORD_BYTES)
+	assert_lt(var_to_bytes(InputChannel.encode(packet)).size(), 140,
+			"as Dictionaries it was about 800 bytes, every tick")
+
+
+func test_malformed_bytes_decode_to_nothing_usable() -> void:
+	assert_null(InputChannel.decode("hello"))
+	assert_null(InputChannel.decode(PackedByteArray([1, 2, 3])), "not a whole record")
+	var too_many := PackedByteArray()
+	too_many.resize((InputChannel.REDUNDANCY + 1) * InputChannel.RECORD_BYTES)
+	assert_null(InputChannel.decode(too_many))
+
+
+func test_a_nan_on_the_wire_is_refused() -> void:
+	var bytes := InputChannel.encode([InputChannel.make_record(3, Vector3.ZERO, Vector3.ZERO)])
+	bytes.encode_float(4, NAN)
+	assert_ne(server.receive(InputChannel.decode(bytes)), "")

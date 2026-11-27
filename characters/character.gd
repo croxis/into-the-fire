@@ -260,7 +260,7 @@ func _apply_input(_dt: float, tick: int) -> void:
 		inputs.autobreak_toggle = false
 		inputs.autospin_toggle = false
 		if source == InputSource.LOCAL_AND_SEND:
-			_submit_inputs.rpc_id(1, input_channel.record(r))
+			_submit_inputs.rpc_id(1, InputChannel.encode(input_channel.record(r)))
 	if r.autobreak_toggle:
 		helm.toggle_autobreak()
 	if r.autospin_toggle:
@@ -299,7 +299,7 @@ func _plays_here() -> bool:
 func _submit_inputs(packet: Variant) -> void:
 	if not multiplayer.is_server():
 		return
-	var refusal := receive_inputs_from(multiplayer.get_remote_sender_id(), packet)
+	var refusal := receive_inputs_from(multiplayer.get_remote_sender_id(), InputChannel.decode(packet))
 	if refusal:
 		Log.log(["Input from peer ", multiplayer.get_remote_sender_id(), " for ", name,
 				" refused: ", refusal], Log.MessageType.WARNING)

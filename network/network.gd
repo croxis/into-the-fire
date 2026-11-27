@@ -28,9 +28,20 @@ var identity: ServerIdentity
 var _joining_address := ""
 var _joining_port := 0
 var _joining_pin: X509Certificate
+## Logs this machine's traffic every 5 s, once hosting or joined.
+var _traffic := TrafficReport.new()
 
 signal connection_succeeded()
 signal auth_failed(peer, reason)
+
+
+func _process(delta: float) -> void:
+	var enet := multiplayer.multiplayer_peer as ENetMultiplayerPeer
+	if enet == null or enet.get_connection_status() != MultiplayerPeer.CONNECTION_CONNECTED:
+		return
+	var line := _traffic.tick(enet, delta, multiplayer.get_peers())
+	if line:
+		Log.log([line], Log.MessageType.INFO)
 
 
 # Server
