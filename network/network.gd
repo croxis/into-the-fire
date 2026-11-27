@@ -42,6 +42,11 @@ func start_server(new_game_name, s_password:="", port: int=DEFAULT_PORT) -> bool
 	if peer.get_connection_status() == MultiplayerPeer.CONNECTION_DISCONNECTED:
 		OS.alert("Failed to start multiplayer server.")
 		return false
+	var identity := ServerIdentity.new()
+	if not identity.load_or_create() or secure_server(peer, identity) != OK:
+		OS.alert("Failed to set up encryption for the multiplayer server.")
+		peer.close()
+		return false
 	multiplayer.multiplayer_peer = peer
 	multiplayer.peer_authenticating.connect(_authenticating)
 	multiplayer.peer_authentication_failed.connect(_auth_failed)
@@ -161,6 +166,22 @@ func _auth_failed(client_peer):
 	pass
 
 
+## Encrypts everything [param server_peer] sends and receives with DTLS, using
+## [param identity]'s key. Logins carry passwords, so they must never cross the
+## network in the clear. Call right after create_server.
+static func secure_server(server_peer: ENetMultiplayerPeer, identity: ServerIdentity) -> Error:
+	return server_peer.host.dtls_server_setup(identity.server_options())
+
+
+## The client's side of secure_server: call right after create_client, before
+## the connection is serviced. The server's certificate is self-signed, so it is
+## not checked (client_unsafe): this stops anyone reading the traffic, not
+## someone pretending to be the server. Pinning the certificate the first time
+## a client joins a server would close that.
+static func secure_client(client_peer: ENetMultiplayerPeer, server_address: String) -> Error:
+	return client_peer.host.dtls_client_setup(server_address, TLSOptions.client_unsafe())
+
+
 # Client
 func join_game(ip, port, new_player_name, s_password, p_password):
 	# Client Only
@@ -175,6 +196,8 @@ func join_game(ip, port, new_player_name, s_password, p_password):
 	_connect_once(multiplayer.server_disconnected, on_server_disconnected)
 	multiplayer.auth_callback = _client_auth_callback
 	var err = peer.create_client(ip, port)
+	if err == OK:
+		err = secure_client(peer, ip)
 	if err != OK:
 		print("Failed to join Game: ", ip, ":", port, " as " , new_player_name)
 		return

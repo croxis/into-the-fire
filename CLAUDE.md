@@ -93,7 +93,7 @@ Autoloads include netfox (`NetworkTime`, `NetworkRollback`, ...), `Log`, `LimboC
 
 ## Netcode
 
-- ENet with Godot's high-level multiplayer (RPCs, `MultiplayerSpawner`, `MultiplayerSynchronizer`). Server
+- ENet, encrypted with DTLS (`ServerIdentity`, `Network.secure_server`), with Godot's high-level multiplayer (RPCs, `MultiplayerSpawner`, `MultiplayerSynchronizer`). Server
   authoritative. netfox 1.35 is installed, rollback disabled; own-ship prediction is our own (`ships/CLAUDE.md`).
   `addons/netfox/network-time.gd` carries one ITF patch (`lead_seconds`, for time dilation; see
   `characters/CLAUDE.md`): reapply it when updating netfox.

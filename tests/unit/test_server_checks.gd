@@ -96,6 +96,12 @@ func test_a_player_can_join_again_after_a_refusal() -> void:
 	assert_eq(network.multiplayer.server_disconnected.get_connections().size(), 1)
 	network.multiplayer.multiplayer_peer.close()
 	get_tree().set_multiplayer(null, network.get_path())
+	# Nothing listens on port 9, so the encrypted handshake's first packets fail
+	# to send and mbedtls says so: what a player trying a server that is down sees.
+	for e in get_errors():
+		if not e.handled and ("TLS" in str(e.code, e.rationale) or "0x6C00" in str(e.code, e.rationale)
+				or "Sending failed" in str(e.code, e.rationale)):
+			e.handled = true
 
 
 # Spawning -------------------------------------------------------------------

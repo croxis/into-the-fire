@@ -147,7 +147,14 @@ How a ship appears and disappears on a client:
 
 - The server validates every request a client makes against what that player's character may do.
 - Never trust an ID a client sends: the sender is `multiplayer.get_remote_sender_id()`.
-- Logins are never logged. Passwords still cross the network in plain text.
+- Logins are never logged.
+- All traffic is encrypted with DTLS (ENet's own support: `Network.secure_server`, `secure_client`), so
+  passwords and everything else are unreadable to anyone watching the network. The server's key and
+  self-signed certificate are made on its first start and kept in `user://` (`ServerIdentity`). Clients
+  don't check the certificate yet, so someone who can sit between a client and the server and pretend
+  to be it could still read a login; remembering the certificate the first time a client joins a
+  server (and warning if it changes) would close that.
+- A client without encryption can't connect at all.
 
 ## Testing under lag
 
@@ -187,5 +194,5 @@ Each of these cost a debugging session; the code and its tests now guard against
 - **A VoxelGI node in a ship froze every machine that drew one,** each time one appeared. Ships carry
   none.
 
-What is planned but not built (weapons and lag compensation, moving between systems, password security)
+What is planned but not built (weapons and lag compensation, moving between systems, checking the server's certificate)
 is in the design doc linked from `CLAUDE.md`.
