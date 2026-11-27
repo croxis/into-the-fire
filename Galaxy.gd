@@ -49,15 +49,14 @@ var fog := FogOfWar.new(self)
 signal interest_refreshed()
 
 ## Every faction in this world. The server creates them; clients receive a copy
-## when they join (see _rpc_receive_factions). Replaced as a whole, never patched
-## from client data.
+## when they join (WorldReplicator). Replaced as a whole, never patched from
+## client data.
 var factions := FactionRegistry.new()
-var _factions_synced := false  # Client: a faction copy has arrived from the server.
+## Tells joining clients about the world (factions); they wait for it.
+var replicator := WorldReplicator.new(self)
 
-## Emitted on clients when a faction copy arrives from the server.
-signal factions_synced()
 ## This machine's player has entered the world (joined, or hosts it) and may
-## pick where to spawn, once factions_ready(). The join UI (JoinFlow) listens.
+## pick where to spawn, once replicator.world_ready(). The join UI (JoinFlow) listens.
 signal ready_to_spawn()
 ## Server: start_new_world has built the world.
 signal world_built()
@@ -102,16 +101,18 @@ func _ready():
 	add_child(hud)
 	add_child(zone_stepper)
 	add_child(spawns)
+	add_child(replicator)
 	zones.stepper = zone_stepper
 	zones.zone_added.connect(func(system: System) -> void:
 			system.shots.max_rewind_ticks = max_rewind_ticks)
 
 
-## Server: send the faction tree to a client that just connected.
-## (peer_connected also fires on clients when other peers join; they ignore it.)
+## Server: tell a client that just connected about the world, then put it back
+## in its character or let it pick a spawn point. (peer_connected also fires
+## on clients when other peers join; they ignore it.)
 func _on_peer_connected(peer_id: int) -> void:
 	if multiplayer.is_server():
-		_rpc_receive_factions.rpc_id(peer_id, factions.to_data())
+		replicator.send_snapshot(peer_id)  # First: its ships find their factions in it.
 		var player: Player = $Players.find_player_by_netid(peer_id)
 		var character := zones.player_character(player.player_id) if player else null
 		if character:
@@ -128,23 +129,6 @@ func _on_peer_disconnected(peer_id: int) -> void:
 	for character in zones.characters_of_peer(peer_id):
 		character.pilot_disconnected()
 		Log.log([character.name, " left; their character stays"], Log.MessageType.INFO)
-
-
-## Client: replace the local copy with the server's.
-## "authority" means only the server may call this, so a client can't push
-## factions to other peers. The data is plain dictionaries, not objects.
-@rpc("authority", "call_remote", "reliable")
-func _rpc_receive_factions(data: Dictionary) -> void:
-	factions = FactionRegistry.from_data(data)
-	_factions_synced = true
-	Log.log(["Received ", factions.size(), " factions from server"], Log.MessageType.INFO)
-	factions_synced.emit()
-
-
-## True once there are factions to pick from: the server's own, or on a client
-## the copy the server sent.
-func factions_ready() -> bool:
-	return multiplayer.is_server() or _factions_synced
 
 
 ## Server: builds this world from its scenario (scenario_id) through a

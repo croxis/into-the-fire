@@ -1,7 +1,7 @@
 extends GutTest
 ## JoinFlow: the client-side faction and spawn picker, kept out of Galaxy so a
 ## world holds no UI (dedicated servers are headless). Galaxy only says when the
-## player may pick (ready_to_spawn, factions_synced) and passes answers on
+## player may pick (ready_to_spawn, replicator.snapshot_received) and passes answers on
 ## (spawn_points_received, resumed). Offline, this machine is the server: a
 ## host, whose factions are always ready.
 

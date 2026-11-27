@@ -63,7 +63,8 @@ moment.
    signature (`ContentRegistry.signature`) lists each manifest loaded, in order, with a hash of the
    file: a client with other mods, other versions of them or another load order is told what
    differs and can't join, rather than breaking later on content IDs it doesn't have.
-2. **Factions.** The server sends the faction tree as plain data (`FactionRegistry.to_data`).
+2. **Factions.** The server sends a world snapshot with the faction tree as plain data
+   (`WorldReplicator.send_snapshot`, `FactionRegistry.to_data`).
 3. **Nothing else, yet.** A client with no character is told about no ships at all (fog of war). The
    join menu asks the server for a faction's spawn points (`SpawnService._request_spawn_points`, names
    only, own side only) and the server checks the pick (`SpawnService.check_spawn_point`).

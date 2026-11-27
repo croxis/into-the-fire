@@ -26,7 +26,7 @@ func _ready() -> void:
 	menu.request_faction.connect(galaxy.spawns.request_spawn_points)
 	menu.request_spawn.connect(_on_request_spawn)
 	galaxy.ready_to_spawn.connect(_on_ready_to_spawn)
-	galaxy.factions_synced.connect(_try_show)
+	galaxy.replicator.snapshot_received.connect(_try_show)
 	galaxy.spawns.resumed.connect(_on_resumed)
 	galaxy.spawns.spawn_points_received.connect(menu.show_spawn)
 
@@ -39,7 +39,7 @@ func _on_ready_to_spawn() -> void:
 ## Shows the picker once it is wanted and there are factions to pick from: on a
 ## client the server's copy may arrive before or after the player joins.
 func _try_show() -> void:
-	if not _wanted or not galaxy.factions_ready():
+	if not _wanted or not galaxy.replicator.world_ready():
 		return
 	_wanted = false
 	menu.build_faction_menu(galaxy.factions)

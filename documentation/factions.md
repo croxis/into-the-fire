@@ -67,12 +67,15 @@ Before a node is in the tree there is no Galaxy above it, so `faction` returns n
 
 Only the server creates or changes factions. Clients get a copy:
 
-1. When a client connects, `Galaxy._on_peer_connected` (on the server) sends
-   `factions.to_data()` to that client with the `_rpc_receive_factions` RPC.
-2. The client replaces its registry with `FactionRegistry.from_data(data)` and emits
-   `factions_synced`.
+1. When a client connects, `Galaxy._on_peer_connected` (on the server) has the `WorldReplicator`
+   (`world/`) send it a world snapshot, `{version, factions: factions.to_data()}`, before anything
+   that spawns ships there.
+2. The client refuses a snapshot of another version; otherwise it replaces its registry with
+   `FactionRegistry.from_data()` and the replicator emits `snapshot_received`.
 3. The faction picker (`JoinFlow`, client-only, `ui/join_game/`) is shown only once the copy has arrived
-   (`Galaxy.factions_ready()`).
+   (`Galaxy.replicator.world_ready()`).
+4. Nothing is sent after that, yet: the copy's `member_ids` go stale as players spawn, but no client
+   reads them. A change clients must see would go out as a `WorldReplicator` event.
 
 Why it is built this way:
 
