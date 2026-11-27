@@ -87,6 +87,7 @@ func _show_role(role: String, player_name: String) -> void:
 
 func _start_dedicated() -> void:
 	_dedicated_server = true
+	$Galaxy.max_rewind_ticks = ShotField.ticks_for_ms(options.max_rewind_ms)
 	if not $network.start_server(options.game_name, options.password, options.port):
 		print("Failure to activate network. Is port in use?")
 		get_tree().quit(1)
@@ -95,6 +96,7 @@ func _start_dedicated() -> void:
 
 
 func _start_test_server() -> void:
+	$Galaxy.max_rewind_ticks = ShotField.ticks_for_ms(options.max_rewind_ms)
 	if not $network.host_server("Test Server", "Test Host", options.port):
 		print("Failure to activate network. Is port in use?")
 		get_tree().quit(1)
@@ -192,6 +194,7 @@ func _on_network_connection_succeeded():
 
 
 func _on_main_menu_new_game(game_name, player_name, port, server_password, player_password):
+	$Galaxy.max_rewind_ticks = ShotField.ticks_for_ms(options.max_rewind_ms)
 	if not $network.host_server(game_name, player_name, port, server_password, player_password):
 		return
 	_show_role("Host", player_name)

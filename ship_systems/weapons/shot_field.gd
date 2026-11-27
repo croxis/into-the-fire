@@ -10,20 +10,21 @@ extends RefCounted
 const BoltScene := preload("res://ship_systems/weapons/effects/bolt/Bolt.tscn")
 ## Retries past the shooter's own hull (the muzzle can sit inside it).
 const MAX_RAY_RETRIES := 4
-## The furthest back a shot is checked (250 ms): favouring the shooter past
-## this would let a target be hit long after it reached cover on its own screen.
-const MAX_REWIND_TICKS := 15
-## Ticks of ship transforms kept (server), for rewound checks.
-const HISTORY_TICKS := MAX_REWIND_TICKS + 2
+## The furthest back a shot is checked by default (250 ms): favouring the
+## shooter past this would let a target be hit long after it reached cover on
+## its own screen. A server sets its own (--max-rewind, max_rewind_ticks).
+const DEFAULT_REWIND_TICKS := 15
 
 var _system: System
 var _hits_allowed: bool
+## This server's rewind cap, in ticks (Galaxy sets it from --max-rewind).
+var max_rewind_ticks := DEFAULT_REWIND_TICKS
 ## Server: [param shot] hit [param target] at [param at] this tick.
 signal hit(shot: Shot, target: Ship, at: Vector3)
 
 var _shots: Array[Shot] = []
 var _bolts: Dictionary[Shot, Node3D] = {}
-## Server: ship -> {tick: global transform}, the last HISTORY_TICKS ticks.
+## Server: ship -> {tick: global transform}, the last _history_ticks() ticks.
 var _history: Dictionary[Ship, Dictionary] = {}
 ## Where the last hit _hit found struck (on the target as it is now).
 var _last_hit_at := Vector3.ZERO
@@ -35,9 +36,20 @@ var _hits := 0
 ## Ticks back to check a remote player's shot fired at server tick
 ## [param server_tick], from their input for client tick [param input_tick],
 ## made while they showed other ships [param view_ticks] behind it: from now
-## to the server tick they were looking at, 0 to MAX_REWIND_TICKS.
-static func rewind_for(server_tick: int, input_tick: int, view_ticks: int) -> int:
-	return clampi(server_tick - (input_tick - view_ticks), 0, MAX_REWIND_TICKS)
+## to the server tick they were looking at, 0 to max_rewind_ticks.
+func rewind_for(server_tick: int, input_tick: int, view_ticks: int) -> int:
+	return clampi(server_tick - (input_tick - view_ticks), 0, max_rewind_ticks)
+
+
+## [param ms] milliseconds as whole netcode ticks.
+static func ticks_for_ms(ms: float) -> int:
+	return roundi(ms / 1000.0 / NetworkTime.ticktime)
+
+
+## Ticks of ship transforms kept (server): the cap and the two ticks a
+## rewound stretch of path spans.
+func _history_ticks() -> int:
+	return max_rewind_ticks + 2
 
 
 ## Server, after each physics step: where every ship in the system is at
@@ -48,7 +60,7 @@ func record_history(tick: int) -> void:
 	for ship in _system.get_ships():
 		var h: Dictionary = _history.get_or_add(ship, {})
 		h[tick] = ship.global_transform
-		h.erase(tick - HISTORY_TICKS)
+		h.erase(tick - _history_ticks())
 	for ship in _history.keys():
 		if not is_instance_valid(ship) or not ship.is_inside_tree():
 			_history.erase(ship)
@@ -58,11 +70,6 @@ func record_history(tick: int) -> void:
 func _transform_at(ship: Ship, tick: int) -> Transform3D:
 	var h: Dictionary = _history.get(ship, {})
 	return h.get(tick, ship.global_transform)
-
-
-## Shots play their gun's sound as they are added: on machines that make sound
-## (not headless ones: a dedicated server, the tests).
-var plays_sounds := DisplayServer.get_name() != "headless"
 
 
 ## [param hits_allowed] false: this field never decides hits, even on a server.
@@ -79,10 +86,6 @@ func add(shot: Shot) -> void:
 		bolt.shot = shot
 		_system.get_node("bolts").add_child(bolt)
 		_bolts[shot] = bolt
-	if plays_sounds:
-		var gun := _gun_of(shot)
-		if gun:
-			gun.play_fire_sound()
 
 
 ## The gun that fired [param shot] (its shooter's gun at Shot.gun_index), or null.
@@ -127,8 +130,11 @@ func step(tick: int) -> void:
 				_remove(shot)
 				show_hit(_last_hit_at)
 				hit.emit(shot, target, _last_hit_at)
-				if shot.shooter and is_instance_valid(shot.shooter) and _system.multiplayer.has_multiplayer_peer():
-					shot.shooter.announce_hit(shot, _last_hit_at)
+				if _system.multiplayer.has_multiplayer_peer():
+					var told: Array[int] = []
+					if shot.shooter and is_instance_valid(shot.shooter):
+						told = shot.shooter.announce_hit(shot, _last_hit_at)
+					target.announce_struck(_last_hit_at, told)
 				continue
 		if shot.expired_at(tick):
 			_remove(shot)
@@ -175,6 +181,42 @@ func show_hit(at: Vector3) -> void:
 	var flash := HitFlash.new()
 	_system.get_node("bolts").add_child(flash)
 	flash.global_position = at
+
+
+## Bytes of a struck event (encode_struck): where it hit (3 doubles).
+const STRUCK_BYTES := 24
+
+
+## A struck event: a ship was hit at [param at], for clients that know the
+## target but not the shooter (they have no bolt to drop, only the flash).
+static func encode_struck(at: Vector3) -> PackedByteArray:
+	var b := PackedByteArray()
+	b.resize(STRUCK_BYTES)
+	b.encode_double(0, at.x)
+	b.encode_double(8, at.y)
+	b.encode_double(16, at.z)
+	return b
+
+
+## Where a struck event says the hit was, or null if [param bytes] isn't one.
+static func decode_struck(bytes: Variant) -> Variant:
+	if not bytes is PackedByteArray or (bytes as PackedByteArray).size() != STRUCK_BYTES:
+		return null
+	var b: PackedByteArray = bytes
+	var at := Vector3(b.decode_double(0), b.decode_double(8), b.decode_double(16))
+	if not at.is_finite():
+		return null
+	return at
+
+
+## Of the peers that know a struck ship ([param knowers]), those not already
+## told through its shooter ([param told]).
+static func struck_only(knowers: Array, told: Array) -> Array[int]:
+	var out: Array[int] = []
+	for peer in knowers:
+		if not peer in told:
+			out.append(peer)
+	return out
 
 
 ## Bytes of a hit event (encode_hit): gun index (u8), the shot's fire tick as

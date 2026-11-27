@@ -19,6 +19,9 @@ var mode: Mode = Mode.CLIENT
 var game_name := "default"
 var password := ""
 var port := DEFAULT_PORT
+## --max-rewind=MS (server): how far back, in milliseconds, a player's shots are
+## checked against where they saw their target (favour the shooter). 0 to 1000.
+var max_rewind_ms := 250
 ## --host=ADDRESS: the server a test player joins (IP or hostname). Defaults to
 ## this machine; set it when the test player runs on another device, e.g. a
 ## Steam Deck joining a --testserver on the dev machine.
@@ -83,6 +86,12 @@ static func parse(args: PackedStringArray, headless := false, dedicated_feature 
 			options.port = int(p)
 		else:
 			options.unknown.append("--port=" + p)
+	if flags.has("max-rewind"):
+		var m: String = flags["max-rewind"]
+		if m.is_valid_int() and int(m) >= 0 and int(m) <= 1000:
+			options.max_rewind_ms = int(m)
+		else:
+			options.unknown.append("--max-rewind=" + m)
 	if flags.get("host", "") != "":
 		options.host = flags["host"]
 	options.xr = flags.has("xr_mode")
@@ -93,7 +102,7 @@ static func parse(args: PackedStringArray, headless := false, dedicated_feature 
 	options.fly = flags.has("fly")
 
 	for key in flags:
-		if key not in ["server", "testserver", "testplayer", "game", "password", "port", "host", "xr_mode", "faction", "spawn-at", "launch", "fire", "fly"]:
+		if key not in ["server", "testserver", "testplayer", "game", "password", "port", "host", "xr_mode", "faction", "spawn-at", "launch", "fire", "fly", "max-rewind"]:
 			options.unknown.append("--" + key)
 	return options
 

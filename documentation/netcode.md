@@ -140,10 +140,14 @@ saw when you fired is what the server checks. Detail for agents: `ship_systems/w
   the moment they draw your ship, so it leaves your guns as they see them.
 - **Hits are the server's, checked as you saw them.** With each input your client says how far behind
   its own tick it was drawing other ships. The server rewinds targets to that moment for your shots (at
-  most 250 ms back), using the last 17 ticks of each ship's transform. The cost of favouring the shooter:
-  a target can be hit just after it reached cover on its own screen.
+  most 250 ms back by default; a server sets its own with `--max-rewind=MS`), keeping each ship's
+  transform for that long plus two ticks. The cost of favouring the shooter: a target can be hit just
+  after it reached cover on its own screen.
 - **A hit** lowers the target's health (synced; at zero the server destroys it) and goes as a 29-byte
-  hit event to the clients that know the shooter. Each drops that shot and shows a flash.
+  hit event to the clients that know the shooter. Each drops that shot and shows a flash. Clients that
+  know the target but not the shooter (fog of war) get a 24-byte struck event, just for the flash.
+- **Sound** plays when a bolt is first drawn, so you hear another ship's shot as you see it leave its
+  guns, not when its fire event arrives a few ticks earlier.
 - Server log: `Shots in SYSTEM: N fired, M hits` every 5 s while anything fired. `--testplayer --fire`
   holds the trigger once flying, for lag runs.
 

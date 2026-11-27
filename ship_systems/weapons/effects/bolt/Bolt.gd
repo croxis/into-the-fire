@@ -7,6 +7,11 @@ class_name Bolt
 var shot: Shot
 ## The bolt mesh's own radius: scaled so the bolt is drawn its shot's size.
 var _mesh_radius := 0.0
+## Its gun's sound has played: once, the first frame the bolt is drawn at or
+## after its fire tick. At once for this machine's own and the host's shots;
+## for other ships' shots the fire event arrives before this machine draws the
+## moment they fired, and the sound waits for the bolt.
+var _sounded := false
 
 
 func _ready() -> void:
@@ -27,6 +32,11 @@ func _process(_delta: float) -> void:
 	if shot == null:
 		return
 	var at := drawn_tick()
+	if not _sounded and at >= shot.fire_tick:
+		_sounded = true
+		var gun := ShotField._gun_of(shot)
+		if gun:
+			gun.play_fire_sound()
 	var grow := shot.size_at(at)
 	if shot.radius > 0.0 and _mesh_radius > 0.0:
 		grow = shot.radius_at(at) / _mesh_radius  # Drawn the size it hits.

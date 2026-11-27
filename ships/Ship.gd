@@ -488,15 +488,41 @@ func _shot_fired(packet: PackedByteArray) -> void:
 ## Server: [param shot], fired by this ship, hit at [param at] (ShotField.hit).
 ## Told to the clients that know this ship, its pilot's too: each names the shot
 ## by the tick it knows it by (the pilot's client by its own input tick).
-func announce_hit(shot: Shot, at: Vector3) -> void:
+## Returns the peers told.
+func announce_hit(shot: Shot, at: Vector3) -> Array[int]:
 	var pilot := remote_pilot()
 	var pilot_peer := pilot.multiplayer_id if pilot else 0
 	var knows := Callable()
 	if galaxy:
 		knows = func(peer: int) -> bool: return galaxy.interest.knows(peer, self)
-	for peer in snapshots.recipients(multiplayer.get_peers(), 0, knows):
+	var told := snapshots.recipients(multiplayer.get_peers(), 0, knows)
+	for peer in told:
 		var tick := shot.client_tick if peer == pilot_peer and shot.client_tick >= 0 else shot.fire_tick
 		_shot_hit.rpc_id(peer, ShotField.encode_hit(shot.gun_index, tick, at))
+	return told
+
+
+## Server: this ship was hit at [param at]. The clients that know it but not
+## the shooter (fog of war), so weren't told through it (announce_hit, the
+## peers in [param told]), see the hit flash too (a struck event).
+func announce_struck(at: Vector3, told: Array[int]) -> void:
+	var knows := Callable()
+	if galaxy:
+		knows = func(peer: int) -> bool: return galaxy.interest.knows(peer, self)
+	for peer in ShotField.struck_only(snapshots.recipients(multiplayer.get_peers(), 0, knows), told):
+		_struck.rpc_id(peer, ShotField.encode_struck(at))
+
+
+## Client: this ship was hit at the place [param packet] says, by a ship this
+## client doesn't know (Ship.announce_struck): show the hit.
+@rpc("authority", "call_remote", "unreliable")
+func _struck(packet: PackedByteArray) -> void:
+	if multiplayer.is_server():
+		return
+	var at: Variant = ShotField.decode_struck(packet)
+	var system := System.find_for(self)
+	if at != null and system:
+		system.shots.show_hit(at)
 
 
 ## Client: one of this ship's shots hit (Ship.announce_hit on the server):

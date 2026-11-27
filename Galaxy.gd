@@ -21,6 +21,9 @@ var zone_view := ZoneView.new()
 var hud := HudLayer.new()
 ## Steps every system's physics space (zones), on server and clients.
 var zone_stepper := ZoneStepper.new()
+## Server: how far back players' shots are checked (favour the shooter), in
+## ticks; given to each system's ShotField. From --max-rewind.
+var max_rewind_ticks := ShotField.DEFAULT_REWIND_TICKS
 ## Client: when ships' snapshots arrive, so when to draw them (netcode N4c).
 var snapshot_clock := SnapshotClock.new()
 ## Client: how far ahead of server time the pilot's inputs are sent (time
@@ -149,6 +152,7 @@ func _ready():
 func _on_system_entered(node: Node) -> void:
 	if node is System:
 		zone_stepper.add_zone(node)
+		(node as System).shots.max_rewind_ticks = max_rewind_ticks
 
 
 ## Server: send the faction tree to a client that just connected.

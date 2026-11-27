@@ -35,6 +35,7 @@ A process also runs as a dedicated server, with no mode flag, when:
 | Flag | Used by | Default | Meaning |
 | --- | --- | --- | --- |
 | `--port=N` | all network modes | `2258` | Port to host on or join. Must be from 1 to 65535; any other value is ignored and logged. |
+| `--max-rewind=MS` | hosting (`--server`, `--testserver`, the menu) | `250` | How far back, in milliseconds, players' shots are checked against where they saw their target (favour the shooter). 0 to 1000; any other value is ignored and logged. Lower suits PvP. |
 | `--game=NAME` | `--server` | `default` | Name of the hosted game. |
 | `--password=PW` | `--server` | (empty) | Password clients must give to join. |
 | `--host=ADDR` | `--testplayer` | `127.0.0.1` | Server to join, as an IP or hostname. Set this when the test player runs on another device. |

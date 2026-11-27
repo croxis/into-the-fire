@@ -104,3 +104,16 @@ func test_shots_are_counted_for_the_log() -> void:
 	system.shots.add(Shot.new(Vector3.ZERO, Vector3.ZERO, 1, 1.0))
 	assert_eq(system.shots.report(), "1 fired, 0 hits")
 	assert_eq(system.shots.report(), "", "counted since the last report")
+
+
+func test_a_struck_event_survives_the_wire() -> void:
+	assert_eq(ShotField.decode_struck(ShotField.encode_struck(Vector3(-80000.5, 2, 1.0e9))), Vector3(-80000.5, 2, 1.0e9))
+	assert_null(ShotField.decode_struck(PackedByteArray([1, 2])))
+	var bytes := ShotField.encode_struck(Vector3.ZERO)
+	bytes.encode_double(0, NAN)
+	assert_null(ShotField.decode_struck(bytes), "not finite")
+
+
+func test_clients_that_know_only_the_target_are_told_it_was_struck() -> void:
+	# Told through the shooter: 5 and 6. Know the target: 6 and 7.
+	assert_eq(ShotField.struck_only([6, 7], [5, 6]), [7])

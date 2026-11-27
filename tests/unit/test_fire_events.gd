@@ -106,16 +106,44 @@ func test_a_told_shot_has_its_guns_bolt_size() -> void:
 	assert_eq(told.growth, gun.growth)
 
 
-func test_a_shot_plays_its_guns_sound_where_sound_is_played() -> void:
+func _bolt_for(gun_index: int, fire_tick: int) -> Bolt:
 	var ship := _starfury()
-	var gun := ship.get_node("Guns").get_child(2) as Gun
-	var player := gun.get_node("AudioStreamPlayer3D") as AudioStreamPlayer3D
-	system.shots.plays_sounds = true  # Tests run headless, where nothing is heard.
-	var shot := gun.shot_from(Vector3.ZERO, Vector3(0, 0, 900), 5)
-	shot.gun_index = 2
-	system.shots.add(shot)
-	assert_true(player.playing, "the gun that fired it")
-	assert_false((ship.get_node("Guns").get_child(0).get_node("AudioStreamPlayer3D") as AudioStreamPlayer3D).playing)
+	var gun := ship.get_node("Guns").get_child(gun_index) as Gun
+	var shot := gun.shot_from(Vector3.ZERO, Vector3(0, 0, 900), fire_tick)
+	shot.gun_index = gun_index
+	shot.predicted = true  # Drawn at this machine's tick, which the test controls.
+	var bolt := Bolt.new()
+	bolt.shot = shot
+	add_child_autofree(bolt)
+	return bolt
+
+
+func _sound_of(bolt: Bolt) -> AudioStreamPlayer3D:
+	var gun := bolt.shot.shooter.get_node("Guns").get_child(bolt.shot.gun_index)
+	return gun.get_node("AudioStreamPlayer3D") as AudioStreamPlayer3D
+
+
+func test_a_bolt_sounds_its_gun_when_it_is_first_drawn() -> void:
+	var bolt := _bolt_for(2, NetworkTime.tick - 1)
+	bolt._process(0.0)
+	assert_true(_sound_of(bolt).playing, "the gun that fired it")
+	assert_false((bolt.shot.shooter.get_node("Guns/Gun").get_node("AudioStreamPlayer3D") as AudioStreamPlayer3D).playing)
+
+
+func test_a_bolt_is_not_heard_before_it_is_seen() -> void:
+	# Another ship's shot arrives (fire event) before this machine draws the
+	# moment it was fired: its sound waits for the bolt.
+	var bolt := _bolt_for(1, NetworkTime.tick + 10)
+	bolt._process(0.0)
+	assert_false(_sound_of(bolt).playing)
+
+
+func test_a_bolt_sounds_once() -> void:
+	var bolt := _bolt_for(0, NetworkTime.tick - 1)
+	bolt._process(0.0)
+	_sound_of(bolt).stop()
+	bolt._process(0.0)
+	assert_false(_sound_of(bolt).playing)
 
 
 func test_guns_overlap_their_own_sounds() -> void:
@@ -123,7 +151,3 @@ func test_guns_overlap_their_own_sounds() -> void:
 	var gun := _starfury().get_node("Guns").get_child(0) as Gun
 	var player := gun.get_node("AudioStreamPlayer3D") as AudioStreamPlayer3D
 	assert_gte(player.max_polyphony * gun.cooldown, player.stream.get_length(), "no shot cuts off the last one's sound")
-
-
-func test_headless_machines_play_no_sounds() -> void:
-	assert_eq(ShotField.new(system).plays_sounds, DisplayServer.get_name() != "headless")

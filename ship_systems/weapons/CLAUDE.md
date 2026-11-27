@@ -41,9 +41,10 @@ owner's design choices: favour the shooter, fire events (not networked bolt node
 
 - Each input record carries `view_ticks` (a byte): how far behind its own tick the client was showing other
   ships (`Character._view_ticks`, from `SnapshotClock`). The server's rewind for a remote player's shot is
-  `ShotField.rewind_for(server tick, input tick, view_ticks)`, capped at `MAX_REWIND_TICKS` (15, 250 ms), kept
+  `ShotField.rewind_for(server tick, input tick, view_ticks)`, capped at the field's `max_rewind_ticks`
+  (default 15, 250 ms; `--max-rewind=MS` via `Galaxy.max_rewind_ticks`, set on each system as it enters), kept
   for the shot's flight (`Shot.rewind_ticks`); NPCs' and the host's shots have none.
-- The server keeps each ship's transform for the last 17 ticks (`ShotField.record_history`, from
+- The server keeps each ship's transform for the cap + 2 ticks (`ShotField.record_history`, from
   `System.after_step`). A rewound shot's stretch this tick is moved with each nearby ship from then to now
   (now x then inverted) and ray-tested against that ship alone (`_rewound_hit`); the nearest hit wins.
 - Tests: place ships with `Ship.place`, not `global_position` (physics only learns a set position next frame).
@@ -54,9 +55,12 @@ owner's design choices: favour the shooter, fire events (not networked bolt node
   shooter announces it (`Ship.announce_hit`: gun, tick, position, 29 bytes, unreliable) to clients that know
   the shooter, its pilot too. Each names the shot by the tick that client knows it by: `Shot.client_tick`
   (the pilot's input tick) for the pilot, the server's fire tick for others. Clients drop it
-  (`ShotField.remove_named`) and flash (`HitFlash`). Clients that know the target but not the shooter see no flash.
+  (`ShotField.remove_named`) and flash (`HitFlash`). Clients that know the target but not the shooter get a
+  struck event instead (`Ship.announce_struck`, 24 bytes, from the target's node): just the flash.
 - Server log `Shots in SYSTEM: N fired, M hits` every 5 s (`ShotField.report`). `--fire` (test player) holds
   the trigger once flying.
-- Sound: `ShotField.add` plays the firing gun's `AudioStreamPlayer3D` (`Gun.play_fire_sound`) for every shot
-  it gets (server, predicted or fire event), unless headless (`plays_sounds`). `ZoneView` lets the window's
-  camera hear the viewed zone. Polyphony x cooldown must cover the sound (Starfury: 5 x 0.25 s, 1.08 s).
+- Sound: each `Bolt` plays its gun's `AudioStreamPlayer3D` (`Gun.play_fire_sound`) once, the first frame it is
+  drawn at or after its fire tick, so another ship's shot is heard as it is seen (no bolts, no sound, when
+  headless). `ZoneView` lets the window's camera hear the viewed zone. Polyphony x cooldown must cover the
+  sound (Starfury: 5 x 0.25 s, 1.08 s).
+- Not netcode, so a future weapons feature (design doc): NPC and turret fire, beams, gun tuning.

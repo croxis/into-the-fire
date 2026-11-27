@@ -47,9 +47,9 @@ func test_a_view_delay_out_of_range_is_clamped() -> void:
 func test_the_rewind_is_from_the_servers_tick_to_what_the_shooter_saw() -> void:
 	# Applied at server tick 10, input from client tick 7, which was showing
 	# other ships 5 ticks behind itself (server tick 2): 8 ticks back.
-	assert_eq(ShotField.rewind_for(10, 7, 5), 8)
-	assert_eq(ShotField.rewind_for(100, 90, 60), ShotField.MAX_REWIND_TICKS, "capped at 250 ms")
-	assert_eq(ShotField.rewind_for(10, 12, 0), 0, "never forward")
+	assert_eq(system.shots.rewind_for(10, 7, 5), 8)
+	assert_eq(system.shots.rewind_for(100, 90, 60), 15, "capped at 250 ms by default")
+	assert_eq(system.shots.rewind_for(10, 12, 0), 0, "never forward")
 
 
 func test_a_remote_pilots_shot_carries_its_rewind() -> void:
@@ -60,7 +60,7 @@ func test_a_remote_pilots_shot_carries_its_rewind() -> void:
 	pilot.receive_inputs_from(99, [_record(7, 5), _record(8, 5)])
 	await Ticks.run(1, 10)
 	assert_eq(system.shots.count(), ship.get_node("Guns").get_child_count())
-	assert_eq(system.shots.all()[0].rewind_ticks, ShotField.rewind_for(10, 7, 5))
+	assert_eq(system.shots.all()[0].rewind_ticks, system.shots.rewind_for(10, 7, 5))
 
 
 func test_a_rewound_shot_hits_where_the_target_was() -> void:
@@ -113,3 +113,44 @@ func test_a_rewound_wide_bolt_hits_beside_its_line() -> void:
 	system.shots.add(shot)
 	await Ticks.run(3, 16)
 	assert_lt(target.health, health, "its size counts where the shooter saw the target too")
+
+
+func test_the_rewind_cap_is_the_servers_to_set() -> void:
+	assert_eq(ShotField.ticks_for_ms(250), 15)
+	assert_eq(ShotField.ticks_for_ms(400), 24)
+	system.shots.max_rewind_ticks = 24
+	assert_eq(system.shots.rewind_for(100, 90, 60), 24)
+
+
+func test_a_longer_cap_keeps_enough_history() -> void:
+	system.shots.max_rewind_ticks = 30
+	var target := _starfury(Vector3(0, 0, -100))
+	await Ticks.run(5, 1)  # Ticks 1-5: in the line of fire.
+	target.place(Transform3D(Basis(), Vector3(500, 0, -100)))
+	await Ticks.run(25, 6)  # Ticks 6-30: moved away.
+	var health := target.health
+	var shot := Shot.new(Vector3(0, 0, -60), Vector3(0, 0, -3000), 30, 20.0)
+	shot.rewind_ticks = 27  # The shooter saw tick 3-4.
+	system.shots.add(shot)
+	await Ticks.run(3, 31)
+	assert_lt(target.health, health, "hit where the shooter saw it, 27 ticks back")
+
+
+func test_servers_can_set_the_rewind_cap() -> void:
+	var options := LaunchOptions.parse(PackedStringArray(["--server", "--max-rewind=400"]))
+	assert_eq(options.max_rewind_ms, 400)
+	assert_eq(LaunchOptions.parse(PackedStringArray(["--server"])).max_rewind_ms, 250, "250 ms by default")
+	var bad := LaunchOptions.parse(PackedStringArray(["--server", "--max-rewind=soon"]))
+	assert_eq(bad.max_rewind_ms, 250)
+	assert_true("--max-rewind=soon" in bad.unknown)
+	assert_true("--max-rewind=5000" in LaunchOptions.parse(PackedStringArray(["--server", "--max-rewind=5000"])).unknown,
+			"over a second is refused")
+
+
+func test_galaxy_gives_its_systems_the_cap() -> void:
+	var galaxy: Galaxy = preload("res://Galaxy.tscn").instantiate()
+	galaxy.max_rewind_ticks = 24
+	add_child_autofree(galaxy)
+	var other: System = SystemScene.instantiate()
+	galaxy.get_node("Systems").add_child(other)
+	assert_eq(other.shots.max_rewind_ticks, 24)

@@ -53,8 +53,8 @@ func fire_at(tick: int, rewind := 0, client_tick := -1) -> bool:
 	return true
 
 
-## Plays this gun's firing sound, if it has one (ShotField.add calls it as each
-## shot is added, on machines that make sound).
+## Plays this gun's firing sound, if it has one (each Bolt calls it when it is
+## first drawn; there are no bolts on headless machines).
 func play_fire_sound() -> void:
 	var player := get_node_or_null(^"AudioStreamPlayer3D") as AudioStreamPlayer3D
 	if player and player.stream:

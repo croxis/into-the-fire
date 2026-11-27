@@ -273,7 +273,8 @@ func _apply_input(_dt: float, tick: int) -> void:
 	var weapons := current_console.get_capability(WeaponsCapability) as WeaponsCapability
 	if weapons:
 		# A remote player's shots are checked against what they saw (W4).
-		var rewind := ShotField.rewind_for(tick, r.tick, r.view_ticks) if source == InputSource.CHANNEL else 0
+		var system := System.find_for(self)
+		var rewind := system.shots.rewind_for(tick, r.tick, r.view_ticks) if source == InputSource.CHANNEL and system else 0
 		weapons.trigger(r.fire_primary, tick, rewind, r.tick if source == InputSource.CHANNEL else -1)
 
 
