@@ -36,15 +36,14 @@ func refresh() -> void:
 	var g := _galaxy
 	var interest := g.interest
 	var ships := {}
-	for system in g.systems():
+	for system in g.zones.systems():
 		for ship in system.get_ships():
 			ships[ship] = system
 	var peers := {}
 	var pictures := {}  # One per top-level faction this refresh.
 	for peer in g.multiplayer.get_peers():
 		var player: Player = g.get_node("Players").find_player_by_netid(peer)
-		var character := Galaxy.find_player_character(g.get_node("Systems"), player.player_id) \
-				if player else null
+		var character := g.zones.player_character(player.player_id) if player else null
 		peers[peer] = view_of(character, pictures) if character else null
 	var changes := interest.update(peers, ships)
 	# Spawn or despawn on each client (N5a2). A leaving ship stops its unreliable
@@ -88,14 +87,14 @@ static func contact_data(ship: Ship, tick: int) -> Dictionary:
 func lost(ship_id: int, data: Dictionary) -> void:
 	var g := _galaxy
 	g.contacts.lost(ship_id, data)
-	var system := g.get_node_or_null(NodePath("Systems/" + String(data.get("system", ""))))
-	if not system is System:
+	var system := g.zones.get_system(String(data.get("system", "")))
+	if system == null:
 		return
 	var marker := GhostMarker.new()
 	var clock := g.snapshot_clock
 	marker.setup(g.contacts, ship_id, func() -> float:
 			return clock.server_tick(SnapshotClock.local_now()))
-	(system as System).add_ghost(marker)
+	system.add_ghost(marker)
 	Log.log(["Lost contact with ", data.get("name", ship_id)], Log.MessageType.INFO)
 
 

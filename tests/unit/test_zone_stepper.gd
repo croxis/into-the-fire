@@ -89,7 +89,7 @@ func test_galaxy_steps_every_system_it_gets() -> void:
 	var galaxy: Galaxy = load("res://Galaxy.tscn").instantiate()
 	add_child_autofree(galaxy)
 	var system: System = load("res://systems/system_template.tscn").instantiate()
-	galaxy.get_node("Systems").add_child(system)
+	galaxy.zones.add_system(system)
 	assert_true(galaxy.zone_stepper.has_zone(system))
 	assert_false(PhysicsServer3D.space_is_active(system.find_world_3d().space))
 

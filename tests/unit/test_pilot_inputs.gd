@@ -15,7 +15,7 @@ func before_each() -> void:
 	galaxy = preload("res://Galaxy.tscn").instantiate()
 	add_child_autofree(galaxy)
 	system = SystemScene.instantiate()
-	galaxy.get_node("Systems").add_child(system)
+	galaxy.zones.add_system(system)
 
 
 func _pilot(peer: int, player_id: int) -> Character:

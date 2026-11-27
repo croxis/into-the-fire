@@ -159,7 +159,7 @@ func test_a_launched_craft_is_shown_to_clients_once_it_is_in_the_bay() -> void:
 	var galaxy: Galaxy = load("res://Galaxy.tscn").instantiate()
 	add_child_autofree(galaxy)
 	var system := SystemScene.instantiate() as System
-	galaxy.get_node("Systems").add_child(system)
+	galaxy.zones.add_system(system)
 	var carrier := _carrier(system)
 	carrier.position = Vector3(5800, 0, 0)
 	var wing := galaxy.factions.create("Zeta Wing", true, true)
@@ -168,7 +168,7 @@ func test_a_launched_craft_is_shown_to_clients_once_it_is_in_the_bay() -> void:
 	var launched_sides: Array[int] = []
 	var player_in_world: Array[bool] = []
 	galaxy.interest_refreshed.connect(func() -> void:
-			player_in_world.append(Galaxy.find_player_character(galaxy.get_node("Systems"), 3) != null)
+			player_in_world.append(galaxy.zones.player_character(3) != null)
 			for ship in system.get_ships():
 				if ship.is_spawning:
 					launched_at.append(ship.global_position)

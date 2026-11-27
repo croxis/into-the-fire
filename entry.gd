@@ -1,7 +1,6 @@
 extends Node
 
 var _dedicated_server := false
-var is_server := false
 var _vr := false
 var interface : XRInterface
 var VR_DEBUG := false
@@ -60,12 +59,10 @@ func _add_main_menu() -> void:
 	main_menu.visible = false
 	add_child(main_menu)
 	move_child(main_menu, $network.get_index() + 1)  # Same draw order as before.
-	# Order matters: entry hosts the server before Galaxy checks is_server.
 	main_menu.join_game.connect(func(_ip, _port, player_name, _s, _p) -> void:
 			_show_role("Client", player_name))
 	main_menu.join_game.connect($network._on_main_menu_join_game)
 	main_menu.new_game.connect(_on_main_menu_new_game)
-	main_menu.new_game.connect($Galaxy._on_main_menu_new_game)
 	main_menu.set_msaa.connect($DisplayManager._on_main_menu_set_msaa)
 	main_menu.set_resolution.connect($DisplayManager.set_resolution)
 	# set_ssaa has no handler yet; the old scene connection pointed at a missing method.
@@ -206,6 +203,9 @@ func _on_main_menu_new_game(game_name, player_name, port, server_password, playe
 		return
 	_show_role("Host", player_name)
 	end_title_sequence()
+	# Only once hosting worked: offline, this machine would count as the server
+	# and start a world nobody can join.
+	$Galaxy._on_main_menu_new_game(game_name, player_name, port, server_password, player_password)
 	
 
 

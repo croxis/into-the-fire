@@ -18,6 +18,8 @@ var zone_view := ZoneView.new()
 var hud := HudLayer.new()
 ## Steps every system's physics space (zones), on server and clients.
 var zone_stepper := ZoneStepper.new()
+## This world's zones (star systems): which exist and who is in each.
+@onready var zones: Zones = $Zones
 ## Server: how far back players' shots are checked (favour the shooter), in
 ## ticks; given to each system's ShotField. From --max-rewind.
 var max_rewind_ticks := ShotField.DEFAULT_REWIND_TICKS
@@ -76,27 +78,21 @@ static func check_spawn_point(points: Dictionary, system_name: String, spawner_n
 ## sent: {system name: [ship name, ...]} (System.spawn_points_for).
 func _spawn_points(faction: Faction) -> Dictionary:
 	var points := {}
-	for system in systems():
+	for system in zones.systems():
 		var here := system.spawn_points_for(faction)
 		if not here.is_empty():
 			points[String(system.name)] = here
 	return points
 
 
-## This galaxy's star systems.
-func systems() -> Array[System]:
-	var out: Array[System] = []
-	for node in $Systems.get_children():
-		if node is System:
-			out.append(node)
-	return out
-
-
 ## Sent by the server to the player who just spawned. "authority": only the
 ## server may move a player's view to a system.
 @rpc("authority", "call_local")
 func player_enter_system(system_name) -> void:
-	var system: System = get_node("Systems/" + system_name)
+	var system := zones.get_system(system_name)
+	if system == null:
+		Log.log(["No system ", system_name, " here to enter"], Log.MessageType.WARNING)
+		return
 	zone_view.view(system)
 	var w0 := get_viewport()
 	#Music Hack
@@ -128,14 +124,9 @@ func _ready():
 	add_child(zone_view)
 	add_child(hud)
 	add_child(zone_stepper)
-	# Systems arrive from setup on the server and from the spawner on clients.
-	$Systems.child_entered_tree.connect(_on_system_entered)
-
-
-func _on_system_entered(node: Node) -> void:
-	if node is System:
-		zone_stepper.add_zone(node)
-		(node as System).shots.max_rewind_ticks = max_rewind_ticks
+	zones.stepper = zone_stepper
+	zones.zone_added.connect(func(system: System) -> void:
+			system.shots.max_rewind_ticks = max_rewind_ticks)
 
 
 ## Server: send the faction tree to a client that just connected.
@@ -144,7 +135,7 @@ func _on_peer_connected(peer_id: int) -> void:
 	if multiplayer.is_server():
 		_rpc_receive_factions.rpc_id(peer_id, factions.to_data())
 		var player: Player = $Players.find_player_by_netid(peer_id)
-		var character := find_player_character($Systems, player.player_id) if player else null
+		var character := zones.player_character(player.player_id) if player else null
 		if character:
 			_resume(character, peer_id)
 		else:
@@ -156,10 +147,9 @@ func _on_peer_connected(peer_id: int) -> void:
 func _on_peer_disconnected(peer_id: int) -> void:
 	if not multiplayer.is_server():
 		return
-	for character in $Systems.find_children("*", "", true, false):
-		if character is Character and character.is_player() and character.multiplayer_id == peer_id:
-			character.pilot_disconnected()
-			Log.log([character.name, " left; their character stays"], Log.MessageType.INFO)
+	for character in zones.characters_of_peer(peer_id):
+		character.pilot_disconnected()
+		Log.log([character.name, " left; their character stays"], Log.MessageType.INFO)
 
 
 ## Server: a player whose character is still in the world logged back in from
@@ -207,7 +197,9 @@ func setup_new_galaxy(dedicated=false, callback = null):
 	Log.log(["Setting up galaxy."], Log.MessageType.QUESTION)
 	if dedicated:
 		callback = Callable(self, "finish_setup_galaxy_all")
-	if not active_galaxy and get_tree().root.get_node("entry").is_server:
+	# Only the machine that runs the world builds it; clients get theirs from
+	# the server's spawners. Asked of this world's own multiplayer, not of entry.
+	if not active_galaxy and multiplayer.is_server():
 		if not _start_scenario(callback):
 			return
 		active_galaxy = true
@@ -244,20 +236,9 @@ func _on_scenario_scenes_loaded(batch: SceneBatchLoader, callback) -> void:
 		if scene == null:
 			Log.log(["Scenario system ", id, " failed to load"], Log.MessageType.ERROR)
 			continue
-		$Systems.add_child(scene.instantiate())
+		zones.add_system(scene.instantiate())
 	if callback:
 		callback.call()
-
-
-## The loaded system node for a system content ID, or null.
-func _system_node(content_id: StringName) -> Node:
-	var path := Content.path_of(content_id)
-	if path.begins_with("uid://"):
-		path = ResourceUID.uid_to_path(path)
-	for system in $Systems.get_children():
-		if system.scene_file_path == path:
-			return system
-	return null
 
 
 func _on_main_menu_new_game(g_name, _player_name, _port, _server_password, _player_password):
@@ -267,12 +248,12 @@ func _on_main_menu_new_game(g_name, _player_name, _port, _server_password, _play
 
 
 func finish_setup_galaxy_all() -> void:
-	if not get_tree().root.get_node("entry").is_server:
+	if not multiplayer.is_server():
 		_scenario_scenes = null
 		return
 	var systems := {}
 	for id in _scenario.systems:
-		systems[id] = _system_node(id)
+		systems[id] = zones.system_for_content(id)
 	ScenarioLoader.populate(_scenario, Content.registry, factions, systems, ids,
 			multiplayer.get_unique_id())
 	_scenario_scenes = null  # Placed ships hold their own references now.
@@ -324,8 +305,8 @@ func first_spawn_player(faction_id: int, system_name: String, spawner_name: Stri
 	if player == null:
 		Log.log(["Spawn refused for peer ", remote_id, ": not logged in"], Log.MessageType.WARNING)
 		return
-	var refusal := check_spawn_request(factions, $Systems, faction_id, system_name)
-	if not refusal and find_player_character($Systems, player.player_id):
+	var refusal := check_spawn_request(factions, zones, faction_id, system_name)
+	if not refusal and zones.player_character(player.player_id):
 		refusal = "already in the world"
 	if refusal:
 		Log.log(["Spawn refused for ", player.name, ": ", refusal], Log.MessageType.WARNING)
@@ -337,7 +318,7 @@ func first_spawn_player(faction_id: int, system_name: String, spawner_name: Stri
 		Log.log(["Spawn refused for ", player.name, ": ", refusal], Log.MessageType.WARNING)
 		return
 	var at: String = spawner_name if spawner_name else points[system_name][0]
-	var spawn_ship: Ship = get_node("Systems/%s/ships" % system_name).get_node(at)
+	var spawn_ship: Ship = zones.get_system(system_name).get_node("ships").get_node(at)
 	player_enter_system.rpc_id(remote_id, system_name)
 	var player_pilot := spawn_ship.spawn_crew(
 			Character.pilot_data(player.name, faction_id, remote_id, ids.next_pilot(),

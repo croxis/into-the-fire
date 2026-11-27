@@ -152,7 +152,7 @@ func test_galaxy_gives_its_systems_the_cap() -> void:
 	galaxy.max_rewind_ticks = 24
 	add_child_autofree(galaxy)
 	var other: System = SystemScene.instantiate()
-	galaxy.get_node("Systems").add_child(other)
+	galaxy.zones.add_system(other)
 	assert_eq(other.shots.max_rewind_ticks, 24)
 
 

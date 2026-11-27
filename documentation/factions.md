@@ -52,7 +52,7 @@ ship.faction_id = b5.faction_id          # ship ownership
 
 `ship.faction` and `character.faction` look for the `Galaxy` above them in the scene tree
 (`Galaxy.find_for(node)`) and use its registry. A ship sits at
-`Galaxy/Systems/<system>/ships/`, and a character sits in a ship's `Crew`, so both are
+`Galaxy/Zones/<system>/ships/`, and a character sits in a ship's `Crew`, so both are
 always under a Galaxy once they are in the world.
 
 Before a node is in the tree there is no Galaxy above it, so `faction` returns null. Logs show
@@ -82,7 +82,8 @@ Why it is built this way:
   its own factions to other players.
 - **Clients send IDs, the server checks them.** A spawn request carries a faction ID and a system
   name. `Galaxy.check_spawn_request()` refuses unknown factions, factions that don't accept
-  players, and anything that isn't a direct child of `Systems`. (Without that last check, a name like
+  players, and anything that isn't a direct child of `Zones`
+  (`Zones.get_system` checks names the same way). (Without that last check, a name like
   `".."` would resolve to a node outside the systems.)
 
 Not sent to clients: the AI doctrine (only the server's AI uses it), the server-only lists of

@@ -119,12 +119,12 @@ func test_galaxy_spawn_points_list_each_system_with_any() -> void:
 	for system_name in ["epsilon", "sol", "narn"]:
 		var system: System = SystemScene.instantiate()
 		system.name = system_name
-		galaxy.get_node("Systems").add_child(system)
+		galaxy.zones.add_system(system)
 		by_name[system_name] = system
 	_ship_in(by_name.epsilon, galaxy.factions, t.b5, "Babylon5").has_spawn_points = true
 	_ship_in(by_name.sol, galaxy.factions, t.ea, "Hyperion").has_spawn_points = true
 	_ship_in(by_name.narn, galaxy.factions, narn, "KhaRi").has_spawn_points = true
-	assert_eq(galaxy.systems().size(), 3)
+	assert_eq(galaxy.zones.systems().size(), 3)
 	assert_eq(galaxy._spawn_points(t.zeta), {"epsilon": ["Babylon5"], "sol": ["Hyperion"]},
 			"no entry for a system with nowhere to spawn")
 

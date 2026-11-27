@@ -129,7 +129,7 @@ func test_boarding_a_ship_refreshes_interest_at_once() -> void:
 	var galaxy: Galaxy = load("res://Galaxy.tscn").instantiate()
 	add_child_autofree(galaxy)
 	var system: System = load("res://systems/system_template.tscn").instantiate()
-	galaxy.get_node("Systems").add_child(system)
+	galaxy.zones.add_system(system)
 	var aboard: Ship = Content.instantiate(&"b5:aurora_starfury")
 	system.add_ship(aboard)
 	var crew_then: Array[int] = []
@@ -146,7 +146,7 @@ func _world() -> Dictionary:
 	var galaxy: Galaxy = load("res://Galaxy.tscn").instantiate()
 	add_child_autofree(galaxy)
 	var system: System = load("res://systems/system_template.tscn").instantiate()
-	galaxy.get_node("Systems").add_child(system)
+	galaxy.zones.add_system(system)
 	var ea := galaxy.factions.create("Earth Alliance")
 	var zeta := galaxy.factions.create("Zeta Wing", true, true, false, ea)
 	var narn := galaxy.factions.create("Narn Regime")

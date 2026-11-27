@@ -75,7 +75,8 @@ machines; nothing on the server path may depend on rendering.
 - `scenario/`: `Scenario` resources and `ScenarioLoader`; scenarios are content (`content/scenarios/`).
 - `systems/`: each star system is a zone: a `SubViewport` with its own `World3D`, holding `ships`, `bolts`
   and their spawners. `System.find_for(node)` finds a node's system.
-- `zones/`: `ZoneView` draws the viewed zone in the main window (zone SubViewports don't render).
+- `zones/`: `Zones` (`Galaxy.zones`) knows a world's zones and who is in each; look systems up there, never by
+  `Galaxy/Zones/<name>` path. `ZoneView` draws the viewed zone in the main window (zone SubViewports don't render).
   `ZoneStepper` (`Galaxy.zone_stepper`) steps each system's physics space itself; modes FULL and PAUSED.
 - `ui/hud/`: `HudLayer` (`Galaxy.hud`), the local player's HUD, client-side only. 2D UI inside a ship is never
   drawn, so HUDs go here (passenger HUD, a console's `hud_scene`). "Console" is a spacecraft's crew

@@ -88,7 +88,6 @@ func start_server(new_game_name, s_password:="", port: int=DEFAULT_PORT) -> bool
 	Log.log(["Server hosted on port: " + str(port)], Log.MessageType.INFO)
 	Log.log(["Server MP ID: ", multiplayer.get_unique_id()], Log.MessageType.INFO)
 	server_password = s_password
-	get_tree().root.get_node("entry").is_server = true
 	return true
 
 
