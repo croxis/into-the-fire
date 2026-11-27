@@ -115,9 +115,9 @@ func _start_test_player() -> void:
 				CONNECT_ONE_SHOT)
 	if options.launch:
 		_launch_when_aboard()
-	_show_role("Client", "Test Player")
+	_show_role("Client", options.player_name)
 	await get_tree().create_timer(5.0).timeout
-	$network.join_game(options.host, options.port, "Test Player", "", "")
+	$network.join_game(options.host, options.port, options.player_name, "", "")
 	$loading.visible = false
 
 

@@ -40,6 +40,7 @@ A process also runs as a dedicated server, with no mode flag, when:
 | `--password=PW` | `--server` | (empty) | Password clients must give to join. |
 | `--host=ADDR` | `--testplayer` | `127.0.0.1` | Server to join, as an IP or hostname. Set this when the test player runs on another device. |
 | `--faction=NAME` | `--testplayer` | (empty) | Spawn in this faction (its `name` in the scenario, e.g. `--faction="Zeta Wing"`) as soon as the server's factions arrive, instead of waiting in the join menu. Used by automated two-process tests. |
+| `--name=NAME` | `--testplayer` | `Test Player` | The name to log in as. Two test players at once need two names: the server refuses a second login by one name. |
 | `--spawn-at=NAME` | `--testplayer` with `--faction` | (empty) | Spawn aboard this spawn point (a ship with launch bays, e.g. `--spawn-at="EASS Hyperion"`) instead of the first one offered. |
 | `--launch` | `--testplayer` with `--faction` | off | Once aboard, press Launch by itself, as a player would. Used by automated two-process tests of a remote pilot flying. |
 | `--fire` | `--testplayer` with `--launch` | off | Once flying (3 s after launch), hold the trigger. Used by automated lag runs of weapons. |

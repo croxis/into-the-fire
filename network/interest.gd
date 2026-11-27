@@ -68,13 +68,15 @@ func update(peers: Dictionary, ships: Dictionary) -> Dictionary:
 		var wanted := _wanted(peers[peer], ships)
 		var known: Dictionary = _known.get(peer, {})
 		var was_leaving: Dictionary = _leaving.get(peer, {})
-		var shown := wanted.keys().filter(func(s: Object) -> bool: return not known.has(s))
+		# Untyped: a known ship may have been freed (destroyed), and a typed
+		# argument refuses a freed object.
+		var shown := wanted.keys().filter(func(s) -> bool: return not known.has(s))
 		var leaving := {}
 		for ship in known:
 			if not wanted.has(ship) and ships.has(ship):
 				leaving[ship] = true
 		# Gone from the world (freed) goes at once: there is nothing left to hold.
-		var hidden := known.keys().filter(func(s: Object) -> bool: return not ships.has(s))
+		var hidden := known.keys().filter(func(s) -> bool: return not ships.has(s))
 		for ship in was_leaving:
 			if not wanted.has(ship):
 				hidden.append(ship)

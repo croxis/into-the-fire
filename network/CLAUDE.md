@@ -43,7 +43,8 @@ yet: sharing pictures between sides, and the host's own player (the server has e
 - Snapshots and the syncs that aren't part of the spawn start only once the client confirms it has the ship
   (`Ship._have_ship`, from its `_ready` there); a despawn forgets that. Sent at once they overtook the spawn.
 - A player's own client sends its `InputsSync` to nobody (`Character.keep_inputs_local`): its input goes
-  through `InputChannel`. New broadcast RPCs (`.rpc()`) on ship
+  through `InputChannel`. The server never acts on a remote player's `Inputs` (their client is that
+  synchronizer's authority, so a tampered one could write it): `test_request_audit.gd`. New broadcast RPCs (`.rpc()`) on ship
   nodes would reach clients that don't have the ship: send to the clients that know it.
 - Server log "Interest: peer X now knows N ships (+ more, leaving, gone)".
 
@@ -61,3 +62,12 @@ yet: sharing pictures between sides, and the host's own player (the server has e
   `_authenticating`, which also tells the client; client: `on_connected`). The throttle is bulk-traffic
   congestion control: after one RTT spike it drops a share of unreliable packets on purpose for seconds,
   down to all of them; our streams are small and carry their own redundancy.
+
+## Requests from clients
+
+- Audited 2026-11-27 (`documentation/netcode.md`, Security): five `any_peer` RPCs plus the pilot's
+  `InputsSync`. A new `any_peer` RPC takes the sender from `get_remote_sender_id()`, checks it, and gets a
+  test; send to the server with `rpc_id(1, ...)`, not `.rpc()`. Servers run with `server_relay` off
+  (`Network.configure_server`).
+- Freed ships: a ship destroyed in a fight is freed. Key per-ship records by instance id, and don't pass
+  possibly freed ships to typed lambda arguments (both errored every tick).

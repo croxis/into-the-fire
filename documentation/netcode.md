@@ -175,6 +175,16 @@ How a ship appears and disappears on a client:
 
 - The server validates every request a client makes against what that player's character may do.
 - Never trust an ID a client sends: the sender is `multiplayer.get_remote_sender_id()`.
+- What a client can send (audited 2026-11-27): five `any_peer` RPCs and its own `InputsSync`.
+  - `Galaxy.first_spawn_player` and `_request_spawn_points` (logged in, a faction that takes players, a
+    valid spawn point, not already in the world), `Ship.request_launch` (aboard that carrier),
+    `Character._submit_inputs` (that character's player; size, shape and ticks checked; the rewind a
+    client claims is capped), `Ship._have_ship` (only for a ship the server has it hold).
+  - `InputsSync`: the pilot's client is its authority, so the server accepts what it syncs into the
+    character's `Inputs`, and never acts on it: a remote player flies only from their input channel.
+  - Godot accepts no RPCs from a peer before its login completes.
+- Servers don't relay between clients (`Network.configure_server`: `server_relay` off): a client's RPCs and
+  synced values reach the server only, and clients aren't told about each other.
 - Logins are never logged.
 - All traffic is encrypted with DTLS (ENet's own support: `Network.secure_server`, `secure_client`), so
   passwords and everything else are unreadable to anyone watching the network. The server's key and

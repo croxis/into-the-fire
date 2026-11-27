@@ -310,7 +310,16 @@ func _after_tick_loop() -> void:
 func _have_ship() -> void:
 	if not multiplayer.is_server():
 		return
-	var peer := multiplayer.get_remote_sender_id()
+	have_ship_from(multiplayer.get_remote_sender_id())
+
+
+## Server: client [param peer] says it has this ship. Only believed of a ship
+## the server has it hold (spawned there): a client can't confirm its way to a
+## ship it was never sent. (Everything sent also checks that the client knows
+## the ship; this keeps the record true too.)
+func have_ship_from(peer: int) -> void:
+	if not interest.is_held_by(peer):
+		return
 	interest.confirm(peer)
 	if interest.source():
 		interest.update(peer, true)

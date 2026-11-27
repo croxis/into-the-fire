@@ -411,7 +411,7 @@ func _on_join_game_request_spawn(faction_name: String, system_name: String, spaw
 	var faction := factions.find_by_name(faction_name)
 	if faction == null:
 		return
-	rpc("first_spawn_player", faction.faction_id, system_name, spawner_name)
+	first_spawn_player.rpc_id(1, faction.faction_id, system_name, spawner_name)  # The server only (the host: itself).
 	$CanvasLayer/JoinGame.visible = false
 
 

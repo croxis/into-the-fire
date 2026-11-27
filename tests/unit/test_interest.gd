@@ -118,3 +118,13 @@ func test_a_client_that_left_is_forgotten() -> void:
 	assert_false(interest.knows(7, ship_a1))
 	assert_true(interest.knows(8, ship_a1))
 	assert_eq_deep(interest.peers(), [8])
+
+
+func test_a_ship_freed_while_known_is_forgotten() -> void:
+	# A ship destroyed in a fight is freed, not just gone from the list.
+	var doomed := Node.new()
+	interest.update({7: Interest.view(alpha, null, {doomed: true})}, {doomed: alpha})
+	assert_true(interest.knows(7, doomed))
+	doomed.free()
+	var changes := interest.update({7: _in(alpha)}, _ships())
+	assert_eq(changes[7]["hidden"].size(), 1, "freed: nothing left to hold")

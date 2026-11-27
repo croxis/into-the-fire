@@ -154,3 +154,12 @@ func test_galaxy_gives_its_systems_the_cap() -> void:
 	var other: System = SystemScene.instantiate()
 	galaxy.get_node("Systems").add_child(other)
 	assert_eq(other.shots.max_rewind_ticks, 24)
+
+
+func test_a_destroyed_ship_leaves_the_history() -> void:
+	var ship := _starfury(Vector3(0, 0, -100))
+	system.shots.record_history(1)
+	assert_true(system.shots._history.size() > 0)
+	ship.free()  # Destroyed in a fight.
+	system.shots.record_history(2)
+	assert_eq(system.shots._history.size(), 0, "forgotten, without errors")

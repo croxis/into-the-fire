@@ -24,8 +24,10 @@ signal hit(shot: Shot, target: Ship, at: Vector3)
 
 var _shots: Array[Shot] = []
 var _bolts: Dictionary[Shot, Node3D] = {}
-## Server: ship -> {tick: global transform}, the last _history_ticks() ticks.
-var _history: Dictionary[Ship, Dictionary] = {}
+## Server: ship's instance id -> {tick: global transform}, the last
+## _history_ticks() ticks. Keyed by id: a ship destroyed in a fight is freed,
+## and a freed object can't even be erased from a dictionary typed by Ship.
+var _history: Dictionary[int, Dictionary] = {}
 ## Where the last hit _hit found struck (on the target as it is now).
 var _last_hit_at := Vector3.ZERO
 ## Counted since the last report (report).
@@ -58,17 +60,18 @@ func record_history(tick: int) -> void:
 	if _system.multiplayer.has_multiplayer_peer() and not _system.multiplayer.is_server():
 		return
 	for ship in _system.get_ships():
-		var h: Dictionary = _history.get_or_add(ship, {})
+		var h: Dictionary = _history.get_or_add(ship.get_instance_id(), {})
 		h[tick] = ship.global_transform
 		h.erase(tick - _history_ticks())
-	for ship in _history.keys():
-		if not is_instance_valid(ship) or not ship.is_inside_tree():
-			_history.erase(ship)
+	for id in _history.keys():
+		var ship := instance_from_id(id) as Node
+		if ship == null or not ship.is_inside_tree():
+			_history.erase(id)
 
 
 ## Where [param ship] was at [param tick], or where it is now if that's not kept.
 func _transform_at(ship: Ship, tick: int) -> Transform3D:
-	var h: Dictionary = _history.get(ship, {})
+	var h: Dictionary = _history.get(ship.get_instance_id(), {})
 	return h.get(tick, ship.global_transform)
 
 

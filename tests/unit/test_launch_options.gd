@@ -174,3 +174,11 @@ func test_test_players_can_fly_a_pattern() -> void:
 	var options := LaunchOptions.parse(PackedStringArray(["--testplayer", "--faction=Zeta Wing", "--launch", "--fly"]))
 	assert_true(options.fly)
 	assert_false("--fly" in options.unknown)
+
+
+func test_test_players_can_have_their_own_names() -> void:
+	# Two test players at once: the server refuses a second login by one name.
+	var options := LaunchOptions.parse(PackedStringArray(["--testplayer", "--name=Test Player 2"]))
+	assert_eq(options.player_name, "Test Player 2")
+	assert_eq(LaunchOptions.parse(PackedStringArray(["--testplayer"])).player_name, "Test Player")
+	assert_false("--name=Test Player 2" in options.unknown)

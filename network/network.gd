@@ -78,6 +78,7 @@ func start_server(new_game_name, s_password:="", port: int=DEFAULT_PORT) -> bool
 		OS.alert("Failed to set up encryption for the multiplayer server.")
 		peer.close()
 		return false
+	configure_server(multiplayer)
 	multiplayer.multiplayer_peer = peer
 	multiplayer.peer_authenticating.connect(_authenticating)
 	multiplayer.peer_authentication_failed.connect(_auth_failed)
@@ -94,6 +95,17 @@ func start_server(new_game_name, s_password:="", port: int=DEFAULT_PORT) -> bool
 func _player_disconnected(client_id):
 	Log.log(["Client %d disconnected!" % [client_id]], Log.MessageType.INFO)
 	players.player_disconnect(client_id)
+
+
+## Server: the multiplayer settings a server runs with, set before its peer.
+## No relay between clients: Godot's default forwards a client's RPCs and
+## synced values to the other clients, and tells each about the rest. Nothing
+## in the game needs a client to reach another, and every path a client can
+## send down is one more to check.
+static func configure_server(mp: MultiplayerAPI) -> void:
+	var scene := mp as SceneMultiplayer
+	if scene:
+		scene.server_relay = false
 
 
 ## ENet's own default throttle interval (ENET_PEER_PACKET_THROTTLE_INTERVAL; Godot
