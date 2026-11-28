@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://d4ihoccsinnvo" path="res://ship_systems/workstations/helm.gd" id="1_7xlpu"]
 [ext_resource type="PackedScene" uid="uid://hivg2o6wgagj" path="res://ships/PID.tscn" id="2_1f074"]
+[ext_resource type="BehaviorTree" path="res://ai/roles/pilot.tres" id="3_pilot"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_7xlpu"]
 properties/0/path = NodePath(".:autospin")
@@ -31,6 +32,7 @@ properties/7/replication_mode = 2
 
 [node name="Helm" type="Node" unique_id=1496238895]
 script = ExtResource("1_7xlpu")
+behavior_tree = ExtResource("3_pilot")
 metadata/_custom_type_script = "uid://d4ihoccsinnvo"
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="." unique_id=1010336750]

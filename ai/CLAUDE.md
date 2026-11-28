@@ -4,8 +4,8 @@ Loaded when working in `ai/`. Project-wide rules are in the top-level `CLAUDE.md
 the design doc's "NPC AI: first pass" section (owner's decisions are recorded there).
 
 NPC AI runs on the server only, for NPC characters (`Character._update_brain_active`). Layers: a commander
-decides and posts objectives (`objectives/`); subordinates claim them by utility (slice 5); a LimboAI tree per
-objective type carries them out; an AI pilot flies the helm (slice 4). LimboAI is an engine module here.
+decides and posts objectives (`objectives/`); crew claim them by utility and carry them out in LimboAI trees;
+an AI pilot flies the helm. LimboAI is an engine module here.
 
 - **Commander** (`roles/command.tres`, on the Command capability, `ship_systems/workstations/command.tscn`):
   whoever sits at a Command console as an NPC (Babylon 5's `StationCommand`). Once a second: `AssessThreat`
@@ -24,6 +24,12 @@ objective type carries them out; an AI pilot flies the helm (slice 4). LimboAI i
   from the ship's engines (rated thruster forces don't add up: many are angled); a Starfury: 37.5 m/s²
   forward, 14.2 reverse, 4.2 sideways. No weapons. Flight tests run 4 ticks per frame and excuse the known
   Jolt job pool warning (`Ticks.excuse_jolt_job_pool`).
+- **Crew and pilots** (`CrewOrders`, thin tasks in `tasks/crew/`): `roles/crew.tres` runs in the brain's
+  IdleState (an NPC with no console: claim, then launch for it); `roles/pilot.tres` on the Helm capability
+  (claim, then fly it). Both think once a second (wait first). One claim per pilot, kept on the board by
+  pilot ID, so it survives the move from carrier to fighter. Choice: `UtilityScorer` multiplies
+  `UtilityConsideration`s (an input 0..1 through a `Curve`, with a weight); `CrewOrders.can_do` lets only
+  wing pilots PATROL. Launch is `ShipLaunch.launch(carrier, character)`, the player path's own.
 - **BT agents**: a console's BTPlayer sits inside the brain HSM, so tasks find their character with
   `CommanderPatrol.character_of(agent)`. Trees are hand-edited `.tres` (keep the uid); the editor can save its
   cached copy of a tree over the file when it saves a scene using it: rescan after editing one.

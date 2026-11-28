@@ -1,0 +1,23 @@
+[gd_resource type="BehaviorTree" format=3]
+
+[ext_resource type="Script" uid="uid://dm088bki4q5ko" path="res://ai/tasks/crew/claim_objective.gd" id="1_claim"]
+[ext_resource type="Script" uid="uid://btt15bxcqyolu" path="res://ai/tasks/crew/fly_objective.gd" id="2_fly"]
+
+[sub_resource type="BlackboardPlan" id="BlackboardPlan_pilot"]
+
+[sub_resource type="BTWait" id="BTWait_think"]
+custom_name = "Think every 1 s"
+
+[sub_resource type="BTAction" id="BTAction_claim"]
+script = ExtResource("1_claim")
+
+[sub_resource type="BTAction" id="BTAction_fly"]
+script = ExtResource("2_fly")
+
+[sub_resource type="BTSequence" id="BTSequence_pilot"]
+custom_name = "Fly orders"
+children = [SubResource("BTWait_think"), SubResource("BTAction_claim"), SubResource("BTAction_fly")]
+
+[resource]
+blackboard_plan = SubResource("BlackboardPlan_pilot")
+root_task = SubResource("BTSequence_pilot")

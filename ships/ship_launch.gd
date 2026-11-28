@@ -1,7 +1,7 @@
 class_name ShipLaunch
 extends RefCounted
-## Server: launching a player from a carrier (a capital ship or station) in a
-## new fighter. Functions only, no state: the carrier's request_launch RPC (it
+## Server: launching a character, player or NPC, from a carrier (a capital
+## ship or station) in a new fighter. Functions only, no state: the carrier's request_launch RPC (it
 ## stays on Ship: Godot routes RPCs by node path) calls request.
 
 
@@ -21,14 +21,19 @@ static func request(carrier: Ship, sender: int) -> void:
 
 
 ## Launches player [param player_id]'s character from [param carrier] in a new
-## fighter. Returns why not ("" when launched). Everything is checked before
-## anything is built.
+## fighter. Returns why not ("" when launched).
 static func launch_player(carrier: Ship, player_id: int, ids: WorldIds) -> String:
-	var passenger: Character = null
 	for c in carrier.get_crew():
-		if c._player_pilot_id == player_id:
-			passenger = c
-	if passenger == null:
+		if c._player_pilot_id == player_id and c.is_player():
+			return launch(carrier, c, ids)
+	return "not aboard"
+
+
+## Launches [param passenger] (a player or an NPC aboard [param carrier]) in a
+## new fighter, seated at its controls. Returns why not ("" when launched).
+## Everything is checked before anything is built.
+static func launch(carrier: Ship, passenger: Character, ids: WorldIds) -> String:
+	if passenger == null or passenger.is_queued_for_deletion() or not passenger in carrier.get_crew():
 		return "not aboard"
 	if not carrier.get_node("Spawner").has_method("find_free_spawner"):
 		return "no launch bays"
@@ -54,13 +59,14 @@ static func launch_player(carrier: Ship, player_id: int, ids: WorldIds) -> Strin
 	# The cockpit's RPCs below need the pilot's client to have it.
 	if carrier.galaxy:
 		carrier.galaxy.fog.refresh()
-	var old_pilot: Character = carrier.get_node("Crew").remove_passenger_by_id(player_id)
+	var old_pilot: Character = carrier.get_node("Crew").remove_passenger(passenger)
 	var pilot: Character = new_ship.get_node("CrewMultiplayerSpawner").spawn(old_pilot.serialize())
 	#TODO: Genealize this to a multicrew craft
 	var cockpit: Console = new_ship.get_node("Consoles/Cockpit") as Console
 	cockpit.occupy(pilot)
 	old_pilot.queue_free()
-	carrier.disable_capital_ui.rpc_id(pilot.multiplayer_id)
+	if pilot.is_player():
+		carrier.disable_capital_ui.rpc_id(pilot.multiplayer_id)
 	_finish(carrier.get_tree(), new_ship, pilot)
 	return ""
 

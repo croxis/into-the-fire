@@ -11,28 +11,15 @@ extends Node
 ## clients (docking did this until 2026-11-27).
 
 
-func remove_passenger_by_id(pilot_id: int) -> Character:
-	for child in get_children():
-		if child._player_pilot_id == pilot_id:
-			if child is Character:
-				var character: Character = child as Character
-				if character.current_console:
-					character.current_console.vacate()
-				remove_child(child)
-				return child
-	return null
-
-
-func remove_passenger_by_multiplayerid(multiplayer_id: int) -> Character:
-	for child in get_children():
-		if child.multiplayer_id == multiplayer_id:
-			if child is Character:
-				var character: Character = child as Character
-				if character.current_console:
-					character.current_console.vacate()
-				remove_child(child)
-				return child
-	return null
+## Takes [param character] off this ship (out of its console first), without
+## freeing it. Returns it, or null when it isn't aboard.
+func remove_passenger(character: Character) -> Character:
+	if character == null or character.get_parent() != self:
+		return null
+	if character.current_console:
+		character.current_console.vacate()
+	remove_child(character)
+	return character
 
 
 func _on_child_exiting_tree(node: Node) -> void:
