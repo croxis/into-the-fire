@@ -113,9 +113,12 @@ func test_input_source_for_every_case() -> void:
 	assert_eq(Character.input_source(true, true, false), S.CHANNEL)
 	# The pilot's own client: read locally, fly with it, and send it.
 	assert_eq(Character.input_source(false, true, true), S.LOCAL_AND_SEND)
-	# The host's own player, NPCs, and other players seen on a client: local values.
+	# An NPC, on the server (whatever peer it carries): its AI pilot, never the
+	# server machine's own controls.
+	assert_eq(Character.input_source(true, false, false), S.AI)
+	assert_eq(Character.input_source(true, false, true), S.AI)
+	# The host's own player, and NPCs and other players seen on a client: local values.
 	assert_eq(Character.input_source(true, true, true), S.LOCAL)
-	assert_eq(Character.input_source(true, false, false), S.LOCAL)
 	assert_eq(Character.input_source(false, false, false), S.LOCAL)
 	assert_eq(Character.input_source(false, true, false), S.LOCAL)
 

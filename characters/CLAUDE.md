@@ -10,7 +10,8 @@ Loaded when working in `characters/`. Project-wide rules are in the top-level `C
   each packet repeating the last 4 inputs, packed by `InputChannel.encode`, 29 bytes each; `make_record`
   rounds vectors to float32 so client and server fly the same values); the server checks it and applies
   one per tick, in order. The
-  host's own input and NPCs still go through `InputsSync`.
+  host's own input still goes through `InputsSync`. NPCs, on the server, fly from their `ai_pilot`
+  (`InputSource.AI`, `ai/CLAUDE.md`), never from the server machine's controls.
 - The server keeps a cushion (jitter buffer) per pilot. Every hold (queue dry: the last input repeats) or skip
   (backlog: the oldest is dropped) is a tick of motion the client didn't predict, a correction of speed x
   1/60 s (about 40 m at 2.5 km/s). Autospin and autobreak presses in skipped or flooded-out inputs carry over.

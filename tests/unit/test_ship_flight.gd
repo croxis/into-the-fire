@@ -119,13 +119,13 @@ func test_spin_is_capped_at_1350_degrees_a_second() -> void:
 
 func test_pilot_input_moves_the_ship_on_the_same_tick() -> void:
 	# before_tick: the character hands its input to the helm; on_tick: the ship
-	# flies with it. (Peer 99 isn't this machine, so the input isn't re-read
-	# from the keyboard; an NPC, so no camera RPC to a missing peer.)
+	# flies with it. An NPC, so its input is its AI pilot's (flying ahead, -Z),
+	# and no camera RPC goes to a missing peer.
 	var ship := _ship(&"b5:aurora_starfury", Vector3.ZERO)
 	var pilot: Character = ship.get_node("CrewMultiplayerSpawner").spawn(
 			Character.pilot_data("Pilot", 0, 99, 1))
 	(ship.get_node("Consoles/Cockpit") as Console).occupy(pilot)
-	pilot.inputs.throttle = Vector3(0, 0, -1)
+	pilot.ai_pilot.fly_to(Vector3(0, 0, -5000))
 	await Ticks.run(1)
 	assert_eq(_helm(ship).throttle, Vector3(0, 0, -1), "the helm got the input")
 	assert_lt((ship.global_basis.inverse() * ship.linear_velocity).z, 0.0, "and the ship moved with it")

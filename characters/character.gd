@@ -205,6 +205,8 @@ func _exit_tree() -> void:
 ## pilot's go through InputChannel instead). Read once, not per tick: one
 ## frame can run several ticks, and the one-shot toggles would fire each time.
 func _read_input() -> void:
+	if not is_player():
+		return  # NPCs carry the server's peer ID, but never fly from its controls.
 	if multiplayer.multiplayer_peer == null or multiplayer.get_unique_id() == multiplayer_id:
 		inputs.update()
 
@@ -215,6 +217,9 @@ func _trim_input_backlog() -> void:
 	if input_source(multiplayer.is_server(), is_player(), _plays_here()) == InputSource.CHANNEL:
 		input_channel.trim_backlog()
 
+
+## How this character flies when it is an NPC, on the server (InputSource.AI).
+var ai_pilot := AiPilot.new()
 
 ## Tick-stamped input (netcode slice N3a). On the pilot's own client it builds
 ## the packets to send; on the server it queues what arrives from that client.
@@ -239,6 +244,9 @@ func _apply_input(_dt: float, tick: int) -> void:
 	var source := input_source(multiplayer.is_server(), is_player(), _plays_here())
 	if source == InputSource.CHANNEL and not player_connected:
 		r = InputChannel.make_record(tick, Vector3.ZERO, Vector3.ZERO)  # Away: hands off.
+	elif source == InputSource.AI:
+		var throttles := ai_pilot.steer(current_ship)
+		r = InputChannel.make_record(tick, throttles[0], throttles[1])
 	elif source == InputSource.CHANNEL:
 		r = input_channel.next()
 		if not _first_remote_input_logged and input_channel.last_applied_tick >= 0:
@@ -291,14 +299,17 @@ func _view_ticks(tick: int) -> int:
 
 
 enum InputSource {
-	LOCAL,  ## The InputsSync values: the host's own player, NPCs, others seen on a client.
+	LOCAL,  ## The InputsSync values: the host's own player; NPCs and others seen on a client.
 	LOCAL_AND_SEND,  ## The pilot's own client: fly with it, and send it to the server.
 	CHANNEL,  ## The server, for a player on another machine: their tick-stamped input.
+	AI,  ## The server, for an NPC: its AiPilot (never the server machine's own controls).
 }
 
 
 ## Where a character's input comes from each tick.
 static func input_source(is_server: bool, player: bool, plays_here: bool) -> InputSource:
+	if not player and is_server:
+		return InputSource.AI
 	if player and is_server and not plays_here:
 		return InputSource.CHANNEL
 	if player and plays_here and not is_server:
