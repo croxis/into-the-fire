@@ -19,5 +19,3 @@ objective type carries them out; an AI pilot flies the helm (slice 4). LimboAI i
 - **BT agents**: a console's BTPlayer sits inside the brain HSM, so tasks find their character with
   `CommanderPatrol.character_of(agent)`. Trees are hand-edited `.tres` (keep the uid); the editor can save its
   cached copy of a tree over the file when it saves a scene using it: rescan after editing one.
-- `tasks/command/conditions/patrol_count_below_doctrine.gd`, `build_patrol_assignments.gd`,
-  `dispatch_launch_orders.gd`: the owner's earlier sketch, no longer in the tree.
