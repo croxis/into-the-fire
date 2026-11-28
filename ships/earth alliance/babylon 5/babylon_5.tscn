@@ -10,6 +10,7 @@
 [ext_resource type="PackedScene" uid="uid://plbif2bjdaj1" path="res://ships/earth alliance/babylon 5/cobra_bays.tscn" id="10_6fysb"]
 [ext_resource type="PackedScene" uid="uid://4xphnpmnqtfs" path="res://ships/earth alliance/babylon 5/neck_section.scn" id="10_7kgi2"]
 [ext_resource type="PackedScene" uid="uid://e3r8bdttgfch" path="res://ship_systems/workstations/console_command.tscn" id="12_7kgi2"]
+[ext_resource type="Script" uid="uid://b7ohi2bn5d0lw" path="res://ai/patrol_route.gd" id="13_e8huj"]
 [ext_resource type="Script" uid="uid://bmf6p1656luf0" path="res://ships/earth alliance/babylon 5/rotation.gd" id="18_kr61b"]
 [ext_resource type="Script" uid="uid://dwdl2krk70wrg" path="res://ships/earth alliance/babylon 5/spawner.gd" id="24_empfd"]
 
@@ -135,6 +136,26 @@ ship = NodePath("../../..")
 transform = Transform3D(6.123233995736766e-17, 1, 0, -1, 6.123233995736766e-17, 0, 0, 0, 1, 0, 0, 0)
 shape = SubResource("CapsuleShape3D_ah7gn")
 debug_fill = true
+
+[node name="PatrolRoutes" type="Node3D" parent="." index="15" unique_id=257501215]
+
+[node name="Inner" type="Node3D" parent="PatrolRoutes" index="0" unique_id=1772536688]
+script = ExtResource("13_e8huj")
+
+[node name="Waypoint1" type="Marker3D" parent="PatrolRoutes/Inner" index="0" unique_id=2009713025]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12000, 0, 0)
+
+[node name="Waypoint2" type="Marker3D" parent="PatrolRoutes/Inner" index="1" unique_id=378278857]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3000, 1500, 10000)
+
+[node name="Waypoint3" type="Marker3D" parent="PatrolRoutes/Inner" index="2" unique_id=286913364]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10000, 0, 7000)
+
+[node name="Waypoint4" type="Marker3D" parent="PatrolRoutes/Inner" index="3" unique_id=340604198]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10000, -1500, -7000)
+
+[node name="Waypoint5" type="Marker3D" parent="PatrolRoutes/Inner" index="4" unique_id=2100853669]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3000, 0, -10000)
 
 [connection signal="body_entered" from="rotation/Area3DDockRotate" to="." method="_on_area_3d_dock_body_entered"]
 

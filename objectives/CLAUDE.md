@@ -16,7 +16,10 @@ that changes them. Server only for now; the board's `changed` signal is there fo
 - **Checked claims.** `claim` returns why a claim is refused ("" when made). When players can claim they will
   send an objective ID; check it here, never trust it.
 - **Types.** `Objective.Type` lists general and specific kinds; an NPC only takes the types it has behaviour
-  for. First pass: PATROL (`params.route`: Array of Vector3 in the system's space). A character holds no copy
+  for. First pass: PATROL: `params.route` (Array of Vector3 relative to the ship `params.anchor_ship_id`, so a
+  moving carrier's patrol moves with it; `PatrolRoute.from_anchor`) and `params.system`. Default routes are
+  `PatrolRoute` nodes (Marker3D waypoints) under a ship scene's `PatrolRoutes`; `PatrolRoute.pick` takes one
+  that fits a radius, else builds a ring. A character holds no copy
   of its objectives: ask `claimed_by(pilot_id)` / `assigned_to(pilot_id)`.
 - Replaces the old `orders/` resources (removed 2026-11-27); its typed array of itself kept a script alive
   at exit.

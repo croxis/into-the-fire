@@ -49,8 +49,9 @@ var assignee_id := 0
 var slots := 1
 ## Pilot IDs that have claimed it, in claim order.
 var claims: Array[int] = []
-## What to do, by type: PATROL has "route" (Array of Vector3, in the system's
-## space) and may have "system" and "anchor_ship_id".
+## What to do, by type: PATROL has "route" (Array of Vector3, relative to the
+## ship "anchor_ship_id" in its frame without scale: PatrolRoute.from_anchor)
+## and "system" (the system's name).
 var params := {}
 var state := State.OPEN
 ## The server tick it expires at; 0 for never.
