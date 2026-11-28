@@ -8,6 +8,7 @@ extends RefCounted
 
 var _next_ship := 1
 var _next_pilot := 1
+var _next_objective := 1
 
 
 func next_ship() -> int:
@@ -18,3 +19,8 @@ func next_ship() -> int:
 func next_pilot() -> int:
 	_next_pilot += 1
 	return _next_pilot - 1
+
+
+func next_objective() -> int:
+	_next_objective += 1
+	return _next_objective - 1

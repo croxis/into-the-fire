@@ -51,8 +51,6 @@ var factions: FactionRegistry:
 ## world, controls neutral, until they log back in).
 var player_connected := true
 @export var pilot_id: int
-var active_orders: Array[OrderData] = []
-var pending_orders: Array[OrderData] = []
 var personality
 var current_console: Console
 ## The console this character sits at, as a path from the character (empty when
@@ -94,8 +92,6 @@ static func pilot_data(pilot_name: String, faction: int, peer_id: int, pilot_id:
 		"multiplayer_id": peer_id,
 		"_player_pilot_id": player_pilot_id,
 		"pilot_id": pilot_id,
-		"active_orders": [],
-		"pending_orders": [],
 	}
 
 
@@ -396,10 +392,8 @@ func serialize() -> Dictionary:
 	payload["_player_pilot_id"] = _player_pilot_id
 	payload["multiplayer_id"] = multiplayer_id
 	payload["pilot_id"] = pilot_id
-	# Orders are OrderData Objects, which can't cross the network. They are left
-	# out until orders have a plain-data form (orders are mostly unimplemented).
-	payload["active_orders"] = []
-	payload["pending_orders"] = []
+	# Objectives are not part of a character: the world's ObjectiveBoard knows
+	# what each pilot has claimed (claimed_by), by pilot ID.
 	
 	return payload
 
@@ -420,9 +414,6 @@ func restore(payload: Dictionary):
 	_player_pilot_id = payload["_player_pilot_id"]
 	multiplayer_id = payload["multiplayer_id"]
 	pilot_id = payload["pilot_id"]
-	# assign(): arrays lose their element type when sent over the network.
-	active_orders.assign(payload["active_orders"])
-	pending_orders.assign(payload["pending_orders"])
 	
 	#hsm.initialize(self)
 	

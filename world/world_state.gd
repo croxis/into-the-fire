@@ -12,7 +12,14 @@ var game_name := "default"
 ## Every faction in this world. Clients hold a copy from the server's snapshot
 ## (WorldReplicator); it is replaced as a whole, never patched from client data.
 var factions := FactionRegistry.new()
-## Ship and pilot IDs: never reused, so they come from the world.
-var ids := WorldIds.new()
+## Ship, pilot and objective IDs: never reused, so they come from the world.
+## Replacing it (a new world) hands the new counter to the objective board too.
+var ids := WorldIds.new():
+	set(value):
+		ids = value
+		if objectives:
+			objectives.ids = value
+## How orders pass down the chain of command (server).
+var objectives := ObjectiveBoard.new(ids)
 ## Server: the players this world knows (logins). Empty on clients.
 var players := PlayerRecords.new()
