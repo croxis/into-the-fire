@@ -25,9 +25,14 @@ func _launch_button() -> Button:
 	return hud.passenger.find_child("Launch", true, false) as Button
 
 
+## The HUDs on screen: not the contact brackets, which are always there.
+func _huds() -> Array:
+	return hud.get_children().filter(func(c: Node) -> bool: return not c is ContactBrackets)
+
+
 func test_starts_empty() -> void:
 	assert_null(hud.passenger)
-	assert_eq(hud.get_child_count(), 0)
+	assert_eq(_huds().size(), 0)
 
 
 func test_show_passenger_adds_the_passenger_hud() -> void:
@@ -49,7 +54,7 @@ func test_showing_again_replaces_the_hud() -> void:
 	add_child_autofree(other)
 	hud.show_passenger(other, _launch)
 	await wait_process_frames(1)  # The old HUD is freed with queue_free.
-	assert_eq(hud.get_child_count(), 1)
+	assert_eq(_huds().size(), 1)
 	_launch_button().pressed.emit()
 	assert_eq(launches, 1, "only the new HUD is connected")
 
@@ -59,7 +64,7 @@ func test_hide_passenger_removes_the_hud() -> void:
 	hud.hide_passenger(ship)
 	assert_null(hud.passenger)
 	await wait_process_frames(1)
-	assert_eq(hud.get_child_count(), 0)
+	assert_eq(_huds().size(), 0)
 
 
 func test_hide_for_another_ship_keeps_the_hud() -> void:

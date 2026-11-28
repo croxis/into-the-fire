@@ -20,7 +20,9 @@ func before_each() -> void:
 
 func test_the_galaxy_holds_no_join_ui() -> void:
 	assert_null(galaxy.get_node_or_null("CanvasLayer"))
-	assert_eq(galaxy.find_children("*", "Control", true, false).size(), 0)
+	var outside_hud := galaxy.find_children("*", "Control", true, false).filter(
+			func(c: Node) -> bool: return not galaxy.hud.is_ancestor_of(c))
+	assert_eq(outside_hud.size(), 0, "no UI in the world but the local player's HUD layer")
 
 
 func test_the_menu_waits_until_the_player_may_pick() -> void:

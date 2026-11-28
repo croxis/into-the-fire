@@ -40,6 +40,7 @@ var console_hud: Control:
 func _init() -> void:
 	name = "HudLayer"
 	layer = 1  # Below the join menu (Galaxy's CanvasLayer is 2).
+	add_child(ContactBrackets.new())  # Every other ship in view, at any range.
 
 
 ## Shows the passenger HUD for [param ship]. Pressing Launch calls

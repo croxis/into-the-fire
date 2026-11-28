@@ -81,7 +81,7 @@ machines; nothing on the server path may depend on rendering.
 - `zones/`: `Zones` (`Galaxy.zones`) knows a world's zones and who is in each; look systems up there, never by
   `Galaxy/Zones/<name>` path. `ZoneView` draws the viewed zone in the main window (zone SubViewports don't render).
   `ZoneStepper` (`Galaxy.zone_stepper`) steps each system's physics space itself; modes FULL and PAUSED.
-- `ui/hud/`: `HudLayer` (`Galaxy.hud`), the local player's HUD, client-side only. 2D UI inside a ship is never
+- `ui/hud/`: `HudLayer` (`Galaxy.hud`), the local player's HUD, client-side only, with `ContactBrackets`. 2D UI inside a ship is never
   drawn, so HUDs go here (passenger HUD, a console's `hud_scene`). "Console" is a spacecraft's crew
   interface; "station" means a space station.
 - `ships/`: `Ship`, `Engines`, `FlightIntegrator`, prediction (see `ships/CLAUDE.md`).
