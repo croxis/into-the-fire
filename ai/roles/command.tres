@@ -1,31 +1,27 @@
 [gd_resource type="BehaviorTree" format=3 uid="uid://cmtvr4dr3ee6u"]
 
-[ext_resource type="Script" uid="uid://dcjk5jm8i0a5g" path="res://ai/tasks/command/evaluate_patrol_need.gd" id="1_txn48"]
-[ext_resource type="Script" uid="uid://cawn75sa8v15d" path="res://ai/tasks/command/conditions/patrol_count_below_doctrine.gd" id="2_p70xd"]
-[ext_resource type="Script" uid="uid://bka1amtyua5vg" path="res://ai/tasks/command/build_patrol_assignments.gd" id="3_1drsh"]
-[ext_resource type="Script" uid="uid://d364r4xgv1o4m" path="res://ai/tasks/command/dispatch_launch_orders.gd" id="4_e0bpl"]
+[ext_resource type="Script" uid="uid://c545438l1tfq5" path="res://ai/tasks/command/assess_threat.gd" id="1_threat"]
+[ext_resource type="Script" uid="uid://dcjk5jm8i0a5g" path="res://ai/tasks/command/evaluate_patrol_need.gd" id="2_need"]
+[ext_resource type="Script" uid="uid://y2p73trg7itd" path="res://ai/tasks/command/post_patrol_objective.gd" id="3_post"]
 
 [sub_resource type="BlackboardPlan" id="BlackboardPlan_rl4ap"]
 
-[sub_resource type="BTAction" id="BTAction_p70xd"]
-script = ExtResource("1_txn48")
+[sub_resource type="BTAction" id="BTAction_threat"]
+script = ExtResource("1_threat")
 
-[sub_resource type="BTCondition" id="BTCondition_1drsh"]
-script = ExtResource("2_p70xd")
+[sub_resource type="BTAction" id="BTAction_need"]
+script = ExtResource("2_need")
 
-[sub_resource type="BTAction" id="BTAction_e0bpl"]
-script = ExtResource("3_1drsh")
+[sub_resource type="BTAction" id="BTAction_post"]
+script = ExtResource("3_post")
 
-[sub_resource type="BTAction" id="BTAction_vupts"]
-script = ExtResource("4_e0bpl")
+[sub_resource type="BTWait" id="BTWait_think"]
+custom_name = "Think again in 1 s"
 
 [sub_resource type="BTSequence" id="BTSequence_ah7gn"]
 custom_name = "Maintain Patrol"
-children = [SubResource("BTAction_p70xd"), SubResource("BTCondition_1drsh"), SubResource("BTAction_e0bpl"), SubResource("BTAction_vupts")]
-
-[sub_resource type="BTSelector" id="BTSelector_n0alx"]
-children = [SubResource("BTSequence_ah7gn")]
+children = [SubResource("BTAction_threat"), SubResource("BTAction_need"), SubResource("BTAction_post"), SubResource("BTWait_think")]
 
 [resource]
 blackboard_plan = SubResource("BlackboardPlan_rl4ap")
-root_task = SubResource("BTSelector_n0alx")
+root_task = SubResource("BTSequence_ah7gn")

@@ -1,41 +1,22 @@
 @tool
-extends BTAction  # or BTCondition, BTDecorator, BTComposite
+extends BTAction
+## Commander: how many fighters its side's doctrine wants out at the threat
+## AssessThreat found (CommanderPatrol.wanted_fighters).
 
-# Task parameters (editable in the Inspector)
-@export var doctrine_var: StringName = &"doctrine"
-@export var out_fighters_needed: StringName = &"fighters_needed"
+@export var threat_var: StringName = &"threat"
+@export var out_fighters_wanted: StringName = &"fighters_wanted"
 
-# Generates the display name in the behavior tree editor (requires @tool).
+
 func _generate_name() -> String:
-	return "EvaluateFighterNeed  -> %s" % LimboUtility.decorate_var(out_fighters_needed)
+	return "EvaluateFighterNeed -> %s" % LimboUtility.decorate_var(out_fighters_wanted)
 
-# Called once when the behavior tree is initialized.
-func _setup() -> void:
-	pass
 
-# Called each time the task becomes the active node.
-func _enter() -> void:
-	pass
-
-# Called when the task stops being active (SUCCESS, FAILURE, or aborted).
-func _exit() -> void:
-	pass
-
-# Called every tick while this task is running. MUST return a Status.
-func _tick(delta: float) -> Status:
-	var doctrine: FactionDoctrine = blackboard.get_var(doctrine_var)
-
-	if doctrine == null:
-		blackboard.set_var(out_fighters_needed, 0)
-		return SUCCESS
-	var needed: int = max(0, doctrine.minimum_patrol_fighters - blackboard.get_var("fighters_deployed").size())
-	#TODO: Also calculate how many fighters are needed from threat level.
-	#If threat, should take another branch in the tree so that intercept orders
-	#are given instead of patrol
-	blackboard.set_var(out_fighters_needed, needed)
+func _tick(_delta: float) -> Status:
+	var commander := CommanderPatrol.character_of(agent)
+	if commander == null or commander.current_ship == null:
+		return FAILURE
+	var side := commander.current_ship.faction
+	var doctrine: FactionDoctrine = side.doctrine if side else null
+	blackboard.set_var(out_fighters_wanted,
+			CommanderPatrol.wanted_fighters(doctrine, blackboard.get_var(threat_var, 0.0)))
 	return SUCCESS
-
-# Warnings shown in the editor if configuration is invalid.
-func _get_configuration_warnings() -> PackedStringArray:
-	var warnings := PackedStringArray()
-	return warnings

@@ -91,6 +91,17 @@ func release_all(pilot_id: int) -> void:
 		release(o.id, pilot_id)
 
 
+## Changes how many characters posting [param id] wants (never fewer than have
+## claimed it).
+func set_slots(id: int, slots: int) -> void:
+	var o := get_objective(id)
+	if o == null or o.is_closed():
+		return
+	o.slots = maxi(maxi(1, slots), o.claims.size())
+	_update_state(o)
+	changed.emit(o)
+
+
 func complete(id: int) -> void:
 	_close(id, Objective.State.COMPLETED)
 

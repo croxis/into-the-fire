@@ -344,16 +344,7 @@ func _physics_process(_dt: float) -> void:
 	if current_console:
 		if Input.is_action_just_released("camera_change") and _player_pilot_id == LocalGameManager.player_id:
 			current_console.change_camera()
-		var command := current_console.get_capability(CommandCapability) as CommandCapability
-		if command:
-			# AI updates server only and non players
-			if multiplayer.is_server() and _player_pilot_id < 1:
-				var threats: Array[Ship] = [] # TODO: command.get_hostiles()
-				$BrainHSM.blackboard.set_var(&"threat_picture", threats)
-				$BrainHSM.blackboard.set_var(doctrine_var, faction.doctrine if faction else null)
-				$BrainHSM.blackboard.set_var(&"fighters_deployed", command.get_subordinate_ships_in_escort_range())
-				$BrainHSM.blackboard.set_var(&"current_ship", current_ship)
-				$BrainHSM.blackboard.set_var(&"faction", faction)
+		# A commander's tree (ai/roles/command.tres) reads what it needs itself.
 
 
 ## Debug inputs (all-stop) count only for the player playing on this machine:

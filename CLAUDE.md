@@ -92,7 +92,7 @@ machines; nothing on the server path may depend on rendering.
 - `factions/`: `Faction`, `FactionRegistry` (one per world, `Galaxy.factions`; found via
   `Galaxy.find_for(node)` or an explicit `faction_registry` in tests). ID 0 is "no faction".
 - `objectives/`: `ObjectiveBoard` (`Galaxy.state.objectives`), how orders reach NPCs and players (its `CLAUDE.md`).
-  `ai/` (LimboAI trees and tasks), `demo/` (LimboAI demo, not game code).
+  `ai/` (NPC AI, its `CLAUDE.md`), `demo/` (LimboAI demo, not game code).
 
 Autoloads include netfox (`NetworkTime`, `NetworkRollback`, ...), `Log`, `LimboConsole`, `LocalGameManager`
 (local player id), `Content`, and `_mcp_game_helper` (godot-ai).

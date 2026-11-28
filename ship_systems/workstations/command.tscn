@@ -1,7 +1,9 @@
 [gd_scene format=3 uid="uid://dkg7gtui8bx4q"]
 
 [ext_resource type="Script" uid="uid://cbi6ivr534tf6" path="res://ship_systems/workstations/command.gd" id="1_ii2aa"]
+[ext_resource type="BehaviorTree" uid="uid://cmtvr4dr3ee6u" path="res://ai/roles/command.tres" id="2_4umdh"]
 
 [node name="Command" type="Node" unique_id=1583432735]
 script = ExtResource("1_ii2aa")
+behavior_tree = ExtResource("2_4umdh")
 metadata/_custom_type_script = "uid://cwadxkem4hn6q"
